@@ -9,8 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@prisma/client": "^6.3.0",
     "dotenv": "^16.4.7",
     "next": "15.1.6",
+    "next-auth": "^4.24.11",
+    "prisma": "^6.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "starknet": "^6.11.0"
