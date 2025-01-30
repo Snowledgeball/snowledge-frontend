@@ -9,6 +9,8 @@ const SignUpForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [starknetAddress, setStarknetAddress] = useState("");
+  const [isStarknetAddressOpen, setIsStarknetAddressOpen] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,6 +28,7 @@ const SignUpForm = () => {
         profilePicture: "ytrezerty",
         email,
         password,
+        starknetAddress: starknetAddress ? starknetAddress : null,
       }),
     });
 
@@ -44,6 +47,30 @@ const SignUpForm = () => {
         <h2 className="text-2xl font-bold text-center text-gray-800">
           Créer un compte
         </h2>
+        {/* Si vous avez une addresse starknet */}
+        <div className="flex items-center space-x-2">
+          <p className="text-sm text-gray-600">
+            Si vous avez une adresse Starknet, cliquez sur le bouton ci-dessous
+            pour la saisir.
+          </p>
+          <button
+            className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            onClick={() => setIsStarknetAddressOpen(!isStarknetAddressOpen)}
+          >
+            {isStarknetAddressOpen ? "Fermer" : "Ouvrir"}
+          </button>
+        </div>
+
+        {isStarknetAddressOpen && (
+          <input
+            type="text"
+            placeholder="Addresse starknet"
+            value={starknetAddress}
+            onChange={(e) => setStarknetAddress(e.target.value)}
+            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black"
+          />
+        )}
+
         {error && <p className="text-sm text-red-600">{error}</p>}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm">

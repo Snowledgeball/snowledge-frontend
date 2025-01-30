@@ -6,10 +6,23 @@ const prisma = new PrismaClient();
 export async function POST(req) {
   try {
     // Extraire les données du corps de la requête
-    const { fullName, userName, profilePicture, email, password } =
-      await req.json();
+    const {
+      fullName,
+      userName,
+      profilePicture,
+      email,
+      password,
+      starknetAddress,
+    } = await req.json();
 
-    console.log(fullName, userName, profilePicture, email, password);
+    console.log(
+      fullName,
+      userName,
+      profilePicture,
+      email,
+      password,
+      starknetAddress
+    );
 
     // Vérifier si l'utilisateur existe déjà
     const existingUser = await prisma.user.findFirst({
@@ -48,7 +61,9 @@ export async function POST(req) {
         fullName,
         userName,
         profilePicture,
-        starknetAddress: randomStarknetAddress,
+        starknetAddress: starknetAddress
+          ? starknetAddress
+          : randomStarknetAddress,
         email,
         password: hashedPassword,
       },
