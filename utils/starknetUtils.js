@@ -53,9 +53,11 @@ export const getBalance = async (address) => {
  * Attends que les fonds soient crédités sur une adresse
  */
 const waitForFunds = async (address, requiredBalance, interval = 5000) => {
+    console.log("waitForFunds");
     while (true) {
         const balance = await getBalance(address);
         if (balance >= requiredBalance) {
+
             console.log("Les fonds nécessaires sont disponibles !");
             break;
         }
@@ -70,6 +72,7 @@ const waitForFunds = async (address, requiredBalance, interval = 5000) => {
  * Transfère des fonds en ETH natif
  */
 export const fundAccount = async (recipientAddress, amount) => {
+    console.log("fundAccount");
     const provider = new Provider({ network: NETWORK, nodeUrl: NODE_URL });
     const funderAccount = new Account(provider, FUNDER_ADDRESS, FUNDER_PRIVATE_KEY);
     const ethContract = new Contract(
@@ -109,9 +112,11 @@ export const fundAccount = async (recipientAddress, amount) => {
  * Déploie un compte StarkNet
  */
 export const deployAccountContract = async (privateKey, publicKey) => {
+    console.log("deployAccountContract");
     const provider = new Provider({ network: NETWORK, nodeUrl: NODE_URL });
     const salt = "0x0";
     const accountAddress = hash.calculateContractAddressFromHash(
+
         salt,
         ACCOUNT_CLASS_HASH,
         [publicKey],

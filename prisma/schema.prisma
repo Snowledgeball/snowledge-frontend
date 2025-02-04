@@ -8,11 +8,15 @@ datasource db {
 }
 
 model User {
-  id              Int    @id @default(autoincrement())
-  fullName        String @db.VarChar(255)
-  userName        String @unique(map: "username_unique") @db.VarChar(50)
-  profilePicture  String
-  starknetAddress String @unique(map: "starknetAddress_unique") @db.VarChar(42)
-  email           String @db.VarChar(255)
-  password        String
+  id             Int    @id @default(autoincrement())
+  fullName       String @db.VarChar(255)
+  userName       String @unique(map: "username_unique") @db.VarChar(50)
+  profilePicture String
+  email          String @unique(map: "email_unique") @db.VarChar(255)
+  password       String
+  accountAddress String @db.VarChar(65)
+  publicKey      String @db.VarChar(65)
+  privateKey     String @db.VarChar(160)
+  salt           String @db.VarChar(32)
+  iv             String @db.VarChar(32)
 }

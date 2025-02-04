@@ -2,6 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { deployAccountContract, generateStarkNetAddress } from "../../utils/starknetUtils";
+
+
+interface AddressDetails {
+  privateKey: string;
+  publicKey: string;
+  accountAddress: string;
+}
 
 const SignUpForm = () => {
   const [fullName, setFullName] = useState("");
@@ -13,23 +21,83 @@ const SignUpForm = () => {
   const [isStarknetAddressOpen, setIsStarknetAddressOpen] = useState(false);
   const router = useRouter();
 
+  const [addressDetails, setAddressDetails] = useState<AddressDetails | null>(
+    null
+  );
+  const [deployStatus, setDeployStatus] = useState<string | null>(null);
+
+  const handleGenerateAddress = async () => {
+    try {
+      console.log("generateStarkNetAddress");
+      const details = generateStarkNetAddress();
+      console.log("details", details);
+      setAddressDetails(details as AddressDetails);
+      setDeployStatus(null);
+      return details;
+    } catch (error: unknown) {
+      console.log("error", error);
+      if (error instanceof Error) {
+        setDeployStatus(`Erreur : ${error.message}`);
+      } else {
+        setDeployStatus("Une erreur inconnue s'est produite");
+      }
+    }
+  };
+
+  const handleDeployContract = async (addressDetails: AddressDetails) => {
+    if (!addressDetails) return;
+    try {
+      setDeployStatus("Déploiement en cours...");
+      console.log("handleDeployContract");
+      const result: any = await deployAccountContract(
+        addressDetails.privateKey,
+        addressDetails.publicKey
+      );
+      console.log("result", result);
+      setDeployStatus(
+        `Contrat déployé avec succès ! Transaction hash : ${result.transactionHash}`
+      );
+      return addressDetails;
+    } catch (error: unknown) {
+      console.log("error", error);
+      if (error instanceof Error) {
+        setDeployStatus(`Erreur : ${error.message}`);
+      } else {
+        setDeployStatus("Une erreur inconnue s'est produite");
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    const addressDetails = await handleGenerateAddress();
+
+
+    await handleDeployContract(addressDetails as AddressDetails);
+
+    console.log("POST");
+    if (!addressDetails) return;
+    const objectToSend = JSON.stringify({
+      fullName: fullName,
+      userName: userName,
+      profilePicture: "ytrezerty",
+      email: email,
+      password: password,
+      accountAddress: addressDetails.accountAddress,
+      publicKey: addressDetails.publicKey,
+      privateKey: addressDetails.privateKey,
+    })
+
+    console.log("objectToSend", objectToSend);
 
     const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        fullName,
-        userName,
-        profilePicture: "ytrezerty",
-        email,
-        password,
-        starknetAddress: starknetAddress ? starknetAddress : null,
-      }),
+      body: objectToSend,
     });
 
     if (response.ok) {
@@ -48,7 +116,7 @@ const SignUpForm = () => {
           Créer un compte
         </h2>
         {/* Si vous avez une addresse starknet */}
-        <div className="flex items-center space-x-2">
+        {/* <div className="flex items-center space-x-2">
           <p className="text-sm text-gray-600">
             Si vous avez une adresse Starknet, cliquez sur le bouton ci-dessous
             pour la saisir.
@@ -59,7 +127,7 @@ const SignUpForm = () => {
           >
             {isStarknetAddressOpen ? "Fermer" : "Ouvrir"}
           </button>
-        </div>
+        </div> */}
 
         {isStarknetAddressOpen && (
           <input

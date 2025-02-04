@@ -1,9 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+import { encryptPrivateKey, decryptPrivateKey } from "../../../../utils/crypt";
+
 
 const prisma = new PrismaClient();
 
 export async function POST(req) {
+  console.log("POSTTTTT");
   try {
     // Extraire les données du corps de la requête
     const {
@@ -12,8 +15,11 @@ export async function POST(req) {
       profilePicture,
       email,
       password,
-      starknetAddress,
+      accountAddress,
+      publicKey,
+      privateKey,
     } = await req.json();
+
 
     console.log(
       fullName,
@@ -21,8 +27,11 @@ export async function POST(req) {
       profilePicture,
       email,
       password,
-      starknetAddress
+      accountAddress,
+      publicKey,
+      privateKey,
     );
+
 
     // Vérifier si l'utilisateur existe déjà
     const existingUser = await prisma.user.findFirst({
@@ -35,25 +44,46 @@ export async function POST(req) {
       });
     }
 
-    const randomStarknetAddress =
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15);
-
-    const existingStarknetAddress = await prisma.user.findFirst({
-      where: { starknetAddress: randomStarknetAddress },
+    const existingEmail = await prisma.user.findFirst({
+      where: { email },
     });
 
-    if (existingStarknetAddress) {
-      return new Response(
-        JSON.stringify({ error: "Starknet address already exists" }),
-        {
-          status: 400,
-        }
-      );
+    if (existingEmail) {
+      return new Response(JSON.stringify({ error: "Email already exists" }), {
+        status: 400,
+      });
     }
 
-    // Hacher le mot de passe
+    console.log("privateKey", privateKey);
+
+    // on crypte la clé privée a partir du mot de passe
+    const { encryptedPrivateKey, salt, iv } = await encryptPrivateKey(privateKey, password);
+
+
+    console.log("encryptedPrivateKey", encryptedPrivateKey);
+
+    const decryptedPrivateKey = await decryptPrivateKey(encryptedPrivateKey, password, salt, iv);
+
+    console.log("decryptedPrivateKey", decryptedPrivateKey);
+
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    const dataToSend = {
+      fullName,
+      userName,
+      profilePicture,
+      email,
+      password: hashedPassword,
+      accountAddress,
+      publicKey,
+      privateKey: encryptedPrivateKey,
+      salt,
+      iv,
+    }
+
+    console.log("dataToSend", dataToSend);
+
+
 
     // Créer le nouvel utilisateur
     const user = await prisma.user.create({
@@ -61,13 +91,16 @@ export async function POST(req) {
         fullName,
         userName,
         profilePicture,
-        starknetAddress: starknetAddress
-          ? starknetAddress
-          : randomStarknetAddress,
         email,
         password: hashedPassword,
+        accountAddress,
+        publicKey,
+        privateKey: encryptedPrivateKey,
+        salt,
+        iv,
       },
     });
+
 
     console.log(user);
 
@@ -79,7 +112,7 @@ export async function POST(req) {
       }
     );
   } catch (error) {
-    console.error("Registration error:", error);
+    console.log("Error:", error.stack)  // Only console.log works here, anything else was throwing errors for me.
     return new Response(
       JSON.stringify({ error: "An error occurred during registration" }),
       {
