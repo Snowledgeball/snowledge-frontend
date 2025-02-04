@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { deployAccountContract, generateStarkNetAddress } from "../../utils/starknetUtils";
 import { mintSBT } from "../../utils/mintSBT";
 import { splitStringToFeltArray } from "../../utils/splitString";
+import { byteArrayFromString, stringFromByteArray } from "@/utils/byteArrayFromString";
+import { ByteArray } from "starknet";
+import { reconstructURI } from "@/utils/reconstructURI";
 
 
 interface AddressDetails {
@@ -76,7 +79,6 @@ const SignUpForm = () => {
 
     const addressDetails = await handleGenerateAddress();
 
-
     await handleDeployContract(addressDetails as AddressDetails);
 
     console.log("POST");
@@ -123,18 +125,11 @@ const SignUpForm = () => {
       console.log("dataUploaded", dataUploaded);
 
       try {
-        // await mintSBT(addressDetails.accountAddress, splitStringToFeltArray(dataUploaded.metadataUrl));
-        // const uriCut = (dataUploaded.metadataUrl).slice(0, 30)
-        // const uri = dataUploaded.metadataUrl
         await mintSBT(addressDetails.accountAddress, dataUploaded.metadataUrl);
-
-
-
 
       } catch (error) {
         console.log("error", error);
       }
-
 
       router.push("/");
     } else {

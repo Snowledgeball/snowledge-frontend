@@ -6,11 +6,11 @@
     },
     {
         "type": "struct",
-        "name": "backend::decentralized_id::ArrayBytes",
+        "name": "core::byte_array::ByteArray",
         "members": [
             {
                 "name": "data",
-                "type": "core::array::Array::<core::felt252>"
+                "type": "core::array::Array::<core::bytes_31::bytes31>"
             },
             {
                 "name": "pending_word",
@@ -50,7 +50,7 @@
                     },
                     {
                         "name": "uri",
-                        "type": "backend::decentralized_id::ArrayBytes"
+                        "type": "core::byte_array::ByteArray"
                     }
                 ],
                 "outputs": [],
@@ -67,7 +67,7 @@
                 ],
                 "outputs": [
                     {
-                        "type": "backend::decentralized_id::ArrayBytes"
+                        "type": "core::byte_array::ByteArray"
                     }
                 ],
                 "state_mutability": "view"
@@ -177,24 +177,6 @@
             {
                 "name": "True",
                 "type": "()"
-            }
-        ]
-    },
-    {
-        "type": "struct",
-        "name": "core::byte_array::ByteArray",
-        "members": [
-            {
-                "name": "data",
-                "type": "core::array::Array::<core::bytes_31::bytes31>"
-            },
-            {
-                "name": "pending_word",
-                "type": "core::felt252"
-            },
-            {
-                "name": "pending_word_len",
-                "type": "core::integer::u32"
             }
         ]
     },
