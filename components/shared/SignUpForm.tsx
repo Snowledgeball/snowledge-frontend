@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { deployAccountContract, generateStarkNetAddress } from "../../utils/starknetUtils";
+import { mintSBT } from "../../utils/mintSBT";
+import { splitStringToFeltArray } from "../../utils/splitString";
 
 
 interface AddressDetails {
@@ -101,7 +103,39 @@ const SignUpForm = () => {
     });
 
     if (response.ok) {
-      // Rediriger l'utilisateur vers la page de connexion après une inscription réussie
+
+      const formData = new FormData();
+      formData.append("fullName", fullName);
+      formData.append("userName", userName);
+      formData.append("email", email);
+      formData.append("accountAddress", addressDetails.accountAddress);
+
+      const responseUpload = await fetch("/api/auth/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!responseUpload.ok) {
+        console.log("Error uploading file");
+      }
+
+      const dataUploaded = await responseUpload.json();
+      console.log("dataUploaded", dataUploaded);
+
+      try {
+        // await mintSBT(addressDetails.accountAddress, splitStringToFeltArray(dataUploaded.metadataUrl));
+        // const uriCut = (dataUploaded.metadataUrl).slice(0, 30)
+        // const uri = dataUploaded.metadataUrl
+        await mintSBT(addressDetails.accountAddress, dataUploaded.metadataUrl);
+
+
+
+
+      } catch (error) {
+        console.log("error", error);
+      }
+
+
       router.push("/");
     } else {
       const data = await response.json();
