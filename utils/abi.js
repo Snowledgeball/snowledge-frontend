@@ -58,11 +58,27 @@ export const abiSBT = [
             },
             {
                 "type": "function",
-                "name": "get_token_uri",
+                "name": "get_token_uri_by_id",
                 "inputs": [
                     {
                         "name": "token_id",
                         "type": "core::integer::u256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "type": "core::byte_array::ByteArray"
+                    }
+                ],
+                "state_mutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "get_token_uri_by_address",
+                "inputs": [
+                    {
+                        "name": "address",
+                        "type": "core::starknet::contract_address::ContractAddress"
                     }
                 ],
                 "outputs": [
@@ -87,6 +103,22 @@ export const abiSBT = [
                     }
                 ],
                 "state_mutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "set_token_uri_by_address",
+                "inputs": [
+                    {
+                        "name": "address",
+                        "type": "core::starknet::contract_address::ContractAddress"
+                    },
+                    {
+                        "name": "uri",
+                        "type": "core::byte_array::ByteArray"
+                    }
+                ],
+                "outputs": [],
+                "state_mutability": "external"
             },
             {
                 "type": "function",
