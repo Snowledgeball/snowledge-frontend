@@ -7,11 +7,13 @@
   --foreground: #171717;
 }
 
+/* a modifier si je veux un dark theme*/
 @media (prefers-color-scheme: dark) {
   :root {
     /* --background: #0a0a0a; */
+
     --background: #ffffff;
-    --foreground: #ededed;
+    --foreground: #000000;
   }
 }
 

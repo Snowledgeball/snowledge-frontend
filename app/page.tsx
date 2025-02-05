@@ -1,6 +1,6 @@
 "use client";
 
-import { getProviders, signIn } from "next-auth/react";
+import { getProviders, signIn, useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import GenerateAddress from "@/components/shared/GenerateAddress";
 import LoginForm from "@/components/shared/LoginForm";
@@ -15,6 +15,9 @@ export default function Home() {
   const [providers, setProviders] = useState<Record<string, Provider> | null>(
     null
   );
+  const { data: session } = useSession();
+
+  console.log("session", session);
 
   useEffect(() => {
     const fetchProviders = async () => {
@@ -44,7 +47,25 @@ export default function Home() {
         <GenerateAddress />
       </div>
       <LoginForm />
+
+      <div className="p-4 text-center">
+        {session ? (
+          <div>
+            <p>Connecté en tant que : <strong>{session.user?.email}</strong></p>
+            <button
+              onClick={() => signOut()}
+              className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md"
+            >
+              Se déconnecter
+            </button>
+          </div>
+        ) : (
+          <p>Non connecté</p>
+        )}
+      </div>
+
       <SignUpForm />
     </div>
+
   );
 }
