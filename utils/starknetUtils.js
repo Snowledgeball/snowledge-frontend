@@ -123,7 +123,8 @@ export const deployAccountContract = async (privateKey, publicKey) => {
         0
     );
 
-    const amount = BigInt("1000000000000"); // 0.01 ETH en WEI
+    // A augmenter quand on sera en prod pour valider d'autres transactions
+    const amount = BigInt("10000000000000"); // 0.01 ETH en WEI
 
     try {
         await fundAccount(accountAddress, amount);
