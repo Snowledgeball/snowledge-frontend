@@ -36,36 +36,54 @@ const LogInForm = ({ closeModal }: { closeModal: () => void }) => {
     };
 
     return (
-        <div className="w-full max-w-md p-6 space-y-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold text-center text-gray-800">Se connecter</h2>
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Adresse e-mail</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-black"
-                        required
-                    />
+        <div className="w-full max-w-md space-y-8">
+            <div className="text-center">
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+                    Se connecter
+                </h2>
+                <p className="mt-2 text-sm text-gray-600">
+                    Accédez à votre compte pour profiter de toutes nos fonctionnalités
+                </p>
+            </div>
+            {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                    <p className="text-sm text-red-600">{error}</p>
                 </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Mot de passe</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-black"
-                        required
-                    />
+            )}
+            <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                <div className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-medium leading-6 text-gray-900">
+                            Adresse e-mail
+                        </label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium leading-6 text-gray-900">
+                            Mot de passe
+                        </label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            required
+                        />
+                    </div>
                 </div>
                 <button
                     type="submit"
-                    className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                 >
                     Se connecter
                 </button>
+
             </form>
         </div>
     );
@@ -75,7 +93,7 @@ export default function LoginModal({ isOpen, closeModal }: LoginModalProps) {
     return (
         <Transition appear show={isOpen} as={Fragment}>
             <Dialog as="div" className="relative z-50" onClose={closeModal}>
-                <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm" />
+                <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
                 <div className="fixed inset-0 overflow-y-auto">
                     <div className="flex min-h-full items-center justify-center p-4">
                         <TransitionChild
@@ -87,7 +105,7 @@ export default function LoginModal({ isOpen, closeModal }: LoginModalProps) {
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-12 shadow-xl transition-all">
+                            <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-8 shadow-xl transition-all">
                                 <LogInForm closeModal={closeModal} />
                             </DialogPanel>
                         </TransitionChild>

@@ -82,15 +82,49 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
     };
 
     return (
-        <div className="w-full max-w-md p-6 space-y-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold text-center text-gray-800">Créer un compte</h2>
-            {error && <p className="text-sm text-red-600">{error}</p>}
+        <div className="w-full max-w-md space-y-6">
+            <h2 className="text-2xl font-bold text-center text-gray-900">Créer un compte</h2>
+            {error && <p className="text-sm text-red-600 text-center">{error}</p>}
             <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
-                <input type="text" placeholder="Nom complet" value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full px-3 py-2 border rounded-md" required />
-                <input type="text" placeholder="Nom d'utilisateur" value={userName} onChange={(e) => setUserName(e.target.value)} className="w-full px-3 py-2 border rounded-md" required />
-                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-3 py-2 border rounded-md" required />
-                <input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-3 py-2 border rounded-md" required />
-                <button type="submit" className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md">S'inscrire</button>
+                <input
+                    type="text"
+                    placeholder="Nom complet"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-colors"
+                    required
+                />
+                <input
+                    type="text"
+                    placeholder="Nom d'utilisateur"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-colors"
+                    required
+                />
+                <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-colors"
+                    required
+                />
+                <input
+                    type="password"
+                    placeholder="Mot de passe"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-colors"
+                    required
+                />
+                <button
+                    type="submit"
+                    className="w-full py-2.5 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                    S'inscrire
+                </button>
+
             </form>
         </div>
     );
