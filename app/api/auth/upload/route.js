@@ -54,7 +54,6 @@ export async function PUT(request) {
     const FUNDER_ADDRESS = process.env.NEXT_PUBLIC_FUNDER_ADDRESS;
     const provider = new Provider({ nodeUrl: NODE_URL });
     const funderAccount = new Account(provider, FUNDER_ADDRESS, FUNDER_PRIVATE_KEY);
-    console.log("SBT_CONTRACT_ADDRESS", SBT_CONTRACT_ADDRESS);
     const contract = new Contract(
         abiSBT,
         SBT_CONTRACT_ADDRESS,
@@ -63,33 +62,35 @@ export async function PUT(request) {
 
     try {
         // TODO: change to the user address
-        const userAddress = "0x6b037166ce425443588a362ed59f83c0cb2f2ace586e1370773900c24464e35";
-
+        const userAddress = data.get("userAddress");
         const txResponse = await contract.call("get_token_uri_by_address", [userAddress]);
 
         const parts = txResponse.split('/ipfs/');
-        const MetadataHash = parts[1]; // "bafkreiht7igivttybar3e5jvyi2lyht7i2e6dzflywqzfixxbear35szpe"
+        const MetadataHash = parts[1];
         console.log("MetadataHash :", MetadataHash);
-
         const file = (await pinata.gateways.get(MetadataHash)).data;
         const newValue = JSON.parse(data.get("newValue"));
+
+        const unpin = await pinata.unpin([MetadataHash]);
+        console.log("unpinata :", unpin);
 
         const newMetadata = {
             ...file,
             ...newValue
         }
-
         const newMetadataUploadData = await pinata.upload.json(newMetadata);
         const newMetadataUrl = `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${newMetadataUploadData.IpfsHash}`;
+        console.log("newMetadata :", newMetadata);
+        console.log("newMetadataUploadData :", newMetadataUploadData);
         console.log("newMetadataUrl :", newMetadataUrl);
-        const accountAddress = file.accountAddress;
-        console.log("accountAddress :", accountAddress);
-        const estimatedFee = await contract.estimate("set_token_uri_by_address", [accountAddress, newMetadataUrl]);
-        const txResponseSetUri = await contract.invoke("set_token_uri_by_address", [accountAddress, newMetadataUrl], {
+
+        const estimatedFee = await contract.estimate("set_token_uri_by_address", [userAddress, newMetadataUrl]);
+        const txResponseSetUri = await contract.invoke("set_token_uri_by_address", [userAddress, newMetadataUrl], {
             maxFee: estimatedFee.overall_fee * BigInt(2)
         });
 
-        console.log("txResponseSetUri :", txResponseSetUri);
+        console.log("old hash :", MetadataHash);
+        console.log("new hash :", newMetadataUploadData.IpfsHash);
 
         return NextResponse.json(
             { message: "Metadata updated successfully", txResponseSetUri },

@@ -8,6 +8,7 @@ import { splitStringToFeltArray } from "../../utils/splitString";
 import { byteArrayFromString, stringFromByteArray } from "@/utils/byteArrayFromString";
 import { ByteArray } from "starknet";
 import { reconstructURI } from "@/utils/reconstructURI";
+import { signIn } from "next-auth/react";
 
 
 interface AddressDetails {
@@ -125,21 +126,32 @@ const SignUpForm = () => {
       console.log("dataUploaded", dataUploaded);
 
       try {
+        // attendre un peu pour s'assure que le wallet est bien deployé (ça arrive d'avoir parfois un bug sinon)
+        await new Promise(resolve => setTimeout(resolve, 1000));
         await mintSBT(addressDetails.accountAddress, dataUploaded.metadataUrl);
-
       } catch (error) {
         console.log("error", error);
       }
 
+      await loginAfterSignUp();
       router.push("/");
     } else {
       const data = await response.json();
       setError(data.error || "Une erreur est survenue lors de l'inscription.");
     }
+
+  };
+
+  const loginAfterSignUp = async () => {
+    await signIn("credentials", {
+      email: email,
+      password: password,
+    });
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
+
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-800">
           Créer un compte

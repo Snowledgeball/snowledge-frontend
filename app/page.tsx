@@ -34,24 +34,28 @@ export default function Home() {
   const handleSubmitUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // TODO: Les valeurs a modifier / ajouter
     const newValue = {
-      role: "admin",
-      community: "the-boss",
-      accountAddress: "0x000000e"
+      community:
+        [
+          { "name": "the-bossssssss", "role": "admineeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" },
+          { "name": "the-boss-oui-enft", "role": "admineeeeeeee" },
+          { "name": "the-boss-oui-enft-2", "role": "admineeeeeeee" },
+        ]
     }
+
+    const userAddress = session?.user?.address;
 
     const formData = new FormData();
     console.log("newValue :", newValue);
     formData.append("newValue", JSON.stringify(newValue));
+    formData.append("userAddress", userAddress || '');
 
-    // TODO: ajouter le user address
     const res = await fetch("/api/auth/upload", {
-
       method: "PUT",
       body: formData,
     });
     const data = await res.json();
-
     console.log(data);
   };
 
@@ -59,7 +63,6 @@ export default function Home() {
   return (
     <div
       style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-
     >
       <h1>Connexion</h1>
       {Object.values(providers).map((provider) => (
