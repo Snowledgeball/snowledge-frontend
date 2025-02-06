@@ -42,9 +42,10 @@ const Header = () => {
                             Explorer
                         </Link>
                         <Link href="/communaute" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 hover:bg-blue-50">
-                            Communauté
+                            Mes Communautés
                         </Link>
                     </div>
+
 
                     {session ? (
                         <div className="flex items-center space-x-4">
