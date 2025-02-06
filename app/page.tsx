@@ -5,6 +5,7 @@ import {
   Users, MessageCircle, TrendingUp, Search, Clock, Globe, Activity, Shield, Bitcoin, PiggyBank, Wallet
 } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const CommunityCard = ({
@@ -46,8 +47,13 @@ export default function Home() {
       return "Moyen";
     };
 
+    const router = useRouter();
+
     return (
-      <Card className="group relative overflow-hidden bg-white rounded-2xl transition-all duration-300 hover:shadow-xl cursor-pointer">
+      <Card
+        onClick={() => router.push(`/community/${name}`)}
+        className="group relative overflow-hidden bg-white rounded-2xl transition-all duration-300 hover:shadow-xl cursor-pointer"
+      >
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
         {/* Image de la communauté */}

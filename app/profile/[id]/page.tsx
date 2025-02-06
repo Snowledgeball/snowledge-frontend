@@ -186,30 +186,37 @@ const ProfilePage = () => {
                                 {userCommunities.map((community, index) => (
                                     <div
                                         key={index}
-                                        className="w-full bg-white rounded-lg p-4 transition-all duration-200"
+                                        className="w-full bg-white rounded-lg p-4 hover:bg-gray-50 transition-all duration-200"
                                     >
-                                        <div className="flex justify-between items-start">
-                                            <button
-                                                onClick={() => setSelectedCommunity(community.name)}
-                                                className={`flex-1 text-left transition-all duration-200 ${selectedCommunity === community.name
-                                                    ? 'text-blue-600'
-                                                    : 'text-gray-700 hover:text-blue-600'
-                                                    }`}
-                                            >
-                                                <div className="font-medium">{community.name}</div>
-                                                <div className="text-sm text-gray-500 mt-1">
-                                                    {community.role} • Depuis {community.joinDate}
+                                        <div className="flex flex-col space-y-4">
+                                            <div className="flex justify-between items-start">
+                                                <div
+                                                    onClick={() => setSelectedCommunity(community.name)}
+                                                    className="flex-1 cursor-pointer"
+                                                >
+                                                    <div className="font-medium text-gray-900">{community.name}</div>
+                                                    <div className="text-sm text-gray-500 mt-1">
+                                                        {community.role} • Depuis {community.joinDate}
+                                                    </div>
                                                 </div>
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedCommunityForContribution(community.name);
-                                                    setIsContributorModalOpen(true);
-                                                }}
-                                                className="ml-4 px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 border border-blue-200 rounded-full hover:bg-blue-50 transition-all duration-200"
-                                            >
-                                                Devenir contributeur
-                                            </button>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <button
+                                                    onClick={() => router.push(`/community/${encodeURIComponent(community.name)}`)}
+                                                    className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                                                >
+                                                    Accéder
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedCommunityForContribution(community.name);
+                                                        setIsContributorModalOpen(true);
+                                                    }}
+                                                    className="flex-1 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 transition-all duration-200"
+                                                >
+                                                    Devenir contributeur
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
