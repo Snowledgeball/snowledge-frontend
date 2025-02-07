@@ -7,25 +7,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id             Int    @id @default(autoincrement())
-  fullName       String @db.VarChar(255)
-  userName       String @unique(map: "username_unique") @db.VarChar(50)
-  profilePicture String
-  email          String @unique(map: "email_unique") @db.VarChar(255)
-  password       String
-  accountAddress String @db.VarChar(65)
-  publicKey      String @db.VarChar(65)
-  privateKey     String @db.VarChar(160)
-  salt           String @db.VarChar(32)
-  iv             String @db.VarChar(32)
-}
-
 model community {
   id                     Int                      @id @default(autoincrement())
   name                   String                   @unique @db.VarChar(255)
   creator_id             Int
   description            String                   @default("")
+  image_url              String?                  @db.VarChar(255)
+  category_id            Int
+  category               category                 @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_community_category")
   community_contributors community_contributors[]
   community_learners     community_learners[]
   community_posts        community_posts[]
@@ -71,4 +60,25 @@ model post_comments {
   updated_at      DateTime?       @default(now()) @db.Timestamp(6)
   likes_count     Int?            @default(0)
   community_posts community_posts @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model category {
+  id        Int         @id @default(autoincrement())
+  name      String      @db.VarChar(255)
+  label     String      @db.VarChar(255)
+  community community[]
+}
+
+model user {
+  id             Int    @id(map: "User_pkey") @default(autoincrement())
+  fullName       String @db.VarChar(255)
+  userName       String @unique(map: "username_unique") @db.VarChar(50)
+  profilePicture String
+  email          String @unique(map: "email_unique") @db.VarChar(255)
+  password       String
+  accountAddress String @db.VarChar(65)
+  publicKey      String @db.VarChar(65)
+  privateKey     String @db.VarChar(160)
+  salt           String @db.VarChar(32)
+  iv             String @db.VarChar(32)
 }

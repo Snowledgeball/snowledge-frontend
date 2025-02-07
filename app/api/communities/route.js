@@ -18,12 +18,30 @@ export async function POST(request) {
 
         // Récupérer les données du body
         const body = await request.json();
-        const { name, description, category } = body;
+        const { name, description, category, imageUrl } = body;
+
+        console.log("body", body);
 
         // Validation des données
-        if (!name || !description) {
+        if (!name || !description || !category) {
             return NextResponse.json(
-                { error: "Le nom et la description sont requis" },
+                { error: "Le nom, la description et la catégorie sont requis" },
+                { status: 400 }
+            );
+        }
+
+        // Récupérer l'ID de la catégorie
+        const categoryData = await prisma.category.findFirst({
+            where: {
+                name: category
+            }
+        });
+
+        console.log("categoryData", categoryData);
+
+        if (!categoryData) {
+            return NextResponse.json(
+                { error: "Catégorie invalide" },
                 { status: 400 }
             );
         }
@@ -33,7 +51,12 @@ export async function POST(request) {
             data: {
                 name: name,
                 description: description,
-                creator_id: parseInt(session.user.id), // Assurez-vous que l'ID est un nombre
+                creator_id: parseInt(session.user.id),
+                image_url: imageUrl || null,
+                category_id: categoryData.id
+            },
+            include: {
+                category: true // Inclure les données de la catégorie dans la réponse
             }
         });
 
@@ -59,6 +82,7 @@ export async function GET() {
     try {
         const communities = await prisma.community.findMany({
             include: {
+                category: true,
                 community_contributors: true,
                 community_learners: true,
             }
