@@ -125,7 +125,7 @@ export default function CommunitySettings() {
             });
 
             if (response.ok) {
-                router.push(`/community-dashboard/${communityId}`);
+                router.push(`/community/${communityId}/dashboard`);
             } else {
                 throw new Error("Erreur lors de la mise à jour");
             }

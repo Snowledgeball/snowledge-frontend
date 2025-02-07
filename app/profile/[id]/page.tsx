@@ -398,7 +398,7 @@ const ProfilePage = () => {
                                                     <p className="text-gray-600 mt-2">{community.description}</p>
                                                 </div>
                                                 <button
-                                                    onClick={() => router.push(`/community-dashboard/${community.id}`)}
+                                                    onClick={() => router.push(`/community/${community.id}/dashboard`)}
                                                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                                                 >
                                                     Tableau de bord

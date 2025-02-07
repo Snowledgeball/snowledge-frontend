@@ -68,7 +68,7 @@ export default function CreateCommunityPage() {
                 toast.success("Communauté créée avec succès ! Veuillez maintenant configurer les informations importantes qui seront présentées aux futurs membres.", {
                     duration: 6000,
                 });
-                router.push(`/community-settings/${data.id}#presentation`);
+                router.push(`/community/${data.id}/settings#presentation`);
             } else {
                 throw new Error("Erreur lors de la création de la communauté");
             }

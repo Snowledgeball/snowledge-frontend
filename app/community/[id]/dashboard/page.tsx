@@ -119,7 +119,7 @@ export default function CommunityDashboard() {
                         <p className="text-gray-600">{dashboardData.community.description}</p>
                     </div>
                     <button
-                        onClick={() => router.push(`/community-settings/${communityId}`)}
+                        onClick={() => router.push(`/community/${communityId}/settings`)}
                         className="flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                         <Settings className="w-4 h-4 mr-2" />
