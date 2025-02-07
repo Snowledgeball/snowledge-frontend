@@ -9,16 +9,19 @@ import { useRouter } from "next/navigation";
 
 export default function Home() {
   const CommunityCard = ({
+    id,
     name,
     members,
     activity,
     trending,
     category,
     lastActive,
+
     trustScore,
     imageUrl,
     creator
   }: {
+    id: number;
     name: string;
     members: number;
     activity: number;
@@ -51,9 +54,10 @@ export default function Home() {
 
     return (
       <Card
-        onClick={() => router.push(`/community/${name}`)}
+        onClick={() => router.push(`/community/${id}`)}
         className="group relative overflow-hidden bg-white rounded-2xl transition-all duration-300 hover:shadow-xl cursor-pointer"
       >
+
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
         {/* Image de la communauté */}
@@ -156,6 +160,7 @@ export default function Home() {
           const data = await response.json();
 
           const formattedCommunities = data.map((community: any) => ({
+            id: community.id,
             name: community.name,
             members: community.community_learners.length,
             activity: Math.floor(Math.random() * 300) + 50, // À remplacer par les vraies données d'activité

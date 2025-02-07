@@ -15,34 +15,11 @@ import {
     Settings,
     Lock,
     ChevronDown,
+    Play,
+    Volume2,
 } from "lucide-react";
 import { Community } from "@/types/community";
 
-const COMMUNITY_DATA: { [key: string]: Community & { description: string; category: string } } = {
-    "cryptomasters-france": {
-        id: "cryptomasters-france",
-        name: "CryptoMasters France",
-        description: "Communauté d'experts en cryptomonnaies",
-        category: "Crypto & Web3",
-        role: "Membre",
-        joinDate: "Jan 2024",
-        contributionsCount: 0,
-        recentActivity: [],
-        revenue: "0€"
-    },
-    "traders-elite": {
-        id: "traders-elite",
-        name: "Traders Elite",
-        description: "Analyses techniques et signaux de trading",
-        category: "Trading",
-        role: "Membre",
-        joinDate: "Jan 2024",
-        contributionsCount: 0,
-        recentActivity: [],
-        revenue: "0€"
-    }
-    // ... autres communautés
-};
 
 // Ajouter ces catégories de posts
 const POST_CATEGORIES = [
@@ -55,31 +32,85 @@ const POST_CATEGORIES = [
 const CommunityHub = () => {
     const params = useParams();
     const router = useRouter();
-    // Normaliser l'ID pour la recherche
-    const communityId = decodeURIComponent(params.id as string).toLowerCase().replace(/\s+/g, '-');
-    const [message, setMessage] = useState("");
-    const [activeTab, setActiveTab] = useState("general"); // 'general' ou 'posts'
-    const [selectedPostCategory, setSelectedPostCategory] = useState('general');
-
-    // État pour les données de la communauté
     const [communityData, setCommunityData] = useState<Community | null>(null);
+    const [activeTab, setActiveTab] = useState("general");
+    const [selectedPostCategory, setSelectedPostCategory] = useState("general");
+    const [message, setMessage] = useState("");
+    // Nouveaux états
+    const [showJoinModal, setShowJoinModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [presentation, setPresentation] = useState<any>(null);
+    const [hasJoined, setHasJoined] = useState(false);
+    const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
 
-    // Charger les données de la communauté
     useEffect(() => {
-        const fetchCommunityData = async () => {
-            const data = COMMUNITY_DATA[communityId];
-            if (!data) {
-                router.push('/404'); // Rediriger vers une page 404
-                return;
+        const checkMembershipAndFetchData = async () => {
+            try {
+                // Vérifier si l'utilisateur est membre
+                const membershipResponse = await fetch(`/api/communities/${params.id}/membership`);
+                const membershipData = await membershipResponse.json();
+                setHasJoined(membershipData.isMember);
+
+                // Récupérer les données de la communauté
+                const communityResponse = await fetch(`/api/communities/${params.id}`);
+                if (!communityResponse.ok) {
+                    router.push('/404');
+                    return;
+                }
+                const communityData = await communityResponse.json();
+                setCommunityData(communityData);
+
+                // Si l'utilisateur n'est pas membre, récupérer la présentation
+                if (!membershipData.isMember) {
+                    const presentationResponse = await fetch(`/api/communities/${params.id}/presentation`);
+                    const presentationData = await presentationResponse.json();
+                    setPresentation(presentationData);
+                    setShowJoinModal(true);
+                }
+            } catch (error) {
+                console.error("Erreur:", error);
+                router.push('/404');
+            } finally {
+                setIsLoading(false);
             }
-            setCommunityData(data);
         };
 
-        fetchCommunityData();
-    }, [communityId, router]);
+        if (params.id) {
+            checkMembershipAndFetchData();
+        }
+    }, [params.id, router]);
 
-    if (!communityData) {
-        return <div>Chargement...</div>;
+    const handleJoinCommunity = async () => {
+        try {
+            const response = await fetch(`/api/communities/${params.id}/join`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                setHasJoined(true);
+                setShowJoinModal(false);
+            } else {
+                throw new Error('Erreur lors de l\'adhésion à la communauté');
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            // Gérer l'erreur (afficher un message à l'utilisateur)
+        }
+    };
+
+    // Afficher le loader pendant le chargement
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Chargement de la communauté...</p>
+                </div>
+            </div>
+        );
     }
 
     // Données mockées plus réalistes
@@ -222,66 +253,161 @@ const CommunityHub = () => {
         }
     ];
 
+    console.log("communityData", communityData);
+
+    const getVideoId = (url: string) => {
+        const videoId = url.split('v=')[1];
+        return videoId;
+    }
+
+    const getYoutubeVideoId = (url: string) => {
+        const videoId = url.split('v=')[1];
+        return videoId;
+    }
+
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header avec gradient */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        <div className="flex items-center">
-                            <button
-                                onClick={() => router.back()}
-                                className="text-white/80 hover:text-white mr-4 transition-colors"
-                            >
-                                <ArrowLeft className="w-5 h-5" />
-                            </button>
-                            {/* Menu déroulant des communautés */}
-                            <div className="relative group">
-                                <button className="flex items-center space-x-2 text-white">
-                                    <h1 className="text-xl font-bold">{communityData.name}</h1>
-                                    <ChevronDown className="w-5 h-5 group-hover:rotate-180 transition-transform" />
-                                </button>
+            {/* Modal de présentation */}
+            {showJoinModal && presentation && (
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl p-8 max-w-2xl w-full shadow-2xl">
+                        {/* En-tête avec gradient */}
+                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 -m-8 mb-6 p-6 rounded-t-xl">
+                            <h2 className="text-2xl font-bold text-white text-center">{communityData?.name}</h2>
+                        </div>
 
-                                {/* Liste déroulante des communautés */}
-                                <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                                    <div className="p-2">
-                                        {Object.values(COMMUNITY_DATA).map((community) => (
-                                            <button
-                                                key={community.id}
-                                                onClick={() => router.push(`/community/${community.id}`)}
-                                                className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left hover:bg-gray-50 transition-colors
-                                                    ${community.id === communityId ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}`}
-                                            >
-                                                <div>
-                                                    <div className="font-medium">{community.name}</div>
-                                                    <div className="text-xs text-gray-500">{community.category}</div>
-                                                </div>
-                                            </button>
-                                        ))}
-
-                                        {/* Séparateur */}
-                                        <div className="h-px bg-gray-200 my-2" />
-
-                                        {/* Lien pour découvrir plus de communautés */}
-                                        <button
-                                            onClick={() => router.push('/')}
-                                            className="w-full flex items-center justify-between p-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                        >
-                                            <span className="text-sm font-medium">Découvrir plus de communautés</span>
-                                            <ArrowLeft className="w-4 h-4 rotate-180" />
-                                        </button>
+                        <div className="grid grid-cols-2 gap-6">
+                            {/* Colonne de gauche avec la vidéo */}
+                            <div className="space-y-4">
+                                {presentation.video_url && (
+                                    <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-lg">
+                                        <iframe
+                                            className="w-full h-full"
+                                            src={`https://www.youtube-nocookie.com/embed/${getYoutubeVideoId(presentation.video_url)}`}
+                                            title="Présentation de la communauté"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        />
                                     </div>
+                                )}
+                            </div>
+
+                            {/* Colonne de droite avec les détails */}
+                            <div className={`space-y-4 ${presentation.video_url ? 'col-span-1' : 'col-span-2'}`}>
+                                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm h-[200px] overflow-y-auto">
+                                    <h3 className="font-semibold mb-2 text-gray-900">Vocation de la communauté & détails de la thématique</h3>
+                                    <p className="text-sm text-gray-600">{presentation.topic_details}</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center space-x-4">
-                            <button className="text-white/80 hover:text-white transition-colors">
-                                <Settings className="w-5 h-5" />
-                            </button>
+
+                        {/* Section du bas */}
+                        <div className="grid grid-cols-2 gap-6 mt-6">
+                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm h-[200px] overflow-y-auto">
+                                <h3 className="font-semibold mb-2 text-gray-900">Code de conduite</h3>
+                                <p className="text-sm text-gray-600">{presentation.code_of_conduct}</p>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm h-[200px] overflow-y-auto">
+                                <h3 className="font-semibold mb-2 text-gray-900">Disclaimer</h3>
+                                <p className="text-sm text-gray-600">{presentation.disclaimers}</p>
+                            </div>
+                        </div>
+
+                        {/* Footer avec checkbox et bouton */}
+                        <div className="mt-6 space-y-4 border-t border-gray-200 pt-6">
+                            <label className="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    checked={hasAcceptedTerms}
+                                    onChange={(e) => setHasAcceptedTerms(e.target.checked)}
+                                />
+                                <span className="text-sm text-gray-600">J'ai compris et j'accepte le code de conduite</span>
+                            </label>
+
+                            <div className="flex justify-end space-x-4">
+                                <button
+                                    onClick={() => router.push('/')}
+                                    className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                                >
+                                    Retour
+                                </button>
+                                <button
+                                    onClick={handleJoinCommunity}
+                                    disabled={!hasAcceptedTerms}
+                                    className={`px-6 py-2 rounded-lg transition-colors ${hasAcceptedTerms
+                                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-md'
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        }`}
+                                >
+                                    Rejoindre la communauté →
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
+
+            {/* Header avec gradient */}
+            {communityData && (
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex items-center justify-between h-16">
+                            <div className="flex items-center">
+                                <button
+                                    onClick={() => router.back()}
+                                    className="text-white/80 hover:text-white mr-4 transition-colors"
+                                >
+                                    <ArrowLeft className="w-5 h-5" />
+                                </button>
+                                {/* Menu déroulant des communautés */}
+                                <div className="relative group">
+                                    <button className="flex items-center space-x-2 text-white">
+                                        <h1 className="text-xl font-bold">{communityData.name}</h1>
+                                        <ChevronDown className="w-5 h-5 group-hover:rotate-180 transition-transform" />
+                                    </button>
+
+                                    {/* Liste déroulante des communautés */}
+                                    <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                                        <div className="p-2">
+                                            {communityData.relatedCommunities?.map((community: Community) => (
+                                                <button
+                                                    key={community.id}
+                                                    onClick={() => router.push(`/community/${community.id}`)}
+                                                    className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left hover:bg-gray-50 transition-colors
+                                                    ${String(community.id) === params.id ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}`}
+                                                >
+                                                    <div>
+                                                        <div className="font-medium">{community.name}</div>
+                                                        <div className="text-xs text-gray-500">{community.category}</div>
+                                                    </div>
+                                                </button>
+                                            ))}
+
+                                            {/* Séparateur */}
+                                            <div className="h-px bg-gray-200 my-2" />
+
+                                            {/* Lien pour découvrir plus de communautés */}
+                                            <button
+                                                onClick={() => router.push('/communities')}
+                                                className="w-full flex items-center justify-between p-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                            >
+                                                <span className="text-sm font-medium">Découvrir plus de communautés</span>
+                                                <ArrowLeft className="w-4 h-4 rotate-180" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                                <button className="text-white/80 hover:text-white transition-colors">
+                                    <Settings className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Main Content avec mise à jour du style */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

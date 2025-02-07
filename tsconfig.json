@@ -40,7 +40,10 @@
     "utils/splitString.js",
     "app/api/communities/route.js",
     "app/api/communities/[id]/dashboard/route.js",
-    "app/api/communities/[id]/members/route.js"
+    "app/api/communities/[id]/members/route.js",
+    "app/api/communities/[id]/membership/route.js",
+    "app/api/communities/[id]/join/route.js",
+    "app/api/communities/[id]/presentation/route.js"
   ],
   "exclude": [
     "node_modules"

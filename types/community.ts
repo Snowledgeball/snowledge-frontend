@@ -1,9 +1,13 @@
 export interface Community {
-    id: string;
+    [x: string]: any;
+    id: number;
     name: string;
+    description: string;
+    category: string;
     role: string;
     joinDate: string;
     contributionsCount: number;
+
     recentActivity: {
         type: string;
         title: string;
