@@ -46,6 +46,37 @@ const ProfilePage = () => {
     const userId = params.id;
     const router = useRouter();
 
+    const [userData, setUserData] = useState({
+        username: '',
+        level: 0,
+        memberSince: '',
+        avatar: '/images/default-avatar.png',
+        stats: {
+            communitiesCount: 0,
+            postsCount: 0,
+            contributionsCount: 0,
+            totalEarnings: 0
+        }
+    });
+
+    // Fonction pour récupérer les données de l'utilisateur
+    const fetchUserData = async () => {
+        try {
+            const response = await fetch(`/api/users/${userId}`);
+            if (!response.ok) throw new Error('Erreur lors de la récupération des données utilisateur');
+            const data = await response.json();
+            setUserData(data);
+        } catch (error) {
+            console.error('Erreur:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (userId) {
+            fetchUserData();
+        }
+    }, [userId]);
+
     const userContributions = [
         {
             type: "post",
@@ -147,21 +178,21 @@ const ProfilePage = () => {
                     <div className="flex items-center">
                         <div className="w-24 h-24 bg-white rounded-full mr-6 flex items-center justify-center p-1 ring-4 ring-white/30">
                             <img
-                                src="/images/default-avatar.png"
+                                src={userData.avatar}
                                 alt="Avatar"
                                 className="w-full h-full object-cover rounded-full"
                             />
                         </div>
                         <div className="text-white">
-                            <h1 className="text-3xl font-bold tracking-tight">CryptoPadawan</h1>
+                            <h1 className="text-3xl font-bold tracking-tight">{userData.username}</h1>
                             <div className="flex items-center mt-2 space-x-4">
-                                <span className="flex items-center bg-white/10 px-3 py-1 rounded-full">
+                                {/* <span className="flex items-center bg-white/10 px-3 py-1 rounded-full">
                                     <Shield className="w-4 h-4 mr-1" />
-                                    Niveau 3
-                                </span>
+                                    Niveau {userData.level}
+                                </span> */}
                                 <span className="flex items-center bg-white/10 px-3 py-1 rounded-full">
                                     <Award className="w-4 h-4 mr-1" />
-                                    Membre depuis Déc 2023
+                                    Membre depuis {userData.memberSince}
                                 </span>
                             </div>
                         </div>
@@ -171,10 +202,10 @@ const ProfilePage = () => {
                 {/* Statistiques */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     {[
-                        { label: "Communautés", value: "3", icon: Users, color: "text-blue-500" },
-                        { label: "Posts", value: "5", icon: MessageCircle, color: "text-green-500" },
-                        { label: "Contributions", value: "25", icon: Activity, color: "text-purple-500" },
-                        { label: "Gains totaux", value: "129,7€", icon: Wallet, color: "text-amber-500" },
+                        { label: "Communautés", value: userData.stats.communitiesCount, icon: Users, color: "text-blue-500" },
+                        { label: "Posts", value: userData.stats.postsCount, icon: MessageCircle, color: "text-green-500" },
+                        { label: "Contributions", value: userData.stats.contributionsCount, icon: Activity, color: "text-purple-500" },
+                        { label: "Gains totaux", value: `${userData.stats.totalEarnings}€`, icon: Wallet, color: "text-amber-500" },
                     ].map((stat, index) => (
                         <Card key={index} className="p-6 bg-white hover:bg-gray-50 transition-colors duration-200">
                             <div className="flex items-center justify-between">
