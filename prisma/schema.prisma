@@ -20,3 +20,55 @@ model User {
   salt           String @db.VarChar(32)
   iv             String @db.VarChar(32)
 }
+
+model community {
+  id                     Int                      @id @default(autoincrement())
+  name                   String                   @unique @db.VarChar(255)
+  creator_id             Int
+  description            String                   @default("")
+  community_contributors community_contributors[]
+  community_learners     community_learners[]
+  community_posts        community_posts[]
+}
+
+model community_contributors {
+  community_id   Int
+  contributor_id Int
+  added_at       DateTime? @default(now()) @db.Timestamp(6)
+  community      community @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([community_id, contributor_id])
+}
+
+model community_learners {
+  community_id Int
+  learner_id   Int
+  joined_at    DateTime? @default(now()) @db.Timestamp(6)
+  community    community @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([community_id, learner_id])
+}
+
+model community_posts {
+  id             Int             @id @default(autoincrement())
+  community_id   Int
+  author_id      Int
+  content        String
+  created_at     DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?       @default(now()) @db.Timestamp(6)
+  likes_count    Int?            @default(0)
+  comments_count Int?            @default(0)
+  community      community       @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post_comments  post_comments[]
+}
+
+model post_comments {
+  id              Int             @id @default(autoincrement())
+  post_id         Int
+  author_id       Int
+  content         String
+  created_at      DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at      DateTime?       @default(now()) @db.Timestamp(6)
+  likes_count     Int?            @default(0)
+  community_posts community_posts @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}

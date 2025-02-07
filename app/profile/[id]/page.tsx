@@ -187,8 +187,8 @@ const ProfilePage = () => {
                                     <div
                                         key={index}
                                         className={`w-full bg-white rounded-lg p-4 hover:bg-gray-50 transition-all duration-200 ${selectedCommunity === community.name
-                                                ? 'ring-2 ring-blue-500 shadow-md'
-                                                : 'border border-gray-200'
+                                            ? 'ring-2 ring-blue-500 shadow-md'
+                                            : 'border border-gray-200'
                                             }`}
                                     >
                                         <div className="flex flex-col space-y-4">
