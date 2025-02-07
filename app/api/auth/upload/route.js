@@ -1,7 +1,7 @@
 import { pinata } from "../../../../utils/config"
 import { NextResponse } from "next/server"
 import { Provider, Account, Contract } from "starknet";
-import { abiSBT } from "../../../../utils/abi";
+import { abiSBT, addressSBT } from "../../../../utils/abi";
 
 
 
@@ -49,16 +49,16 @@ export async function PUT(request) {
     console.log("data :", data);
 
     const NODE_URL = process.env.NEXT_PUBLIC_STARKNET_NODE_URL;
-    const SBT_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_SBT_CONTRACT_ADDRESS;
     const FUNDER_PRIVATE_KEY = process.env.NEXT_PUBLIC_FUNDER_PRIVATE_KEY;
     const FUNDER_ADDRESS = process.env.NEXT_PUBLIC_FUNDER_ADDRESS;
     const provider = new Provider({ nodeUrl: NODE_URL });
     const funderAccount = new Account(provider, FUNDER_ADDRESS, FUNDER_PRIVATE_KEY);
     const contract = new Contract(
         abiSBT,
-        SBT_CONTRACT_ADDRESS,
+        addressSBT,
         funderAccount
     );
+
 
     try {
         // TODO: change to the user address
