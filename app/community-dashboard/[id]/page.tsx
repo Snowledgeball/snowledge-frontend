@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
 import {
     Users, MessageCircle, TrendingUp, Wallet, Settings,
-    BarChart2, FileText, UserPlus, Flag, ChevronRight
+    BarChart2, FileText, ChevronRight
 } from "lucide-react";
 
 interface DashboardData {
@@ -119,7 +119,7 @@ export default function CommunityDashboard() {
                         <p className="text-gray-600">{dashboardData.community.description}</p>
                     </div>
                     <button
-                        onClick={() => router.push('/community-settings')}
+                        onClick={() => router.push(`/community-settings/${communityId}`)}
                         className="flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                         <Settings className="w-4 h-4 mr-2" />
@@ -134,7 +134,6 @@ export default function CommunityDashboard() {
                             { id: 'overview', label: 'Vue d\'ensemble', icon: BarChart2 },
                             { id: 'members', label: 'Membres', icon: Users },
                             { id: 'content', label: 'Contenu', icon: FileText },
-                            { id: 'moderation', label: 'Modération', icon: Flag }
                         ].map((tab) => (
                             <button
                                 key={tab.id}
@@ -189,7 +188,10 @@ export default function CommunityDashboard() {
                                         <div className={`w-12 h-12 rounded-full flex items-center justify-center ${stat.color} bg-gray-50`}>
                                             <stat.icon className="w-6 h-6" />
                                         </div>
-                                        <span className="text-green-500 text-sm font-medium">{stat.trend}</span>
+                                        <span className={`text-sm font-medium ${parseFloat(stat.trend) > 0 ? 'text-green-500' : 'text-red-500'
+                                            }`}>
+                                            {stat.trend}
+                                        </span>
                                     </div>
                                     <h3 className="text-2xl font-bold text-gray-900">{stat.value}</h3>
                                     <p className="text-gray-600 text-sm">{stat.label}</p>

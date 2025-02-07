@@ -14,10 +14,11 @@ model community {
   description            String                   @default("")
   image_url              String?                  @db.VarChar(255)
   category_id            Int
-  category               category                 @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_community_category")
+  category               community_category       @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_community_category")
   community_contributors community_contributors[]
   community_learners     community_learners[]
   community_posts        community_posts[]
+  community_presentation community_presentation?
 }
 
 model community_contributors {
@@ -39,34 +40,16 @@ model community_learners {
 }
 
 model community_posts {
-  id             Int             @id @default(autoincrement())
-  community_id   Int
-  author_id      Int
-  content        String
-  created_at     DateTime?       @default(now()) @db.Timestamp(6)
-  updated_at     DateTime?       @default(now()) @db.Timestamp(6)
-  likes_count    Int?            @default(0)
-  comments_count Int?            @default(0)
-  community      community       @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  post_comments  post_comments[]
-}
-
-model post_comments {
-  id              Int             @id @default(autoincrement())
-  post_id         Int
-  author_id       Int
-  content         String
-  created_at      DateTime?       @default(now()) @db.Timestamp(6)
-  updated_at      DateTime?       @default(now()) @db.Timestamp(6)
-  likes_count     Int?            @default(0)
-  community_posts community_posts @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-}
-
-model category {
-  id        Int         @id @default(autoincrement())
-  name      String      @db.VarChar(255)
-  label     String      @db.VarChar(255)
-  community community[]
+  id                       Int                        @id @default(autoincrement())
+  community_id             Int
+  author_id                Int
+  content                  String
+  created_at               DateTime?                  @default(now()) @db.Timestamp(6)
+  updated_at               DateTime?                  @default(now()) @db.Timestamp(6)
+  likes_count              Int?                       @default(0)
+  comments_count           Int?                       @default(0)
+  community                community                  @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  community_posts_comments community_posts_comments[]
 }
 
 model user {
@@ -81,4 +64,32 @@ model user {
   privateKey     String @db.VarChar(160)
   salt           String @db.VarChar(32)
   iv             String @db.VarChar(32)
+}
+
+model community_category {
+  id        Int         @id(map: "category_pkey") @default(autoincrement())
+  name      String      @db.VarChar(255)
+  label     String      @db.VarChar(255)
+  community community[]
+}
+
+model community_posts_comments {
+  id              Int             @id(map: "post_comments_pkey") @default(autoincrement())
+  post_id         Int
+  author_id       Int
+  content         String
+  created_at      DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at      DateTime?       @default(now()) @db.Timestamp(6)
+  likes_count     Int?            @default(0)
+  community_posts community_posts @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "post_comments_post_id_fkey")
+}
+
+model community_presentation {
+  id              Int       @id @default(autoincrement())
+  community_id    Int       @unique
+  video_url       String?
+  topic_details   String
+  code_of_conduct String
+  disclaimers     String
+  community       community @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }

@@ -31,7 +31,7 @@ export async function POST(request) {
         }
 
         // Récupérer l'ID de la catégorie
-        const categoryData = await prisma.category.findFirst({
+        const categoryData = await prisma.community_category.findFirst({
             where: {
                 name: category
             }

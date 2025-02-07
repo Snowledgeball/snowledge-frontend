@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Upload } from "lucide-react";
+import { toast } from "sonner";
 
 export default function CreateCommunityPage() {
     const router = useRouter();
@@ -33,7 +34,6 @@ export default function CreateCommunityPage() {
         setIsSubmitting(true);
 
         try {
-            // Upload de l'image si elle existe
             let finalImageUrl = "";
             if (imageFile) {
                 const imageFormData = new FormData();
@@ -51,7 +51,6 @@ export default function CreateCommunityPage() {
                 }
             }
 
-            // Création de la communauté
             const response = await fetch("/api/communities", {
                 method: "POST",
                 headers: {
@@ -66,13 +65,16 @@ export default function CreateCommunityPage() {
 
             if (response.ok) {
                 const data = await response.json();
-                router.push(`/community/${data.id}`);
+                toast.success("Communauté créée avec succès ! Veuillez maintenant configurer les informations importantes qui seront présentées aux futurs membres.", {
+                    duration: 6000,
+                });
+                router.push(`/community-settings/${data.id}#presentation`);
             } else {
                 throw new Error("Erreur lors de la création de la communauté");
             }
         } catch (error) {
             console.error("Erreur:", error);
-            // Gérer l'erreur (ajouter un toast ou une notification)
+            toast.error("Une erreur est survenue lors de la création de la communauté");
         } finally {
             setIsSubmitting(false);
         }

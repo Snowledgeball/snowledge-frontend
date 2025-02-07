@@ -25,9 +25,10 @@ export async function GET(request, { params }) {
                 community_learners: true,
                 community_posts: {
                     include: {
-                        post_comments: true
+                        community_posts_comments: true
                     }
                 }
+
             }
         });
 
@@ -78,10 +79,11 @@ export async function GET(request, { params }) {
         });
 
     } catch (error) {
-        console.error("Erreur lors de la récupération des données du tableau de bord:", error);
+        console.log("Erreur lors de la récupération des données du tableau de bord:", error.stack);
         return NextResponse.json(
             { error: "Erreur lors de la récupération des données" },
             { status: 500 }
+
         );
     } finally {
         await prisma.$disconnect();
