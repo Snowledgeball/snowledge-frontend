@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { Users, MessageCircle, TrendingUp, Shield, Bitcoin, Activity, Award, Wallet, Globe, Plus, ArrowRight, Settings, Mail, Lock, HelpCircle, MessageSquare, FileText, Check, Trophy, DollarSign, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog } from '@headlessui/react';
 
 interface CommunityData {
@@ -14,6 +14,30 @@ interface CommunityData {
     contributionsCount: number;
     recentActivity: { type: string; title: string; date: string; engagement: number }[];
     revenue: string;
+}
+
+// Ajout des types pour la communauté
+interface CommunityStats {
+    membersCount: number;
+    postsCount: number;
+    revenue: number;
+}
+
+interface UserCommunity {
+    id: string;
+    name: string;
+    description: string;
+    createdAt: string;
+    stats: CommunityStats;
+    isComplete: boolean;
+}
+
+// Ajout d'une nouvelle interface
+interface JoinedCommunity {
+    id: string;
+    name: string;
+    createdAt: string;
+    role: string;
 }
 
 const ProfilePage = () => {
@@ -42,33 +66,32 @@ const ProfilePage = () => {
         // ... autres contributions
     ];
 
-    const userCommunities = [
-        {
-            name: "CryptoMasters France",
-            role: "Membre actif",
-            joinDate: "Déc 2023",
-            contributionsCount: 45,
-            recentActivity: [
-                { type: "post", title: "L'avenir du Bitcoin en 2024", date: "Il y a 2 jours", engagement: 156 },
-                { type: "analysis", title: "Analyse technique : ETH/USD", date: "Il y a 5 jours", engagement: 89 }
-            ],
-            revenue: "25.5€"
-        },
-        {
-            name: "Traders Elite",
-            role: "Analyste vérifié",
-            joinDate: "Jan 2024",
-            contributionsCount: 23,
-            recentActivity: [
-                { type: "post", title: "Stratégies de trading", date: "Il y a 1 jour", engagement: 45 },
-                { type: "analysis", title: "Analyse des tendances", date: "Il y a 3 jours", engagement: 30 }
-            ],
-            revenue: "15.2€"
-        }
-    ];
+    const [userOwnedCommunities, setUserOwnedCommunities] = useState<UserCommunity[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const [selectedCommunity, setSelectedCommunity] = useState(userCommunities[0]?.name);
-    const selectedCommunityData = userCommunities.find(c => c.name === selectedCommunity) as CommunityData;
+    // Nouvelle fonction pour récupérer les communautés rejointes
+    const fetchJoinedCommunities = async () => {
+        try {
+            setIsLoadingJoined(true);
+            const response = await fetch(`/api/users/${userId}/joined-communities`);
+            if (!response.ok) throw new Error('Erreur lors de la récupération des communautés rejointes');
+            const data = await response.json();
+            setJoinedCommunities(data.communities);
+        } catch (error) {
+            console.error('Erreur:', error);
+        } finally {
+            setIsLoadingJoined(false);
+        }
+    };
+
+    useEffect(() => {
+        if (userId) {
+            fetchJoinedCommunities();
+        }
+    }, [userId]);
+
+    const [selectedCommunity, setSelectedCommunity] = useState(userOwnedCommunities[0]?.name);
+    const selectedCommunityData = userOwnedCommunities.find(c => c.name === selectedCommunity) as unknown as CommunityData;
 
     const recommendedCommunities = [
         {
@@ -91,6 +114,30 @@ const ProfilePage = () => {
     // Ajoutez l'état pour gérer le modal
     const [isContributorModalOpen, setIsContributorModalOpen] = useState(false);
     const [selectedCommunityForContribution, setSelectedCommunityForContribution] = useState<string | null>(null);
+
+    const [joinedCommunities, setJoinedCommunities] = useState<JoinedCommunity[]>([]);
+    const [isLoadingJoined, setIsLoadingJoined] = useState(true);
+
+    // Fonction pour récupérer les communautés de l'utilisateur
+    const fetchUserCommunities = async () => {
+        try {
+            setIsLoading(true);
+            const response = await fetch(`/api/users/${userId}/owned-communities`);
+            if (!response.ok) throw new Error('Erreur lors de la récupération des communautés');
+            const data = await response.json();
+            setUserOwnedCommunities(data.communities);
+        } catch (error) {
+            console.error('Erreur:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (userId) {
+            fetchUserCommunities();
+        }
+    }, [userId]);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -183,7 +230,11 @@ const ProfilePage = () => {
                         <>
                             {/* Navigation des communautés (colonne de gauche) */}
                             <div className="space-y-4">
-                                {userCommunities.map((community, index) => (
+                                {isLoadingJoined ? (
+                                    <div className="text-center py-4">
+                                        <p>Chargement des communautés...</p>
+                                    </div>
+                                ) : joinedCommunities.map((community, index) => (
                                     <div
                                         key={index}
                                         className={`w-full bg-white rounded-lg p-4 hover:bg-gray-50 transition-all duration-200 ${selectedCommunity === community.name
@@ -199,7 +250,7 @@ const ProfilePage = () => {
                                                 >
                                                     <div className="font-medium text-gray-900">{community.name}</div>
                                                     <div className="text-sm text-gray-500 mt-1">
-                                                        {community.role} • Depuis {community.joinDate}
+                                                        {community.role} • Depuis {community.createdAt}
                                                     </div>
                                                 </div>
                                             </div>
@@ -302,16 +353,89 @@ const ProfilePage = () => {
 
                     {activeTab === 'my-community' && (
                         <div className="col-span-3">
-                            <div className="text-center py-12">
-                                <h3 className="text-2xl font-bold text-gray-900 mb-4">Créez votre propre communauté</h3>
-                                <p className="text-gray-600 mb-8">Lancez votre communauté et commencez à partager votre expertise</p>
-                                <button
-                                    onClick={() => router.push('/create-community')}
-                                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
-                                >
-                                    Créer une communauté
-                                </button>
-                            </div>
+                            {isLoading ? (
+                                <div className="text-center py-12">
+                                    <p>Chargement...</p>
+                                </div>
+                            ) : userOwnedCommunities.length > 0 ? (
+                                <div className="space-y-8">
+                                    {userOwnedCommunities.map((community) => (
+                                        <Card key={community.id} className="p-6 bg-white rounded-xl shadow-md">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <h3 className="text-2xl font-bold text-gray-900">{community.name}</h3>
+                                                    <p className="text-gray-600 mt-2">{community.description}</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => router.push(`/community-dashboard/${community.id}`)}
+                                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                                >
+                                                    Tableau de bord
+                                                </button>
+                                            </div>
+
+                                            {!community.isComplete && (
+                                                <div className="mt-6 space-y-4">
+                                                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                                        <h4 className="font-medium text-amber-800 mb-2">Actions recommandées</h4>
+                                                        <ul className="space-y-2">
+                                                            <li className="flex items-center text-amber-700">
+                                                                <ArrowRight className="w-4 h-4 mr-2" />
+                                                                Complétez la description de votre communauté
+                                                            </li>
+                                                            <li className="flex items-center text-amber-700">
+                                                                <ArrowRight className="w-4 h-4 mr-2" />
+                                                                Ajoutez une vidéo de présentation YouTube
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className="mt-6 grid grid-cols-3 gap-6">
+                                                <div className="bg-gray-50 p-4 rounded-lg">
+                                                    <Users className="w-6 h-6 text-blue-500 mb-2" />
+                                                    <p className="text-2xl font-bold text-gray-900">{community.stats.membersCount}</p>
+                                                    <p className="text-sm text-gray-600">Membres</p>
+                                                </div>
+                                                <div className="bg-gray-50 p-4 rounded-lg">
+                                                    <MessageCircle className="w-6 h-6 text-green-500 mb-2" />
+                                                    <p className="text-2xl font-bold text-gray-900">{community.stats.postsCount}</p>
+                                                    <p className="text-sm text-gray-600">Posts</p>
+                                                </div>
+                                                <div className="bg-gray-50 p-4 rounded-lg">
+                                                    <Wallet className="w-6 h-6 text-purple-500 mb-2" />
+                                                    <p className="text-2xl font-bold text-gray-900">{community.stats.revenue}€</p>
+                                                    <p className="text-sm text-gray-600">Revenus générés</p>
+                                                </div>
+                                            </div>
+                                        </Card>
+                                    ))}
+                                    <Card className="p-6 bg-white rounded-xl shadow-md">
+                                        <div className="text-center">
+                                            <h3 className="text-xl font-bold text-gray-900 mb-4">Créer une autre communauté</h3>
+                                            <p className="text-gray-600 mb-6">Développez votre présence avec une nouvelle communauté</p>
+                                            <button
+                                                onClick={() => router.push('/create-community')}
+                                                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all"
+                                            >
+                                                Créer une communauté
+                                            </button>
+                                        </div>
+                                    </Card>
+                                </div>
+                            ) : (
+                                <div className="text-center py-12">
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Créez votre propre communauté</h3>
+                                    <p className="text-gray-600 mb-8">Lancez votre communauté et commencez à partager votre expertise</p>
+                                    <button
+                                        onClick={() => router.push('/create-community')}
+                                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+                                    >
+                                        Créer une communauté
+                                    </button>
+                                </div>
+                            )}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
                                 <Card className="p-6 bg-white rounded-xl shadow-md">
                                     <h4 className="text-lg font-semibold text-gray-900 mb-4">Avantages</h4>
@@ -389,13 +513,16 @@ const ProfilePage = () => {
                             <Card className="p-6 mt-6 bg-white rounded-xl shadow-md">
                                 <h3 className="text-xl font-semibold text-gray-900 mb-6">Mes abonnements</h3>
                                 <div className="space-y-4">
-                                    {userCommunities.map((community, index) => (
+                                    {userOwnedCommunities.map((community, index) => (
                                         <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                                             <div className="flex justify-between items-start mb-2">
                                                 <div>
                                                     <h4 className="font-medium text-gray-900">{community.name}</h4>
                                                     <p className="text-sm text-gray-500">
-                                                        {community.role === "Membre actif"
+                                                        {/* {community.role === "Membre actif"
+                                                            ? "Abonnement Premium - Accès illimité"
+                                                            : "Abonnement Standard"} */}
+                                                        {"Membre actif" === "Membre actif"
                                                             ? "Abonnement Premium - Accès illimité"
                                                             : "Abonnement Standard"}
                                                     </p>

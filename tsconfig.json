@@ -38,7 +38,9 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "utils/splitString.js",
-    "app/api/communities/route.js"
+    "app/api/communities/route.js",
+    "app/api/communities/[id]/dashboard/route.js",
+    "app/api/communities/[id]/members/route.js"
   ],
   "exclude": [
     "node_modules"
