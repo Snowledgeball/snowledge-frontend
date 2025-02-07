@@ -59,7 +59,7 @@ export default function Home() {
         {/* Image de la communauté */}
         <div className="relative h-48 w-full">
           <Image
-            src={imageUrl}
+            src={'https://' + imageUrl}
             alt={name}
             fill
             className="object-cover rounded-t-2xl"
@@ -137,7 +137,8 @@ export default function Home() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedFilter, setSelectedFilter] = useState("all");
     const [selectedCategory, setSelectedCategory] = useState("all");
-    const [exploreCommunities, setExploreCommunities] = useState<any[]>([]);
+    const [communities, setCommunities] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const categories = [
       { id: "all", label: "Toutes les catégories", icon: Globe },
@@ -147,137 +148,38 @@ export default function Home() {
       { id: "defi", label: "DeFi", icon: Wallet },
     ];
 
-    const featuredCommunities = [
-      {
-        name: "CryptoMasters France",
-        members: 15420,
-        activity: 348,
-        trending: true,
-        category: "Crypto & Web3",
-        lastActive: "il y a 5min",
-        trustScore: 95,
-        imageUrl: "https://images.unsplash.com/photo-1621761191319-c6fb62004040",
-        creator: {
-          name: "Thomas Dubois",
-          avatar: "https://ui-avatars.com/api/?name=Thomas+Dubois&background=random",
-          role: "Analyste Crypto & Fondateur"
-        }
-      },
-      {
-        name: "Traders Elite",
-        members: 8750,
-        activity: 245,
-        trending: false,
-        category: "Trading",
-        lastActive: "il y a 15min",
-        trustScore: 88,
-        imageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3",
-        creator: {
-          name: "Sophie Laurent",
-          avatar: "https://ui-avatars.com/api/?name=Sophie+Laurent&background=random",
-          role: "Trader Professionnelle"
-        }
-      },
-      {
-        name: "Investisseurs Long Terme",
-        members: 12300,
-        activity: 156,
-        trending: false,
-        category: "Investissement",
-        lastActive: "il y a 1h",
-        trustScore: 92,
-        imageUrl: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f",
-        creator: {
-          name: "Marc Lefebvre",
-          avatar: "https://ui-avatars.com/api/?name=Marc+Lefebvre&background=random",
-          role: "Gestionnaire de portefeuille"
-        }
-      }
-    ];
-
-    const communityTemplates = [
-      {
-        name: "DeFi Innovators",
-        category: "DeFi",
-        imageUrl: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0",
-        creator: { name: "Julie Moreau", role: "DeFi Researcher" }
-      },
-      {
-        name: "Bitcoin & Blockchain FR",
-        category: "Crypto & Web3",
-        imageUrl: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d",
-        creator: { name: "Pierre Martin", role: "Expert Blockchain" }
-      },
-      {
-        name: "Options & Futures",
-        category: "Trading",
-        imageUrl: "https://images.unsplash.com/photo-1535320903710-d993d3d77d29",
-        creator: { name: "Alexandre Dupont", role: "Trader Institutionnel" }
-      },
-      {
-        name: "Value Investing Club",
-        category: "Investissement",
-        imageUrl: "https://images.unsplash.com/photo-1604594849809-dfedbc827105",
-        creator: { name: "Marie Bernard", role: "Analyste Financière" }
-      },
-      {
-        name: "ETF & Index",
-        category: "Investissement",
-        imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71",
-        creator: { name: "Emma Rousseau", role: "Conseillère en Investissement" }
-      },
-      {
-        name: "Analyse Technique Pro",
-        category: "Trading",
-        imageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3",
-        creator: { name: "Nicolas Mercier", role: "Analyste Technique" }
-      },
-      {
-        name: "Staking & Yield",
-        category: "DeFi",
-        imageUrl: "https://images.unsplash.com/photo-1620321023374-d1a68fbc720d",
-        creator: { name: "Sarah Cohen", role: "DeFi Strategist" }
-      },
-      {
-        name: "Small Caps FR",
-        category: "Investissement",
-        imageUrl: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f",
-        creator: { name: "Paul Durand", role: "Analyste Small Caps" }
-      },
-      {
-        name: "Trading Algorithmique",
-        category: "Trading",
-        imageUrl: "https://images.unsplash.com/photo-1642543492481-44e81e3914a7",
-        creator: { name: "Antoine Leroy", role: "Quant Trader" }
-      },
-      {
-        name: "Ethereum France",
-        category: "Crypto & Web3",
-        imageUrl: "https://images.unsplash.com/photo-1622630998477-20aa696ecb05",
-        creator: { name: "Claire Dubois", role: "Développeuse Ethereum" }
-      }
-    ];
-
     useEffect(() => {
-      const generatedCommunities = Array(12).fill(null).map((_, index) => {
-        const template = communityTemplates[index % communityTemplates.length];
-        return {
-          name: template.name,
-          members: Math.floor(Math.random() * 10000) + 1000,
-          activity: Math.floor(Math.random() * 300) + 50,
-          trending: Math.random() > 0.7,
-          category: template.category,
-          lastActive: "il y a 2h",
-          trustScore: Math.floor(Math.random() * 30) + 65,
-          imageUrl: template.imageUrl,
-          creator: {
-            name: template.creator.name,
-            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(template.creator.name)}&background=random`,
-            role: template.creator.role
-          }
-        };
-      });
-      setExploreCommunities(generatedCommunities);
+      const fetchCommunities = async () => {
+        try {
+          const response = await fetch('/api/communities');
+          if (!response.ok) throw new Error('Erreur lors de la récupération des communautés');
+          const data = await response.json();
+
+          const formattedCommunities = data.map((community: any) => ({
+            name: community.name,
+            members: community.community_learners.length,
+            activity: Math.floor(Math.random() * 300) + 50, // À remplacer par les vraies données d'activité
+            trending: Math.random() > 0.7, // À remplacer par une vraie logique de trending
+            category: community.category.label,
+            lastActive: "il y a 2h", // À remplacer par un vrai calcul de dernière activité
+            trustScore: Math.floor(Math.random() * 30) + 65, // À remplacer par un vrai score de confiance
+            imageUrl: community.image_url || "https://images.unsplash.com/photo-1621761191319-c6fb62004040",
+            creator: {
+              name: "À définir", // À remplacer par les vraies données du créateur
+              avatar: `https://ui-avatars.com/api/?name=User&background=random`,
+              role: "Membre"
+            }
+          }));
+
+          setCommunities(formattedCommunities);
+        } catch (error) {
+          console.error("Erreur:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchCommunities();
     }, []);
 
     const filters = [
@@ -322,7 +224,7 @@ export default function Home() {
           <section className="mb-16">
             <h2 className="text-2xl font-bold text-gray-900 mb-8">Communautés en vedette</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredCommunities.map((community, index) => (
+              {communities.map((community, index) => (
                 <CommunityCard key={index} {...community} />
               ))}
             </div>
@@ -379,11 +281,17 @@ export default function Home() {
             </div>
 
             {/* Grille des communautés */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {exploreCommunities.map((community, index) => (
-                <CommunityCard key={index} {...community} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="text-center py-12">
+                <p className="text-gray-600">Chargement des communautés...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {communities.map((community, index) => (
+                  <CommunityCard key={index} {...community} />
+                ))}
+              </div>
+            )}
           </section>
         </main>
       </div>

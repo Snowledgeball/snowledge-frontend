@@ -77,7 +77,6 @@ export async function POST(request) {
     }
 }
 
-// Optionnel : Endpoint pour récupérer toutes les communautés
 export async function GET() {
     try {
         const communities = await prisma.community.findMany({
@@ -85,17 +84,15 @@ export async function GET() {
                 category: true,
                 community_contributors: true,
                 community_learners: true,
+            },
+            orderBy: {
+                name: 'asc'
             }
         });
 
         return NextResponse.json(communities);
     } catch (error) {
         console.error("Erreur lors de la récupération des communautés:", error);
-        return NextResponse.json(
-            { error: "Erreur lors de la récupération des communautés" },
-            { status: 500 }
-        );
-    } finally {
-        await prisma.$disconnect();
+        return new NextResponse(null, { status: 500 });
     }
 } 
