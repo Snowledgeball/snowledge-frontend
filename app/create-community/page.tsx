@@ -24,6 +24,14 @@ export default function CreateCommunityPage() {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
 
+    useEffect(() => {
+        return () => {
+            if (previewImage) {
+                URL.revokeObjectURL(previewImage);
+            }
+        };
+    }, [previewImage]);
+
     if (isLoading) {
         return <LoadingComponent />;
     }
@@ -100,15 +108,6 @@ export default function CreateCommunityPage() {
         const previewUrl = URL.createObjectURL(file);
         setPreviewImage(previewUrl);
     };
-
-    // Nettoyer l'URL de prévisualisation lors du démontage du composant
-    useEffect(() => {
-        return () => {
-            if (previewImage) {
-                URL.revokeObjectURL(previewImage);
-            }
-        };
-    }, [previewImage]);
 
     if (!session) {
         return (
