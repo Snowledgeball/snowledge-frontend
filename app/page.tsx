@@ -33,7 +33,6 @@ export default function Home() {
     creator: {
       name: string;
       avatar: string;
-      role: string;
     };
   }) => {
     const getTrustScoreColor = (score: number) => {
@@ -106,10 +105,10 @@ export default function Home() {
             />
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-900">{creator.name}</p>
-
-              <p className="text-xs text-gray-500">{creator.role}</p>
+              {/* <p className="text-xs text-gray-500">Créateur</p> */}
             </div>
           </div>
+
 
           <div className="space-y-3">
             <div className="flex items-center text-gray-600">
@@ -167,7 +166,6 @@ export default function Home() {
           const response = await fetch('/api/communities');
           if (!response.ok) throw new Error('Erreur lors de la récupération des communautés');
           const data = await response.json();
-
           const formattedCommunities = data.map((community: any) => ({
             id: community.id,
             name: community.name,
@@ -179,9 +177,8 @@ export default function Home() {
             trustScore: Math.floor(Math.random() * 30) + 65, // À remplacer par un vrai score de confiance
             imageUrl: community.image_url || "https://images.unsplash.com/photo-1621761191319-c6fb62004040",
             creator: {
-              name: "À définir", // À remplacer par les vraies données du créateur
+              name: community.creator.fullName,
               avatar: `https://ui-avatars.com/api/?name=User&background=random`,
-              role: "Membre"
             }
           }));
 

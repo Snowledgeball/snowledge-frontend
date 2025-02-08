@@ -66,7 +66,6 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
             }
 
             const dataUploaded = await responseUpload.json();
-            console.log("dataUploaded", dataUploaded);
 
             // Wait for 1 second before minting the SBT
             await new Promise(resolve => setTimeout(resolve, 1000));

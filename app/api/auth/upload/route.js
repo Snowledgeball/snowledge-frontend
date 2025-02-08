@@ -46,7 +46,6 @@ export async function POST(request) {
 // PUT route pour modifier les informations de l'utilisateur
 export async function PUT(request) {
     const data = await request.formData();
-    console.log("data :", data);
 
     const NODE_URL = process.env.NEXT_PUBLIC_STARKNET_NODE_URL;
     const FUNDER_PRIVATE_KEY = process.env.NEXT_PUBLIC_FUNDER_PRIVATE_KEY;

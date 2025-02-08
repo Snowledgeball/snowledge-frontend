@@ -90,9 +90,32 @@ export async function GET() {
             }
         });
 
-        return NextResponse.json(communities);
+        // Récupérer les informations des créateurs en parallèle
+        const communitiesWithCreators = await Promise.all(
+            communities.map(async (community) => {
+                const creator = await prisma.user.findUnique({
+                    where: {
+                        id: community.creator_id
+                    },
+                    select: {
+                        id: true,
+                        fullName: true,
+                        userName: true,
+                        profilePicture: true
+                    }
+                });
+                return {
+                    ...community,
+                    creator
+                };
+            })
+        );
+
+        return NextResponse.json(communitiesWithCreators);
     } catch (error) {
         console.error("Erreur lors de la récupération des communautés:", error);
         return new NextResponse(null, { status: 500 });
+    } finally {
+        await prisma.$disconnect();
     }
 } 

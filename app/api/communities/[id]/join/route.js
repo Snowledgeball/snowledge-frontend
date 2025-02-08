@@ -24,7 +24,7 @@ export async function POST(
         const membership = await prisma.community_learners.create({
             data: {
                 community_id: parseInt(id),
-                learner_id: session.user.id,
+                learner_id: parseInt(session.user.id),
             }
 
         });

@@ -79,7 +79,6 @@ const CommunityHub = () => {
 
                 // Récupérer les communautés de l'utilisateur
                 const userCommunitiesResponse = await fetch(`/api/users/${session?.user?.id}/joined-communities`);
-                console.log("userCommunitiesResponse", userCommunitiesResponse);
                 if (userCommunitiesResponse.ok) {
                     const userCommunitiesData = await userCommunitiesResponse.json();
                     setUserCommunities(userCommunitiesData.communities);
@@ -97,12 +96,6 @@ const CommunityHub = () => {
             checkMembershipAndFetchData();
         }
     }, [params.id, router, session]);
-
-
-    useEffect(() => {
-        console.log("userCommunities", userCommunities);
-    }, [userCommunities]);
-
 
     const handleJoinCommunity = async () => {
         try {
@@ -408,7 +401,7 @@ const CommunityHub = () => {
 
                                             {/* Lien pour découvrir plus de communautés */}
                                             <button
-                                                onClick={() => router.push('/communities')}
+                                                onClick={() => router.push('/')}
                                                 className="w-full flex items-center justify-between p-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                             >
                                                 <span className="text-sm font-medium">Découvrir plus de communautés</span>

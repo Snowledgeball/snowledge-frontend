@@ -81,10 +81,6 @@ export async function POST(req) {
       iv,
     }
 
-    console.log("dataToSend", dataToSend);
-
-
-
     // Créer le nouvel utilisateur
     const user = await prisma.user.create({
       data: {

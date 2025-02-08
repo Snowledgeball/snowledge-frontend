@@ -25,10 +25,11 @@ export async function GET(
             where: {
                 community_id_learner_id: {
                     community_id: parseInt(id),
-                    learner_id: session.user.id,
+                    learner_id: parseInt(session.user.id),
                 }
             }
         });
+
 
         return NextResponse.json({ isMember: !!membership });
     } catch (error) {
