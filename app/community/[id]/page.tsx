@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
+import { useSession } from "next-auth/react";
 import {
     Users,
     MessageCircle,
@@ -30,6 +31,7 @@ const POST_CATEGORIES = [
 ];
 
 const CommunityHub = () => {
+    const { data: session } = useSession();
     const params = useParams();
     const router = useRouter();
     const [communityData, setCommunityData] = useState<Community | null>(null);
@@ -42,10 +44,15 @@ const CommunityHub = () => {
     const [presentation, setPresentation] = useState<any>(null);
     const [hasJoined, setHasJoined] = useState(false);
     const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
+    const [userCommunities, setUserCommunities] = useState<Community[]>([]);
 
     useEffect(() => {
+        if (!session) {
+            return;
+        }
         const checkMembershipAndFetchData = async () => {
             try {
+
                 // Vérifier si l'utilisateur est membre
                 const membershipResponse = await fetch(`/api/communities/${params.id}/membership`);
                 const membershipData = await membershipResponse.json();
@@ -67,9 +74,19 @@ const CommunityHub = () => {
                     setPresentation(presentationData);
                     setShowJoinModal(true);
                 }
-            } catch (error) {
-                console.error("Erreur:", error);
-                router.push('/404');
+
+
+                // Récupérer les communautés de l'utilisateur
+                const userCommunitiesResponse = await fetch(`/api/users/${session?.user?.id}/joined-communities`);
+                console.log("userCommunitiesResponse", userCommunitiesResponse);
+                if (userCommunitiesResponse.ok) {
+                    const userCommunitiesData = await userCommunitiesResponse.json();
+                    setUserCommunities(userCommunitiesData.communities);
+                }
+
+            } catch (error: any) {
+                console.log("Erreur:", error.stack);
+                setUserCommunities([]);
             } finally {
                 setIsLoading(false);
             }
@@ -78,7 +95,13 @@ const CommunityHub = () => {
         if (params.id) {
             checkMembershipAndFetchData();
         }
-    }, [params.id, router]);
+    }, [params.id, router, session]);
+
+
+    useEffect(() => {
+        console.log("userCommunities", userCommunities);
+    }, [userCommunities]);
+
 
     const handleJoinCommunity = async () => {
         try {
@@ -252,14 +275,6 @@ const CommunityHub = () => {
             tags: ["Rapport", "Bitcoin", "Macro"]
         }
     ];
-
-    console.log("communityData", communityData);
-
-    const getVideoId = (url: string) => {
-        const videoId = url.split('v=')[1];
-        return videoId;
-    }
-
     const getYoutubeVideoId = (url: string) => {
         const videoId = url.split('v=')[1];
         return videoId;
@@ -370,16 +385,19 @@ const CommunityHub = () => {
                                     {/* Liste déroulante des communautés */}
                                     <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                                         <div className="p-2">
-                                            {communityData.relatedCommunities?.map((community: Community) => (
+                                            {userCommunities && userCommunities.map((community) => (
                                                 <button
                                                     key={community.id}
                                                     onClick={() => router.push(`/community/${community.id}`)}
+
                                                     className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left hover:bg-gray-50 transition-colors
                                                     ${String(community.id) === params.id ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}`}
                                                 >
                                                     <div>
                                                         <div className="font-medium">{community.name}</div>
-                                                        <div className="text-xs text-gray-500">{community.category}</div>
+                                                        <div className="text-xs text-gray-500">
+                                                            {community.role === 'LEARNER' ? 'Apprenant' : 'Contributeur'}
+                                                        </div>
                                                     </div>
                                                 </button>
                                             ))}

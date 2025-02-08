@@ -7,7 +7,6 @@ export async function GET(request, { params }) {
     try {
         const { id } = await params;
         const userId = parseInt(id);
-
         // Récupérer les communautés où l'utilisateur est contributeur
         const contributorCommunities = await prisma.community_contributors.findMany({
             where: {
@@ -67,7 +66,7 @@ export async function GET(request, { params }) {
         return NextResponse.json({ communities: formattedCommunities });
 
     } catch (error) {
-        console.error('Erreur serveur:', error);
+        console.log('Erreur serveur:', error.stack);
         return NextResponse.json(
             { error: 'Erreur serveur interne' },
             { status: 500 }
