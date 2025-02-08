@@ -44,19 +44,23 @@ interface JoinedCommunity {
 const ProfilePage = () => {
     const { data: session } = useSession();
     const params = useParams();
-    const userId = params.id;
     const router = useRouter();
+
     const { isLoading: isLoadingAuth, isAuthenticated: isAuthenticatedAuth, LoadingComponent } = useAuthGuard();
 
-    if (isLoadingAuth) {
-        return <LoadingComponent />;
-    }
+    const [userOwnedCommunities, setUserOwnedCommunities] = useState<UserCommunity[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [selectedCommunity, setSelectedCommunity] = useState(userOwnedCommunities[0]?.name);
+    const selectedCommunityData = userOwnedCommunities.find(c => c.name === selectedCommunity) as unknown as CommunityData;
+    // Modifier l'état des onglets pour inclure les nouvelles options
+    const [activeTab, setActiveTab] = useState('communities'); // 'communities', 'settings', 'support', 'my-community', 'contributor'
 
-    if (!isAuthenticatedAuth) {
-        return null;
-    }
-
-
+    // Ajoutez l'état pour gérer le modal
+    const [isContributorModalOpen, setIsContributorModalOpen] = useState(false);
+    const [selectedCommunityForContribution, setSelectedCommunityForContribution] = useState<string | null>(null);
+    const [joinedCommunities, setJoinedCommunities] = useState<JoinedCommunity[]>([]);
+    const [isLoadingJoined, setIsLoadingJoined] = useState(true);
+    const [userId, setUserId] = useState<string | null>(null);
     const [userData, setUserData] = useState({
         username: '',
         level: 0,
@@ -69,6 +73,14 @@ const ProfilePage = () => {
             totalEarnings: 0
         }
     });
+
+    useEffect(() => {
+        const userId = session?.user?.id;
+        if (userId) {
+            setUserId(userId);
+        }
+    }, [session]);
+
 
     // Fonction pour récupérer les données de l'utilisateur
     const fetchUserData = async () => {
@@ -88,28 +100,6 @@ const ProfilePage = () => {
         }
     }, [userId]);
 
-    const userContributions = [
-        {
-            type: "post",
-            title: "L'avenir du Bitcoin en 2024",
-            community: "CryptoMasters France",
-            date: "Il y a 2 jours",
-            engagement: 156,
-            reward: "25.5€"
-        },
-        {
-            type: "analysis",
-            title: "Analyse technique : ETH/USD",
-            community: "Traders Elite",
-            date: "Il y a 5 jours",
-            engagement: 89,
-            reward: "15.2€"
-        },
-        // ... autres contributions
-    ];
-
-    const [userOwnedCommunities, setUserOwnedCommunities] = useState<UserCommunity[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
 
     // Nouvelle fonction pour récupérer les communautés rejointes
     const fetchJoinedCommunities = async () => {
@@ -132,34 +122,6 @@ const ProfilePage = () => {
         }
     }, [userId]);
 
-    const [selectedCommunity, setSelectedCommunity] = useState(userOwnedCommunities[0]?.name);
-    const selectedCommunityData = userOwnedCommunities.find(c => c.name === selectedCommunity) as unknown as CommunityData;
-
-    const recommendedCommunities = [
-        {
-            name: "DeFi Masters",
-            description: "Communauté dédiée à la finance décentralisée"
-        },
-        {
-            name: "Trading View FR",
-            description: "Analyses techniques et signaux de trading"
-        },
-        {
-            name: "Crypto Analytics",
-            description: "Analyses on-chain et fondamentales"
-        }
-    ];
-
-    // Modifier l'état des onglets pour inclure les nouvelles options
-    const [activeTab, setActiveTab] = useState('communities'); // 'communities', 'settings', 'support', 'my-community', 'contributor'
-
-    // Ajoutez l'état pour gérer le modal
-    const [isContributorModalOpen, setIsContributorModalOpen] = useState(false);
-    const [selectedCommunityForContribution, setSelectedCommunityForContribution] = useState<string | null>(null);
-
-    const [joinedCommunities, setJoinedCommunities] = useState<JoinedCommunity[]>([]);
-    const [isLoadingJoined, setIsLoadingJoined] = useState(true);
-
     // Fonction pour récupérer les communautés de l'utilisateur
     const fetchUserCommunities = async () => {
         try {
@@ -181,6 +143,13 @@ const ProfilePage = () => {
         }
     }, [userId]);
 
+    if (isLoadingAuth) {
+        return <LoadingComponent />;
+    }
+
+    if (!isAuthenticatedAuth) {
+        return null;
+    }
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -50,7 +50,7 @@ const Header = () => {
                     {session ? (
                         <div className="flex items-center space-x-4">
                             <Link
-                                href={`/profile/${session.user.id}`}
+                                href={`/profile`}
                                 className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 hover:bg-blue-50 flex items-center gap-2"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

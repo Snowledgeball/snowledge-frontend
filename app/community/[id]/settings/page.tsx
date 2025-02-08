@@ -36,14 +36,35 @@ export default function CommunitySettings() {
     const router = useRouter();
     const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
 
-    if (isLoading) {
-        return <LoadingComponent />;
-    }
+    const [userId, setUserId] = useState<string | null>(null);
 
-    if (!isAuthenticated) {
-        return null;
-    }
+    useEffect(() => {
+        const userId = session?.user?.id;
+        if (userId) {
+            setUserId(userId);
+        }
+    }, [session]);
 
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                const response = await fetch(`/api/communities/${communityId}`);
+                if (response.ok && userId) {
+                    const data = await response.json();
+                    if (data.creator_id !== parseInt(userId)) {
+                        toast.error("Vous n'avez pas les permissions pour accéder à cette page");
+                        console.log(data.creator_id, userId);
+                        router.push(`/`);
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur lors de la récupération des données:', error);
+            }
+        };
+
+        fetchDashboardData();
+    }, [userId, communityId]);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -171,6 +192,15 @@ export default function CommunitySettings() {
 
     if (loading) return <div>Chargement...</div>;
     if (!settings) return <div>Erreur lors du chargement des paramètres</div>;
+
+    if (isLoading) {
+        return <LoadingComponent />;
+    }
+
+    if (!isAuthenticated) {
+        return null;
+    }
+
 
     return (
         <div className="min-h-screen bg-gray-50">

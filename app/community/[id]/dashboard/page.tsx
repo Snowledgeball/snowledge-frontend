@@ -9,6 +9,7 @@ import {
     BarChart2, FileText, ChevronRight
 } from "lucide-react";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { toast } from "sonner";
 
 interface DashboardData {
     stats: {
@@ -61,13 +62,36 @@ export default function CommunityDashboard() {
     const [members, setMembers] = useState<Member[]>([]);
     const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
 
-    if (isLoading) {
-        return <LoadingComponent />;
-    }
+    const [userId, setUserId] = useState<string | null>(null);
 
-    if (!isAuthenticated) {
-        return null;
-    }
+    useEffect(() => {
+        const userId = session?.user?.id;
+        if (userId) {
+            setUserId(userId);
+        }
+    }, [session]);
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                const response = await fetch(`/api/communities/${communityId}`);
+                if (response.ok && userId) {
+                    const data = await response.json();
+                    if (data.creator_id !== parseInt(userId)) {
+                        toast.error("Vous n'avez pas les permissions pour accéder à cette page");
+                        console.log(data.creator_id, userId);
+                        router.push(`/`);
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur lors de la récupération des données:', error);
+            }
+        };
+
+        fetchDashboardData();
+    }, [userId, communityId]);
+
 
     useEffect(() => {
         const fetchMembers = async () => {
@@ -118,6 +142,13 @@ export default function CommunityDashboard() {
         return <div>Erreur lors du chargement des données</div>;
     }
 
+    if (isLoading) {
+        return <LoadingComponent />;
+    }
+
+    if (!isAuthenticated) {
+        return null;
+    }
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
