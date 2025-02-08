@@ -20,6 +20,7 @@ import {
     Volume2,
 } from "lucide-react";
 import { Community } from "@/types/community";
+import Image from 'next/image';
 
 
 // Ajouter ces catégories de posts
@@ -446,10 +447,12 @@ const CommunityHub = () => {
                                         className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-all cursor-pointer"
                                     >
                                         <div className="relative">
-                                            <img
+                                            <Image
                                                 src={user.avatar}
                                                 alt={user.name}
-                                                className="w-10 h-10 rounded-full"
+                                                width={40}
+                                                height={40}
+                                                className="rounded-full"
                                             />
                                             <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full ring-2 ring-white" />
                                         </div>
@@ -498,10 +501,12 @@ const CommunityHub = () => {
                                     <div className="flex-1 overflow-y-auto space-y-4 p-4">
                                         {messages.map((msg) => (
                                             <div key={msg.id} className="flex items-start space-x-3 group">
-                                                <img
+                                                <Image
                                                     src={msg.avatar}
                                                     alt={msg.user}
-                                                    className="w-10 h-10 rounded-full"
+                                                    width={40}
+                                                    height={40}
+                                                    className="rounded-full"
                                                 />
                                                 <div className="flex-1">
                                                     <div className="flex items-center space-x-2">
@@ -592,10 +597,12 @@ const CommunityHub = () => {
                                                 {/* En-tête du post */}
                                                 <div className="flex items-start justify-between mb-4">
                                                     <div className="flex items-center space-x-3">
-                                                        <img
+                                                        <Image
                                                             src={post.author.avatar}
                                                             alt={post.author.name}
-                                                            className="w-10 h-10 rounded-full"
+                                                            width={40}
+                                                            height={40}
+                                                            className="rounded-full"
                                                         />
                                                         <div>
                                                             <div className="flex items-center space-x-2">
@@ -614,9 +621,11 @@ const CommunityHub = () => {
                                                 <p className="text-gray-800 mb-4">{post.content}</p>
                                                 {post.image && (
                                                     <div className="mb-4 rounded-lg overflow-hidden">
-                                                        <img
+                                                        <Image
                                                             src={post.image}
                                                             alt="Post illustration"
+                                                            width={500}
+                                                            height={300}
                                                             className="w-full h-auto"
                                                         />
                                                     </div>

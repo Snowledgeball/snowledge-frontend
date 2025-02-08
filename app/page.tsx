@@ -65,6 +65,10 @@ export default function Home() {
           <Image
             src={'https://' + imageUrl}
             alt={name}
+            quality={75}
+            loading="eager"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={true}
             fill
             className="object-cover rounded-t-2xl"
           />
@@ -95,9 +99,14 @@ export default function Home() {
               width={32}
               height={32}
               className="rounded-full"
+              quality={75}
+              loading="eager"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority={true}
             />
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-900">{creator.name}</p>
+
               <p className="text-xs text-gray-500">{creator.role}</p>
             </div>
           </div>

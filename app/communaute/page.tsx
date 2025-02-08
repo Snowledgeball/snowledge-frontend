@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Users, MessageCircle, Activity, Wallet, TrendingUp } from "lucide-react";
+import Image from 'next/image';
 
 interface Community {
     id: string;
@@ -17,32 +18,6 @@ export default function CommunautePage() {
     const { data: session } = useSession();
     const [communities, setCommunities] = useState<Community[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-
-    const EXAMPLE_COMMUNITIES: Community[] = [
-        {
-            id: "CryptoMasters France",
-            name: "CryptoMasters France",
-            description: "Communauté dédiée au trading de Bitcoin et des cryptomonnaies",
-            memberCount: 15420,
-            imageUrl: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?ixlib=rb-4.0.1"
-        },
-        {
-            id: "traders-elite",
-            name: "Traders Elite",
-            description: "Apprenez et partagez vos analyses techniques des marchés",
-            memberCount: 8750,
-            imageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.1"
-        },
-    ];
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setCommunities(EXAMPLE_COMMUNITIES);
-            setIsLoading(false);
-        }, 1000);
-
-        return () => clearTimeout(timer);
-    }, []);
 
     if (!session) {
         return (
@@ -104,10 +79,15 @@ export default function CommunautePage() {
                                         <div className="absolute inset-0 [backface-visibility:hidden] group-hover:animate-card-rotate-out">
                                             <div className="h-full w-full rounded-xl bg-white shadow-sm">
                                                 <div className="relative h-2/3">
-                                                    <img
+                                                    <Image
                                                         src={community.imageUrl}
                                                         alt={community.name}
-                                                        className="h-full w-full rounded-t-xl object-cover group-hover:scale-105 transition-transform duration-700"
+                                                        fill
+                                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                        priority={true}
+                                                        className="object-cover rounded-t-xl group-hover:scale-105 transition-transform duration-700"
+                                                        quality={75}
+                                                        loading="eager"
                                                     />
                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent rounded-t-xl" />
                                                     <div className="absolute bottom-0 left-0 right-0 p-6">
@@ -168,7 +148,7 @@ export default function CommunautePage() {
                                                                 iconColor: "text-blue-500",
                                                                 label: "Membres",
                                                                 value: community.memberCount,
-                                                                delay: "delay-[400ms]"
+                                                                delay: "delay-300"
                                                             },
                                                             {
                                                                 icon: MessageCircle,
@@ -176,7 +156,7 @@ export default function CommunautePage() {
                                                                 iconColor: "text-green-500",
                                                                 label: "Messages / jour",
                                                                 value: Math.floor(community.memberCount * 0.1),
-                                                                delay: "delay-[500ms]"
+                                                                delay: "delay-400"
                                                             },
                                                             {
                                                                 icon: Activity,
@@ -184,7 +164,7 @@ export default function CommunautePage() {
                                                                 iconColor: "text-purple-500",
                                                                 label: "Membres actifs",
                                                                 value: Math.floor(community.memberCount * 0.7),
-                                                                delay: "delay-[600ms]"
+                                                                delay: "delay-500"
                                                             }
                                                         ].map((stat, index) => (
                                                             <div
