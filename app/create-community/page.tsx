@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 export default function CreateCommunityPage() {
     const router = useRouter();
@@ -21,6 +22,15 @@ export default function CreateCommunityPage() {
     });
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
+    const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
+
+    if (isLoading) {
+        return <LoadingComponent />;
+    }
+
+    if (!isAuthenticated) {
+        return null;
+    }
 
     const categories = [
         { id: "crypto", label: "Crypto & Web3" },

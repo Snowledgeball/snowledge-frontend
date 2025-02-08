@@ -6,6 +6,7 @@ import { Users, MessageCircle, TrendingUp, Shield, Bitcoin, Activity, Award, Wal
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { Dialog } from '@headlessui/react';
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 interface CommunityData {
     name: string;
@@ -45,6 +46,16 @@ const ProfilePage = () => {
     const params = useParams();
     const userId = params.id;
     const router = useRouter();
+    const { isLoading: isLoadingAuth, isAuthenticated: isAuthenticatedAuth, LoadingComponent } = useAuthGuard();
+
+    if (isLoadingAuth) {
+        return <LoadingComponent />;
+    }
+
+    if (!isAuthenticatedAuth) {
+        return null;
+    }
+
 
     const [userData, setUserData] = useState({
         username: '',

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Users, MessageCircle, Activity, Wallet, TrendingUp } from "lucide-react";
 import Image from 'next/image';
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 interface Community {
     id: string;
@@ -18,10 +19,20 @@ export default function CommunautePage() {
     const { data: session } = useSession();
     const [communities, setCommunities] = useState<Community[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { isLoading: isLoadingAuth, isAuthenticated: isAuthenticatedAuth, LoadingComponent } = useAuthGuard();
+
+    if (isLoadingAuth) {
+        return <LoadingComponent />;
+    }
+
+    if (!isAuthenticatedAuth) {
+        return null;
+    }
 
     if (!session) {
         return (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
                 <div className="text-center">
                     <h1 className="text-3xl font-bold text-gray-900 mb-4">
                         Connectez-vous pour voir vos communautés

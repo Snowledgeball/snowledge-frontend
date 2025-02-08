@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { Community } from "@/types/community";
 import Image from 'next/image';
+import { toast } from "sonner";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 
 // Ajouter ces catégories de posts
@@ -32,16 +34,15 @@ const POST_CATEGORIES = [
 ];
 
 const CommunityHub = () => {
-    const { data: session } = useSession();
+    const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
+    const { data: session, status } = useSession();
     const params = useParams();
     const router = useRouter();
     const [communityData, setCommunityData] = useState<Community | null>(null);
     const [activeTab, setActiveTab] = useState("general");
     const [selectedPostCategory, setSelectedPostCategory] = useState("general");
     const [message, setMessage] = useState("");
-    // Nouveaux états
     const [showJoinModal, setShowJoinModal] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
     const [presentation, setPresentation] = useState<any>(null);
     const [hasJoined, setHasJoined] = useState(false);
     const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
@@ -51,9 +52,9 @@ const CommunityHub = () => {
         if (!session) {
             return;
         }
+
         const checkMembershipAndFetchData = async () => {
             try {
-
                 // Vérifier si l'utilisateur est membre
                 const membershipResponse = await fetch(`/api/communities/${params.id}/membership`);
                 const membershipData = await membershipResponse.json();
@@ -87,8 +88,6 @@ const CommunityHub = () => {
             } catch (error: any) {
                 console.log("Erreur:", error.stack);
                 setUserCommunities([]);
-            } finally {
-                setIsLoading(false);
             }
         };
 
@@ -118,16 +117,14 @@ const CommunityHub = () => {
         }
     };
 
-    // Afficher le loader pendant le chargement
+    // Si en cours de chargement, afficher le loader
     if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Chargement de la communauté...</p>
-                </div>
-            </div>
-        );
+        return <LoadingComponent />;
+    }
+
+    // Si non authentifié, ne rien afficher (la redirection est gérée par le hook)
+    if (!isAuthenticated) {
+        return null;
     }
 
     // Données mockées plus réalistes

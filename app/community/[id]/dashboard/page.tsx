@@ -8,6 +8,7 @@ import {
     Users, MessageCircle, TrendingUp, Wallet, Settings,
     BarChart2, FileText, ChevronRight
 } from "lucide-react";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 interface DashboardData {
     stats: {
@@ -58,10 +59,20 @@ export default function CommunityDashboard() {
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [members, setMembers] = useState<Member[]>([]);
+    const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
+
+    if (isLoading) {
+        return <LoadingComponent />;
+    }
+
+    if (!isAuthenticated) {
+        return null;
+    }
 
     useEffect(() => {
         const fetchMembers = async () => {
             if (activeTab === 'members') {
+
                 try {
                     const response = await fetch(`/api/communities/${communityId}/members`);
                     if (response.ok) {

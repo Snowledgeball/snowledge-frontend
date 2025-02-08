@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Upload, ArrowLeft, Youtube, Globe, Shield } from "lucide-react";
 import { defaultCode, defaultDisclaimers } from "@/utils/defaultPres";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 interface CommunitySettings {
     id: number;
@@ -33,6 +34,16 @@ export default function CommunitySettings() {
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const router = useRouter();
+    const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
+
+    if (isLoading) {
+        return <LoadingComponent />;
+    }
+
+    if (!isAuthenticated) {
+        return null;
+    }
+
 
     useEffect(() => {
         const fetchSettings = async () => {
