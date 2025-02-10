@@ -47,12 +47,14 @@ export async function POST(
         // Vérifier si une demande existe déjà
         const existingRequest = await prisma.community_contributors_requests.findUnique({
             where: {
-                community_id_contributor_id: {
+                community_id_requester_id: {
                     community_id: communityId,
-                    contributor_id: parseInt(session.user.id),
+                    requester_id: parseInt(session.user.id),
                 },
             },
+
         });
+
 
         if (existingRequest) {
             return NextResponse.json(
@@ -65,10 +67,11 @@ export async function POST(
         await prisma.community_contributors_requests.create({
             data: {
                 community_id: communityId,
-                contributor_id: parseInt(session.user.id),
+                requester_id: parseInt(session.user.id),
                 justification,
                 expertise_domain: expertiseDomain,
                 status: 'PENDING',
+
             },
         });
 
@@ -78,12 +81,13 @@ export async function POST(
         );
 
     } catch (error) {
-        console.error('Erreur lors de la création de la demande:', error);
+        console.log('Erreur lors de la création de la demande:', error.stack);
         return NextResponse.json(
             { message: 'Une erreur est survenue lors du traitement de votre demande' },
             { status: 500 }
         );
     }
+
 }
 
 export async function GET(

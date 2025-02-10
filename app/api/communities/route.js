@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import MetadataSBTModifier from "@/utils/MetadataSBTModifier";
 
 const prisma = new PrismaClient();
 
@@ -60,17 +61,37 @@ export async function POST(request) {
             }
         });
 
+        const newData = {
+            community: {
+                name: newCommunity.name,
+                role: "Owner"
+            }
+        }
+
+        const formData = new FormData();
+        formData.append("userAddress", session.user.address);
+        formData.append("newValue", JSON.stringify(newData));
+
+        await fetch(`${process.env.API_URL}/api/auth/upload`, {
+            method: "PUT",
+            body: formData,
+        });
+
+
         return NextResponse.json({
             message: "Communauté créée avec succès",
             id: newCommunity.id,
             community: newCommunity
         });
 
+
     } catch (error) {
-        console.error("Erreur lors de la création de la communauté:", error);
+        console.log("Erreur lors de la création de la communauté:", error.stack);
         return NextResponse.json(
             { error: "Erreur lors de la création de la communauté" },
             { status: 500 }
+
+
         );
     } finally {
         await prisma.$disconnect();

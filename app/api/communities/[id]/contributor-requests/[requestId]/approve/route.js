@@ -25,7 +25,7 @@ export async function POST(
         // Vérifier si l'utilisateur est le créateur de la communauté
         const community = await prisma.community.findUnique({
             where: { id: communityId },
-            select: { creator_id: true }
+            select: { creator_id: true, name: true }
         });
 
         if (!community || community.creator_id !== parseInt(session.user.id)) {
@@ -72,6 +72,29 @@ export async function POST(
                 }
             })
         ]);
+
+        const userRequesting = await prisma.user.findUnique({
+            where: {
+                id: contributorRequest.requester_id
+            }
+        });
+
+
+        const newData = {
+            community: {
+                name: community.name,
+                role: "Contributor"
+            }
+        }
+
+        const formData = new FormData();
+        formData.append("userAddress", userRequesting.accountAddress);
+        formData.append("newValue", JSON.stringify(newData));
+
+        await fetch(`${process.env.API_URL}/api/auth/upload`, {
+            method: "PUT",
+            body: formData,
+        });
 
         return NextResponse.json(
             { message: 'Demande approuvée avec succès' },
