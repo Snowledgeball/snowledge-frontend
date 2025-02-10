@@ -43,7 +43,9 @@
     "app/api/communities/[id]/members/route.js",
     "app/api/communities/[id]/membership/route.js",
     "app/api/communities/[id]/join/route.js",
-    "app/api/communities/[id]/presentation/route.js"
+    "app/api/communities/[id]/presentation/route.js",
+    "app/api/communities/[id]/contributor-request/route.js",
+    "app/api/users/[id]/joined-communities/route.js"
   ],
   "exclude": [
     "node_modules"

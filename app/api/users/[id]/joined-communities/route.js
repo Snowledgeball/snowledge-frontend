@@ -10,8 +10,9 @@ export async function GET(request, { params }) {
         // Récupérer les communautés où l'utilisateur est contributeur
         const contributorCommunities = await prisma.community_contributors.findMany({
             where: {
-                contributor_id: userId
+                contributor_id: userId,
             },
+
             select: {
                 added_at: true,
                 community: {

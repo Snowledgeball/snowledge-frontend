@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { Dialog } from '@headlessui/react';
 import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { toast } from "sonner";
 
 interface CommunityData {
     name: string;
@@ -73,6 +74,10 @@ const ProfilePage = () => {
             totalEarnings: 0
         }
     });
+    const [justification, setJustification] = useState('');
+    const [expertiseDomain, setExpertiseDomain] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     useEffect(() => {
         const userId = session?.user?.id;
@@ -142,6 +147,54 @@ const ProfilePage = () => {
             fetchUserCommunities();
         }
     }, [userId]);
+
+    // Fonction pour soumettre la candidature
+    const handleContributorRequest = async () => {
+        if (!selectedCommunityForContribution || !justification || !expertiseDomain) {
+            setSubmitError('Veuillez remplir tous les champs');
+            return;
+        }
+
+        setIsSubmitting(true);
+        setSubmitError(null);
+
+        try {
+            // Trouver l'ID de la communauté sélectionnée
+            const community = joinedCommunities.find(c => c.name === selectedCommunityForContribution);
+
+            if (!community) {
+                throw new Error('Communauté non trouvée');
+            }
+
+            const response = await fetch(`/api/communities/${community.id}/contributor-requests`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    justification,
+                    expertiseDomain,
+                }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Une erreur est survenue');
+            }
+
+            // Réinitialiser les champs et fermer le modal
+            setJustification('');
+            setExpertiseDomain('');
+            setIsContributorModalOpen(false);
+
+            toast.success('Votre candidature a été envoyée avec succès');
+
+        } catch (error) {
+            setSubmitError(error instanceof Error ? error.message : 'Une erreur est survenue');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     if (isLoadingAuth) {
         return <LoadingComponent />;
@@ -706,6 +759,8 @@ const ProfilePage = () => {
                                             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
                                             rows={4}
                                             placeholder="Partagez votre motivation et votre expertise..."
+                                            value={justification}
+                                            onChange={(e) => setJustification(e.target.value)}
                                         />
                                     </div>
                                     <div>
@@ -716,8 +771,15 @@ const ProfilePage = () => {
                                             type="text"
                                             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                                             placeholder="Ex: Trading, Analyse technique, DeFi..."
+                                            value={expertiseDomain}
+                                            onChange={(e) => setExpertiseDomain(e.target.value)}
                                         />
                                     </div>
+                                    {submitError && (
+                                        <div className="text-red-600 text-sm">
+                                            {submitError}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -726,17 +788,16 @@ const ProfilePage = () => {
                                 <button
                                     onClick={() => setIsContributorModalOpen(false)}
                                     className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-800 transition-colors"
+                                    disabled={isSubmitting}
                                 >
                                     Annuler
                                 </button>
                                 <button
-                                    onClick={() => {
-                                        // Logique pour soumettre la candidature
-                                        setIsContributorModalOpen(false);
-                                    }}
-                                    className="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all"
+                                    onClick={handleContributorRequest}
+                                    disabled={isSubmitting}
+                                    className="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Envoyer ma candidature
+                                    {isSubmitting ? 'Envoi en cours...' : 'Envoyer ma candidature'}
                                 </button>
                             </div>
                         </Dialog.Panel>

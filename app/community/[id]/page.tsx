@@ -387,7 +387,7 @@ const CommunityHub = () => {
                                                     <div>
                                                         <div className="font-medium">{community.name}</div>
                                                         <div className="text-xs text-gray-500">
-                                                            {community.role === 'LEARNER' ? 'Apprenant' : 'Contributeur'}
+                                                            {community.role === 'learner' ? 'Apprenant' : 'Contributeur'}
                                                         </div>
                                                     </div>
                                                 </button>

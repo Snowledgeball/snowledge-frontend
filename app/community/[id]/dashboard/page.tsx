@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 interface DashboardData {
     stats: {
@@ -27,6 +29,7 @@ interface DashboardData {
         type: string;
         text: string;
         author: string;
+        authorAvatar?: string;
         engagement: number;
         time: string;
     }[];
@@ -50,6 +53,17 @@ interface Member {
     gains: number;
 }
 
+interface ContributorRequest {
+    id: number;
+    userId: number;
+    userName: string;
+    userAvatar: string;
+    justification: string;
+    expertiseDomain: string;
+    status: 'pending' | 'approved' | 'rejected';
+    createdAt: string;
+}
+
 export default function CommunityDashboard() {
     const router = useRouter();
     const params = useParams();
@@ -63,6 +77,10 @@ export default function CommunityDashboard() {
     const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
 
     const [userId, setUserId] = useState<string | null>(null);
+    const [contributorRequests, setContributorRequests] = useState<ContributorRequest[]>([]);
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [rejectionReason, setRejectionReason] = useState('');
+    const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
 
     useEffect(() => {
         const userId = session?.user?.id;
@@ -133,6 +151,83 @@ export default function CommunityDashboard() {
             fetchDashboardData();
         }
     }, [session, communityId]);
+
+    useEffect(() => {
+        const fetchContributorRequests = async () => {
+            try {
+                const response = await fetch(`/api/communities/${communityId}/contributor-requests`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setContributorRequests(data.requests);
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        };
+
+        if (session?.user && communityId) {
+            fetchContributorRequests();
+        }
+    }, [session, communityId]);
+
+    const handleApproveRequest = async (requestId: number) => {
+        try {
+            const response = await fetch(`/api/communities/${communityId}/contributor-requests/${requestId}/approve`, {
+                method: 'POST',
+            });
+
+            if (response.ok) {
+                toast.success('Demande approuvée avec succès');
+                // Mettre à jour la liste des demandes
+                setContributorRequests(prev =>
+                    prev.map(req =>
+                        req.id === requestId ? { ...req, status: 'approved' } : req
+                    )
+                );
+            } else {
+                toast.error('Erreur lors de l\'approbation de la demande');
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            toast.error('Une erreur est survenue');
+        }
+    };
+
+    const handleRejectClick = (requestId: number) => {
+        setSelectedRequestId(requestId);
+        setIsRejectModalOpen(true);
+    };
+
+    const handleRejectRequest = async () => {
+        if (!selectedRequestId || !rejectionReason.trim()) return;
+
+        try {
+            const response = await fetch(`/api/communities/${communityId}/contributor-requests/${selectedRequestId}/reject`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ rejection_reason: rejectionReason }),
+            });
+
+            if (response.ok) {
+                toast.success('Demande refusée');
+                setContributorRequests(prev =>
+                    prev.map(req =>
+                        req.id === selectedRequestId ? { ...req, status: 'rejected' } : req
+                    )
+                );
+                setIsRejectModalOpen(false);
+                setRejectionReason('');
+                setSelectedRequestId(null);
+            } else {
+                toast.error('Erreur lors du refus de la demande');
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            toast.error('Une erreur est survenue');
+        }
+    };
 
     if (loading) {
         return <div>Chargement...</div>;
@@ -241,7 +336,49 @@ export default function CommunityDashboard() {
                             ))}
                         </div>
 
-                        {/* Activité récente */}
+                        {/* Demandes de contributeurs en attente */}
+                        {contributorRequests.length > 0 && (
+                            <Card className="p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                                    Demandes de contributeurs en attente
+                                </h3>
+                                <div className="space-y-4">
+                                    {contributorRequests
+                                        .map((request) => (
+                                            <div key={request.id} className="flex items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                                                <div className="flex items-center space-x-4">
+                                                    <img
+                                                        src={request.userAvatar}
+                                                        alt={request.userName}
+                                                        className="w-10 h-10 rounded-full"
+                                                    />
+                                                    <div>
+                                                        <p className="font-medium text-gray-900">{request.userName}</p>
+                                                        <p className="text-sm text-gray-600">{request.expertiseDomain}</p>
+                                                        <p className="text-sm text-gray-500 mt-1 max-w-xl">{request.justification}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <button
+                                                        onClick={() => handleApproveRequest(request.id)}
+                                                        className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                                    >
+                                                        Approuver
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRejectClick(request.id)}
+                                                        className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                                                    >
+                                                        Refuser
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            </Card>
+                        )}
+
+                        {/* Activité récente modifiée */}
                         <Card className="p-6">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Activité récente</h3>
                             <div className="space-y-4">
@@ -250,9 +387,16 @@ export default function CommunityDashboard() {
                                         <div className="flex items-center">
                                             <FileText className="w-4 h-4 text-green-500 mr-3" />
                                             <div>
-                                                <span className="text-gray-700">{activity.text}</span>
+                                                <div className="flex items-center space-x-2">
+                                                    <img
+                                                        src={activity.authorAvatar || '/images/default-avatar.png'}
+                                                        alt={activity.author}
+                                                        className="w-6 h-6 rounded-full"
+                                                    />
+                                                    <span className="text-gray-700">{activity.text}</span>
+                                                </div>
                                                 <p className="text-sm text-gray-500">
-                                                    par {activity.author} • {activity.engagement} interactions
+                                                    par <span className="font-medium">{activity.author}</span> • {activity.engagement} interactions
                                                 </p>
                                             </div>
                                         </div>
@@ -326,6 +470,37 @@ export default function CommunityDashboard() {
                     </div>
                 )}
             </div>
+
+            <Dialog open={isRejectModalOpen} onOpenChange={setIsRejectModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Justification du refus</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <Textarea
+                            placeholder="Veuillez expliquer la raison du refus..."
+                            value={rejectionReason}
+                            onChange={(e) => setRejectionReason(e.target.value)}
+                            className="min-h-[100px]"
+                        />
+                    </div>
+                    <DialogFooter className="flex space-x-2">
+                        <button
+                            onClick={() => setIsRejectModalOpen(false)}
+                            className="px-4 py-2 text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                            Annuler
+                        </button>
+                        <button
+                            onClick={handleRejectRequest}
+                            disabled={!rejectionReason.trim()}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Confirmer le refus
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 } 
