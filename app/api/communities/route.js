@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import MetadataSBTModifier from "@/utils/MetadataSBTModifier";
 
 const prisma = new PrismaClient();
 
@@ -77,21 +76,17 @@ export async function POST(request) {
             body: formData,
         });
 
-
         return NextResponse.json({
             message: "Communauté créée avec succès",
             id: newCommunity.id,
             community: newCommunity
         });
 
-
     } catch (error) {
         console.log("Erreur lors de la création de la communauté:", error.stack);
         return NextResponse.json(
             { error: "Erreur lors de la création de la communauté" },
             { status: 500 }
-
-
         );
     } finally {
         await prisma.$disconnect();

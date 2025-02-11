@@ -3,32 +3,31 @@ import { NextResponse } from "next/server"
 import { Provider, Account, Contract } from "starknet";
 import { abiSBT, addressSBT } from "../../../../utils/abi";
 
-
-
-
 export async function POST(request) {
     try {
         const data = await request.formData();
 
         const fullName = data.get("fullName");
+        const name = (fullName + "'s" + " DID").trim();
+        const description = "Decentralized Identity of " + fullName;
+        const image = data.get("image");
         const userName = data.get("userName");
         const email = data.get("email");
         const accountAddress = data.get("accountAddress");
 
         // Create metadata
         const metadata = {
+            name,
+            description,
+            image,
             fullName,
             userName,
             email,
             accountAddress,
-            // image: imageUrl,
-            // role
-            // community
         };
 
         const metadataUploadData = await pinata.upload.json(metadata);
-        const metadataUrl = `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${metadataUploadData.IpfsHash}`;
-
+        const metadataUrl = `https://${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${metadataUploadData.IpfsHash}`;
 
         return NextResponse.json(
             { metadataUrl },

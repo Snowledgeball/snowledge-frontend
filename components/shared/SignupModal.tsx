@@ -18,6 +18,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
     const [userName, setUserName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [profilePicture, setProfilePicture] = useState<File | null>(null);
     const [error, setError] = useState("");
     const router = useRouter();
 
@@ -25,27 +26,35 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
         e.preventDefault();
         setError("");
 
+        if (!profilePicture) {
+            setError("Veuillez sélectionner une photo de profil");
+            return;
+        }
+
         const addressDetails = generateStarkNetAddress();
         await deployAccountContract(addressDetails.privateKey, addressDetails.publicKey);
 
+        const formData = new FormData();
+        formData.append("fullName", fullName);
+        formData.append("userName", userName);
+        formData.append("email", email);
+        formData.append("password", password);
+        formData.append("profilePicture", profilePicture);
+        formData.append("accountAddress", addressDetails.accountAddress);
+        formData.append("publicKey", addressDetails.publicKey);
+        formData.append("privateKey", addressDetails.privateKey);
+
         const response = await fetch("/api/auth/register", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                fullName,
-                userName,
-                email,
-                password,
-                profilePicture: "temp",
-                accountAddress: addressDetails.accountAddress,
-                publicKey: addressDetails.publicKey,
-                privateKey: addressDetails.privateKey,
-            }),
+            body: formData,
         });
 
+
         if (response.ok) {
+            const { profilePictureUrl } = await response.json();
             const formData = new FormData();
             const userData = {
+                image: profilePictureUrl,
                 fullName,
                 userName,
                 email,
@@ -85,6 +94,18 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
             <h2 className="text-2xl font-bold text-center text-gray-900">Créer un compte</h2>
             {error && <p className="text-sm text-red-600 text-center">{error}</p>}
             <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
+                <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Photo de profil
+                    </label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setProfilePicture(e.target.files?.[0] || null)}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-colors"
+                        required
+                    />
+                </div>
                 <input
                     type="text"
                     placeholder="Nom complet"
@@ -123,7 +144,6 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                 >
                     S'inscrire
                 </button>
-
             </form>
         </div>
     );

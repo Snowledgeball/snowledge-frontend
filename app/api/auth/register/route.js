@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { encryptPrivateKey, decryptPrivateKey } from "../../../../utils/crypt";
-
+import { pinata } from "../../../../utils/config";
 
 const prisma = new PrismaClient();
 
@@ -9,29 +9,16 @@ export async function POST(req) {
   console.log("POSTTTTT");
   try {
     // Extraire les données du corps de la requête
-    const {
-      fullName,
-      userName,
-      profilePicture,
-      email,
-      password,
-      accountAddress,
-      publicKey,
-      privateKey,
-    } = await req.json();
 
-
-    console.log(
-      fullName,
-      userName,
-      profilePicture,
-      email,
-      password,
-      accountAddress,
-      publicKey,
-      privateKey,
-    );
-
+    const formData = await req.formData();
+    const fullName = formData.get("fullName");
+    const userName = formData.get("userName");
+    const profilePicture = formData.get("profilePicture");
+    const email = formData.get("email");
+    const password = formData.get("password");
+    const accountAddress = formData.get("accountAddress");
+    const publicKey = formData.get("publicKey");
+    const privateKey = formData.get("privateKey");
 
     // Vérifier si l'utilisateur existe déjà
     const existingUser = await prisma.user.findFirst({
@@ -68,25 +55,15 @@ export async function POST(req) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const dataToSend = {
-      fullName,
-      userName,
-      profilePicture,
-      email,
-      password: hashedPassword,
-      accountAddress,
-      publicKey,
-      privateKey: encryptedPrivateKey,
-      salt,
-      iv,
-    }
+    const result = await pinata.upload.file(profilePicture);
+    const profilePictureUrl = `https://${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${result.IpfsHash}`;
 
     // Créer le nouvel utilisateur
     const user = await prisma.user.create({
       data: {
         fullName,
         userName,
-        profilePicture,
+        profilePicture: profilePictureUrl,
         email,
         password: hashedPassword,
         accountAddress,
@@ -98,11 +75,11 @@ export async function POST(req) {
     });
 
 
-    console.log(user);
+    console.log("user", user);
 
     // Retourner une réponse réussie
     return new Response(
-      JSON.stringify({ message: "User registered successfully" }),
+      JSON.stringify({ message: "User registered successfully", profilePictureUrl }),
       {
         status: 201,
       }

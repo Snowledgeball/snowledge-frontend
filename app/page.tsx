@@ -258,6 +258,13 @@ export default function Home() {
               </div>
             </div>
 
+            <button onClick={() => {
+              fetch("/api/pinata", {
+                method: "POST",
+                body: JSON.stringify({ name: "My New Group" }),
+              });
+            }}>Create Group</button>
+
             {/* Catégories */}
             <div className="flex flex-wrap gap-3 mb-6">
               {categories.map(({ id, label, icon: Icon }) => (

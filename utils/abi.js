@@ -1,4 +1,4 @@
-export const addressSBT = "0x046dbf5f24b005114d13f15f6c6d1a075d0d41f521fd1c670d578b1046b75282";
+export const addressSBT = "0x02f4429b9b6126f7c86ee49055e342e48448976df0a80cd648ff9fe5da506ddc";
 export const abiSBT = [
     {
         "type": "impl",
@@ -59,22 +59,6 @@ export const abiSBT = [
             },
             {
                 "type": "function",
-                "name": "get_token_uri_by_id",
-                "inputs": [
-                    {
-                        "name": "token_id",
-                        "type": "core::integer::u256"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "type": "core::byte_array::ByteArray"
-                    }
-                ],
-                "state_mutability": "view"
-            },
-            {
-                "type": "function",
                 "name": "get_token_uri_by_address",
                 "inputs": [
                     {
@@ -123,23 +107,42 @@ export const abiSBT = [
             },
             {
                 "type": "function",
-                "name": "transfer",
+                "name": "get_token_uri_by_id",
                 "inputs": [
-                    {
-                        "name": "from",
-                        "type": "core::starknet::contract_address::ContractAddress"
-                    },
-                    {
-                        "name": "to",
-                        "type": "core::starknet::contract_address::ContractAddress"
-                    },
                     {
                         "name": "token_id",
                         "type": "core::integer::u256"
                     }
                 ],
+                "outputs": [
+                    {
+                        "type": "core::byte_array::ByteArray"
+                    }
+                ],
+                "state_mutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "set_token_uri_by_id",
+                "inputs": [
+                    {
+                        "name": "token_id",
+                        "type": "core::integer::u256"
+                    },
+                    {
+                        "name": "uri",
+                        "type": "core::byte_array::ByteArray"
+                    }
+                ],
                 "outputs": [],
                 "state_mutability": "external"
+            },
+            {
+                "type": "function",
+                "name": "transfer",
+                "inputs": [],
+                "outputs": [],
+                "state_mutability": "view"
             }
         ]
     },
@@ -186,8 +189,8 @@ export const abiSBT = [
     },
     {
         "type": "impl",
-        "name": "ERC721MixinImpl",
-        "interface_name": "openzeppelin_token::erc721::interface::ERC721ABI"
+        "name": "ERC721Impl",
+        "interface_name": "openzeppelin_token::erc721::interface::IERC721"
     },
     {
         "type": "struct",
@@ -215,7 +218,7 @@ export const abiSBT = [
     },
     {
         "type": "interface",
-        "name": "openzeppelin_token::erc721::interface::ERC721ABI",
+        "name": "openzeppelin_token::erc721::interface::IERC721",
         "items": [
             {
                 "type": "function",
@@ -360,61 +363,18 @@ export const abiSBT = [
                     }
                 ],
                 "state_mutability": "view"
-            },
-            {
-                "type": "function",
-                "name": "supports_interface",
-                "inputs": [
-                    {
-                        "name": "interface_id",
-                        "type": "core::felt252"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "type": "core::bool"
-                    }
-                ],
-                "state_mutability": "view"
-            },
-            {
-                "type": "function",
-                "name": "name",
-                "inputs": [],
-                "outputs": [
-                    {
-                        "type": "core::byte_array::ByteArray"
-                    }
-                ],
-                "state_mutability": "view"
-            },
-            {
-                "type": "function",
-                "name": "symbol",
-                "inputs": [],
-                "outputs": [
-                    {
-                        "type": "core::byte_array::ByteArray"
-                    }
-                ],
-                "state_mutability": "view"
-            },
-            {
-                "type": "function",
-                "name": "token_uri",
-                "inputs": [
-                    {
-                        "name": "token_id",
-                        "type": "core::integer::u256"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "type": "core::byte_array::ByteArray"
-                    }
-                ],
-                "state_mutability": "view"
-            },
+            }
+        ]
+    },
+    {
+        "type": "impl",
+        "name": "ERC721CamelOnlyImpl",
+        "interface_name": "openzeppelin_token::erc721::interface::IERC721CamelOnly"
+    },
+    {
+        "type": "interface",
+        "name": "openzeppelin_token::erc721::interface::IERC721CamelOnly",
+        "items": [
             {
                 "type": "function",
                 "name": "balanceOf",
@@ -542,6 +502,55 @@ export const abiSBT = [
                     }
                 ],
                 "state_mutability": "view"
+            }
+        ]
+    },
+    {
+        "type": "impl",
+        "name": "IIERC721MetadataImpl",
+        "interface_name": "backend::decentralized_id::IIERC721Metadata"
+    },
+    {
+        "type": "interface",
+        "name": "backend::decentralized_id::IIERC721Metadata",
+        "items": [
+            {
+                "type": "function",
+                "name": "name",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "type": "core::byte_array::ByteArray"
+                    }
+                ],
+                "state_mutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "symbol",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "type": "core::byte_array::ByteArray"
+                    }
+                ],
+                "state_mutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "token_uri",
+                "inputs": [
+                    {
+                        "name": "tokenId",
+                        "type": "core::integer::u256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "type": "core::byte_array::ByteArray"
+                    }
+                ],
+                "state_mutability": "view"
             },
             {
                 "type": "function",
@@ -555,6 +564,33 @@ export const abiSBT = [
                 "outputs": [
                     {
                         "type": "core::byte_array::ByteArray"
+                    }
+                ],
+                "state_mutability": "view"
+            }
+        ]
+    },
+    {
+        "type": "impl",
+        "name": "SRC5Impl",
+        "interface_name": "openzeppelin_introspection::interface::ISRC5"
+    },
+    {
+        "type": "interface",
+        "name": "openzeppelin_introspection::interface::ISRC5",
+        "items": [
+            {
+                "type": "function",
+                "name": "supports_interface",
+                "inputs": [
+                    {
+                        "name": "interface_id",
+                        "type": "core::felt252"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "type": "core::bool"
                     }
                 ],
                 "state_mutability": "view"

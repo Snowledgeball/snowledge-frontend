@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
-import { Users, MessageCircle, TrendingUp, Shield, Bitcoin, Activity, Award, Wallet, Globe, Plus, ArrowRight, Settings, Mail, Lock, HelpCircle, MessageSquare, FileText, Check, Trophy, DollarSign, X } from "lucide-react";
+import { Users, MessageCircle, TrendingUp, Shield, Bitcoin, Activity, Award, Wallet, Globe, Plus, ArrowRight, Settings, Mail, Lock, HelpCircle, MessageSquare, FileText, Check, Trophy, DollarSign, X, User, AtSign } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { Dialog } from '@headlessui/react';
@@ -64,6 +64,9 @@ const ProfilePage = () => {
     const [userId, setUserId] = useState<string | null>(null);
     const [userData, setUserData] = useState({
         username: '',
+        fullName: '',
+        userName: '',
+        email: '',
         level: 0,
         memberSince: '',
         avatar: '/images/default-avatar.png',
@@ -78,6 +81,19 @@ const ProfilePage = () => {
     const [expertiseDomain, setExpertiseDomain] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
+
+    // Ajout des états pour gérer les modifications
+    const [isEditing, setIsEditing] = useState<string | null>(null);
+    const [formData, setFormData] = useState({
+        fullName: '',
+        userName: '',
+        email: '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+    });
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     useEffect(() => {
         const userId = session?.user?.id;
@@ -193,6 +209,48 @@ const ProfilePage = () => {
             setSubmitError(error instanceof Error ? error.message : 'Une erreur est survenue');
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    // Ajout des fonctions de gestion
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData(prev => ({
+            ...prev,
+            [e.target.name]: e.target.value
+        }));
+    };
+
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setAvatarFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const handleSubmit = async (field: string) => {
+        try {
+            let formDataToSend = new FormData();
+
+            if (field === 'avatar' && avatarFile) {
+                formDataToSend.append('profilePicture', avatarFile);
+            } else {
+                formDataToSend.append(field, formData[field as keyof typeof formData]);
+            }
+
+            const response = await fetch(`/api/users/${userId}/update`, {
+                method: 'PUT',
+                body: formDataToSend,
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de la mise à jour');
+
+            toast.success('Mise à jour effectuée avec succès');
+            setIsEditing(null);
+            // Rafraîchir les données utilisateur
+            fetchUserData();
+        } catch (error) {
+            toast.error('Erreur lors de la mise à jour');
         }
     };
 
@@ -535,44 +593,248 @@ const ProfilePage = () => {
                                         </li>
                                     </ul>
                                 </Card>
+
+
                             </div>
                         </div>
                     )}
 
                     {activeTab === 'settings' && (
                         <div className="col-span-3">
-                            {/* Informations du compte */}
                             <Card className="p-6 bg-white rounded-xl shadow-md">
                                 <div className="flex items-center justify-between mb-6">
                                     <h3 className="text-xl font-semibold text-gray-900">Informations du compte</h3>
-                                    <button className="text-blue-600 hover:text-blue-700">
-                                        <Settings className="w-5 h-5" />
-                                    </button>
                                 </div>
                                 <div className="space-y-4">
+                                    {/* Photo de profil */}
+                                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-12 h-12 rounded-full overflow-hidden">
+                                                <img
+                                                    src={previewUrl || userData.avatar}
+                                                    alt="Profile"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">Photo de profil</p>
+                                            </div>
+                                        </div>
+                                        {isEditing === 'avatar' ? (
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleAvatarChange}
+                                                    className="text-sm"
+                                                />
+                                                <button
+                                                    onClick={() => handleSubmit('avatar')}
+                                                    className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm"
+                                                >
+                                                    Enregistrer
+                                                </button>
+                                                <button
+                                                    onClick={() => setIsEditing(null)}
+                                                    className="px-3 py-1 text-gray-600 text-sm"
+                                                >
+                                                    Annuler
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => setIsEditing('avatar')}
+                                                className="text-blue-600 text-sm hover:text-blue-700"
+                                            >
+                                                Modifier
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Nom complet */}
+                                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <User className="w-5 h-5 text-gray-500" />
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">Nom complet</p>
+                                                <p className="text-sm text-gray-500">{userData.fullName}</p>
+                                            </div>
+                                        </div>
+                                        {isEditing === 'fullName' ? (
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="text"
+                                                    name="fullName"
+                                                    value={formData.fullName}
+                                                    onChange={handleInputChange}
+                                                    className="px-2 py-1 border rounded"
+                                                />
+                                                <button
+                                                    onClick={() => handleSubmit('fullName')}
+                                                    className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm"
+                                                >
+                                                    Enregistrer
+                                                </button>
+                                                <button
+                                                    onClick={() => setIsEditing(null)}
+                                                    className="px-3 py-1 text-gray-600 text-sm"
+                                                >
+                                                    Annuler
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => setIsEditing('fullName')}
+                                                className="text-blue-600 text-sm hover:text-blue-700"
+                                            >
+                                                Modifier
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Nom d'utilisateur */}
+                                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <AtSign className="w-5 h-5 text-gray-500" />
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">Nom d'utilisateur</p>
+                                                <p className="text-sm text-gray-500">{userData.userName}</p>
+                                            </div>
+                                        </div>
+                                        {isEditing === 'userName' ? (
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="text"
+                                                    name="userName"
+                                                    value={formData.userName}
+                                                    onChange={handleInputChange}
+                                                    className="px-2 py-1 border rounded"
+                                                />
+                                                <button
+                                                    onClick={() => handleSubmit('userName')}
+                                                    className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm"
+                                                >
+                                                    Enregistrer
+                                                </button>
+                                                <button
+                                                    onClick={() => setIsEditing(null)}
+                                                    className="px-3 py-1 text-gray-600 text-sm"
+                                                >
+                                                    Annuler
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => setIsEditing('userName')}
+                                                className="text-blue-600 text-sm hover:text-blue-700"
+                                            >
+                                                Modifier
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Email */}
                                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                         <div className="flex items-center gap-3">
                                             <Mail className="w-5 h-5 text-gray-500" />
                                             <div>
                                                 <p className="text-sm font-medium text-gray-900">Email</p>
-                                                <p className="text-sm text-gray-500">user@example.com</p>
+                                                <p className="text-sm text-gray-500">{userData.email}</p>
                                             </div>
                                         </div>
-                                        <button className="text-blue-600 text-sm hover:text-blue-700">Modifier</button>
+                                        {isEditing === 'email' ? (
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="email"
+                                                    name="email"
+                                                    value={formData.email}
+                                                    onChange={handleInputChange}
+                                                    className="px-2 py-1 border rounded"
+                                                />
+                                                <button
+                                                    onClick={() => handleSubmit('email')}
+                                                    className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm"
+                                                >
+                                                    Enregistrer
+                                                </button>
+                                                <button
+                                                    onClick={() => setIsEditing(null)}
+                                                    className="px-3 py-1 text-gray-600 text-sm"
+                                                >
+                                                    Annuler
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => setIsEditing('email')}
+                                                className="text-blue-600 text-sm hover:text-blue-700"
+                                            >
+                                                Modifier
+                                            </button>
+                                        )}
                                     </div>
+
+                                    {/* Mot de passe */}
                                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                         <div className="flex items-center gap-3">
                                             <Lock className="w-5 h-5 text-gray-500" />
                                             <div>
                                                 <p className="text-sm font-medium text-gray-900">Mot de passe</p>
-                                                <p className="text-sm text-gray-500">Dernière modification : il y a 2 mois</p>
+                                                <p className="text-sm text-gray-500">••••••••</p>
                                             </div>
                                         </div>
-                                        <button className="text-blue-600 text-sm hover:text-blue-700">Modifier</button>
+                                        {isEditing === 'password' ? (
+                                            <div className="flex flex-col gap-2 w-64">
+                                                <input
+                                                    type="password"
+                                                    name="currentPassword"
+                                                    placeholder="Mot de passe actuel"
+                                                    value={formData.currentPassword}
+                                                    onChange={handleInputChange}
+                                                    className="px-2 py-1 border rounded text-sm"
+                                                />
+                                                <input
+                                                    type="password"
+                                                    name="newPassword"
+                                                    placeholder="Nouveau mot de passe"
+                                                    value={formData.newPassword}
+                                                    onChange={handleInputChange}
+                                                    className="px-2 py-1 border rounded text-sm"
+                                                />
+                                                <input
+                                                    type="password"
+                                                    name="confirmPassword"
+                                                    placeholder="Confirmer le mot de passe"
+                                                    value={formData.confirmPassword}
+                                                    onChange={handleInputChange}
+                                                    className="px-2 py-1 border rounded text-sm"
+                                                />
+                                                <div className="flex justify-end gap-2 mt-2">
+                                                    <button
+                                                        onClick={() => handleSubmit('password')}
+                                                        className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm"
+                                                    >
+                                                        Enregistrer
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setIsEditing(null)}
+                                                        className="px-3 py-1 text-gray-600 text-sm"
+                                                    >
+                                                        Annuler
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => setIsEditing('password')}
+                                                className="text-blue-600 text-sm hover:text-blue-700"
+                                            >
+                                                Modifier
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </Card>
-
                             {/* Abonnements */}
                             <Card className="p-6 mt-6 bg-white rounded-xl shadow-md">
                                 <h3 className="text-xl font-semibold text-gray-900 mb-6">Mes abonnements</h3>
