@@ -61,8 +61,8 @@ export async function GET(
 
         });
 
-        const memberSince = firstJoin?.joined_at
-            ? new Date(firstJoin.joined_at).toLocaleDateString('fr-FR', {
+        const memberSince = user.created_at
+            ? new Date(user.created_at).toLocaleDateString('fr-FR', {
                 year: 'numeric',
                 month: 'long'
             })
@@ -76,12 +76,14 @@ export async function GET(
         const totalEarnings = 0;
 
         const userData = {
-            username: user.userName,
+            userName: user.userName,
             fullName: user.fullName,
             level: level,
             memberSince: memberSince,
             avatar: user.profilePicture,
             email: user.email,
+            createdAt: user.created_at,
+            updatedAt: user.updated_at,
             stats: {
                 communitiesCount,
                 postsCount,

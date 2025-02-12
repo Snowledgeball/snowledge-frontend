@@ -54,17 +54,19 @@ model community_posts {
 }
 
 model user {
-  id             Int    @id(map: "User_pkey") @default(autoincrement())
-  fullName       String @db.VarChar(255)
-  userName       String @unique(map: "username_unique") @db.VarChar(50)
+  id             Int      @id(map: "User_pkey") @default(autoincrement())
+  fullName       String   @db.VarChar(255)
+  userName       String   @unique(map: "username_unique") @db.VarChar(50)
   profilePicture String
-  email          String @unique(map: "email_unique") @db.VarChar(255)
+  email          String   @unique(map: "email_unique") @db.VarChar(255)
   password       String
-  accountAddress String @db.VarChar(65)
-  publicKey      String @db.VarChar(65)
-  privateKey     String @db.VarChar(160)
-  salt           String @db.VarChar(32)
-  iv             String @db.VarChar(32)
+  accountAddress String   @db.VarChar(65)
+  publicKey      String   @db.VarChar(65)
+  privateKey     String   @db.VarChar(160)
+  salt           String   @db.VarChar(32)
+  iv             String   @db.VarChar(32)
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  updated_at     DateTime @default(now()) @db.Timestamp(6)
 }
 
 model community_category {

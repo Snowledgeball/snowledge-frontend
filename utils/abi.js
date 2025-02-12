@@ -1,4 +1,4 @@
-export const addressSBT = "0x02f4429b9b6126f7c86ee49055e342e48448976df0a80cd648ff9fe5da506ddc";
+export const addressSBT = "0x03837f9d3d44c0bdf1f0024da1b109c1ed59d44691cb5d19019eb31d78c6fb1b";
 export const abiSBT = [
     {
         "type": "impl",
@@ -43,27 +43,27 @@ export const abiSBT = [
         "items": [
             {
                 "type": "function",
-                "name": "safe_mint",
-                "inputs": [
-                    {
-                        "name": "recipient",
-                        "type": "core::starknet::contract_address::ContractAddress"
-                    },
-                    {
-                        "name": "uri",
-                        "type": "core::byte_array::ByteArray"
-                    }
-                ],
-                "outputs": [],
-                "state_mutability": "external"
-            },
-            {
-                "type": "function",
                 "name": "get_token_uri_by_address",
                 "inputs": [
                     {
                         "name": "address",
                         "type": "core::starknet::contract_address::ContractAddress"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "type": "core::byte_array::ByteArray"
+                    }
+                ],
+                "state_mutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "get_token_uri_by_id",
+                "inputs": [
+                    {
+                        "name": "token_id",
+                        "type": "core::integer::u256"
                     }
                 ],
                 "outputs": [
@@ -91,6 +91,22 @@ export const abiSBT = [
             },
             {
                 "type": "function",
+                "name": "safe_mint",
+                "inputs": [
+                    {
+                        "name": "recipient",
+                        "type": "core::starknet::contract_address::ContractAddress"
+                    },
+                    {
+                        "name": "uri",
+                        "type": "core::byte_array::ByteArray"
+                    }
+                ],
+                "outputs": [],
+                "state_mutability": "external"
+            },
+            {
+                "type": "function",
                 "name": "set_token_uri_by_address",
                 "inputs": [
                     {
@@ -104,22 +120,6 @@ export const abiSBT = [
                 ],
                 "outputs": [],
                 "state_mutability": "external"
-            },
-            {
-                "type": "function",
-                "name": "get_token_uri_by_id",
-                "inputs": [
-                    {
-                        "name": "token_id",
-                        "type": "core::integer::u256"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "type": "core::byte_array::ByteArray"
-                    }
-                ],
-                "state_mutability": "view"
             },
             {
                 "type": "function",

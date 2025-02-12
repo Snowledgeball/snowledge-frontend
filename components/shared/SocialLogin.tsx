@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getProviders, signIn } from "next-auth/react"
 
 interface Provider {
@@ -39,7 +39,3 @@ const SocialLogin = () => {
 };
 
 export default SocialLogin;
-function useState<T>(arg0: null): [any, any] {
-    throw new Error('Function not implemented.');
-}
-

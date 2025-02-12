@@ -42,27 +42,27 @@
         "items": [
             {
                 "type": "function",
-                "name": "safe_mint",
-                "inputs": [
-                    {
-                        "name": "recipient",
-                        "type": "core::starknet::contract_address::ContractAddress"
-                    },
-                    {
-                        "name": "uri",
-                        "type": "core::byte_array::ByteArray"
-                    }
-                ],
-                "outputs": [],
-                "state_mutability": "external"
-            },
-            {
-                "type": "function",
                 "name": "get_token_uri_by_address",
                 "inputs": [
                     {
                         "name": "address",
                         "type": "core::starknet::contract_address::ContractAddress"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "type": "core::byte_array::ByteArray"
+                    }
+                ],
+                "state_mutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "get_token_uri_by_id",
+                "inputs": [
+                    {
+                        "name": "token_id",
+                        "type": "core::integer::u256"
                     }
                 ],
                 "outputs": [
@@ -90,6 +90,22 @@
             },
             {
                 "type": "function",
+                "name": "safe_mint",
+                "inputs": [
+                    {
+                        "name": "recipient",
+                        "type": "core::starknet::contract_address::ContractAddress"
+                    },
+                    {
+                        "name": "uri",
+                        "type": "core::byte_array::ByteArray"
+                    }
+                ],
+                "outputs": [],
+                "state_mutability": "external"
+            },
+            {
+                "type": "function",
                 "name": "set_token_uri_by_address",
                 "inputs": [
                     {
@@ -103,22 +119,6 @@
                 ],
                 "outputs": [],
                 "state_mutability": "external"
-            },
-            {
-                "type": "function",
-                "name": "get_token_uri_by_id",
-                "inputs": [
-                    {
-                        "name": "token_id",
-                        "type": "core::integer::u256"
-                    }
-                ],
-                "outputs": [
-                    {
-                        "type": "core::byte_array::ByteArray"
-                    }
-                ],
-                "state_mutability": "view"
             },
             {
                 "type": "function",

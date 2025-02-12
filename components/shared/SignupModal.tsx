@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
+import { Dialog, DialogPanel, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment } from "react";
 import { deployAccountContract, generateStarkNetAddress } from "../../utils/starknetUtils";
 import { mintSBT } from "../../utils/mintSBT";
@@ -142,7 +142,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                     type="submit"
                     className="w-full py-2.5 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
-                    S'inscrire
+                    S&apos;inscrire
                 </button>
             </form>
         </div>
