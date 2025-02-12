@@ -95,7 +95,7 @@ export async function PUT(
         }
 
         // Mettre à jour les informations de base de la communauté
-        const updatedCommunity = await prisma.community.update({
+        await prisma.community.update({
             where: { id: communityId },
             data: {
                 name: data.name,

@@ -6,11 +6,11 @@ import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Upload, ArrowLeft, Youtube, Globe, Shield } from "lucide-react";
 import { defaultCode, defaultDisclaimers } from "@/utils/defaultPres";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
+import Image from "next/image";
 
 interface CommunitySettings {
     id: number;
@@ -64,7 +64,7 @@ export default function CommunitySettings() {
         };
 
         fetchDashboardData();
-    }, [userId, communityId]);
+    }, [userId, communityId, router]);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -239,13 +239,15 @@ export default function CommunitySettings() {
                                 >
                                     {previewImage ? (
                                         <div className="relative">
-                                            <img
+                                            <Image
                                                 src={previewImage}
                                                 alt="Aperçu"
                                                 className="max-h-48 mx-auto rounded-lg"
+                                                width={192}
+                                                height={192}
                                             />
                                             <p className="text-sm text-gray-500 text-center mt-2">
-                                                Cliquez pour modifier l'image
+                                                Cliquez pour modifier l&apos;image
                                             </p>
                                         </div>
                                     ) : (

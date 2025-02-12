@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Users, MessageCircle, Activity, Wallet, TrendingUp } from "lucide-react";
 import Image from 'next/image';

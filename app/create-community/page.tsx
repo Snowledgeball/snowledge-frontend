@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
+import Image from "next/image";
 
 export default function CreateCommunityPage() {
     const router = useRouter();
@@ -197,10 +198,12 @@ export default function CreateCommunityPage() {
                             >
                                 {previewImage ? (
                                     <div className="relative">
-                                        <img
+                                        <Image
                                             src={previewImage}
                                             alt="Aperçu"
                                             className="max-h-48 mx-auto rounded-lg"
+                                            width={192}
+                                            height={192}
                                         />
                                         <p className="text-sm text-gray-500 mt-2">
                                             Cliquez pour changer l'image

@@ -12,6 +12,11 @@ interface AddressDetails {
   accountAddress: string;
 }
 
+interface DeploymentResult {
+  transactionHash?: string;
+  accountAddress?: string;
+}
+
 const GenerateAddress = () => {
   const [addressDetails, setAddressDetails] = useState<AddressDetails | null>(
     null
@@ -40,10 +45,10 @@ const GenerateAddress = () => {
 
     try {
       setDeployStatus("Déploiement en cours...");
-      const result: any = await deployAccountContract(
+      const result = await deployAccountContract(
         addressDetails.privateKey,
         addressDetails.publicKey
-      );
+      ) as DeploymentResult;
       console.log("result", result);
       setDeployStatus(
         `Contrat déployé avec succès ! Transaction hash : ${result.transactionHash}`
@@ -61,7 +66,7 @@ const GenerateAddress = () => {
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-2xl shadow-lg">
       <h1 className="text-xl font-bold text-gray-800 text-center mb-4">
-        Générateur et Déployeur d'Adresse StarkNet
+        Générateur et Déployeur d&apos;Adresse StarkNet
       </h1>
       <p className="text-gray-600 text-center mb-6">
         Cliquez sur le bouton ci-dessous pour générer une adresse, ajoutez des

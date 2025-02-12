@@ -2,8 +2,24 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+import { Session } from "next-auth";
+import { JWT } from "next-auth/jwt";
 
 const prisma = new PrismaClient();
+
+interface CustomSession extends Session {
+    user: {
+        id: string;
+        email: string;
+        name: string;
+        address?: string;
+    }
+}
+
+interface CustomJWT extends JWT {
+    id: string;
+    address?: string;
+}
 
 export const authOptions = {
     adapter: PrismaAdapter(prisma),
@@ -35,14 +51,25 @@ export const authOptions = {
         strategy: "jwt",
     },
     callbacks: {
-        async jwt({ token, user }: { token: any; user: any }) {
+        async jwt({ token, user }: {
+            token: CustomJWT;
+            user?: {
+                id: string;
+                email: string;
+                name: string;
+                accountAddress: string;
+            }
+        }) {
             if (user) {
                 token.id = user.id;
                 token.address = user.accountAddress;
             }
             return token;
         },
-        async session({ session, token }: { session: any; token: any }) {
+        async session({ session, token }: {
+            session: CustomSession;
+            token: CustomJWT;
+        }) {
             if (token) {
                 session.user.id = token.id;
                 session.user.address = token.address;

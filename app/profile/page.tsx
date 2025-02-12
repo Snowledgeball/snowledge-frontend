@@ -2,12 +2,13 @@
 
 import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
-import { Users, MessageCircle, TrendingUp, Shield, Bitcoin, Activity, Award, Wallet, Globe, Plus, ArrowRight, Settings, Mail, Lock, HelpCircle, MessageSquare, FileText, Check, Trophy, DollarSign, X, User, AtSign } from "lucide-react";
+import { Users, MessageCircle, Activity, Award, Wallet, Plus, ArrowRight, Mail, Lock, HelpCircle, MessageSquare, FileText, Check, Trophy, DollarSign, X, User, AtSign } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { Dialog } from '@headlessui/react';
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
+import Image from "next/image";
 
 interface CommunityData {
     name: string;
@@ -44,7 +45,6 @@ interface JoinedCommunity {
 
 const ProfilePage = () => {
     const { data: session } = useSession();
-    const params = useParams();
     const router = useRouter();
 
     const { isLoading: isLoadingAuth, isAuthenticated: isAuthenticatedAuth, LoadingComponent } = useAuthGuard();
@@ -63,7 +63,6 @@ const ProfilePage = () => {
     const [isLoadingJoined, setIsLoadingJoined] = useState(true);
     const [userId, setUserId] = useState<string | null>(null);
     const [userData, setUserData] = useState({
-        username: '',
         fullName: '',
         userName: '',
         email: '',
@@ -230,7 +229,7 @@ const ProfilePage = () => {
 
     const handleSubmit = async (field: string) => {
         try {
-            let formDataToSend = new FormData();
+            const formDataToSend = new FormData();
 
             if (field === 'avatar' && avatarFile) {
                 formDataToSend.append('profilePicture', avatarFile);
@@ -250,7 +249,9 @@ const ProfilePage = () => {
             // Rafraîchir les données utilisateur
             fetchUserData();
         } catch (error) {
-            toast.error('Erreur lors de la mise à jour');
+            toast.error('Erreur lors de la mise à jour', {
+                description: error instanceof Error ? error.message : 'Une erreur est survenue',
+            });
         }
     };
 
@@ -268,14 +269,16 @@ const ProfilePage = () => {
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-8 mb-8 transition-all">
                     <div className="flex items-center">
                         <div className="w-24 h-24 bg-white rounded-full mr-6 flex items-center justify-center p-1 ring-4 ring-white/30">
-                            <img
+                            <Image
                                 src={userData.avatar}
                                 alt="Avatar"
                                 className="w-full h-full object-cover rounded-full"
+                                width={96}
+                                height={96}
                             />
                         </div>
                         <div className="text-white">
-                            <h1 className="text-3xl font-bold tracking-tight">{userData.username}</h1>
+                            <h1 className="text-3xl font-bold tracking-tight">{userData.fullName}</h1>
                             <div className="flex items-center mt-2 space-x-4">
                                 {/* <span className="flex items-center bg-white/10 px-3 py-1 rounded-full">
                                     <Shield className="w-4 h-4 mr-1" />
@@ -486,7 +489,7 @@ const ProfilePage = () => {
                                             <div className="flex justify-between items-start">
                                                 <div>
                                                     <h3 className="text-2xl font-bold text-gray-900">{community.name}</h3>
-                                                    <p className="text-gray-600 mt-2">{community.description}</p>
+                                                    <p className="text-gray-600 mt-2 pr-2">{community.description}</p>
                                                 </div>
                                                 <button
                                                     onClick={() => router.push(`/community/${community.id}/dashboard`)}
@@ -564,7 +567,7 @@ const ProfilePage = () => {
                                     <ul className="space-y-3">
                                         <li className="flex items-center gap-2 text-gray-600">
                                             <Check className="w-5 h-5 text-green-500" />
-                                            Créez votre propre espace d'échange
+                                            Créez votre propre espace d&apos;échange
                                         </li>
                                         <li className="flex items-center gap-2 text-gray-600">
                                             <Check className="w-5 h-5 text-green-500" />
@@ -610,10 +613,12 @@ const ProfilePage = () => {
                                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                         <div className="flex items-center gap-3">
                                             <div className="w-12 h-12 rounded-full overflow-hidden">
-                                                <img
+                                                <Image
                                                     src={previewUrl || userData.avatar}
                                                     alt="Profile"
                                                     className="w-full h-full object-cover"
+                                                    width={48}
+                                                    height={48}
                                                 />
                                             </div>
                                             <div>
@@ -697,7 +702,7 @@ const ProfilePage = () => {
                                         <div className="flex items-center gap-3">
                                             <AtSign className="w-5 h-5 text-gray-500" />
                                             <div>
-                                                <p className="text-sm font-medium text-gray-900">Nom d'utilisateur</p>
+                                                <p className="text-sm font-medium text-gray-900">Nom d&apos;utilisateur</p>
                                                 <p className="text-sm text-gray-500">{userData.userName}</p>
                                             </div>
                                         </div>
@@ -932,7 +937,7 @@ const ProfilePage = () => {
                                     <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
                                         <div className="flex items-center gap-3">
                                             <HelpCircle className="w-5 h-5 text-gray-500" />
-                                            <span className="text-sm font-medium text-gray-900">Centre d'aide</span>
+                                            <span className="text-sm font-medium text-gray-900">Centre d&apos;aide</span>
                                         </div>
                                         <ArrowRight className="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform" />
                                     </button>
@@ -1007,7 +1012,7 @@ const ProfilePage = () => {
                                             <Users className="w-6 h-6 text-blue-600" />
                                         </div>
                                         <h4 className="font-medium text-blue-900 mb-1">Communauté</h4>
-                                        <p className="text-xs text-blue-700">Rejoignez un réseau d'experts</p>
+                                        <p className="text-xs text-blue-700">Rejoignez un réseau d&apos;experts</p>
                                     </div>
                                 </div>
 
@@ -1027,7 +1032,7 @@ const ProfilePage = () => {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Vos domaines d'expertise
+                                            Vos domaines d&apos;expertise
                                         </label>
                                         <input
                                             type="text"

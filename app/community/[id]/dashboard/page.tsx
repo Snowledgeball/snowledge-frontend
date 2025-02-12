@@ -12,6 +12,7 @@ import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import Image from "next/image";
 
 interface DashboardData {
     stats: {
@@ -108,7 +109,7 @@ export default function CommunityDashboard() {
         };
 
         fetchDashboardData();
-    }, [userId, communityId]);
+    }, [userId, communityId, router]);
 
 
     useEffect(() => {
@@ -253,7 +254,7 @@ export default function CommunityDashboard() {
                         <h1 className="text-2xl font-bold text-gray-900">
                             Tableau de bord - {dashboardData.community.name}
                         </h1>
-                        <p className="text-gray-600">{dashboardData.community.description}</p>
+                        <p className="text-gray-600 pr-2">{dashboardData.community.description}</p>
                     </div>
                     <button
                         onClick={() => router.push(`/community/${communityId}/settings`)}
@@ -347,10 +348,12 @@ export default function CommunityDashboard() {
                                         .map((request) => (
                                             <div key={request.id} className="flex items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-lg">
                                                 <div className="flex items-center space-x-4">
-                                                    <img
+                                                    <Image
                                                         src={request.userAvatar}
                                                         alt={request.userName}
                                                         className="w-10 h-10 rounded-full"
+                                                        width={48}
+                                                        height={48}
                                                     />
                                                     <div>
                                                         <p className="font-medium text-gray-900">{request.userName}</p>
@@ -388,10 +391,12 @@ export default function CommunityDashboard() {
                                             <FileText className="w-4 h-4 text-green-500 mr-3" />
                                             <div>
                                                 <div className="flex items-center space-x-2">
-                                                    <img
+                                                    <Image
                                                         src={activity.authorAvatar || '/images/default-avatar.png'}
                                                         alt={activity.author}
                                                         className="w-6 h-6 rounded-full"
+                                                        width={48}
+                                                        height={48}
                                                     />
                                                     <span className="text-gray-700">{activity.text}</span>
                                                 </div>
@@ -413,59 +418,66 @@ export default function CommunityDashboard() {
                 {activeTab === 'members' && (
                     <div className="space-y-6">
                         <Card className="p-6 bg-white shadow-sm">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-lg font-semibold text-gray-900">Membres de la communauté</h3>
-                            </div>
-                            {/* En-tête de la grille */}
-                            <div className="grid grid-cols-8 items-center p-4 text-base font-medium text-gray-500 border-b justify-items-center">
-                                <div className="col-span-2">Membre</div>
-                                <div>Statut</div>
-                                <div>Date d'inscription</div>
-                                <div>Révisions</div>
-                                <div>Posts</div>
-                                <div>Gains</div>
-                                <div className="text-center">Actions</div>
-                            </div>
-                            <div className="space-y-2">
-
-                                {members.map((member, index) => (
-                                    <div key={index} className="grid grid-cols-8 items-center p-4 bg-white hover:bg-gray-50 rounded-lg transition-colors justify-items-center">
-                                        <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden">
-                                            <img
-                                                src={member.profilePicture}
-                                                alt={member.fullName}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-                                        <div>
-                                            <p className="text-base font-medium text-gray-900">{member.fullName}</p>
-                                            <p className="text-sm text-gray-500">@{member.userName}</p>
-                                        </div>
-
-                                        <div>
-                                            <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${member.status === 'Contributeur'
-                                                ? 'bg-blue-100 text-blue-700'
-                                                : 'bg-green-100 text-green-700'
-                                                }`}>
-                                                {member.status}
-                                            </span>
-                                        </div>
-                                        <div className="text-base text-gray-600">
-                                            {member.joinedAt ?
-                                                new Date(member.joinedAt).toLocaleDateString('fr-FR')
-                                                : 'Date inconnue'
-                                            }
-                                        </div>
-                                        <div className="text-base text-gray-600">{member.revisions} révisions</div>
-                                        <div className="text-base text-gray-600">{member.posts} posts</div>
-                                        <div className="text-base font-medium text-gray-900">{member.gains}€</div>
-                                        <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors justify-self-center">
-                                            <ChevronRight className="w-6 h-6" />
-                                        </button>
+                            {members.length === 0 ? (
+                                <div className="text-center text-gray-500">Aucun membre trouvé</div>
+                            ) : (
+                                <>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h3 className="text-lg font-semibold text-gray-900">Membres de la communauté</h3>
                                     </div>
+                                    {/* En-tête de la grille */}
+                                    <div className="grid grid-cols-8 items-center p-4 text-base font-medium text-gray-500 border-b justify-items-center">
+                                        <div className="col-span-2">Membre</div>
+                                        <div>Statut</div>
+                                        <div>Date d&apos;inscription</div>
+                                        <div>Révisions</div>
+                                        <div>Posts</div>
+                                        <div>Gains</div>
+                                        <div className="text-center">Actions</div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {members.map((member, index) => (
+                                            <div key={index} className="grid grid-cols-8 items-center p-4 bg-white hover:bg-gray-50 rounded-lg transition-colors justify-items-center">
+                                                <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden">
+                                                    <Image
+                                                        src={member.profilePicture}
+                                                        alt={member.fullName}
+                                                        className="w-full h-full object-cover"
+                                                        width={48}
+                                                        height={48}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <p className="text-base font-medium text-gray-900">{member.fullName}</p>
+                                                    <p className="text-sm text-gray-500">@{member.userName}</p>
+                                                </div>
 
-                                ))}
-                            </div>
+                                                <div>
+                                                    <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${member.status === 'Contributeur'
+                                                        ? 'bg-blue-100 text-blue-700'
+                                                        : 'bg-green-100 text-green-700'
+                                                        }`}>
+                                                        {member.status}
+                                                    </span>
+                                                </div>
+                                                <div className="text-base text-gray-600">
+                                                    {member.joinedAt ?
+                                                        new Date(member.joinedAt).toLocaleDateString('fr-FR')
+                                                        : 'Date inconnue'
+                                                    }
+                                                </div>
+                                                <div className="text-base text-gray-600">{member.revisions} révisions</div>
+                                                <div className="text-base text-gray-600">{member.posts} posts</div>
+                                                <div className="text-base font-medium text-gray-900">{member.gains}€</div>
+                                                <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors justify-self-center">
+                                                    <ChevronRight className="w-6 h-6" />
+                                                </button>
+                                            </div>
+
+                                        ))}
+                                    </div>
+                                </>
+                            )}
                         </Card>
                     </div>
                 )}

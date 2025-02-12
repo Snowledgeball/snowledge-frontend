@@ -7,6 +7,42 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+interface Community {
+  id: number;
+  name: string;
+  members: number;
+  activity: number;
+  trending: boolean;
+  category: string;
+  lastActive: string;
+  trustScore: number;
+  imageUrl: string;
+  creator: {
+    name: string;
+    avatar: string;
+  };
+}
+
+// Ajout de l'interface pour les données brutes de l'API
+interface RawCommunity {
+  id: number;
+  name: string;
+  community_learners: {
+    id: number;
+    userId: number;
+    communityId: number;
+    joinedAt: string;
+  }[];
+  category: {
+    label: string;
+  };
+  image_url: string;
+  creator: {
+    fullName: string;
+    profilePicture: string;
+  };
+}
+
 export default function Home() {
   const CommunityCard = ({
     id,
@@ -149,7 +185,7 @@ export default function Home() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedFilter, setSelectedFilter] = useState("all");
     const [selectedCategory, setSelectedCategory] = useState("all");
-    const [communities, setCommunities] = useState<any[]>([]);
+    const [communities, setCommunities] = useState<Community[]>([]);
     const [loading, setLoading] = useState(true);
 
     const categories = [
@@ -166,19 +202,19 @@ export default function Home() {
           const response = await fetch('/api/communities');
           if (!response.ok) throw new Error('Erreur lors de la récupération des communautés');
           const data = await response.json();
-          const formattedCommunities = data.map((community: any) => ({
+          const formattedCommunities = data.map((community: RawCommunity) => ({
             id: community.id,
             name: community.name,
             members: community.community_learners.length,
-            activity: Math.floor(Math.random() * 300) + 50, // À remplacer par les vraies données d'activité
-            trending: Math.random() > 0.7, // À remplacer par une vraie logique de trending
+            activity: Math.floor(Math.random() * 300) + 50,
+            trending: Math.random() > 0.7,
             category: community.category.label,
-            lastActive: "il y a 2h", // À remplacer par un vrai calcul de dernière activité
-            trustScore: Math.floor(Math.random() * 30) + 65, // À remplacer par un vrai score de confiance
+            lastActive: "il y a 2h",
+            trustScore: Math.floor(Math.random() * 30) + 65,
             imageUrl: community.image_url || "https://images.unsplash.com/photo-1621761191319-c6fb62004040",
             creator: {
               name: community.creator.fullName,
-              avatar: `https://ui-avatars.com/api/?name=User&background=random`,
+              avatar: community.creator.profilePicture,
             }
           }));
 
@@ -257,13 +293,6 @@ export default function Home() {
                 />
               </div>
             </div>
-
-            <button onClick={() => {
-              fetch("/api/pinata", {
-                method: "POST",
-                body: JSON.stringify({ name: "My New Group" }),
-              });
-            }}>Create Group</button>
 
             {/* Catégories */}
             <div className="flex flex-wrap gap-3 mb-6">

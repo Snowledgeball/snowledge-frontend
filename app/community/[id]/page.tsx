@@ -5,25 +5,19 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
 import {
-    Users,
     MessageCircle,
     ArrowLeft,
-    Search,
     Send,
     PlusCircle,
     HelpCircle,
     FileText,
     Settings,
-    Lock,
     ChevronDown,
-    Play,
-    Volume2,
 } from "lucide-react";
 import { Community } from "@/types/community";
 import Image from 'next/image';
 import { toast } from "sonner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
-
 
 // Ajouter ces catégories de posts
 const POST_CATEGORIES = [
@@ -33,9 +27,17 @@ const POST_CATEGORIES = [
     { id: 'reports', label: 'Rapports' }
 ];
 
+// Ajouter ce type avant le composant CommunityHub
+type Presentation = {
+    video_url?: string;
+    topic_details: string;
+    code_of_conduct: string;
+    disclaimers: string;
+};
+
 const CommunityHub = () => {
     const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
-    const { data: session, status } = useSession();
+    const { data: session } = useSession();
     const params = useParams();
     const router = useRouter();
     const [communityData, setCommunityData] = useState<Community | null>(null);
@@ -43,8 +45,7 @@ const CommunityHub = () => {
     const [selectedPostCategory, setSelectedPostCategory] = useState("general");
     const [message, setMessage] = useState("");
     const [showJoinModal, setShowJoinModal] = useState(false);
-    const [presentation, setPresentation] = useState<any>(null);
-    const [hasJoined, setHasJoined] = useState(false);
+    const [presentation, setPresentation] = useState<Presentation | null>(null);
     const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
     const [userCommunities, setUserCommunities] = useState<Community[]>([]);
 
@@ -58,7 +59,6 @@ const CommunityHub = () => {
                 // Vérifier si l'utilisateur est membre
                 const membershipResponse = await fetch(`/api/communities/${params.id}/membership`);
                 const membershipData = await membershipResponse.json();
-                setHasJoined(membershipData.isMember);
 
                 // Récupérer les données de la communauté
                 const communityResponse = await fetch(`/api/communities/${params.id}`);
@@ -85,8 +85,12 @@ const CommunityHub = () => {
                     setUserCommunities(userCommunitiesData.communities);
                 }
 
-            } catch (error: any) {
-                console.log("Erreur:", error.stack);
+            } catch (error) {
+                if (error instanceof Error) {
+                    console.log("Erreur:", error.stack);
+                } else {
+                    console.log("Une erreur inattendue s'est produite");
+                }
                 setUserCommunities([]);
             }
         };
@@ -106,7 +110,6 @@ const CommunityHub = () => {
             });
 
             if (response.ok) {
-                setHasJoined(true);
                 setShowJoinModal(false);
             } else {
                 throw new Error('Erreur lors de l\'adhésion à la communauté');
@@ -328,7 +331,7 @@ const CommunityHub = () => {
                                     checked={hasAcceptedTerms}
                                     onChange={(e) => setHasAcceptedTerms(e.target.checked)}
                                 />
-                                <span className="text-sm text-gray-600">J'ai compris et j'accepte le code de conduite</span>
+                                <span className="text-sm text-gray-600">J&apos;ai compris et j&apos;accepte le code de conduite</span>
                             </label>
 
                             <div className="flex justify-end space-x-4">
