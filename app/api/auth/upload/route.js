@@ -57,7 +57,6 @@ export async function PUT(request) {
         funderAccount
     );
 
-
     try {
         // TODO: change to the user address
         const userAddress = data.get("userAddress");
@@ -69,26 +68,21 @@ export async function PUT(request) {
         const file = (await pinata.gateways.get(MetadataHash)).data;
         const newValue = JSON.parse(data.get("newValue"));
 
-
         // TODO: A refaire, c'est pas propre (peut etre créer une liste a u premier ajout et la modifier a chaque fois)
         //Si file.community existe (au moins 1 communauté deja ajoutée)
-        if (file.community) {
-            console.log("1")
+        if (newValue.community && file.community) {
             //Si la newValue.community.name existe déjà dans file.community et que file.community est un tableau (au moins 2 communautés deja ajoutées), on remplace la valeur de role
             if (!Array.isArray(file.community) && file.community.name === newValue.community.name) {
-                console.log("2")
                 file.community.role = newValue.community.role;
                 newValue.community = file.community;
             }
             else {
                 if (Array.isArray(file.community) && file.community.find(community => community.name === newValue.community.name)) {
-                    console.log("3")
                     file.community.find(community => community.name === newValue.community.name).role = newValue.community.role;
                     newValue.community = file.community;
                 }
                 //Si file.community n'est pas un tableau (au moins 1 communauté deja ajoutée) et que la newValue.community.name n'existe pas dans file.community, on remplace la valeur de role
                 else {
-                    console.log("4")
                     const existingCommunities = Array.isArray(file.community) ? file.community : [file.community];
                     // On ajoute la nouvelle communauté au tableau existant
                     newValue.community = [
@@ -102,9 +96,13 @@ export async function PUT(request) {
             }
         }
 
-        console.log("5");
-        const unpin = await pinata.unpin([MetadataHash]);
-        console.log("unpinata :", unpin);
+        //Si y a un champs profilePicture, on le supprime de newValue
+        if (file.profilePicture) {
+            console.log("profilePicture field exists");
+            delete newValue.profilePicture;
+        }
+
+        await pinata.unpin([MetadataHash]);
 
         const newMetadata = {
             ...file,
@@ -113,9 +111,6 @@ export async function PUT(request) {
 
         const newMetadataUploadData = await pinata.upload.json(newMetadata);
         const newMetadataUrl = `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${newMetadataUploadData.IpfsHash}`;
-        console.log("newMetadata :", newMetadata);
-        console.log("newMetadataUploadData :", newMetadataUploadData);
-        console.log("newMetadataUrl :", newMetadataUrl);
 
         const estimatedFee = await contract.estimate("set_token_uri_by_address", [userAddress, newMetadataUrl]);
         const txResponseSetUri = await contract.invoke("set_token_uri_by_address", [userAddress, newMetadataUrl], {

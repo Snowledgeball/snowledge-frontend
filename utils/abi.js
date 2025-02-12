@@ -1,4 +1,4 @@
-export const addressSBT = "0x03837f9d3d44c0bdf1f0024da1b109c1ed59d44691cb5d19019eb31d78c6fb1b";
+export const addressSBT = "0x0334394a8abf18c3369aad13922495d572e48005c4aab7e47850a14e97d5c11e";
 export const abiSBT = [
     {
         "type": "impl",

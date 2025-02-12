@@ -10,6 +10,7 @@ import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
 import Image from "next/image";
 
+
 interface CommunityData {
     name: string;
     role: string;
@@ -232,12 +233,18 @@ const ProfilePage = () => {
             const formDataToSend = new FormData();
 
             if (field === 'avatar' && avatarFile) {
-                formDataToSend.append('profilePicture', avatarFile);
+                formDataToSend.append('image', avatarFile);
+            } else if (field === 'password') {
+                formDataToSend.append('currentPassword', formData.currentPassword);
+                formDataToSend.append('newPassword', formData.newPassword);
+                formDataToSend.append('confirmPassword', formData.confirmPassword);
             } else {
                 formDataToSend.append(field, formData[field as keyof typeof formData]);
             }
 
-            const response = await fetch(`/api/users/${userId}/update`, {
+            console.log("formDataToSend :", formDataToSend);
+
+            const response = await fetch(`/api/users/${userId}`, {
                 method: 'PUT',
                 body: formDataToSend,
             });
