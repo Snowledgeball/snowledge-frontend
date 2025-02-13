@@ -120,6 +120,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-colors"
+                    autoComplete="off"
                     required
                 />
                 <input
@@ -128,6 +129,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-colors"
+                    autoComplete="username"
                     required
                 />
                 <input
@@ -136,6 +138,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-colors"
+                    autoComplete="new-password"
                     required
                 />
                 <button
