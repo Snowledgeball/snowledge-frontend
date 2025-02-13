@@ -59,7 +59,7 @@ const Header = () => {
                                 Mon Profil
                             </Link>
                             <button
-                                onClick={() => signOut()}
+                                onClick={() => signOut({ redirect: false, callbackUrl: '/' })}
                                 className="text-gray-600 hover:text-red-600 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 border border-gray-200 hover:border-red-200 hover:bg-red-50 flex items-center gap-2"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
