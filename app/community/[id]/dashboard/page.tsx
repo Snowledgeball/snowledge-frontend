@@ -179,11 +179,9 @@ export default function CommunityDashboard() {
 
             if (response.ok) {
                 toast.success('Demande approuvée avec succès');
-                // Mettre à jour la liste des demandes
+                // Filtrer la demande approuvée de la liste
                 setContributorRequests(prev =>
-                    prev.map(req =>
-                        req.id === requestId ? { ...req, status: 'approved' } : req
-                    )
+                    prev.filter(req => req.id !== requestId)
                 );
             } else {
                 toast.error('Erreur lors de l\'approbation de la demande');

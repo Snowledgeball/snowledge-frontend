@@ -7,7 +7,12 @@ export interface Community {
     role: string;
     joinDate: string;
     contributionsCount: number;
-
+    creator: {
+        id: number;
+        fullName: string;
+        userName: string;
+        profilePicture: string;
+    };
     recentActivity: {
         type: string;
         title: string;

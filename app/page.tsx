@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   Users, MessageCircle, TrendingUp, Search, Clock, Globe, Activity, Shield, Bitcoin, PiggyBank, Wallet
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -18,9 +19,12 @@ interface Community {
   trustScore: number;
   imageUrl: string;
   creator: {
+    id: number;
     name: string;
     avatar: string;
   };
+  community_learners_id: number[];
+  community_contributors_id: number[];
 }
 
 // Ajout de l'interface pour les données brutes de l'API
@@ -29,21 +33,40 @@ interface RawCommunity {
   name: string;
   community_learners: {
     id: number;
-    userId: number;
-    communityId: number;
-    joinedAt: string;
+    learner_id: number;
+    community_id: number;
+    joined_at: string;
+  }[];
+  community_contributors: {
+    id: number;
+    contributor_id: number;
+    community_id: number;
+    joined_at: string;
   }[];
   category: {
     label: string;
   };
   image_url: string;
   creator: {
+    id: number;
     fullName: string;
     profilePicture: string;
   };
 }
 
 export default function Home() {
+
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (userId) {
+      setUserId(userId);
+    }
+  }, [session]);
+
   const CommunityCard = ({
     id,
     name,
@@ -55,7 +78,9 @@ export default function Home() {
 
     trustScore,
     imageUrl,
-    creator
+    creator,
+    community_learners_id,
+    community_contributors_id
   }: {
     id: number;
     name: string;
@@ -67,9 +92,12 @@ export default function Home() {
     trustScore: number;
     imageUrl: string;
     creator: {
+      id: number;
       name: string;
       avatar: string;
     };
+    community_learners_id: number[];
+    community_contributors_id: number[];
   }) => {
     const getTrustScoreColor = (score: number) => {
       if (score >= 90) return "text-emerald-500";
@@ -85,7 +113,8 @@ export default function Home() {
       return "Moyen";
     };
 
-    const router = useRouter();
+    console.log("creator.id :", creator.id);
+    console.log("userId :", userId);
 
     return (
       <Card
@@ -172,9 +201,13 @@ export default function Home() {
               </div>
             </div>
           </div>
-
           <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            Rejoindre
+            {userId ? (
+              creator.id === parseInt(userId) ?
+                "Accéder à votre communauté" :
+                (community_learners_id.includes(parseInt(userId)) || community_contributors_id.includes(parseInt(userId))) ?
+                  "Accéder" : "Rejoindre"
+            ) : "Rejoindre"}
           </button>
         </CardContent>
       </Card>
@@ -213,9 +246,12 @@ export default function Home() {
             trustScore: Math.floor(Math.random() * 30) + 65,
             imageUrl: community.image_url || "https://images.unsplash.com/photo-1621761191319-c6fb62004040",
             creator: {
+              id: community.creator.id,
               name: community.creator.fullName,
               avatar: community.creator.profilePicture,
-            }
+            },
+            community_learners_id: community.community_learners.map(learner => learner.learner_id),
+            community_contributors_id: community.community_contributors.map(contributor => contributor.contributor_id),
           }));
 
           setCommunities(formattedCommunities);

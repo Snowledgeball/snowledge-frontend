@@ -41,6 +41,7 @@ const CommunityHub = () => {
     const params = useParams();
     const router = useRouter();
     const [communityData, setCommunityData] = useState<Community | null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState("general");
     const [selectedPostCategory, setSelectedPostCategory] = useState("general");
     const [message, setMessage] = useState("");
@@ -52,6 +53,8 @@ const CommunityHub = () => {
     useEffect(() => {
         if (!session) {
             return;
+        } else if (userId === null) {
+            setUserId(session.user.id);
         }
 
         const checkMembershipAndFetchData = async () => {
@@ -277,7 +280,7 @@ const CommunityHub = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Modal de présentation */}
-            {showJoinModal && presentation && (
+            {userId && communityData?.creator.id !== parseInt(userId) && showJoinModal && presentation && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-xl p-8 max-w-2xl w-full shadow-2xl">
                         {/* En-tête avec gradient */}

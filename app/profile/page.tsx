@@ -393,15 +393,17 @@ const ProfilePage = () => {
                                                 >
                                                     Accéder
                                                 </button>
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedCommunityForContribution(community.name);
-                                                        setIsContributorModalOpen(true);
-                                                    }}
-                                                    className="flex-1 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 transition-all duration-200"
-                                                >
-                                                    Devenir contributeur
-                                                </button>
+                                                {community.role === 'learner' && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedCommunityForContribution(community.name);
+                                                            setIsContributorModalOpen(true);
+                                                        }}
+                                                        className="flex-1 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 transition-all duration-200"
+                                                    >
+                                                        Devenir contributeur
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
