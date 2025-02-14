@@ -112,10 +112,6 @@ export default function Home() {
       if (score >= 60) return "Bon";
       return "Moyen";
     };
-
-    console.log("creator.id :", creator.id);
-    console.log("userId :", userId);
-
     return (
       <Card
         onClick={() => router.push(`/community/${id}`)}

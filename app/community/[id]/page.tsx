@@ -277,10 +277,12 @@ const CommunityHub = () => {
         return videoId;
     }
 
+
+
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Modal de présentation */}
-            {userId && communityData?.creator.id !== parseInt(userId) && showJoinModal && presentation && (
+            {userId && communityData && communityData?.creator.creator_id !== parseInt(userId) && showJoinModal && presentation && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-xl p-8 max-w-2xl w-full shadow-2xl">
                         {/* En-tête avec gradient */}
@@ -359,6 +361,7 @@ const CommunityHub = () => {
                     </div>
                 </div>
             )}
+
 
             {/* Header avec gradient */}
             {communityData && (

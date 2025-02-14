@@ -8,10 +8,7 @@ export interface Community {
     joinDate: string;
     contributionsCount: number;
     creator: {
-        id: number;
-        fullName: string;
-        userName: string;
-        profilePicture: string;
+        creator_id: number;
     };
     recentActivity: {
         type: string;

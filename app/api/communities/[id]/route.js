@@ -47,7 +47,7 @@ export async function GET(request, { params }) {
 
         const objectToReturn = {
             ...community,
-            creator_id: creatorId
+            creator: creatorId
         };
 
         return NextResponse.json(objectToReturn);
