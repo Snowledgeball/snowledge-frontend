@@ -691,7 +691,9 @@ const CommunityHub = () => {
                         </Card>
 
                         <Card className="p-4 bg-white">
-                            <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
+                            <button
+                                onClick={() => router.push(`/community/${params.id}/create-post`)}
+                                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
                                 <PlusCircle className="w-4 h-4" />
                                 <span>Créer un post</span>
                             </button>

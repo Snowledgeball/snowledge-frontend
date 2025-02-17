@@ -6,13 +6,15 @@ import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
 import {
     Users, MessageCircle, TrendingUp, Wallet, Settings,
-    BarChart2, FileText, ChevronRight
+    BarChart2, FileText, ChevronRight, Inbox
 } from "lucide-react";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
+import { ContributionsChart } from '@/components/shared/ContributionsChart';
+import { SubscribersChart } from '@/components/shared/SubscribersChart';
 
 interface DashboardData {
     stats: {
@@ -64,6 +66,7 @@ interface ContributorRequest {
     status: 'pending' | 'approved' | 'rejected';
     createdAt: string;
 }
+
 
 export default function CommunityDashboard() {
     const router = useRouter();
@@ -243,242 +246,333 @@ export default function CommunityDashboard() {
     if (!isAuthenticated) {
         return null;
     }
-    return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* En-tête */}
-                <div className="flex justify-between items-center mb-8">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900">
-                            Tableau de bord - {dashboardData.community.name}
-                        </h1>
-                        <p className="text-gray-600 pr-2">{dashboardData.community.description}</p>
-                    </div>
-                    <button
-                        onClick={() => router.push(`/community/${communityId}/settings`)}
-                        className="flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                        <Settings className="w-4 h-4 mr-2" />
-                        Paramètres
-                    </button>
-                </div>
 
-                {/* Navigation */}
-                <div className="border-b border-gray-200 mb-8">
-                    <nav className="-mb-px flex space-x-8">
-                        {[
-                            { id: 'overview', label: 'Vue d\'ensemble', icon: BarChart2 },
-                            { id: 'members', label: 'Membres', icon: Users },
-                            { id: 'content', label: 'Contenu', icon: FileText },
-                        ].map((tab) => (
-                            <button
-                                key={tab.id}
-                                className={`flex items-center border-b-2 py-4 px-1 text-sm font-medium transition-all duration-200 
-                                    ${activeTab === tab.id ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'}`}
-                                onClick={() => setActiveTab(tab.id)}
-                            >
-                                <tab.icon className="w-4 h-4 mr-2" />
-                                {tab.label}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
-
-                {/* Contenu principal */}
-                {activeTab === 'overview' && (
-                    <div className="space-y-6">
-                        {/* Statistiques principales */}
-                        <div className="grid grid-cols-4 gap-6">
-                            {[
-                                {
-                                    label: "Membres totaux",
-                                    value: dashboardData.stats.totalMembers,
-                                    trend: dashboardData.stats.membersTrend,
-                                    icon: Users,
-                                    color: "text-blue-500"
-                                },
-                                {
-                                    label: "Posts",
-                                    value: dashboardData.stats.totalPosts,
-                                    trend: dashboardData.stats.postsTrend,
-                                    icon: MessageCircle,
-                                    color: "text-green-500"
-                                },
-                                {
-                                    label: "Engagement",
-                                    value: `${dashboardData.stats.engagementRate}%`,
-                                    trend: dashboardData.stats.engagementTrend,
-                                    icon: TrendingUp,
-                                    color: "text-purple-500"
-                                },
-                                {
-                                    label: "Revenus du mois",
-                                    value: dashboardData.stats.revenue,
-                                    trend: dashboardData.stats.revenueTrend,
-                                    icon: Wallet,
-                                    color: "text-amber-500"
-                                },
-                            ].map((stat, index) => (
-                                <Card key={index} className="p-6">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${stat.color} bg-gray-50`}>
-                                            <stat.icon className="w-6 h-6" />
-                                        </div>
-                                        <span className={`text-sm font-medium ${parseFloat(stat.trend) > 0 ? 'text-green-500' : 'text-red-500'
-                                            }`}>
-                                            {stat.trend}
-                                        </span>
-                                    </div>
-                                    <h3 className="text-2xl font-bold text-gray-900">{stat.value}</h3>
-                                    <p className="text-gray-600 text-sm">{stat.label}</p>
-                                </Card>
-                            ))}
+    // Composant Sidebar
+    const Sidebar = () => {
+        return (
+            <div className="w-64 min-h-screen bg-black border-r border-gray-800 rounded-r-xl">
+                {/* Logo et nom de la communauté */}
+                <div className="px-4 py-6 border-b border-gray-800">
+                    <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gray-800 rounded-full">
+                            <Image
+                                src={`https://${dashboardData.community.imageUrl}`}
+                                alt={dashboardData.community.name}
+                                width={40}
+                                height={40}
+                                className="rounded-full"
+                            />
                         </div>
+                        <div>
+                            <h2 className="font-semibold text-white">{dashboardData.community.name}</h2>
+                            <p onClick={() => router.push(`/community/${communityId}`)} className="text-xs text-gray-400 hover:underline cursor-pointer">Voir la communauté</p>
+                        </div>
+                    </div>
+                </div>
 
-                        {/* Demandes de contributeurs en attente */}
-                        {contributorRequests.length > 0 && (
-                            <Card className="p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                                    Demandes de contributeurs en attente
-                                </h3>
-                                <div className="space-y-4">
-                                    {contributorRequests
-                                        .map((request) => (
-                                            <div key={request.id} className="flex items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                                                <div className="flex items-center space-x-4">
-                                                    <Image
-                                                        src={request.userAvatar}
-                                                        alt={request.userName}
-                                                        className="w-10 h-10 rounded-full"
-                                                        width={48}
-                                                        height={48}
-                                                    />
-                                                    <div>
-                                                        <p className="font-medium text-gray-900">{request.userName}</p>
-                                                        <p className="text-sm text-gray-600">{request.expertiseDomain}</p>
-                                                        <p className="text-sm text-gray-500 mt-1 max-w-xl">{request.justification}</p>
+                {/* Sections de navigation */}
+                <div className="p-4">
+                    <div className="mb-6">
+                        <h3 className="text-xs font-semibold text-purple-400 uppercase mb-3">Surveillance</h3>
+                        <div className="space-y-1">
+                            <button
+                                className={`flex items-center w-full p-2 rounded-lg font-bold ${activeTab === 'overview' ? 'bg-gray-800 text-white' : 'hover:bg-gray-800 text-white'}`}
+                                onClick={() => setActiveTab('overview')}
+                            >
+                                <span className="mr-3 text-lg">📊</span>
+                                Tableau de bord
+                                <ChevronRight className="ml-auto w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="space-y-1">
+                            <button
+                                className={`flex items-center w-full p-2 rounded-lg font-bold ${activeTab === 'members' ? 'bg-gray-800 text-white' : 'hover:bg-gray-800 text-white'}`}
+                                onClick={() => setActiveTab('members')}
+                            >
+                                <span className="mr-3 text-lg">👥</span>
+                                Membres
+                                <ChevronRight className="ml-auto w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="h-px bg-gray-800 my-4" />
+
+                    <div className="mb-6">
+                        <h3 className="text-xs font-semibold text-purple-400 uppercase mb-3">Création</h3>
+                        <div className="space-y-1">
+                            <button className="flex items-center w-full p-2 rounded-lg hover:bg-gray-800 text-white hover:text-white font-bold">
+                                <span className="mr-3 text-lg">📡</span>
+                                Collecte et veille
+                                <ChevronRight className="ml-auto w-5 h-5" />
+                            </button>
+                            <button className="flex items-center w-full p-2 rounded-lg hover:bg-gray-800 text-white hover:text-white font-bold">
+                                <span className="mr-3 text-lg">✍️</span>
+                                Création & édition
+                                <ChevronRight className="ml-auto w-5 h-5" />
+                            </button>
+                            <button className="flex items-center w-full p-2 rounded-lg hover:bg-gray-800 text-white hover:text-white font-bold">
+                                <span className="mr-3 text-lg">📢</span>
+                                Publication & diffusion
+                                <ChevronRight className="ml-auto w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="h-px bg-gray-800 my-4" />
+
+                    <div className="mb-6">
+                        <h3 className="text-xs font-semibold text-purple-400 uppercase mb-3">Communication</h3>
+                        <div className="space-y-1">
+                            <button className="flex items-center w-full p-2 rounded-lg hover:bg-gray-800 text-white font-bold">
+                                <span className="mr-3 text-lg">💬</span>
+                                Inbox
+                                <ChevronRight className="ml-auto w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <div className="flex min-h-screen bg-gray-50">
+            <Sidebar />
+            <div className="flex-1">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    {/* En-tête */}
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 className="text-3xl font-bold mb-6">
+                                Bienvenue {session?.user?.name} 👋
+                            </h1>
+                            {/* Titre et nom de la communauté plus petit */}
+                            <div>
+                                <h2 className="text-xl font-medium">
+                                    Tableau de bord - {dashboardData.community.name}
+                                </h2>
+                                <p className="text-gray-600 pr-2">Aujourd'hui est un bon jour pour partager ton savoir !</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => router.push(`/community/${communityId}/settings`)}
+                            className="flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                            <Settings className="w-4 h-4 mr-2" />
+                            Paramètres
+                        </button>
+                    </div>
+
+                    {/* Contenu principal */}
+                    {activeTab === 'overview' && (
+                        <div className="space-y-6">
+                            {/* Section Revenus et Audience */}
+                            <div className="grid grid-cols-2 gap-6">
+                                {/* Revenus générés */}
+                                <Card className="p-6 rounded-3xl">
+                                    <h3 className="text-lg font-semibold mb-4">Revenus générés</h3>
+                                    <div className="grid grid-cols-3 gap-4 mb-4">
+                                        <div className="p-4 bg-gray-800 rounded-lg text-white">
+                                            <p className="text-sm">Revenus totaux</p>
+                                            <p className="text-xl font-bold">{dashboardData.stats.revenue}</p>
+                                        </div>
+                                        <div className="p-4 bg-gray-800 rounded-lg text-white">
+                                            <p className="text-sm">Rev. mensuel</p>
+                                            <p className="text-xl font-bold">1,250€</p>
+                                        </div>
+                                        <div className="p-4 bg-gray-800 rounded-lg text-white">
+                                            <p className="text-sm">Rev. par membre</p>
+                                            <p className="text-xl font-bold">8.50€</p>
+                                        </div>
+                                    </div>
+                                    <button className="w-full py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                                        Analyser mes statistiques
+                                    </button>
+                                </Card>
+
+                                {/* Audience et engagement */}
+                                <Card className="p-6 rounded-3xl">
+                                    <h3 className="text-lg font-semibold mb-4">Audience et engagement</h3>
+                                    <div className="grid grid-cols-3 gap-4 mb-4">
+                                        <div className="p-4 bg-gray-800 rounded-lg text-white">
+                                            <p className="text-sm">Total membres</p>
+                                            <p className="text-xl font-bold">{dashboardData.stats.totalMembers}</p>
+                                        </div>
+                                        <div className="p-4 bg-gray-800 rounded-lg text-white">
+                                            <p className="text-sm">Taux d'engagement</p>
+                                            <p className="text-xl font-bold">{dashboardData.stats.engagementRate}%</p>
+                                        </div>
+                                        <div className="p-4 bg-gray-800 rounded-lg text-white">
+                                            <p className="text-sm">Posts/semaine</p>
+                                            <p className="text-xl font-bold">12</p>
+                                        </div>
+                                    </div>
+                                    <button className="w-full py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                                        Analyser mes posts
+                                    </button>
+                                </Card>
+                            </div>
+
+                            {/* Statistiques détaillées par contenu */}
+                            <Card className="p-6 rounded-3xl">
+                                <h3 className="text-lg font-semibold mb-4">Statistiques détaillées par contenu</h3>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="text-left border-b">
+                                                <th className="pb-3 font-semibold text-gray-600">Titre du contenu</th>
+                                                <th className="pb-3 font-semibold text-gray-600">Type</th>
+                                                <th className="pb-3 font-semibold text-gray-600">Vues</th>
+                                                <th className="pb-3 font-semibold text-gray-600">Engagement</th>
+                                                <th className="pb-3 font-semibold text-gray-600">Revenus</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr className="border-b hover:bg-gray-50">
+                                                <td className="py-4">Analyse quotidienne BTC/USD - 17/02/2024</td>
+                                                <td className="py-4">
+                                                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                                                        Analyse
+                                                    </span>
+                                                </td>
+                                                <td className="py-4">1,234</td>
+                                                <td className="py-4">
+                                                    <div className="flex items-center">
+                                                        <span className="text-green-600">+12%</span>
+                                                        <TrendingUp className="w-4 h-4 ml-1 text-green-600" />
                                                     </div>
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <button
-                                                        onClick={() => handleApproveRequest(request.id)}
-                                                        className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                                                    >
-                                                        Approuver
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleRejectClick(request.id)}
-                                                        className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                                                    >
-                                                        Refuser
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
+                                                </td>
+                                                <td className="py-4">45€</td>
+                                            </tr>
+                                            <tr className="border-b hover:bg-gray-50">
+                                                <td className="py-4">Impact des élections US sur les marchés - Scénarios</td>
+                                                <td className="py-4">
+                                                    <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                                                        Analyse macro
+                                                    </span>
+                                                </td>
+                                                <td className="py-4">856</td>
+                                                <td className="py-4">
+                                                    <div className="flex items-center">
+                                                        <span className="text-red-600">-3%</span>
+                                                        <TrendingUp className="w-4 h-4 ml-1 text-red-600 transform rotate-180" />
+                                                    </div>
+                                                </td>
+                                                <td className="py-4">28€</td>
+                                            </tr>
+                                            <tr className="hover:bg-gray-50">
+                                                <td className="py-4">Setup trading : Double bottom sur ETH/USD</td>
+                                                <td className="py-4">
+                                                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+                                                        Signal
+                                                    </span>
+                                                </td>
+                                                <td className="py-4">567</td>
+                                                <td className="py-4">
+                                                    <div className="flex items-center">
+                                                        <span className="text-green-600">+8%</span>
+                                                        <TrendingUp className="w-4 h-4 ml-1 text-green-600" />
+                                                    </div>
+                                                </td>
+                                                <td className="py-4">32€</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </Card>
-                        )}
 
-                        {/* Activité récente modifiée */}
-                        <Card className="p-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Activité récente</h3>
-                            <div className="space-y-4">
-                                {dashboardData.recentActivity.map((activity, index) => (
-                                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                        <div className="flex items-center">
-                                            <FileText className="w-4 h-4 text-green-500 mr-3" />
-                                            <div>
-                                                <div className="flex items-center space-x-2">
-                                                    <Image
-                                                        src={activity.authorAvatar || '/images/default-avatar.png'}
-                                                        alt={activity.author}
-                                                        className="w-6 h-6 rounded-full"
-                                                        width={48}
-                                                        height={48}
-                                                    />
-                                                    <span className="text-gray-700">{activity.text}</span>
-                                                </div>
-                                                <p className="text-sm text-gray-500">
-                                                    par <span className="font-medium">{activity.author}</span> • {activity.engagement} interactions
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <span className="text-sm text-gray-500">
-                                            {new Date(activity.time).toLocaleDateString('fr-FR')}
-                                        </span>
-                                    </div>
-                                ))}
+                            {/* Section graphiques */}
+                            <div className="grid grid-cols-2 gap-6">
+                                {/* Graphique Contributions */}
+                                <Card className="p-6 rounded-3xl">
+                                    <h3 className="text-lg font-semibold mb-4">Contributions</h3>
+                                    <ContributionsChart
+                                        data={{ active: 65, pending: 35 }}
+                                    />
+                                </Card>
+
+                                {/* Graphique Évolution des abonnés */}
+                                <Card className="p-6 rounded-3xl">
+                                    <h3 className="text-lg font-semibold mb-4">Évolution des abonnés</h3>
+                                    <SubscribersChart
+                                        data={{
+                                            labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
+                                            values: [120, 450, 280, 190, 300, 250, 180, 220, 350, 200, 150, 280]
+                                        }}
+                                    />
+                                </Card>
                             </div>
-                        </Card>
-                    </div>
-                )}
+                        </div>
+                    )}
 
-                {activeTab === 'members' && (
-                    <div className="space-y-6">
-                        <Card className="p-6 bg-white shadow-sm">
-                            {members.length === 0 ? (
-                                <div className="text-center text-gray-500">Aucun membre trouvé</div>
-                            ) : (
-                                <>
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h3 className="text-lg font-semibold text-gray-900">Membres de la communauté</h3>
-                                    </div>
-                                    {/* En-tête de la grille */}
-                                    <div className="grid grid-cols-8 items-center p-4 text-base font-medium text-gray-500 border-b justify-items-center">
-                                        <div className="col-span-2">Membre</div>
-                                        <div>Statut</div>
-                                        <div>Date d&apos;inscription</div>
-                                        <div>Révisions</div>
-                                        <div>Posts</div>
-                                        <div>Gains</div>
-                                        <div className="text-center">Actions</div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        {members.map((member, index) => (
-                                            <div key={index} className="grid grid-cols-8 items-center p-4 bg-white hover:bg-gray-50 rounded-lg transition-colors justify-items-center">
-                                                <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden">
-                                                    <Image
-                                                        src={member.profilePicture}
-                                                        alt={member.fullName}
-                                                        className="w-full h-full object-cover"
-                                                        width={48}
-                                                        height={48}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <p className="text-base font-medium text-gray-900">{member.fullName}</p>
-                                                    <p className="text-sm text-gray-500">@{member.userName}</p>
+                    {activeTab === 'members' && (
+                        <div className="space-y-6">
+                            <Card className="p-6 bg-white shadow-sm rounded-3xl">
+                                {members.length === 0 ? (
+                                    <div className="text-center text-gray-500">Aucun membre trouvé</div>
+                                ) : (
+                                    <>
+                                        <div className="flex items-center justify-between mb-6">
+                                            <h3 className="text-lg font-semibold text-gray-900">Membres de la communauté</h3>
+                                        </div>
+                                        {/* En-tête de la grille */}
+                                        <div className="grid grid-cols-8 items-center p-4 text-base font-medium text-gray-500 border-b justify-items-center">
+                                            <div className="col-span-2">Membre</div>
+                                            <div>Statut</div>
+                                            <div>Date d&apos;inscription</div>
+                                            <div>Révisions</div>
+                                            <div>Posts</div>
+                                            <div>Gains</div>
+                                            <div className="text-center">Actions</div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            {members.map((member, index) => (
+                                                <div key={index} className="grid grid-cols-8 items-center p-4 bg-white hover:bg-gray-50 rounded-lg transition-colors justify-items-center">
+                                                    <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden">
+                                                        <Image
+                                                            src={member.profilePicture}
+                                                            alt={member.fullName}
+                                                            className="w-full h-full object-cover"
+                                                            width={48}
+                                                            height={48}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-base font-medium text-gray-900">{member.fullName}</p>
+                                                        <p className="text-sm text-gray-500">@{member.userName}</p>
+                                                    </div>
+
+                                                    <div>
+                                                        <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${member.status === 'Contributeur'
+                                                            ? 'bg-blue-100 text-blue-700'
+                                                            : 'bg-green-100 text-green-700'
+                                                            }`}>
+                                                            {member.status}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-base text-gray-600">
+                                                        {member.joinedAt ?
+                                                            new Date(member.joinedAt).toLocaleDateString('fr-FR')
+                                                            : 'Date inconnue'
+                                                        }
+                                                    </div>
+                                                    <div className="text-base text-gray-600">{member.revisions} révisions</div>
+                                                    <div className="text-base text-gray-600">{member.posts} posts</div>
+                                                    <div className="text-base font-medium text-gray-900">{member.gains}€</div>
+                                                    <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors justify-self-center">
+                                                        <ChevronRight className="w-6 h-6" />
+                                                    </button>
                                                 </div>
 
-                                                <div>
-                                                    <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${member.status === 'Contributeur'
-                                                        ? 'bg-blue-100 text-blue-700'
-                                                        : 'bg-green-100 text-green-700'
-                                                        }`}>
-                                                        {member.status}
-                                                    </span>
-                                                </div>
-                                                <div className="text-base text-gray-600">
-                                                    {member.joinedAt ?
-                                                        new Date(member.joinedAt).toLocaleDateString('fr-FR')
-                                                        : 'Date inconnue'
-                                                    }
-                                                </div>
-                                                <div className="text-base text-gray-600">{member.revisions} révisions</div>
-                                                <div className="text-base text-gray-600">{member.posts} posts</div>
-                                                <div className="text-base font-medium text-gray-900">{member.gains}€</div>
-                                                <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors justify-self-center">
-                                                    <ChevronRight className="w-6 h-6" />
-                                                </button>
-                                            </div>
-
-                                        ))}
-                                    </div>
-                                </>
-                            )}
-                        </Card>
-                    </div>
-                )}
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </Card>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <Dialog open={isRejectModalOpen} onOpenChange={setIsRejectModalOpen}>
