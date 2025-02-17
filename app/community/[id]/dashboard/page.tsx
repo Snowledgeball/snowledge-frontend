@@ -6,7 +6,9 @@ import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
 import {
     Users, MessageCircle, TrendingUp, Wallet, Settings,
-    BarChart2, FileText, ChevronRight, Inbox
+    BarChart2, FileText, ChevronRight, Inbox,
+    Rss, Search, Bookmark, PinIcon, Link2,
+    NotebookPen, Hash, Globe, BookMarked, ArrowUpRight
 } from "lucide-react";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
@@ -15,6 +17,8 @@ import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { ContributionsChart } from '@/components/shared/ContributionsChart';
 import { SubscribersChart } from '@/components/shared/SubscribersChart';
+import { Editor } from '@tinymce/tinymce-react';
+import TinyEditor from "@/components/shared/TinyEditor";
 
 interface DashboardData {
     stats: {
@@ -67,6 +71,21 @@ interface ContributorRequest {
     createdAt: string;
 }
 
+interface RssFeed {
+    id: number;
+    title: string;
+    source: string;
+    date: string;
+    thumbnail: string;
+    category: string;
+}
+
+interface Post {
+    id: number;
+    title: string;
+    content: string;
+    type: 'Analyse technique' | 'News' | 'Rapports' | 'Brouillons';
+}
 
 export default function CommunityDashboard() {
     const router = useRouter();
@@ -85,6 +104,56 @@ export default function CommunityDashboard() {
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
     const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
+    const [rssFeeds, setRssFeeds] = useState<RssFeed[]>([
+        {
+            id: 1,
+            title: "Bitcoin atteint un nouveau record historique",
+            source: "CoinDesk",
+            date: "Il y a 2h",
+            thumbnail: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d",
+            category: "Crypto"
+        },
+        {
+            id: 2,
+            title: "La Fed maintient ses taux directeurs",
+            source: "Bloomberg",
+            date: "Il y a 4h",
+            thumbnail: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3",
+            category: "Macro"
+        },
+        {
+            id: 3,
+            title: "Ethereum 2.0 : Les développeurs annoncent une mise à jour majeure",
+            source: "CryptoNews",
+            date: "Il y a 8h",
+            thumbnail: "https://images.unsplash.com/photo-1622630998477-20aa696ecb05",
+            category: "Crypto"
+        },
+        {
+            id: 4,
+            title: "L'inflation en zone euro atteint son plus bas niveau depuis 2021",
+            source: "Financial Times",
+            date: "Il y a 12h",
+            thumbnail: "https://images.unsplash.com/photo-1574607383476-f517f260d30b",
+            category: "Macro"
+        },
+        {
+            id: 5,
+            title: "Microsoft dévoile sa nouvelle stratégie IA pour 2024",
+            source: "TechCrunch",
+            date: "Il y a 14h",
+            thumbnail: "https://images.unsplash.com/photo-1633419461186-7d40a38105ec",
+            category: "Tech"
+        }
+    ]);
+    const [posts, setPosts] = useState<Post[]>([
+        { id: 1, title: 'Post 1', content: '', type: 'Brouillons' },
+        { id: 2, title: 'Post 2', content: '', type: 'Analyse technique' },
+        { id: 3, title: 'Post 3', content: '', type: 'News' },
+    ]);
+    const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+    const [editorContent, setEditorContent] = useState('');
+    const [postTitle, setPostTitle] = useState('');
 
     useEffect(() => {
         const userId = session?.user?.id;
@@ -231,6 +300,22 @@ export default function CommunityDashboard() {
         }
     };
 
+    const handleEditorChange = (content: string) => {
+        setEditorContent(content);
+    };
+
+    const handleCreatePost = () => {
+        const newPost = {
+            id: posts.length + 1,
+            title: postTitle || 'Nouveau post',
+            content: editorContent,
+            type: 'Brouillons' as const
+        };
+        setPosts([...posts, newPost]);
+        setPostTitle('');
+        setEditorContent('');
+    };
+
     if (loading) {
         return <div>Chargement...</div>;
     }
@@ -301,12 +386,12 @@ export default function CommunityDashboard() {
                     <div className="mb-6">
                         <h3 className="text-xs font-semibold text-purple-400 uppercase mb-3">Création</h3>
                         <div className="space-y-1">
-                            <button className="flex items-center w-full p-2 rounded-lg hover:bg-gray-800 text-white hover:text-white font-bold">
+                            <button onClick={() => setActiveTab('veille')} className="flex items-center w-full p-2 rounded-lg hover:bg-gray-800 text-white hover:text-white font-bold">
                                 <span className="mr-3 text-lg">📡</span>
                                 Collecte et veille
                                 <ChevronRight className="ml-auto w-5 h-5" />
                             </button>
-                            <button className="flex items-center w-full p-2 rounded-lg hover:bg-gray-800 text-white hover:text-white font-bold">
+                            <button onClick={() => setActiveTab('creation')} className="flex items-center w-full p-2 rounded-lg hover:bg-gray-800 text-white hover:text-white font-bold">
                                 <span className="mr-3 text-lg">✍️</span>
                                 Création & édition
                                 <ChevronRight className="ml-auto w-5 h-5" />
@@ -570,6 +655,176 @@ export default function CommunityDashboard() {
                                     </>
                                 )}
                             </Card>
+                        </div>
+                    )}
+
+                    {activeTab === 'veille' && (
+                        <div className="p-8">
+                            <div className="flex justify-between items-center mb-8">
+                                <h1 className="text-2xl font-bold">Collecte et veille</h1>
+                                <div className="flex space-x-4">
+                                    <button className="flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200">
+                                        <Rss className="w-4 h-4 mr-2" />
+                                        Ajouter un flux RSS
+                                    </button>
+                                    <button className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                                        <Link2 className="w-4 h-4 mr-2" />
+                                        Nouvelle source
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-4 gap-6">
+                                {/* Sidebar de gauche */}
+                                <div className="col-span-1 space-y-6">
+                                    <div className="bg-white rounded-xl p-4 shadow-sm">
+                                        <h3 className="font-medium mb-4 flex items-center">
+                                            <Search className="w-4 h-4 mr-2" />
+                                            Outils de veille
+                                        </h3>
+                                        <div className="space-y-2">
+                                            <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center text-gray-700">
+                                                <Rss className="w-4 h-4 mr-2" />
+                                                Flux RSS
+                                            </button>
+                                            <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center text-gray-700">
+                                                <Globe className="w-4 h-4 mr-2" />
+                                                Sites web
+                                            </button>
+                                            <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center text-gray-700">
+                                                <Hash className="w-4 h-4 mr-2" />
+                                                Mots-clés
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white rounded-xl p-4 shadow-sm">
+                                        <h3 className="font-medium mb-4 flex items-center">
+                                            <BookMarked className="w-4 h-4 mr-2" />
+                                            Organisation
+                                        </h3>
+                                        <div className="space-y-2">
+                                            <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center text-gray-700">
+                                                <Bookmark className="w-4 h-4 mr-2" />
+                                                Bookmarks
+                                            </button>
+                                            <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center text-gray-700">
+                                                <PinIcon className="w-4 h-4 mr-2" />
+                                                Épinglés
+                                            </button>
+                                            <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center text-gray-700">
+                                                <NotebookPen className="w-4 h-4 mr-2" />
+                                                Notes
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Contenu principal */}
+                                <div className="col-span-3">
+                                    <div className="bg-white rounded-xl p-6 shadow-sm">
+                                        <div className="flex items-center justify-between mb-6">
+                                            <h2 className="text-xl font-semibold">Flux RSS</h2>
+                                            <div className="flex space-x-2">
+                                                <select className="px-3 py-2 border rounded-lg text-sm">
+                                                    <option>Tous les flux</option>
+                                                    <option>Crypto</option>
+                                                    <option>Macro</option>
+                                                    <option>Tech</option>
+                                                </select>
+                                                <select className="px-3 py-2 border rounded-lg text-sm">
+                                                    <option>Plus récents</option>
+                                                    <option>Plus pertinents</option>
+                                                    <option>Plus commentés</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            {rssFeeds.map((feed) => (
+                                                <div key={feed.id} className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-xl transition-colors">
+                                                    <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                        <Image
+                                                            src={feed.thumbnail}
+                                                            alt={feed.title}
+                                                            width={96}
+                                                            height={96}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-sm font-medium text-purple-600">{feed.category}</span>
+                                                            <span className="text-sm text-gray-500">{feed.date}</span>
+                                                        </div>
+                                                        <h3 className="font-medium mt-1 mb-2">{feed.title}</h3>
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-sm text-gray-600">{feed.source}</span>
+                                                            <div className="flex space-x-2">
+                                                                <button className="p-2 hover:bg-gray-100 rounded-lg">
+                                                                    <Bookmark className="w-4 h-4 text-gray-500" />
+                                                                </button>
+                                                                <button className="p-2 hover:bg-gray-100 rounded-lg">
+                                                                    <ArrowUpRight className="w-4 h-4 text-gray-500" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'creation' && (
+                        <div className="grid grid-cols-5 gap-6 p-6">
+                            {/* Sidebar gauche */}
+                            <div className="col-span-1 space-y-4">
+                                <div className="bg-white rounded-xl p-4 shadow-sm">
+                                    <h3 className="font-medium mb-4">Mes posts</h3>
+                                    <div className="space-y-2">
+                                        {posts.map((post) => (
+                                            <button
+                                                key={post.id}
+                                                onClick={() => setSelectedPost(post)}
+                                                className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center ${selectedPost?.id === post.id ? 'bg-gray-100' : ''
+                                                    }`}
+                                            >
+                                                <FileText className="w-4 h-4 mr-2" />
+                                                {post.title}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Éditeur principal */}
+                            <div className="col-span-4">
+                                <div className="bg-white rounded-xl p-6 shadow-sm">
+                                    <div className="mb-6 flex justify-between items-center">
+                                        <input
+                                            type="text"
+                                            placeholder="Titre du post"
+                                            value={postTitle}
+                                            onChange={(e) => setPostTitle(e.target.value)}
+                                            className="text-2xl font-bold border-none focus:outline-none focus:ring-0 w-full"
+                                        />
+                                        <div className="flex space-x-2">
+                                            <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                                                Visualisation
+                                            </button>
+                                            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                                                Publier
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <TinyEditor />
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
