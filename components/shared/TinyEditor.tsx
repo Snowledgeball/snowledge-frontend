@@ -25,7 +25,7 @@ const TinyEditor = () => {
         <div className="tiny-editor p-2">
             <Editor
                 id="my-tiny-editor"
-                apiKey='lyx7gw5lsafqowwgdrssfaqry5mv32gvr8l03sbrjfda7sbi'
+                apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
                 inline={true}
                 initialValue="<p>Écrivez ici...</p>"
                 init={{
