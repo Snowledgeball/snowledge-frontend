@@ -8,7 +8,8 @@ import {
     Users, MessageCircle, TrendingUp, Wallet, Settings,
     BarChart2, FileText, ChevronRight, Inbox,
     Rss, Search, Bookmark, PinIcon, Link2,
-    NotebookPen, Hash, Globe, BookMarked, ArrowUpRight
+    NotebookPen, Hash, Globe, BookMarked, ArrowUpRight,
+    ImageIcon, Eye, PenTool
 } from "lucide-react";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ import { ContributionsChart } from '@/components/shared/ContributionsChart';
 import { SubscribersChart } from '@/components/shared/SubscribersChart';
 import { Editor } from '@tinymce/tinymce-react';
 import TinyEditor from "@/components/shared/TinyEditor";
+import { Switch } from "@/components/ui/switch";
 
 interface DashboardData {
     stats: {
@@ -87,6 +89,24 @@ interface Post {
     type: 'Analyse technique' | 'News' | 'Rapports' | 'Brouillons';
 }
 
+const POST_TAGS = [
+    { value: 'analyse-technique', label: 'Analyse Technique' },
+    { value: 'analyse-macro', label: 'Analyse Macro' },
+    { value: 'defi', label: 'DeFi' },
+    { value: 'news', label: 'News' },
+    { value: 'education', label: 'Éducation' },
+    { value: 'trading', label: 'Trading' }
+];
+
+const POST_EMOJIS = [
+    { value: '📊', label: 'Graphique' },
+    { value: '📈', label: 'Tendance' },
+    { value: '💡', label: 'Idée' },
+    { value: '🔍', label: 'Analyse' },
+    { value: '📰', label: 'News' },
+    { value: '💰', label: 'Finance' }
+];
+
 export default function CommunityDashboard() {
     const router = useRouter();
     const params = useParams();
@@ -154,6 +174,11 @@ export default function CommunityDashboard() {
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
     const [editorContent, setEditorContent] = useState('');
     const [postTitle, setPostTitle] = useState('');
+    const [contributionsEnabled, setContributionsEnabled] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [coverImage, setCoverImage] = useState('');
+    const [selectedEmoji, setSelectedEmoji] = useState('');
+    const [selectedTag, setSelectedTag] = useState('');
 
     useEffect(() => {
         const userId = session?.user?.id;
@@ -316,6 +341,36 @@ export default function CommunityDashboard() {
         setEditorContent('');
     };
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || !e.target.files[0]) return;
+
+        const file = e.target.files[0];
+        setIsUploading(true);
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors de l\'upload');
+            }
+
+            const data = await response.json();
+            setCoverImage(data.url);
+            toast.success('Image uploadée avec succès');
+        } catch (error) {
+            toast.error('Erreur lors de l\'upload de l\'image');
+            console.error(error);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     if (loading) {
         return <div>Chargement...</div>;
     }
@@ -334,19 +389,22 @@ export default function CommunityDashboard() {
 
     // Composant Sidebar
     const Sidebar = () => {
+
         return (
-            <div className="w-64 min-h-screen bg-black border-r border-gray-800 rounded-r-xl">
-                {/* Logo et nom de la communauté */}
-                <div className="px-4 py-6 border-b border-gray-800">
+            <div className="w-64 min-h-screen bg-black border-r border-gray-800 rounded-r-3xl shadow-2xl">
+                {/* Logo et nom */}
+                <div className="p-4 border-b border-gray-800">
                     <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-gray-800 rounded-full">
-                            <Image
-                                src={`https://${dashboardData.community.imageUrl}`}
-                                alt={dashboardData.community.name}
-                                width={40}
-                                height={40}
-                                className="rounded-full"
-                            />
+                            {dashboardData?.community?.imageUrl && (
+                                <Image
+                                    src={`https://${dashboardData.community.imageUrl}`}
+                                    alt="Logo"
+                                    width={40}
+                                    height={40}
+                                    className="rounded-full"
+                                />
+                            )}
                         </div>
                         <div>
                             <h2 className="font-semibold text-white">{dashboardData.community.name}</h2>
@@ -355,64 +413,54 @@ export default function CommunityDashboard() {
                     </div>
                 </div>
 
-                {/* Sections de navigation */}
-                <div className="p-4">
-                    <div className="mb-6">
-                        <h3 className="text-xs font-semibold text-purple-400 uppercase mb-3">Surveillance</h3>
+                {/* Navigation */}
+                <div className="p-4 space-y-6">
+                    <div>
+                        <h3 className="text-purple-400 text-xs font-medium mb-2">Surveillance</h3>
                         <div className="space-y-1">
                             <button
-                                className={`flex items-center w-full p-2 rounded-lg font-bold ${activeTab === 'overview' ? 'bg-gray-800 text-white' : 'hover:bg-gray-800 text-white'}`}
+                                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === 'overview' ? 'bg-gray-800' : 'hover:bg-gray-800'
+                                    }`}
                                 onClick={() => setActiveTab('overview')}
                             >
-                                <span className="mr-3 text-lg">📊</span>
-                                Tableau de bord
-                                <ChevronRight className="ml-auto w-5 h-5" />
+                                📊 Tableau de bord
+                                <ChevronRight className="ml-auto w-4 h-4" />
                             </button>
                         </div>
+                    </div>
+
+                    <div>
+                        <h3 className="text-purple-400 text-xs font-medium mb-2">Création</h3>
                         <div className="space-y-1">
                             <button
-                                className={`flex items-center w-full p-2 rounded-lg font-bold ${activeTab === 'members' ? 'bg-gray-800 text-white' : 'hover:bg-gray-800 text-white'}`}
-                                onClick={() => setActiveTab('members')}
+                                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === 'veille' ? 'bg-gray-800' : 'hover:bg-gray-800'
+                                    }`}
+                                onClick={() => setActiveTab('veille')}
                             >
-                                <span className="mr-3 text-lg">👥</span>
-                                Membres
-                                <ChevronRight className="ml-auto w-5 h-5" />
+                                📡 Collecte et veille
+                                <ChevronRight className="ml-auto w-4 h-4" />
+                            </button>
+                            <button
+                                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === 'creation' ? 'bg-gray-800' : 'hover:bg-gray-800'
+                                    }`}
+                                onClick={() => setActiveTab('creation')}
+                            >
+                                ✍️ Création & édition
+                                <ChevronRight className="ml-auto w-4 h-4" />
+                            </button>
+                            <button className="w-full flex items-center text-white p-2 rounded-lg hover:bg-gray-800">
+                                📢 Publication & diffusion
+                                <ChevronRight className="ml-auto w-4 h-4" />
                             </button>
                         </div>
                     </div>
 
-                    <div className="h-px bg-gray-800 my-4" />
-
-                    <div className="mb-6">
-                        <h3 className="text-xs font-semibold text-purple-400 uppercase mb-3">Création</h3>
+                    <div>
+                        <h3 className="text-purple-400 text-xs font-medium mb-2">Communication</h3>
                         <div className="space-y-1">
-                            <button onClick={() => setActiveTab('veille')} className="flex items-center w-full p-2 rounded-lg hover:bg-gray-800 text-white hover:text-white font-bold">
-                                <span className="mr-3 text-lg">📡</span>
-                                Collecte et veille
-                                <ChevronRight className="ml-auto w-5 h-5" />
-                            </button>
-                            <button onClick={() => setActiveTab('creation')} className="flex items-center w-full p-2 rounded-lg hover:bg-gray-800 text-white hover:text-white font-bold">
-                                <span className="mr-3 text-lg">✍️</span>
-                                Création & édition
-                                <ChevronRight className="ml-auto w-5 h-5" />
-                            </button>
-                            <button className="flex items-center w-full p-2 rounded-lg hover:bg-gray-800 text-white hover:text-white font-bold">
-                                <span className="mr-3 text-lg">📢</span>
-                                Publication & diffusion
-                                <ChevronRight className="ml-auto w-5 h-5" />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="h-px bg-gray-800 my-4" />
-
-                    <div className="mb-6">
-                        <h3 className="text-xs font-semibold text-purple-400 uppercase mb-3">Communication</h3>
-                        <div className="space-y-1">
-                            <button className="flex items-center w-full p-2 rounded-lg hover:bg-gray-800 text-white font-bold">
-                                <span className="mr-3 text-lg">💬</span>
-                                Inbox
-                                <ChevronRight className="ml-auto w-5 h-5" />
+                            <button className="w-full flex items-center text-white p-2 rounded-lg hover:bg-gray-800">
+                                💬 Inbox
+                                <ChevronRight className="ml-auto w-4 h-4" />
                             </button>
                         </div>
                     </div>
@@ -780,50 +828,95 @@ export default function CommunityDashboard() {
                     )}
 
                     {activeTab === 'creation' && (
-                        <div className="grid grid-cols-5 gap-6 p-6">
-                            {/* Sidebar gauche */}
-                            <div className="col-span-1 space-y-4">
-                                <div className="bg-white rounded-xl p-4 shadow-sm">
-                                    <h3 className="font-medium mb-4">Mes posts</h3>
-                                    <div className="space-y-2">
-                                        {posts.map((post) => (
-                                            <button
-                                                key={post.id}
-                                                onClick={() => setSelectedPost(post)}
-                                                className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center ${selectedPost?.id === post.id ? 'bg-gray-100' : ''
-                                                    }`}
-                                            >
-                                                <FileText className="w-4 h-4 mr-2" />
-                                                {post.title}
-                                            </button>
-                                        ))}
+                        <div className="flex-1 p-6">
+                            <div className="flex justify-end items-center mb-4">
+                                <div className="flex items-center space-x-4">
+                                    <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-2 ">
+                                        <Switch
+                                            checked={contributionsEnabled}
+                                            onCheckedChange={setContributionsEnabled}
+                                            className="data-[state=checked]:bg-green-600"
+                                        />
+                                        <label className="text-gray-600 flex items-center">
+                                            Contributions
+                                        </label>
                                     </div>
+                                    <button className="px-4 py-2 bg-purple-100 text-purple-600 rounded-lg">
+                                        Soumettre à la commu
+                                    </button>
+                                    <button className="px-4 py-2 bg-green-600 text-white rounded-lg">
+                                        Publier
+                                    </button>
                                 </div>
                             </div>
 
-                            {/* Éditeur principal */}
-                            <div className="col-span-4">
-                                <div className="bg-white rounded-xl p-6 shadow-sm">
-                                    <div className="mb-6 flex justify-between items-center">
+                            <div className="bg-white rounded-xl p-6">
+                                <div className="flex w-full space-x-4">
+                                    <div className="flex items-center space-x-2 flex-1">
                                         <input
-                                            type="text"
-                                            placeholder="Titre du post"
-                                            value={postTitle}
-                                            onChange={(e) => setPostTitle(e.target.value)}
-                                            className="text-2xl font-bold border-none focus:outline-none focus:ring-0 w-full"
+                                            type="file"
+                                            id="cover-image"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={handleImageUpload}
                                         />
-                                        <div className="flex space-x-2">
-                                            <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-                                                Visualisation
-                                            </button>
-                                            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-                                                Publier
-                                            </button>
-                                        </div>
+                                        {coverImage ? (
+                                            <Image
+                                                src={`https://${coverImage}`}
+                                                alt="Cover Image"
+                                                width={50}
+                                                height={50}
+                                                className="rounded-lg"
+                                            />
+                                        ) : (
+                                            <label
+                                                htmlFor="cover-image"
+                                                className="w-full px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors text-center">
+                                                {isUploading ? 'Upload...' : 'Ajouter une image de couverture'}
+                                            </label>
+                                        )}
+                                        {coverImage && (
+                                            <label
+                                                htmlFor="cover-image"
+                                                className={`px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            >
+                                                Modifier
+                                            </label>
+                                        )}
                                     </div>
-
-                                    <TinyEditor />
+                                    <select
+                                        className="flex-1 px-3 py-2 border rounded-lg bg-white"
+                                        value={selectedEmoji}
+                                        onChange={(e) => setSelectedEmoji(e.target.value)}
+                                    >
+                                        <option defaultValue={POST_EMOJIS[0].value}>Choisir un emoji</option>
+                                        {POST_EMOJIS.map((emoji) => (
+                                            <option key={emoji.value} value={emoji.value}>
+                                                {emoji.value} {emoji.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        value={selectedTag}
+                                        onChange={(e) => setSelectedTag(e.target.value)}
+                                        className="flex-1 px-3 py-2 border rounded-lg bg-white"
+                                    >
+                                        <option defaultValue={POST_TAGS[0].value}>Choisir une catégorie</option>
+                                        {POST_TAGS.map((tag) => (
+                                            <option key={tag.value} value={tag.value}>
+                                                {tag.label}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
+
+                                <input
+                                    type="text"
+                                    placeholder="Titre de l'article"
+                                    className="mt-4 w-full text-3xl font-bold border-none mb-4"
+                                />
+
+                                <TinyEditor />
                             </div>
                         </div>
                     )}
