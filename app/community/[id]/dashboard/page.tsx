@@ -171,13 +171,11 @@ export default function CommunityDashboard() {
         { id: 2, title: 'Post 2', content: '', type: 'Analyse technique' },
         { id: 3, title: 'Post 3', content: '', type: 'News' },
     ]);
-    const [selectedPost, setSelectedPost] = useState<Post | null>(null);
     const [editorContent, setEditorContent] = useState('');
     const [postTitle, setPostTitle] = useState('');
     const [contributionsEnabled, setContributionsEnabled] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [coverImage, setCoverImage] = useState('');
-    const [selectedEmoji, setSelectedEmoji] = useState('');
     const [selectedTag, setSelectedTag] = useState('');
 
     useEffect(() => {
@@ -368,6 +366,48 @@ export default function CommunityDashboard() {
             console.error(error);
         } finally {
             setIsUploading(false);
+        }
+    };
+
+    const handleSubmitPost = async () => {
+        if (!postTitle || !editorContent || !selectedTag) {
+            toast.error('Veuillez remplir tous les champs');
+            return;
+        }
+
+        if (editorContent.length < 100) {
+            toast.error('Le contenu doit contenir au moins 100 caractères');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/communities/${communityId}/posts`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: postTitle,
+                    content: editorContent,
+                    cover_image_url: coverImage,
+                    tag: selectedTag,
+                    accept_contributions: contributionsEnabled
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors de la publication');
+            }
+
+            toast.success('Post publié avec succès');
+            // Réinitialiser les champs
+            setPostTitle('');
+            setEditorContent('');
+            setCoverImage('');
+            setSelectedTag('');
+        } catch (error) {
+            toast.error('Erreur lors de la publication du post');
+            console.error(error);
         }
     };
 
@@ -841,10 +881,9 @@ export default function CommunityDashboard() {
                                             Contributions
                                         </label>
                                     </div>
-                                    <button className="px-4 py-2 bg-purple-100 text-purple-600 rounded-lg">
-                                        Soumettre à la commu
-                                    </button>
-                                    <button className="px-4 py-2 bg-green-600 text-white rounded-lg">
+                                    <button
+                                        onClick={handleSubmitPost}
+                                        className="px-4 py-2 bg-green-600 text-white rounded-lg">
                                         Publier
                                     </button>
                                 </div>
@@ -885,18 +924,6 @@ export default function CommunityDashboard() {
                                         )}
                                     </div>
                                     <select
-                                        className="flex-1 px-3 py-2 border rounded-lg bg-white"
-                                        value={selectedEmoji}
-                                        onChange={(e) => setSelectedEmoji(e.target.value)}
-                                    >
-                                        <option defaultValue={POST_EMOJIS[0].value}>Choisir un emoji</option>
-                                        {POST_EMOJIS.map((emoji) => (
-                                            <option key={emoji.value} value={emoji.value}>
-                                                {emoji.value} {emoji.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <select
                                         value={selectedTag}
                                         onChange={(e) => setSelectedTag(e.target.value)}
                                         className="flex-1 px-3 py-2 border rounded-lg bg-white"
@@ -909,14 +936,19 @@ export default function CommunityDashboard() {
                                         ))}
                                     </select>
                                 </div>
-
                                 <input
                                     type="text"
+                                    value={postTitle}
+                                    onChange={(e) => setPostTitle(e.target.value)}
                                     placeholder="Titre de l'article"
-                                    className="mt-4 w-full text-3xl font-bold border-none mb-4"
+                                    className="mt-8 w-full text-2xl font-bold border border-gray-200 mb-4 px-4 py-2 rounded-lg"
                                 />
 
-                                <TinyEditor />
+
+                                <TinyEditor
+                                    value={editorContent}
+                                    onChange={setEditorContent}
+                                />
                             </div>
                         </div>
                     )}
