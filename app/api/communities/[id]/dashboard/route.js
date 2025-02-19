@@ -24,12 +24,7 @@ export async function GET(request, { params }) {
             },
             include: {
                 community_learners: true,
-                community_posts: {
-                    include: {
-                        community_posts_comments: true
-                    }
-                }
-
+                community_posts: true,
             }
         });
 
@@ -42,10 +37,10 @@ export async function GET(request, { params }) {
         const totalPosts = community.community_posts.length;
 
         // Calculer le taux d'engagement (nombre total de commentaires / nombre de posts)
-        const totalComments = community.community_posts.reduce((acc, post) =>
-            acc + (post.comments_count || 0), 0);
+        const totalLikes = community.community_posts.reduce((acc, post) =>
+            acc + (post.likes_count || 0), 0);
         const engagementRate = totalPosts > 0
-            ? Math.round((totalComments / totalPosts) * 100)
+            ? Math.round((totalLikes / totalPosts) * 100)
             : 0;
 
         // Récupérer l'activité récente
@@ -54,7 +49,7 @@ export async function GET(request, { params }) {
             type: "post",
             text: post.content,
             author_id: post.author_id,
-            engagement: post.comments_count || 0,
+            engagement: post.likes_count || 0,
             time: post.created_at
         })).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
             .slice(0, 5);

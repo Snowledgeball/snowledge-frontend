@@ -93,9 +93,6 @@ const TinyEditor = () => {
                 }}
                 onEditorChange={handleEditorChange}
             />
-
-
-
         </div>
     );
 };

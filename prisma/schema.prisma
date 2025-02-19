@@ -41,16 +41,18 @@ model community_learners {
 }
 
 model community_posts {
-  id                       Int                        @id @default(autoincrement())
-  community_id             Int
-  author_id                Int
-  content                  String
-  created_at               DateTime?                  @default(now()) @db.Timestamp(6)
-  updated_at               DateTime?                  @default(now()) @db.Timestamp(6)
-  likes_count              Int?                       @default(0)
-  comments_count           Int?                       @default(0)
-  community                community                  @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  community_posts_comments community_posts_comments[]
+  id                   Int       @id @default(autoincrement())
+  community_id         Int
+  author_id            Int
+  content              String
+  created_at           DateTime? @default(now()) @db.Timestamp(6)
+  updated_at           DateTime? @default(now()) @db.Timestamp(6)
+  likes_count          Int?      @default(0)
+  title                String    @db.VarChar(255)
+  tag                  String    @db.VarChar(50)
+  cover_image_url      String    @db.VarChar(255)
+  accept_contributions Boolean?  @default(false)
+  community            community @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model user {
@@ -74,17 +76,6 @@ model community_category {
   name      String      @db.VarChar(255)
   label     String      @db.VarChar(255)
   community community[]
-}
-
-model community_posts_comments {
-  id              Int             @id(map: "post_comments_pkey") @default(autoincrement())
-  post_id         Int
-  author_id       Int
-  content         String
-  created_at      DateTime?       @default(now()) @db.Timestamp(6)
-  updated_at      DateTime?       @default(now()) @db.Timestamp(6)
-  likes_count     Int?            @default(0)
-  community_posts community_posts @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "post_comments_post_id_fkey")
 }
 
 model community_presentation {

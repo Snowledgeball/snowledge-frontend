@@ -43,12 +43,8 @@ export async function GET(
             }
         });
 
-        // Récupérer le nombre de contributions (commentaires)
-        const contributionsCount = await prismaClient.community_posts_comments.count({
-            where: {
-                author_id: parseInt(id)
-            }
-        });
+        // Récupérer le nombre de contributions 
+        const contributionsCount = 0;
 
         // Calculer la date d'inscription (à partir de la première communauté rejointe)
         const memberSince = user.created_at

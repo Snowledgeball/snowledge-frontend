@@ -26,10 +26,6 @@ export async function GET(request, { params }) {
                 community_learners: true,
                 community_contributors: true,
                 community_posts: {
-
-                    include: {
-                        community_posts_comments: true
-                    },
                     orderBy: {
                         created_at: 'desc'
                     }
