@@ -177,6 +177,7 @@ export default function CommunityDashboard() {
     const [isUploading, setIsUploading] = useState(false);
     const [coverImage, setCoverImage] = useState('');
     const [selectedTag, setSelectedTag] = useState('');
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
     useEffect(() => {
         const userId = session?.user?.id;
@@ -871,7 +872,7 @@ export default function CommunityDashboard() {
                         <div className="flex-1 p-6">
                             <div className="flex justify-end items-center mb-4">
                                 <div className="flex items-center space-x-4">
-                                    <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-2 ">
+                                    <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-2">
                                         <Switch
                                             checked={contributionsEnabled}
                                             onCheckedChange={setContributionsEnabled}
@@ -881,9 +882,19 @@ export default function CommunityDashboard() {
                                             Contributions
                                         </label>
                                     </div>
+
+                                    <button
+                                        onClick={() => setIsPreviewOpen(true)}
+                                        className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                                    >
+                                        <Eye className="w-4 h-4 mr-2 inline-block" />
+                                        Prévisualiser
+                                    </button>
+
                                     <button
                                         onClick={handleSubmitPost}
-                                        className="px-4 py-2 bg-green-600 text-white rounded-lg">
+                                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                    >
                                         Publier
                                     </button>
                                 </div>
@@ -903,8 +914,8 @@ export default function CommunityDashboard() {
                                             <Image
                                                 src={`https://${coverImage}`}
                                                 alt="Cover Image"
-                                                width={50}
-                                                height={50}
+                                                width={75}
+                                                height={75}
                                                 className="rounded-lg"
                                             />
                                         ) : (
@@ -983,6 +994,62 @@ export default function CommunityDashboard() {
                             Confirmer le refus
                         </button>
                     </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+                    <DialogHeader>
+                        <DialogTitle>Prévisualisation du post</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="py-4">
+                        {/* Image de couverture */}
+                        {coverImage && (
+                            <div className="w-full h-48 relative mb-6 rounded-lg overflow-hidden">
+                                <Image
+                                    src={`https://${coverImage}`}
+                                    alt="Cover"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                        )}
+
+                        {/* Tag */}
+                        {selectedTag && (
+                            <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm mb-4">
+                                {POST_TAGS.find(t => t.value === selectedTag)?.label}
+                            </span>
+                        )}
+
+                        {/* Titre */}
+                        <h1 className="text-3xl font-bold text-gray-900 mb-6">
+                            {postTitle || "Sans titre"}
+                        </h1>
+
+                        {/* Contenu */}
+                        <div
+                            className="prose max-w-none"
+                            dangerouslySetInnerHTML={{ __html: editorContent }}
+                        />
+
+                        {/* Footer */}
+                        <div className="mt-6 pt-4 border-t border-gray-200">
+                            <div className="flex items-center justify-between text-sm text-gray-500">
+                                <span>
+                                    {contributionsEnabled ? "✅ Contributions activées" : "❌ Contributions désactivées"}
+                                </span>
+                                <span>
+                                    {new Date().toLocaleDateString('fr-FR', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>

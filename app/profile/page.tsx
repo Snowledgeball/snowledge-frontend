@@ -495,52 +495,60 @@ const ProfilePage = () => {
                                 <div className="space-y-8">
                                     {userOwnedCommunities.map((community) => (
                                         <Card key={community.id} className="p-6 bg-white rounded-xl shadow-md">
-                                            <div className="flex justify-between items-start">
-                                                <div>
+                                            <div className="flex flex-col">
+                                                <div className="flex justify-between items-center">
                                                     <h3 className="text-2xl font-bold text-gray-900">{community.name}</h3>
-                                                    <p className="text-gray-600 mt-2 pr-2">{community.description}</p>
-                                                </div>
-                                                <button
-                                                    onClick={() => router.push(`/community/${community.id}/dashboard`)}
-                                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                                                >
-                                                    Tableau de bord
-                                                </button>
-                                            </div>
-
-                                            {!community.isComplete && (
-                                                <div className="mt-6 space-y-4">
-                                                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                                                        <h4 className="font-medium text-amber-800 mb-2">Actions recommandées</h4>
-                                                        <ul className="space-y-2">
-                                                            <li className="flex items-center text-amber-700">
-                                                                <ArrowRight className="w-4 h-4 mr-2" />
-                                                                Complétez la description de votre communauté
-                                                            </li>
-                                                            <li className="flex items-center text-amber-700">
-                                                                <ArrowRight className="w-4 h-4 mr-2" />
-                                                                Ajoutez une vidéo de présentation YouTube
-                                                            </li>
-                                                        </ul>
+                                                    <div className="flex gap-4">
+                                                        <button
+                                                            onClick={() => router.push(`/community/${community.id}/dashboard`)}
+                                                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                                        >
+                                                            Tableau de bord
+                                                        </button>
+                                                        <button
+                                                            onClick={() => router.push(`/community/${community.id}`)}
+                                                            className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                                                        >
+                                                            Accéder à la communauté
+                                                        </button>
                                                     </div>
                                                 </div>
-                                            )}
+                                                <p className="text-gray-600 mt-2 pr-2">{community.description}</p>
 
-                                            <div className="mt-6 grid grid-cols-3 gap-6">
-                                                <div className="bg-gray-50 p-4 rounded-lg">
-                                                    <Users className="w-6 h-6 text-blue-500 mb-2" />
-                                                    <p className="text-2xl font-bold text-gray-900">{community.stats.membersCount}</p>
-                                                    <p className="text-sm text-gray-600">Membres</p>
-                                                </div>
-                                                <div className="bg-gray-50 p-4 rounded-lg">
-                                                    <MessageCircle className="w-6 h-6 text-green-500 mb-2" />
-                                                    <p className="text-2xl font-bold text-gray-900">{community.stats.postsCount}</p>
-                                                    <p className="text-sm text-gray-600">Posts</p>
-                                                </div>
-                                                <div className="bg-gray-50 p-4 rounded-lg">
-                                                    <Wallet className="w-6 h-6 text-purple-500 mb-2" />
-                                                    <p className="text-2xl font-bold text-gray-900">{community.stats.revenue}€</p>
-                                                    <p className="text-sm text-gray-600">Revenus générés</p>
+                                                {!community.isComplete && (
+                                                    <div className="mt-6 space-y-4">
+                                                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                                            <h4 className="font-medium text-amber-800 mb-2">Actions recommandées</h4>
+                                                            <ul className="space-y-2">
+                                                                <li className="flex items-center text-amber-700">
+                                                                    <ArrowRight className="w-4 h-4 mr-2" />
+                                                                    Complétez la description de votre communauté
+                                                                </li>
+                                                                <li className="flex items-center text-amber-700">
+                                                                    <ArrowRight className="w-4 h-4 mr-2" />
+                                                                    Ajoutez une vidéo de présentation YouTube
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                <div className="mt-6 grid grid-cols-3 gap-6">
+                                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                                        <Users className="w-6 h-6 text-blue-500 mb-2" />
+                                                        <p className="text-2xl font-bold text-gray-900">{community.stats.membersCount}</p>
+                                                        <p className="text-sm text-gray-600">Membres</p>
+                                                    </div>
+                                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                                        <MessageCircle className="w-6 h-6 text-green-500 mb-2" />
+                                                        <p className="text-2xl font-bold text-gray-900">{community.stats.postsCount}</p>
+                                                        <p className="text-sm text-gray-600">Posts</p>
+                                                    </div>
+                                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                                        <Wallet className="w-6 h-6 text-purple-500 mb-2" />
+                                                        <p className="text-2xl font-bold text-gray-900">{community.stats.revenue}€</p>
+                                                        <p className="text-sm text-gray-600">Revenus générés</p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </Card>
