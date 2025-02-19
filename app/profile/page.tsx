@@ -273,7 +273,7 @@ const ProfilePage = () => {
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* En-tête du profil avec fond dégradé */}
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-8 mb-8 transition-all">
+                <div className="bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#003E8A] to-[#16215B] rounded-2xl shadow-xl p-8 mb-8 transition-all">
                     <div className="flex items-center">
                         <div className="w-24 h-24 bg-white rounded-full mr-6 flex items-center justify-center p-1 ring-4 ring-white/30">
                             <Image

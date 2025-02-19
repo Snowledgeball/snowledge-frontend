@@ -14,6 +14,7 @@ import {
     Settings,
     ChevronDown,
     Users,
+    Lock,
 } from "lucide-react";
 import { Community } from "@/types/community";
 import Image from 'next/image';
@@ -355,7 +356,7 @@ const CommunityHub = () => {
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-xl p-8 max-w-2xl w-full shadow-2xl">
                         {/* En-tête avec gradient */}
-                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 -m-8 mb-6 p-6 rounded-t-xl">
+                        <div className="bg-gradient-radial from-[#003E8A] to-[#16215B] -m-8 mb-6 p-6 rounded-t-xl">
                             <h2 className="text-2xl font-bold text-white text-center">{communityData?.name}</h2>
                         </div>
 
@@ -434,7 +435,7 @@ const CommunityHub = () => {
 
             {/* Header avec gradient */}
             {communityData && (
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600">
+                <div className="bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#003E8A] to-[#16215B]">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex items-center justify-between h-16">
                             <div className="flex items-center">
@@ -558,6 +559,18 @@ const CommunityHub = () => {
                                     onClick={() => setActiveTab("posts")}
                                 >
                                     Les posts
+                                </button>
+                                {/* Bouton Cours verrouillé */}
+                                <button
+                                    onClick={() => toast.info("Les cours ne sont pas encore disponibles. Revenez bientôt !")}
+                                    className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors opacity-60 cursor-not-allowed flex items-center gap-2
+                                        ${activeTab === "courses"
+                                            ? "border-blue-500 text-blue-600"
+                                            : "border-transparent text-gray-500"
+                                        }`}
+                                >
+                                    Cours
+                                    <Lock className="w-4 h-4" />
                                 </button>
                             </nav>
                         </div>
@@ -746,17 +759,27 @@ const CommunityHub = () => {
                         <div className="space-y-6">
                             {faqData.map((item) => (
                                 <div key={item.id} className="border-b border-gray-100 pb-6 last:border-0">
+                                    {/* Question */}
                                     <div className="flex items-start space-x-3">
                                         <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm">
                                             Q
                                         </span>
-                                        <div>
+                                        <div className="flex-1">
                                             <h3 className="font-medium text-gray-900 mb-2">{item.question}</h3>
-                                            <p className="text-gray-600 text-sm leading-relaxed">{item.answer}</p>
-                                            <span className="inline-block mt-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                                            <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
                                                 {item.category}
                                             </span>
                                         </div>
+                                    </div>
+
+                                    {/* Réponse */}
+                                    <div className="flex items-start space-x-3 mt-4">
+                                        <span className="flex-shrink-0 w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm">
+                                            R
+                                        </span>
+                                        <p className="flex-1 text-gray-600 text-sm leading-relaxed">
+                                            {item.answer}
+                                        </p>
                                     </div>
                                 </div>
                             ))}
