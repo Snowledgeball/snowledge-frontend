@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Disclosure } from "@/components/ui/disclosure";
 
 // Ajouter ces catégories de posts
 const POST_CATEGORIES = [
@@ -730,7 +731,7 @@ const CommunityHub = () => {
                                                                     </span>
                                                                 )}
                                                                 <button
-                                                                    onClick={() => router.push(`/community/${params.id}/post/${post.id}`)}
+                                                                    onClick={() => router.push(`/community/${params.id}/post/${post.id}#post-page`)}
                                                                     className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                                                                 >
                                                                     Lire la suite →
@@ -748,7 +749,7 @@ const CommunityHub = () => {
                     </div>
                 </div>
 
-                {/* Section Q&A déplacée en bas - pleine largeur */}
+                {/* Section Q&A avec Disclosure */}
                 <div className="mt-8">
                     <div className="bg-white rounded-lg shadow-sm p-6">
                         <div className="flex items-center justify-between mb-6">
@@ -756,32 +757,37 @@ const CommunityHub = () => {
                             <HelpCircle className="w-5 h-5 text-blue-500" />
                         </div>
 
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             {faqData.map((item) => (
-                                <div key={item.id} className="border-b border-gray-100 pb-6 last:border-0">
-                                    {/* Question */}
-                                    <div className="flex items-start space-x-3">
-                                        <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm">
-                                            Q
-                                        </span>
-                                        <div className="flex-1">
-                                            <h3 className="font-medium text-gray-900 mb-2">{item.question}</h3>
-                                            <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                                                {item.category}
-                                            </span>
-                                        </div>
-                                    </div>
+                                <Disclosure key={item.id}>
+                                    {({ open }: { open: boolean }) => (
+                                        <div className="border rounded-lg overflow-hidden">
+                                            <Disclosure.Button className="w-full p-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors">
+                                                <div className="flex items-center space-x-3">
+                                                    <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm">
+                                                        Q
+                                                    </span>
+                                                    <h3 className="font-medium text-gray-900">{item.question}</h3>
+                                                </div>
+                                                <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`} />
+                                            </Disclosure.Button>
 
-                                    {/* Réponse */}
-                                    <div className="flex items-start space-x-3 mt-4">
-                                        <span className="flex-shrink-0 w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm">
-                                            R
-                                        </span>
-                                        <p className="flex-1 text-gray-600 text-sm leading-relaxed">
-                                            {item.answer}
-                                        </p>
-                                    </div>
-                                </div>
+                                            <Disclosure.Panel className="p-4 bg-white">
+                                                <div className="flex items-start space-x-3">
+                                                    <span className="flex-shrink-0 w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm">
+                                                        R
+                                                    </span>
+                                                    <p className="flex-1 text-gray-600 text-sm leading-relaxed">
+                                                        {item.answer}
+                                                    </p>
+                                                </div>
+                                                <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full mt-3">
+                                                    {item.category}
+                                                </span>
+                                            </Disclosure.Panel>
+                                        </div>
+                                    )}
+                                </Disclosure>
                             ))}
                         </div>
                     </div>

@@ -720,7 +720,7 @@ export default function CommunityDashboard() {
                                                                 </span>
                                                             )}
                                                             <button
-                                                                onClick={() => router.push(`/community/${communityId}/post/${post.id}`)}
+                                                                onClick={() => router.push(`/community/${communityId}/post/${post.id}#post-page`)}
                                                                 className="text-blue-600 hover:text-blue-700"
                                                             >
                                                                 Voir le post
