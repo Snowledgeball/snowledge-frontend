@@ -18,9 +18,10 @@ import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { ContributionsChart } from '@/components/shared/ContributionsChart';
 import { SubscribersChart } from '@/components/shared/SubscribersChart';
-import { Editor } from '@tinymce/tinymce-react';
 import TinyEditor from "@/components/shared/TinyEditor";
 import { Switch } from "@/components/ui/switch";
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface DashboardData {
     stats: {
@@ -86,7 +87,16 @@ interface Post {
     id: number;
     title: string;
     content: string;
-    type: 'Analyse technique' | 'News' | 'Rapports' | 'Brouillons';
+    cover_image_url: string | null;
+    tag: string;
+    status: string;
+    created_at: string;
+    accept_contributions: boolean;
+    user: {
+        id: number;
+        fullName: string;
+        profilePicture: string;
+    };
 }
 
 const POST_TAGS = [
@@ -96,15 +106,6 @@ const POST_TAGS = [
     { value: 'news', label: 'News' },
     { value: 'education', label: 'Éducation' },
     { value: 'trading', label: 'Trading' }
-];
-
-const POST_EMOJIS = [
-    { value: '📊', label: 'Graphique' },
-    { value: '📈', label: 'Tendance' },
-    { value: '💡', label: 'Idée' },
-    { value: '🔍', label: 'Analyse' },
-    { value: '📰', label: 'News' },
-    { value: '💰', label: 'Finance' }
 ];
 
 export default function CommunityDashboard() {
@@ -166,11 +167,7 @@ export default function CommunityDashboard() {
             category: "Tech"
         }
     ]);
-    const [posts, setPosts] = useState<Post[]>([
-        { id: 1, title: 'Post 1', content: '', type: 'Brouillons' },
-        { id: 2, title: 'Post 2', content: '', type: 'Analyse technique' },
-        { id: 3, title: 'Post 3', content: '', type: 'News' },
-    ]);
+    const [posts, setPosts] = useState<Post[]>([]);
     const [editorContent, setEditorContent] = useState('');
     const [postTitle, setPostTitle] = useState('');
     const [contributionsEnabled, setContributionsEnabled] = useState(false);
@@ -324,22 +321,6 @@ export default function CommunityDashboard() {
         }
     };
 
-    const handleEditorChange = (content: string) => {
-        setEditorContent(content);
-    };
-
-    const handleCreatePost = () => {
-        const newPost = {
-            id: posts.length + 1,
-            title: postTitle || 'Nouveau post',
-            content: editorContent,
-            type: 'Brouillons' as const
-        };
-        setPosts([...posts, newPost]);
-        setPostTitle('');
-        setEditorContent('');
-    };
-
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || !e.target.files[0]) return;
 
@@ -412,6 +393,24 @@ export default function CommunityDashboard() {
         }
     };
 
+    const fetchPosts = async () => {
+        try {
+            const response = await fetch(`/api/communities/${communityId}/posts`);
+            if (!response.ok) throw new Error('Erreur lors de la récupération des posts');
+            const data = await response.json();
+            setPosts(data);
+        } catch (error) {
+            console.error('Erreur:', error);
+            toast.error('Erreur lors de la récupération des posts');
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'overview') {
+            fetchPosts();
+        }
+    }, [activeTab, communityId]);
+
     if (loading) {
         return <div>Chargement...</div>;
     }
@@ -465,6 +464,16 @@ export default function CommunityDashboard() {
                                 onClick={() => setActiveTab('overview')}
                             >
                                 📊 Tableau de bord
+                                <ChevronRight className="ml-auto w-4 h-4" />
+                            </button>
+                        </div>
+                        <div className="space-y-1">
+                            <button
+                                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === 'members' ? 'bg-gray-800' : 'hover:bg-gray-800'
+                                    }`}
+                                onClick={() => setActiveTab('members')}
+                            >
+                                👥 Membres
                                 <ChevronRight className="ml-auto w-4 h-4" />
                             </button>
                         </div>
@@ -603,54 +612,33 @@ export default function CommunityDashboard() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr className="border-b hover:bg-gray-50">
-                                                <td className="py-4">Analyse quotidienne BTC/USD - 17/02/2024</td>
-                                                <td className="py-4">
-                                                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                                                        Analyse
-                                                    </span>
-                                                </td>
-                                                <td className="py-4">1,234</td>
-                                                <td className="py-4">
-                                                    <div className="flex items-center">
-                                                        <span className="text-green-600">+12%</span>
-                                                        <TrendingUp className="w-4 h-4 ml-1 text-green-600" />
-                                                    </div>
-                                                </td>
-                                                <td className="py-4">45€</td>
-                                            </tr>
-                                            <tr className="border-b hover:bg-gray-50">
-                                                <td className="py-4">Impact des élections US sur les marchés - Scénarios</td>
-                                                <td className="py-4">
-                                                    <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
-                                                        Analyse macro
-                                                    </span>
-                                                </td>
-                                                <td className="py-4">856</td>
-                                                <td className="py-4">
-                                                    <div className="flex items-center">
-                                                        <span className="text-red-600">-3%</span>
-                                                        <TrendingUp className="w-4 h-4 ml-1 text-red-600 transform rotate-180" />
-                                                    </div>
-                                                </td>
-                                                <td className="py-4">28€</td>
-                                            </tr>
-                                            <tr className="hover:bg-gray-50">
-                                                <td className="py-4">Setup trading : Double bottom sur ETH/USD</td>
-                                                <td className="py-4">
-                                                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-sm">
-                                                        Signal
-                                                    </span>
-                                                </td>
-                                                <td className="py-4">567</td>
-                                                <td className="py-4">
-                                                    <div className="flex items-center">
-                                                        <span className="text-green-600">+8%</span>
-                                                        <TrendingUp className="w-4 h-4 ml-1 text-green-600" />
-                                                    </div>
-                                                </td>
-                                                <td className="py-4">32€</td>
-                                            </tr>
+                                            {posts.map((post) => (
+                                                <tr key={post.id} className="border-b hover:bg-gray-50">
+                                                    <td className="py-4">{post.title}</td>
+                                                    <td className="py-4">
+                                                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                                                            {POST_TAGS.find(t => t.value === post.tag)?.label || post.tag}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-4">{Math.floor(Math.random() * 2000) + 100}</td>
+                                                    <td className="py-4">
+                                                        <div className="flex items-center">
+                                                            {Math.random() > 0.5 ? (
+                                                                <>
+                                                                    <span className="text-green-600">+{Math.floor(Math.random() * 15) + 1}%</span>
+                                                                    <TrendingUp className="w-4 h-4 ml-1 text-green-600" />
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <span className="text-red-600">-{Math.floor(Math.random() * 10) + 1}%</span>
+                                                                    <TrendingUp className="w-4 h-4 ml-1 text-red-600 transform rotate-180" />
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-4">{Math.floor(Math.random() * 100) + 10}€</td>
+                                                </tr>
+                                            ))}
                                         </tbody>
                                     </table>
                                 </div>
@@ -677,11 +665,123 @@ export default function CommunityDashboard() {
                                     />
                                 </Card>
                             </div>
+
+                            {/* Section des posts récents */}
+                            <h2 className="text-xl font-bold text-gray-900 mb-4">Posts récents</h2>
+                            <div className="grid gap-6">
+                                {posts.length === 0 ? (
+                                    <Card className="p-6 text-center text-gray-500">
+                                        Aucun post pour le moment
+                                    </Card>
+                                ) : (
+                                    posts.map((post) => (
+                                        <Card key={post.id} className="p-6 bg-white">
+                                            <div className="flex items-start space-x-4">
+                                                {post.cover_image_url && (
+                                                    <div className="flex-shrink-0">
+                                                        <Image
+                                                            src={`https://${post.cover_image_url}`}
+                                                            alt={post.title}
+                                                            width={120}
+                                                            height={80}
+                                                            className="rounded-lg object-cover"
+                                                        />
+                                                    </div>
+                                                )}
+                                                <div className="flex-1">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">
+                                                            {POST_TAGS.find(t => t.value === post.tag)?.label || post.tag}
+                                                        </span>
+                                                        <span className="text-sm text-gray-500">
+                                                            {formatDistanceToNow(new Date(post.created_at), {
+                                                                addSuffix: true,
+                                                                locale: fr
+                                                            })}
+                                                        </span>
+                                                    </div>
+                                                    <h3 className="text-xl font-bold text-gray-900 mb-2">{post.title}</h3>
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-2">
+                                                            <Image
+                                                                src={post.user.profilePicture}
+                                                                alt={post.user.fullName}
+                                                                width={24}
+                                                                height={24}
+                                                                className="rounded-full"
+                                                            />
+                                                            <span className="text-sm text-gray-600">{post.user.fullName}</span>
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            {post.accept_contributions && (
+                                                                <span className="text-sm text-green-600 flex items-center">
+                                                                    <Users className="w-4 h-4 mr-1" />
+                                                                    Contributions activées
+                                                                </span>
+                                                            )}
+                                                            <button
+                                                                onClick={() => router.push(`/community/${communityId}/post/${post.id}`)}
+                                                                className="text-blue-600 hover:text-blue-700"
+                                                            >
+                                                                Voir le post
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Card>
+                                    ))
+                                )}
+                            </div>
                         </div>
                     )}
 
                     {activeTab === 'members' && (
                         <div className="space-y-6">
+                            {/* Demandes de contributeurs en attente */}
+                            {contributorRequests.length > 0 && (
+                                <Card className="p-6">
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                                        Demandes de contributeurs en attente
+                                    </h3>
+                                    <div className="space-y-4">
+                                        {contributorRequests
+                                            .map((request) => (
+                                                <div key={request.id} className="flex items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                                                    <div className="flex items-center space-x-4">
+                                                        <Image
+                                                            src={request.userAvatar}
+                                                            alt={request.userName}
+                                                            className="w-10 h-10 rounded-full"
+                                                            width={48}
+                                                            height={48}
+                                                        />
+                                                        <div>
+                                                            <p className="font-medium text-gray-900">{request.userName}</p>
+                                                            <p className="text-sm text-gray-600">{request.expertiseDomain}</p>
+                                                            <p className="text-sm text-gray-500 mt-1 max-w-xl">{request.justification}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <button
+                                                            onClick={() => handleApproveRequest(request.id)}
+                                                            className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                                        >
+                                                            Approuver
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleRejectClick(request.id)}
+                                                            className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                                                        >
+                                                            Refuser
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                    </div>
+                                </Card>
+                            )}
+
                             <Card className="p-6 bg-white shadow-sm rounded-3xl">
                                 {members.length === 0 ? (
                                     <div className="text-center text-gray-500">Aucun membre trouvé</div>

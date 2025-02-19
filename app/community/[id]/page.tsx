@@ -13,16 +13,19 @@ import {
     FileText,
     Settings,
     ChevronDown,
+    Users,
 } from "lucide-react";
 import { Community } from "@/types/community";
 import Image from 'next/image';
 import { toast } from "sonner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 // Ajouter ces catégories de posts
 const POST_CATEGORIES = [
     { id: 'general', label: 'Général' },
-    { id: 'technical-analysis', label: 'Analyse technique' },
+    { id: 'analyse-technique', label: 'Analyse technique' },
     { id: 'news', label: 'News' },
     { id: 'reports', label: 'Rapports' }
 ];
@@ -35,6 +38,52 @@ type Presentation = {
     disclaimers: string;
 };
 
+// Ajouter l'interface Post
+interface Post {
+    id: number;
+    title: string;
+    content: string;
+    cover_image_url: string | null;
+    tag: string;
+    created_at: string;
+    accept_contributions: boolean;
+    user: {
+        id: number;
+        fullName: string;
+        profilePicture: string;
+    };
+}
+
+// Ajouter ce type pour les Q&A
+type QAItem = {
+    id: number;
+    question: string;
+    answer: string;
+    category: string;
+};
+
+// Ajouter ces données fictives
+const faqData: QAItem[] = [
+    {
+        id: 1,
+        question: "Comment puis-je contribuer à la communauté ?",
+        answer: "Vous pouvez contribuer de plusieurs manières : en partageant vos analyses, en participant aux discussions, en répondant aux questions d'autres membres ou en proposant des ressources pertinentes.",
+        category: "Général"
+    },
+    {
+        id: 2,
+        question: "Quelles sont les règles pour publier une analyse technique ?",
+        answer: "Toute analyse technique doit inclure : les niveaux de support/résistance identifiés, les indicateurs utilisés, un horizon temporel clair et une conclusion actionnable. N'oubliez pas d'inclure un disclaimer.",
+        category: "Analyse Technique"
+    },
+    {
+        id: 3,
+        question: "Comment sont vérifiées les informations partagées ?",
+        answer: "Les informations sont vérifiées par notre équipe de modérateurs et d'experts. Nous encourageons également la communauté à signaler toute information douteuse et à citer ses sources.",
+        category: "Qualité"
+    }
+];
+
 const CommunityHub = () => {
     const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
     const { data: session } = useSession();
@@ -43,12 +92,13 @@ const CommunityHub = () => {
     const [communityData, setCommunityData] = useState<Community | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState("general");
-    const [selectedPostCategory, setSelectedPostCategory] = useState("general");
+    const [selectedPostCategory, setSelectedPostCategory] = useState<string | null>(null);
     const [message, setMessage] = useState("");
     const [showJoinModal, setShowJoinModal] = useState(false);
     const [presentation, setPresentation] = useState<Presentation | null>(null);
     const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
     const [userCommunities, setUserCommunities] = useState<Community[]>([]);
+    const [posts, setPosts] = useState<Post[]>([]);
 
     useEffect(() => {
         if (!session) {
@@ -102,6 +152,22 @@ const CommunityHub = () => {
             checkMembershipAndFetchData();
         }
     }, [params.id, router, session]);
+
+    useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                const response = await fetch(`/api/communities/${params.id}/posts`);
+                if (!response.ok) throw new Error('Erreur lors de la récupération des posts');
+                const data = await response.json();
+                setPosts(data);
+            } catch (error) {
+                console.error('Erreur:', error);
+                toast.error('Erreur lors de la récupération des posts');
+            }
+        };
+
+        fetchPosts();
+    }, [params.id]);
 
     const handleJoinCommunity = async () => {
         try {
@@ -193,7 +259,7 @@ const CommunityHub = () => {
     ];
 
     // Ajouter ces données mockées en haut du fichier
-    const posts = [
+    const postsExample = [
         {
             id: 1,
             author: {
@@ -277,7 +343,10 @@ const CommunityHub = () => {
         return videoId;
     }
 
-
+    // Modifier la fonction de gestion du clic sur une catégorie
+    const handleCategoryClick = (categoryId: string) => {
+        setSelectedPostCategory(selectedPostCategory === categoryId ? null : categoryId);
+    };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -429,9 +498,9 @@ const CommunityHub = () => {
 
             {/* Main Content avec mise à jour du style */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid grid-cols-12 gap-8">
-                    {/* Sidebar des utilisateurs avec style amélioré */}
-                    <div className="col-span-3">
+                <div className="grid grid-cols-9 gap-8">
+                    {/* Sidebar des utilisateurs - ajusté de 3 à 2 colonnes */}
+                    <div className="col-span-2">
                         <Card className="p-4 bg-white shadow-sm">
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="font-semibold text-gray-900">Membres actifs</h2>
@@ -467,8 +536,8 @@ const CommunityHub = () => {
                         </Card>
                     </div>
 
-                    {/* Zone principale de chat avec style amélioré */}
-                    <div className="col-span-6">
+                    {/* Zone principale - ajustée de 6 à 7 colonnes */}
+                    <div className="col-span-7">
                         {/* Tabs */}
                         <div className="border-b border-gray-200 mb-6">
                             <nav className="-mb-px flex justify-center space-x-8">
@@ -550,24 +619,7 @@ const CommunityHub = () => {
                                 </div>
                             </Card>
                         ) : (
-                            <div className="space-y-6">
-                                {/* Navigation secondaire pour les catégories de posts */}
-                                <div className="flex space-x-2 mb-6">
-                                    {POST_CATEGORIES.map((category) => (
-                                        <button
-                                            key={category.id}
-                                            onClick={() => setSelectedPostCategory(category.id)}
-                                            className={`px-4 py-2 rounded-lg text-sm font-medium
-                                                ${selectedPostCategory === category.id
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                                                } transition-colors`}
-                                        >
-                                            <span>{category.label}</span>
-                                        </button>
-                                    ))}
-                                </div>
-
+                            <div className="space-y-8">
                                 {/* Bouton Nouveau Post */}
                                 <div className="flex justify-end">
                                     <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
@@ -576,128 +628,139 @@ const CommunityHub = () => {
                                     </button>
                                 </div>
 
-                                {/* Liste des posts filtrée par catégorie */}
-                                <div className="space-y-6">
-                                    {posts
-                                        .filter(post => {
-                                            switch (selectedPostCategory) {
-                                                case 'technical-analysis':
-                                                    return post.tags.includes('Analyse Technique');
-                                                case 'news':
-                                                    return post.tags.includes('News');
-                                                case 'reports':
-                                                    return post.tags.includes('Rapport');
-                                                default:
-                                                    return true;
-                                            }
-                                        })
-                                        .map((post) => (
-                                            <Card key={post.id} className="bg-white shadow-sm p-6">
-                                                {/* En-tête du post */}
-                                                <div className="flex items-start justify-between mb-4">
+                                {/* Posts groupés par catégories */}
+                                {POST_CATEGORIES.map((category) => {
+                                    const categoryPosts = posts.filter(post => post.tag === category.id);
+                                    if (categoryPosts.length === 0) return null;
+                                    return (
+                                        <div key={category.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
+                                            {/* En-tête de la catégorie */}
+                                            <div className="border-b border-gray-100">
+                                                <button
+                                                    onClick={() => handleCategoryClick(category.id)}
+                                                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                                                >
                                                     <div className="flex items-center space-x-3">
-                                                        <Image
-                                                            src={post.author.avatar}
-                                                            alt={post.author.name}
-                                                            width={40}
-                                                            height={40}
-                                                            className="rounded-full"
-                                                        />
-                                                        <div>
-                                                            <div className="flex items-center space-x-2">
-                                                                <span className="font-medium text-gray-900">{post.author.name}</span>
-                                                                <span className="text-sm text-gray-500">{post.author.role}</span>
-                                                            </div>
-                                                            <span className="text-sm text-gray-500">{post.timestamp}</span>
-                                                        </div>
-                                                    </div>
-                                                    <button className="text-gray-400 hover:text-gray-600">
-                                                        <Settings className="w-5 h-5" />
-                                                    </button>
-                                                </div>
-
-                                                {/* Contenu du post */}
-                                                <p className="text-gray-800 mb-4">{post.content}</p>
-                                                {post.image && (
-                                                    <div className="mb-4 rounded-lg overflow-hidden">
-                                                        <Image
-                                                            src={post.image}
-                                                            alt="Post illustration"
-                                                            width={500}
-                                                            height={300}
-                                                            className="w-full h-auto"
-                                                        />
-                                                    </div>
-                                                )}
-
-                                                {/* Tags */}
-                                                <div className="flex flex-wrap gap-2 mb-4">
-                                                    {post.tags.map((tag, index) => (
-                                                        <span
-                                                            key={index}
-                                                            className="px-3 py-1 bg-blue-50 text-blue-600 text-sm rounded-full"
-                                                        >
-                                                            #{tag}
+                                                        <FileText className="w-5 h-5 text-blue-600" />
+                                                        <h3 className="font-medium text-gray-900">{category.label}</h3>
+                                                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
+                                                            {categoryPosts.length}
                                                         </span>
+                                                    </div>
+                                                    <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${selectedPostCategory === category.id ? 'rotate-180' : ''
+                                                        }`} />
+                                                </button>
+                                            </div>
+
+                                            {/* Liste des posts de la catégorie */}
+                                            {selectedPostCategory === category.id && (
+                                                <div className="divide-y divide-gray-100">
+                                                    {categoryPosts.map((post) => (
+                                                        <div key={post.id} className="p-4 hover:bg-gray-50 transition-colors">
+                                                            <div className="flex items-center justify-between mb-2">
+                                                                <div className="flex items-center space-x-3">
+                                                                    <Image
+                                                                        src={post.user.profilePicture}
+                                                                        alt={post.user.fullName}
+                                                                        width={32}
+                                                                        height={32}
+                                                                        className="rounded-full"
+                                                                    />
+                                                                    <div>
+                                                                        <p className="font-medium text-gray-900">{post.user.fullName}</p>
+                                                                        <p className="text-sm text-gray-500">
+                                                                            {formatDistanceToNow(new Date(post.created_at), {
+                                                                                addSuffix: true,
+                                                                                locale: fr
+                                                                            })}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <h4 className="text-lg font-semibold text-gray-900 mb-2">{post.title}</h4>
+
+                                                            {/* Image de couverture */}
+                                                            {post.cover_image_url && (
+                                                                <div className="mb-3 rounded-lg overflow-hidden">
+                                                                    <Image
+                                                                        src={`https://${post.cover_image_url}`}
+                                                                        alt={post.title}
+                                                                        width={800}
+                                                                        height={400}
+                                                                        className="w-full h-[200px] object-cover"
+                                                                    />
+                                                                </div>
+                                                            )}
+
+                                                            <div
+                                                                className="prose prose-sm max-w-none text-gray-600 mb-3 max-h-[300px] overflow-hidden relative"
+                                                            >
+                                                                <div
+                                                                    dangerouslySetInnerHTML={{
+                                                                        __html: post.content
+                                                                    }}
+                                                                    className="line-clamp-[12]"
+                                                                />
+                                                                <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent" />
+                                                            </div>
+                                                            <div className="flex items-center justify-between">
+                                                                {post.accept_contributions ? (
+                                                                    <span className="text-sm text-green-600 flex items-center">
+                                                                        <Users className="w-4 h-4 mr-1" />
+                                                                        Contributions activées
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-sm text-red-600 flex items-center">
+                                                                        <Users className="w-4 h-4 mr-1" />
+                                                                        Contributions désactivées
+                                                                    </span>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => router.push(`/community/${params.id}/post/${post.id}`)}
+                                                                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                                                                >
+                                                                    Lire la suite →
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                     ))}
                                                 </div>
-
-                                                {/* Métriques et actions */}
-                                                <div className="flex items-center justify-between pt-4 border-t">
-                                                    <div className="flex items-center space-x-6">
-                                                        <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-600">
-                                                            <MessageCircle className="w-5 h-5" />
-                                                            <span>{post.metrics.comments}</span>
-                                                        </button>
-                                                        <button className="flex items-center space-x-2 text-gray-500 hover:text-green-600">
-                                                            <ArrowLeft className="w-5 h-5 rotate-45" />
-                                                            <span>{post.metrics.shares}</span>
-                                                        </button>
-                                                        <button className="flex items-center space-x-2 text-gray-500 hover:text-red-600">
-                                                            <span>♥</span>
-                                                            <span>{post.metrics.likes}</span>
-                                                        </button>
-                                                    </div>
-                                                    <button className="text-blue-600 hover:text-blue-700 font-medium">
-                                                        Voir les commentaires
-                                                    </button>
-                                                </div>
-                                            </Card>
-                                        ))
-                                    }
-                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
+                </div>
 
-                    {/* Right Sidebar - Q&A */}
-                    <div className="col-span-3">
-                        <Card className="p-4 bg-white mb-4">
-                            <h2 className="font-semibold text-gray-900 mb-4">Q&A général</h2>
-                            <div className="space-y-3">
-                                <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                    <div className="flex items-center space-x-2">
-                                        <HelpCircle className="w-4 h-4 text-blue-500" />
-                                        <span className="text-sm text-gray-700">FAQ</span>
-                                    </div>
-                                </button>
-                                <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                    <div className="flex items-center space-x-2">
-                                        <FileText className="w-4 h-4 text-blue-500" />
-                                        <span className="text-sm text-gray-700">Documentation</span>
-                                    </div>
-                                </button>
-                            </div>
-                        </Card>
+                {/* Section Q&A déplacée en bas - pleine largeur */}
+                <div className="mt-8">
+                    <div className="bg-white rounded-lg shadow-sm p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-bold text-gray-900">Questions fréquentes</h2>
+                            <HelpCircle className="w-5 h-5 text-blue-500" />
+                        </div>
 
-                        <Card className="p-4 bg-white">
-                            <button
-                                onClick={() => router.push(`/community/${params.id}/create-post`)}
-                                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
-                                <PlusCircle className="w-4 h-4" />
-                                <span>Créer un post</span>
-                            </button>
-                        </Card>
+                        <div className="space-y-6">
+                            {faqData.map((item) => (
+                                <div key={item.id} className="border-b border-gray-100 pb-6 last:border-0">
+                                    <div className="flex items-start space-x-3">
+                                        <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm">
+                                            Q
+                                        </span>
+                                        <div>
+                                            <h3 className="font-medium text-gray-900 mb-2">{item.question}</h3>
+                                            <p className="text-gray-600 text-sm leading-relaxed">{item.answer}</p>
+                                            <span className="inline-block mt-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                                                {item.category}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>

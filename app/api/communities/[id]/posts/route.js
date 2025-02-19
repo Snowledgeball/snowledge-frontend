@@ -65,4 +65,39 @@ export async function POST(request, { params }) {
     } finally {
         await prisma.$disconnect();
     }
+}
+
+export async function GET(request, { params }) {
+    try {
+        const { id } = await params;
+        const communityId = parseInt(id);
+
+        const posts = await prisma.community_posts.findMany({
+            where: {
+                community_id: communityId
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                        profilePicture: true
+                    }
+                }
+            },
+            orderBy: {
+                created_at: 'desc'
+            }
+        });
+
+        return NextResponse.json(posts);
+    } catch (error) {
+        console.log("Erreur lors de la récupération des posts:", error.stack);
+        return NextResponse.json(
+            { error: "Erreur lors de la récupération des posts" },
+            { status: 500 }
+        );
+    } finally {
+        await prisma.$disconnect();
+    }
 } 
