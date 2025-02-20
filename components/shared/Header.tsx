@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { StatIndicator } from "./StatIndicator";
 import { PointsIcon } from "./icons/PointsIcon";
 import { WalletIcon } from "./icons/WalletIcon";
+import { toast } from "sonner";
 
 interface User {
     id: number;
@@ -50,10 +51,10 @@ export default function Header() {
 
                         {/* Navigation desktop */}
                         <nav className="hidden lg:flex items-center space-x-6">
-                            <Link href="/explore" className="text-[#000333] hover:text-gray-900 font-bold text-sm">
+                            <Link onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} href="/" className="text-[#000333] hover:text-gray-900 font-bold text-sm">
                                 EXPLORER
                             </Link>
-                            <Link href="/" className="text-[#000333] hover:text-gray-900 font-bold text-sm ">
+                            <Link onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} href="/" className="text-[#000333] hover:text-gray-900 font-bold text-sm ">
                                 COMMUNAUTÉS
                             </Link>
                         </nav>
