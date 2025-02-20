@@ -68,21 +68,33 @@ type QAItem = {
 const faqData: QAItem[] = [
     {
         id: 1,
-        question: "Comment puis-je contribuer à la communauté ?",
-        answer: "Vous pouvez contribuer de plusieurs manières : en partageant vos analyses, en participant aux discussions, en répondant aux questions d'autres membres ou en proposant des ressources pertinentes.",
-        category: "Général"
+        question: "Quelles sont les meilleures plateformes pour faire de la DeFi quand on débute ?",
+        answer: "Pour commencer en DeFi, les plateformes les plus accessibles sont Aave, Uniswap, Curve et PancakeSwap. Elles offrent une interface intuitive et une bonne liquidité. Il est conseillé d'utiliser des wallets non-custodiaux comme MetaMask ou Rabby et d'interagir avec des blockchains à faibles frais comme Polygon ou Arbitrum.",
+        category: "Débutant"
     },
     {
         id: 2,
-        question: "Quelles sont les règles pour publier une analyse technique ?",
-        answer: "Toute analyse technique doit inclure : les niveaux de support/résistance identifiés, les indicateurs utilisés, un horizon temporel clair et une conclusion actionnable. N'oubliez pas d'inclure un disclaimer.",
-        category: "Analyse Technique"
+        question: "Quels sont les risques principaux en DeFi et comment s'en protéger ?",
+        answer: "Les principaux risques en DeFi sont les smart contracts mal sécurisés, l'impermanent loss, la volatilité des tokens et les attaques par phishing. Pour s'en protéger : 1) Vérifiez la sécurité des protocoles en consultant des audits et la réputation du projet. 2) Utilisez plusieurs wallets (un pour l'exploration, un autre pour les fonds importants). 3) Activez un hardware wallet (ex. Ledger) pour protéger vos actifs.",
+        category: "Sécurité"
     },
     {
         id: 3,
-        question: "Comment sont vérifiées les informations partagées ?",
-        answer: "Les informations sont vérifiées par notre équipe de modérateurs et d'experts. Nous encourageons également la communauté à signaler toute information douteuse et à citer ses sources.",
-        category: "Qualité"
+        question: "Quels sont les meilleurs moyens de générer des rendements passifs en DeFi ?",
+        answer: "Les stratégies les plus courantes incluent : 1) Le staking : Verrouiller des tokens (ex. Ethereum 2.0, Cosmos). 2) Le lending : Prêter des cryptos sur des plateformes comme Aave. 3) Le yield farming : Fournir de la liquidité sur Uniswap ou Curve. 4) Les auto-compounders : Utiliser des protocoles comme Beefy Finance pour optimiser les rendements.",
+        category: "Rendements"
+    },
+    {
+        id: 4,
+        question: "Comment éviter les scams et rug pulls en DeFi ?",
+        answer: "Pour minimiser les risques : 1) Évitez les projets trop beaux pour être vrais (APY exagérés, pas d'audit). 2) Analysez l'équipe et la communauté : Si les fondateurs sont anonymes et absents des discussions, méfiez-vous. 3) Vérifiez le TVL (Total Value Locked) et l'historique du projet sur des plateformes comme DeFiLlama.",
+        category: "Sécurité"
+    },
+    {
+        id: 5,
+        question: "Quels outils utiliser pour suivre son portefeuille DeFi ?",
+        answer: "Pour suivre tes positions et ton rendement en DeFi, voici quelques outils utiles : 1) Zapper & DeBank : Visualisation multi-wallet et gestion DeFi. 2) Dune Analytics : Données et graphiques avancés sur les protocoles DeFi. 3) DefiLlama : Classement des protocoles par TVL et analyse des rendements.",
+        category: "Outil"
     }
 ];
 
