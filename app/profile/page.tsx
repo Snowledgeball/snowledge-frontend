@@ -9,6 +9,8 @@ import { Dialog } from '@headlessui/react';
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
 import Image from "next/image";
+import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
 
 
 interface CommunityData {
@@ -44,6 +46,14 @@ interface JoinedCommunity {
     role: string;
 }
 
+interface Post {
+    id: string;
+    title: string;
+    content: string;
+    created_at: string;
+    updated_at: string;
+}
+
 const ProfilePage = () => {
     const { data: session } = useSession();
     const router = useRouter();
@@ -52,8 +62,6 @@ const ProfilePage = () => {
 
     const [userOwnedCommunities, setUserOwnedCommunities] = useState<UserCommunity[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedCommunity, setSelectedCommunity] = useState(userOwnedCommunities[0]?.name);
-    const selectedCommunityData = userOwnedCommunities.find(c => c.name === selectedCommunity) as unknown as CommunityData;
     // Modifier l'état des onglets pour inclure les nouvelles options
     const [activeTab, setActiveTab] = useState('communities'); // 'communities', 'settings', 'support', 'my-community', 'contributor'
 
@@ -62,7 +70,10 @@ const ProfilePage = () => {
     const [selectedCommunityForContribution, setSelectedCommunityForContribution] = useState<string | null>(null);
     const [joinedCommunities, setJoinedCommunities] = useState<JoinedCommunity[]>([]);
     const [isLoadingJoined, setIsLoadingJoined] = useState(true);
+    const [selectedCommunity, setSelectedCommunity] = useState<UserCommunity | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [selectedCommunityPosts, setSelectedCommunityPosts] = useState<Post[]>([]);
     const [userData, setUserData] = useState({
         fullName: '',
         userName: '',
@@ -130,6 +141,7 @@ const ProfilePage = () => {
             if (!response.ok) throw new Error('Erreur lors de la récupération des communautés rejointes');
             const data = await response.json();
             setJoinedCommunities(data.communities);
+            setSelectedCommunity(data.communities[0] as unknown as UserCommunity);
         } catch (error) {
             console.error('Erreur:', error);
         } finally {
@@ -163,6 +175,55 @@ const ProfilePage = () => {
             fetchUserCommunities();
         }
     }, [userId]);
+
+
+    const fetchPosts = async () => {
+        if (!joinedCommunities.length || !userOwnedCommunities.length) {
+            return;
+        }
+
+        console.log("joinedCommunities :", joinedCommunities);
+        console.log("userOwnedCommunities :", userOwnedCommunities);
+
+        const listOfCommunityIds = [...joinedCommunities.map(community => community.id), ...userOwnedCommunities.map(community => community.id)];
+        try {
+            for (const communityId of listOfCommunityIds) {
+                const response = await fetch(`/api/communities/${communityId}/posts`);
+                const data = await response.json();
+                setPosts(prevPosts => [...prevPosts, ...data]);
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (userId) {
+            fetchPosts();
+        }
+    }, [userId]);
+
+    useEffect(() => {
+        if (selectedCommunity) {
+            const fetchSelectedCommunityPosts = async () => {
+                const response = await fetch(`/api/users/${userId}/posts/${selectedCommunity?.id}`);
+                const data = await response.json();
+                setSelectedCommunityPosts(data);
+                console.log("selectedCommunityPosts :", selectedCommunityPosts);
+            };
+            fetchSelectedCommunityPosts();
+        }
+    }, [selectedCommunity]);
+
+    useEffect(() => {
+        console.log("selectedCommunityPosts :", selectedCommunityPosts);
+    }, [selectedCommunityPosts]);
+
+
+
+    useEffect(() => {
+        console.log("posts :", posts);
+    }, [posts]);
 
     // Fonction pour soumettre la candidature
     const handleContributorRequest = async () => {
@@ -303,7 +364,7 @@ const ProfilePage = () => {
                 {/* Statistiques responsives */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     {[
-                        { label: "Communautés", value: userData.stats.communitiesCount, icon: Users, color: "text-blue-500" },
+                        { label: "Communautés rejointes", value: userData.stats.communitiesCount, icon: Users, color: "text-blue-500" },
                         { label: "Posts", value: userData.stats.postsCount, icon: MessageCircle, color: "text-green-500" },
                         { label: "Contributions", value: userData.stats.contributionsCount, icon: Activity, color: "text-purple-500" },
                         { label: "Gains totaux", value: `${userData.stats.totalEarnings}€`, icon: Wallet, color: "text-amber-500" },
@@ -369,7 +430,7 @@ const ProfilePage = () => {
                                 ) : joinedCommunities.map((community, index) => (
                                     <div
                                         key={index}
-                                        className={`w-full bg-white rounded-lg p-4 hover:bg-gray-50 transition-all duration-200 ${selectedCommunity === community.name
+                                        className={`w-full bg-white rounded-lg p-4 hover:bg-gray-50 transition-all duration-200 ${selectedCommunity?.name === community.name
                                             ? 'ring-2 ring-blue-500 shadow-md'
                                             : 'border border-gray-200'
                                             }`}
@@ -377,7 +438,7 @@ const ProfilePage = () => {
                                         <div className="flex flex-col space-y-4">
                                             <div className="flex justify-between items-start">
                                                 <div
-                                                    onClick={() => setSelectedCommunity(community.name)}
+                                                    onClick={() => setSelectedCommunity(community as unknown as UserCommunity)}
                                                     className="flex-1 cursor-pointer"
                                                 >
                                                     <div className="font-medium text-gray-900">{community.name}</div>
@@ -422,7 +483,7 @@ const ProfilePage = () => {
                                 {/* Mes contributions */}
                                 <Card className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
                                     <h3 className="text-xl font-semibold text-gray-900 mb-6">Mes contributions</h3>
-                                    {selectedCommunityData && selectedCommunityData.recentActivity ? (
+                                    {/* {selectedCommunityData && selectedCommunityData.recentActivity ? (
                                         <div className="space-y-4">
                                             {selectedCommunityData.recentActivity.map((activity, idx) => (
                                                 <div key={idx} className="bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition-colors duration-200">
@@ -444,26 +505,28 @@ const ProfilePage = () => {
                                                     </div>
                                                 </div>
                                             ))}
-                                        </div>
+                                        </div> 
                                     ) : (
-                                        <p>Aucune activité récente disponible.</p>
-                                    )}
+                                    <p>Aucune activité récente disponible.</p>
+                                    )}*/}
+                                    <p>Aucune activité récente disponible.</p>
                                 </Card>
 
                                 {/* Mes posts */}
                                 <Card className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
                                     <h3 className="text-xl font-semibold text-gray-900 mb-6">Mes posts</h3>
-                                    {selectedCommunityData && selectedCommunityData.recentActivity ? (
+                                    {selectedCommunityPosts.length > 0 ? (
                                         <div className="space-y-4">
-                                            {selectedCommunityData.recentActivity
-                                                .filter(activity => activity.type === 'post')
+                                            {selectedCommunityPosts
                                                 .map((post, idx) => (
                                                     <div key={idx} className="bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                                                         <h4 className="font-medium text-gray-900">{post.title}</h4>
                                                         <div className="flex items-center mt-2 text-sm text-gray-500">
-                                                            <span>{post.date}</span>
-                                                            <span className="mx-2">•</span>
-                                                            <span>{post.engagement} interactions</span>
+                                                            <div dangerouslySetInnerHTML={{ __html: post.content.slice(0, 300) + '...' }} />
+                                                            {formatDistanceToNow(new Date(post.created_at), {
+                                                                addSuffix: true,
+                                                                locale: fr
+                                                            })}
                                                         </div>
                                                     </div>
                                                 ))}
@@ -477,7 +540,7 @@ const ProfilePage = () => {
                                 <Card className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
                                     <h3 className="text-xl font-semibold text-gray-900 mb-6">Revenus générés</h3>
                                     <div className="bg-gray-50 p-6 rounded-lg">
-                                        <p className="text-3xl font-bold text-gray-900">{selectedCommunityData?.revenue || "0€"}</p>
+                                        <p className="text-3xl font-bold text-gray-900">{"0€"}</p>
                                         <p className="text-sm text-gray-500 mt-1">Revenus totaux de la communauté</p>
                                     </div>
                                 </Card>
@@ -988,7 +1051,7 @@ const ProfilePage = () => {
                     <div className="fixed inset-0 flex items-center justify-center p-4">
                         <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
                             {/* En-tête du modal avec dégradé */}
-                            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
+                            <div className="bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#003E8A] to-[#16215B] p-6">
                                 <div className="flex justify-between items-start">
                                     <div className="text-white">
                                         <h3 className="text-xl font-bold">
@@ -1079,7 +1142,7 @@ const ProfilePage = () => {
                                 <button
                                     onClick={handleContributorRequest}
                                     disabled={isSubmitting}
-                                    className="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isSubmitting ? 'Envoi en cours...' : 'Envoyer ma candidature'}
                                 </button>
