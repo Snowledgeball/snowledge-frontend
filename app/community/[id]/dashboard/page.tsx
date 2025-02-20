@@ -485,7 +485,10 @@ export default function CommunityDashboard() {
                             <button
                                 className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === 'veille' ? 'bg-gray-800' : 'hover:bg-gray-800'
                                     }`}
-                                onClick={() => setActiveTab('veille')}
+                                onClick={() => {
+                                    setActiveTab('veille');
+                                    toast.error("Cette fonctionnalité n'est pas encore définie");
+                                }}
                             >
                                 📡 Collecte et veille
                                 <ChevronRight className="ml-auto w-4 h-4" />
@@ -498,7 +501,7 @@ export default function CommunityDashboard() {
                                 ✍️ Création & édition
                                 <ChevronRight className="ml-auto w-4 h-4" />
                             </button>
-                            <button className="w-full flex items-center text-white p-2 rounded-lg hover:bg-gray-800">
+                            <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="w-full flex items-center text-white p-2 rounded-lg hover:bg-gray-800">
                                 📢 Publication & diffusion
                                 <ChevronRight className="ml-auto w-4 h-4" />
                             </button>
@@ -508,7 +511,7 @@ export default function CommunityDashboard() {
                     <div>
                         <h3 className="text-purple-400 text-xs font-medium mb-2">Communication</h3>
                         <div className="space-y-1">
-                            <button className="w-full flex items-center text-white p-2 rounded-lg hover:bg-gray-800">
+                            <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="w-full flex items-center text-white p-2 rounded-lg hover:bg-gray-800">
                                 💬 Inbox
                                 <ChevronRight className="ml-auto w-4 h-4" />
                             </button>
@@ -569,7 +572,7 @@ export default function CommunityDashboard() {
                                             <p className="text-xl font-bold">8.50€</p>
                                         </div>
                                     </div>
-                                    <button className="w-full py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                                    <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="w-full py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
                                         Analyser mes statistiques
                                     </button>
                                 </Card>
@@ -591,7 +594,7 @@ export default function CommunityDashboard() {
                                             <p className="text-xl font-bold">12</p>
                                         </div>
                                     </div>
-                                    <button className="w-full py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                                    <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="w-full py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
                                         Analyser mes posts
                                     </button>
                                 </Card>
@@ -713,10 +716,15 @@ export default function CommunityDashboard() {
                                                             <span className="text-sm text-gray-600">{post.user.fullName}</span>
                                                         </div>
                                                         <div className="flex items-center space-x-2">
-                                                            {post.accept_contributions && (
+                                                            {post.accept_contributions ? (
                                                                 <span className="text-sm text-green-600 flex items-center">
                                                                     <Users className="w-4 h-4 mr-1" />
                                                                     Contributions activées
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-sm text-red-600 flex items-center">
+                                                                    <Users className="w-4 h-4 mr-1" />
+                                                                    Contributions désactivées
                                                                 </span>
                                                             )}
                                                             <button
@@ -841,7 +849,7 @@ export default function CommunityDashboard() {
                                                             <td className="p-4 hidden sm:table-cell">{member.posts}</td>
                                                             <td className="p-4 font-medium">{member.gains}€</td>
                                                             <td className="p-4 text-right">
-                                                                <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                                                <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                                                                     <ChevronRight className="w-5 h-5" />
                                                                 </button>
                                                             </td>

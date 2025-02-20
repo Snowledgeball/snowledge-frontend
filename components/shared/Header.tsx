@@ -104,6 +104,7 @@ export default function Header() {
                                     <button
                                         className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors"
                                         aria-label="Notifications"
+                                        onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")}
                                     >
                                         <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                                     </button>

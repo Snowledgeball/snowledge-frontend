@@ -895,15 +895,15 @@ const ProfilePage = () => {
                                             </div>
                                             <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
                                                 <div className="flex space-x-2">
-                                                    <button className="text-blue-600 text-sm hover:text-blue-700 font-medium">
+                                                    <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="text-blue-600 text-sm hover:text-blue-700 font-medium">
                                                         Changer de formule
                                                     </button>
                                                     <span className="text-gray-300">|</span>
-                                                    <button className="text-red-600 text-sm hover:text-red-700 font-medium">
+                                                    <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="text-red-600 text-sm hover:text-red-700 font-medium">
                                                         Résilier
                                                     </button>
                                                 </div>
-                                                <button className="text-gray-600 text-sm hover:text-gray-700 font-medium">
+                                                <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="text-gray-600 text-sm hover:text-gray-700 font-medium">
                                                     Voir les détails
                                                 </button>
                                             </div>
@@ -922,7 +922,7 @@ const ProfilePage = () => {
                                                     </div>
                                                     <span className="text-lg font-bold text-blue-900">49,99€/mois</span>
                                                 </div>
-                                                <button className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                                <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                                     Choisir cette offre
                                                 </button>
                                             </div>
@@ -935,7 +935,7 @@ const ProfilePage = () => {
                                                     </div>
                                                     <span className="text-lg font-bold text-purple-900">89,99€/mois</span>
                                                 </div>
-                                                <button className="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                                <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
                                                     Choisir cette offre
                                                 </button>
                                             </div>
@@ -952,20 +952,20 @@ const ProfilePage = () => {
                                 <h3 className="text-xl font-semibold text-gray-900 mb-6">Support et Aide</h3>
                                 <div className="space-y-3">
                                     <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
-                                        <div className="flex items-center gap-3">
+                                        <div onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="flex items-center gap-3">
                                             <HelpCircle className="w-5 h-5 text-gray-500" />
                                             <span className="text-sm font-medium text-gray-900">Centre d&apos;aide</span>
                                         </div>
                                         <ArrowRight className="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform" />
                                     </button>
-                                    <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+                                    <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
                                         <div className="flex items-center gap-3">
                                             <MessageSquare className="w-5 h-5 text-gray-500" />
                                             <span className="text-sm font-medium text-gray-900">Contacter le support</span>
                                         </div>
                                         <ArrowRight className="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform" />
                                     </button>
-                                    <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+                                    <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
                                         <div className="flex items-center gap-3">
                                             <FileText className="w-5 h-5 text-gray-500" />
                                             <span className="text-sm font-medium text-gray-900">FAQ</span>

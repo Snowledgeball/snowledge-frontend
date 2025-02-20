@@ -488,11 +488,13 @@ const CommunityHub = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center space-x-4">
-                                <button className="text-white/80 hover:text-white transition-colors">
-                                    <Settings className="w-5 h-5" />
-                                </button>
-                            </div>
+                            {session && communityData?.creator.creator_id === parseInt(session?.user?.id) && (
+                                <div className="flex items-center space-x-4">
+                                    <button onClick={() => router.push(`/community/${params.id}/settings`)} className="text-white/80 hover:text-white transition-colors">
+                                        <Settings className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -606,7 +608,7 @@ const CommunityHub = () => {
                                                                 {reaction}
                                                             </span>
                                                         ))}
-                                                        <button className="text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
                                                             + 😊
                                                         </button>
                                                     </div>
@@ -619,13 +621,14 @@ const CommunityHub = () => {
                                     <div className="border-t p-4">
                                         <div className="flex items-center space-x-2">
                                             <input
+                                                onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")}
                                                 type="text"
                                                 value={message}
                                                 onChange={(e) => setMessage(e.target.value)}
                                                 placeholder="Écrivez votre message..."
                                                 className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                                             />
-                                            <button className="p-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                                            <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="p-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
                                                 <Send className="w-5 h-5" />
                                             </button>
                                         </div>
@@ -635,12 +638,12 @@ const CommunityHub = () => {
                         ) : (
                             <div className="space-y-8">
                                 {/* Bouton Nouveau Post */}
-                                <div className="flex justify-end">
+                                {/* <div className="flex justify-end">
                                     <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                         <PlusCircle className="w-4 h-4" />
                                         <span>Nouveau post</span>
                                     </button>
-                                </div>
+                                </div> */}
 
                                 {/* Posts groupés par catégories */}
                                 {POST_CATEGORIES.map((category) => {
@@ -754,7 +757,7 @@ const CommunityHub = () => {
                     <div className="bg-white rounded-lg shadow-sm p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-bold text-gray-900">Questions fréquentes</h2>
-                            <HelpCircle className="w-5 h-5 text-blue-500" />
+                            <HelpCircle onClick={() => toast.info("Posez vos questions à l'équipe de la communauté")} className="cursor-pointer w-5 h-5 text-blue-500" />
                         </div>
 
                         <div className="space-y-4">
