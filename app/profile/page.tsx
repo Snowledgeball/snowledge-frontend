@@ -271,10 +271,10 @@ const ProfilePage = () => {
     }
     return (
         <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* En-tête du profil avec fond dégradé */}
-                <div className="bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#003E8A] to-[#16215B] rounded-2xl shadow-xl p-8 mb-8 transition-all">
-                    <div className="flex items-center">
+            <div className="max-w-7xl mx-auto px-4 py-8">
+                {/* En-tête responsive */}
+                <div className="bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#003E8A] to-[#16215B] rounded-2xl p-4 lg:p-8 mb-8">
+                    <div className="flex flex-col lg:flex-row items-center">
                         <div className="w-24 h-24 bg-white rounded-full mr-6 flex items-center justify-center p-1 ring-4 ring-white/30">
                             <Image
                                 src={userData.avatar}
@@ -300,8 +300,8 @@ const ProfilePage = () => {
                     </div>
                 </div>
 
-                {/* Statistiques */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                {/* Statistiques responsives */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     {[
                         { label: "Communautés", value: userData.stats.communitiesCount, icon: Users, color: "text-blue-500" },
                         { label: "Posts", value: userData.stats.postsCount, icon: MessageCircle, color: "text-green-500" },
@@ -356,8 +356,8 @@ const ProfilePage = () => {
                     </nav>
                 </div>
 
-                {/* Contenu principal */}
-                <div className="grid grid-cols-3 gap-8">
+                {/* Contenu principal responsive */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {activeTab === 'communities' && (
                         <>
                             {/* Navigation des communautés (colonne de gauche) */}
@@ -559,7 +559,7 @@ const ProfilePage = () => {
                                             <p className="text-gray-600 mb-6">Développez votre présence avec une nouvelle communauté</p>
                                             <button
                                                 onClick={() => router.push('/create-community')}
-                                                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all"
+                                                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
                                             >
                                                 Créer une communauté
                                             </button>
@@ -572,7 +572,7 @@ const ProfilePage = () => {
                                     <p className="text-gray-600 mb-8">Lancez votre communauté et commencez à partager votre expertise</p>
                                     <button
                                         onClick={() => router.push('/create-community')}
-                                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+                                        className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
                                     >
                                         Créer une communauté
                                     </button>

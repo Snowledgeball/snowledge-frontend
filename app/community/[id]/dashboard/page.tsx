@@ -740,49 +740,49 @@ export default function CommunityDashboard() {
                         <div className="space-y-6">
                             {/* Demandes de contributeurs en attente */}
                             {contributorRequests.length > 0 && (
-                                <Card className="p-6">
+                                <Card className="p-4 lg:p-6">
                                     <h3 className="text-lg font-semibold text-gray-900 mb-4">
                                         Demandes de contributeurs en attente
                                     </h3>
                                     <div className="space-y-4">
-                                        {contributorRequests
-                                            .map((request) => (
-                                                <div key={request.id} className="flex items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                                                    <div className="flex items-center space-x-4">
-                                                        <Image
-                                                            src={request.userAvatar}
-                                                            alt={request.userName}
-                                                            className="w-10 h-10 rounded-full"
-                                                            width={48}
-                                                            height={48}
-                                                        />
-                                                        <div>
-                                                            <p className="font-medium text-gray-900">{request.userName}</p>
-                                                            <p className="text-sm text-gray-600">{request.expertiseDomain}</p>
-                                                            <p className="text-sm text-gray-500 mt-1 max-w-xl">{request.justification}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <button
-                                                            onClick={() => handleApproveRequest(request.id)}
-                                                            className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                                                        >
-                                                            Approuver
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleRejectClick(request.id)}
-                                                            className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                                                        >
-                                                            Refuser
-                                                        </button>
+                                        {contributorRequests.map((request) => (
+                                            <div key={request.id} className="flex flex-col lg:flex-row lg:items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-lg gap-4">
+                                                <div className="flex items-center space-x-4">
+                                                    <Image
+                                                        src={request.userAvatar}
+                                                        alt={request.userName}
+                                                        className="w-10 h-10 rounded-full"
+                                                        width={48}
+                                                        height={48}
+                                                    />
+                                                    <div>
+                                                        <p className="font-medium text-gray-900">{request.userName}</p>
+                                                        <p className="text-sm text-gray-600">{request.expertiseDomain}</p>
+                                                        <p className="text-sm text-gray-500 mt-1 max-w-xl">{request.justification}</p>
                                                     </div>
                                                 </div>
-                                            ))}
+                                                <div className="flex items-center space-x-2 self-end lg:self-auto">
+                                                    <button
+                                                        onClick={() => handleApproveRequest(request.id)}
+                                                        className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                                    >
+                                                        Approuver
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRejectClick(request.id)}
+                                                        className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                                                    >
+                                                        Refuser
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </Card>
                             )}
 
-                            <Card className="p-6 bg-white shadow-sm rounded-3xl">
+                            {/* Liste des membres */}
+                            <Card className="p-4 lg:p-6 bg-white shadow-sm rounded-3xl overflow-x-auto">
                                 {members.length === 0 ? (
                                     <div className="text-center text-gray-500">Aucun membre trouvé</div>
                                 ) : (
@@ -790,56 +790,65 @@ export default function CommunityDashboard() {
                                         <div className="flex items-center justify-between mb-6">
                                             <h3 className="text-lg font-semibold text-gray-900">Membres de la communauté</h3>
                                         </div>
-                                        {/* En-tête de la grille */}
-                                        <div className="grid grid-cols-8 items-center p-4 text-base font-medium text-gray-500 border-b justify-items-center">
-                                            <div className="col-span-2">Membre</div>
-                                            <div>Statut</div>
-                                            <div>Date d&apos;inscription</div>
-                                            <div>Révisions</div>
-                                            <div>Posts</div>
-                                            <div>Gains</div>
-                                            <div className="text-center">Actions</div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            {members.map((member, index) => (
-                                                <div key={index} className="grid grid-cols-8 items-center p-4 bg-white hover:bg-gray-50 rounded-lg transition-colors justify-items-center">
-                                                    <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden">
-                                                        <Image
-                                                            src={member.profilePicture}
-                                                            alt={member.fullName}
-                                                            className="w-full h-full object-cover"
-                                                            width={48}
-                                                            height={48}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-base font-medium text-gray-900">{member.fullName}</p>
-                                                        <p className="text-sm text-gray-500">@{member.userName}</p>
-                                                    </div>
 
-                                                    <div>
-                                                        <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${member.status === 'Contributeur'
-                                                            ? 'bg-blue-100 text-blue-700'
-                                                            : 'bg-green-100 text-green-700'
-                                                            }`}>
-                                                            {member.status}
-                                                        </span>
-                                                    </div>
-                                                    <div className="text-base text-gray-600">
-                                                        {member.joinedAt ?
-                                                            new Date(member.joinedAt).toLocaleDateString('fr-FR')
-                                                            : 'Date inconnue'
-                                                        }
-                                                    </div>
-                                                    <div className="text-base text-gray-600">{member.revisions} révisions</div>
-                                                    <div className="text-base text-gray-600">{member.posts} posts</div>
-                                                    <div className="text-base font-medium text-gray-900">{member.gains}€</div>
-                                                    <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors justify-self-center">
-                                                        <ChevronRight className="w-6 h-6" />
-                                                    </button>
-                                                </div>
-
-                                            ))}
+                                        {/* Table responsive */}
+                                        <div className="min-w-full">
+                                            <table className="w-full">
+                                                <thead>
+                                                    <tr className="text-left text-gray-500 border-b">
+                                                        <th className="p-4 font-medium w-[300px]">Membre</th>
+                                                        <th className="p-4 font-medium">Statut</th>
+                                                        <th className="p-4 font-medium hidden lg:table-cell">Date d'inscription</th>
+                                                        <th className="p-4 font-medium hidden sm:table-cell">Révisions</th>
+                                                        <th className="p-4 font-medium hidden sm:table-cell">Posts</th>
+                                                        <th className="p-4 font-medium">Gains</th>
+                                                        <th className="p-4 font-medium text-right">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {members.map((member) => (
+                                                        <tr key={member.id} className="hover:bg-gray-50">
+                                                            <td className="p-4">
+                                                                <div className="flex items-center space-x-3">
+                                                                    <Image
+                                                                        src={member.profilePicture}
+                                                                        alt={member.fullName}
+                                                                        className="w-10 h-10 rounded-full"
+                                                                        width={40}
+                                                                        height={40}
+                                                                    />
+                                                                    <div>
+                                                                        <p className="font-medium text-gray-900">{member.fullName}</p>
+                                                                        <p className="text-sm text-gray-500">@{member.userName}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="p-4">
+                                                                <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${member.status === 'Contributeur'
+                                                                    ? 'bg-blue-100 text-blue-700'
+                                                                    : 'bg-green-100 text-green-700'
+                                                                    }`}>
+                                                                    {member.status}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-4 hidden lg:table-cell">
+                                                                {member.joinedAt ?
+                                                                    new Date(member.joinedAt).toLocaleDateString('fr-FR')
+                                                                    : 'Date inconnue'
+                                                                }
+                                                            </td>
+                                                            <td className="p-4 hidden sm:table-cell">{member.revisions}</td>
+                                                            <td className="p-4 hidden sm:table-cell">{member.posts}</td>
+                                                            <td className="p-4 font-medium">{member.gains}€</td>
+                                                            <td className="p-4 text-right">
+                                                                <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                                                    <ChevronRight className="w-5 h-5" />
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </>
                                 )}
@@ -848,10 +857,11 @@ export default function CommunityDashboard() {
                     )}
 
                     {activeTab === 'veille' && (
-                        <div className="p-8">
-                            <div className="flex justify-between items-center mb-8">
+                        <div className="p-4 lg:p-8">
+                            {/* En-tête */}
+                            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
                                 <h1 className="text-2xl font-bold">Collecte et veille</h1>
-                                <div className="flex space-x-4">
+                                <div className="flex flex-wrap gap-4">
                                     <button className="flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200">
                                         <Rss className="w-4 h-4 mr-2" />
                                         Ajouter un flux RSS
@@ -863,15 +873,16 @@ export default function CommunityDashboard() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-4 gap-6">
+                            <div className="flex flex-col lg:flex-row gap-6">
                                 {/* Sidebar de gauche */}
-                                <div className="col-span-1 space-y-6">
+                                <aside className="w-full lg:w-64 flex flex-col gap-6">
+                                    {/* Outils de veille */}
                                     <div className="bg-white rounded-xl p-4 shadow-sm">
                                         <h3 className="font-medium mb-4 flex items-center">
                                             <Search className="w-4 h-4 mr-2" />
                                             Outils de veille
                                         </h3>
-                                        <div className="space-y-2">
+                                        <div className="flex flex-col gap-2">
                                             <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center text-gray-700">
                                                 <Rss className="w-4 h-4 mr-2" />
                                                 Flux RSS
@@ -887,12 +898,13 @@ export default function CommunityDashboard() {
                                         </div>
                                     </div>
 
+                                    {/* Organisation */}
                                     <div className="bg-white rounded-xl p-4 shadow-sm">
                                         <h3 className="font-medium mb-4 flex items-center">
                                             <BookMarked className="w-4 h-4 mr-2" />
                                             Organisation
                                         </h3>
-                                        <div className="space-y-2">
+                                        <div className="flex flex-col gap-2">
                                             <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center text-gray-700">
                                                 <Bookmark className="w-4 h-4 mr-2" />
                                                 Bookmarks
@@ -907,14 +919,14 @@ export default function CommunityDashboard() {
                                             </button>
                                         </div>
                                     </div>
-                                </div>
+                                </aside>
 
                                 {/* Contenu principal */}
-                                <div className="col-span-3">
-                                    <div className="bg-white rounded-xl p-6 shadow-sm">
-                                        <div className="flex items-center justify-between mb-6">
+                                <main className="flex-1">
+                                    <div className="bg-white rounded-xl p-4 lg:p-6 shadow-sm">
+                                        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
                                             <h2 className="text-xl font-semibold">Flux RSS</h2>
-                                            <div className="flex space-x-2">
+                                            <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
                                                 <select className="px-3 py-2 border rounded-lg text-sm">
                                                     <option>Tous les flux</option>
                                                     <option>Crypto</option>
@@ -929,10 +941,10 @@ export default function CommunityDashboard() {
                                             </div>
                                         </div>
 
-                                        <div className="space-y-4">
+                                        <div className="flex flex-col gap-4">
                                             {rssFeeds.map((feed) => (
-                                                <div key={feed.id} className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-xl transition-colors">
-                                                    <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                                <div key={feed.id} className="flex flex-col sm:flex-row items-start gap-4 p-4 hover:bg-gray-50 rounded-xl transition-colors">
+                                                    <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-lg overflow-hidden">
                                                         <Image
                                                             src={feed.thumbnail}
                                                             alt={feed.title}
@@ -941,8 +953,8 @@ export default function CommunityDashboard() {
                                                             className="w-full h-full object-cover"
                                                         />
                                                     </div>
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center justify-between">
+                                                    <div className="flex-1 w-full">
+                                                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                                                             <span className="text-sm font-medium text-purple-600">{feed.category}</span>
                                                             <span className="text-sm text-gray-500">{feed.date}</span>
                                                         </div>
@@ -963,7 +975,7 @@ export default function CommunityDashboard() {
                                             ))}
                                         </div>
                                     </div>
-                                </div>
+                                </main>
                             </div>
                         </div>
                     )}

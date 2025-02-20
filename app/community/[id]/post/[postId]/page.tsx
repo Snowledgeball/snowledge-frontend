@@ -291,9 +291,9 @@ export default function PostPage() {
             </div >
 
             <div className="max-w-7xl mx-auto px-4">
-                <div className="flex gap-8">
+                <div className="flex flex-col lg:flex-row gap-8">
                     {/* Contenu principal */}
-                    <main className="flex-1">
+                    <main className="flex-1 order-2 lg:order-1">
                         <Card className="overflow-hidden">
                             {post.cover_image_url && (
                                 <div className="w-full h-96 relative">
@@ -408,8 +408,8 @@ export default function PostPage() {
                         </div>
                     </main>
 
-                    {/* Sidebar Chat */}
-                    <aside className="w-[320px]">
+                    {/* Sidebar Chat - maintenant responsive */}
+                    <aside className="w-full lg:w-[320px] order-1 lg:order-2 sticky top-4">
                         <Card className="overflow-hidden">
                             <div className="p-4 border-b border-gray-200">
                                 <h2 className="text-xl font-semibold text-gray-900 flex items-center">

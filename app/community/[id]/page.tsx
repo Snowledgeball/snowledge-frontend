@@ -499,10 +499,10 @@ const CommunityHub = () => {
             )}
 
             {/* Main Content avec mise à jour du style */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid grid-cols-9 gap-8">
-                    {/* Sidebar des utilisateurs - ajusté de 3 à 2 colonnes */}
-                    <div className="col-span-2">
+            <div className="max-w-7xl mx-auto px-4">
+                <div className="flex flex-col lg:flex-row gap-8">
+                    {/* Sidebar gauche */}
+                    <aside className="w-full lg:w-64 order-2 lg:order-1">
                         <Card className="p-4 bg-white shadow-sm">
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="font-semibold text-gray-900">Membres actifs</h2>
@@ -536,10 +536,10 @@ const CommunityHub = () => {
                                 ))}
                             </div>
                         </Card>
-                    </div>
+                    </aside>
 
-                    {/* Zone principale - ajustée de 6 à 7 colonnes */}
-                    <div className="col-span-7">
+                    {/* Contenu principal */}
+                    <main className="flex-1 order-1 lg:order-2">
                         {/* Tabs */}
                         <div className="border-b border-gray-200 mb-6">
                             <nav className="-mb-px flex justify-center space-x-8">
@@ -746,7 +746,7 @@ const CommunityHub = () => {
                                 })}
                             </div>
                         )}
-                    </div>
+                    </main>
                 </div>
 
                 {/* Section Q&A avec Disclosure */}
