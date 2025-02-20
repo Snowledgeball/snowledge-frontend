@@ -714,7 +714,7 @@ const CommunityHub = () => {
                                                                     dangerouslySetInnerHTML={{
                                                                         __html: post.content
                                                                     }}
-                                                                    className="line-clamp-[12]"
+                                                                    className="line-clamp-[12] p-6"
                                                                 />
                                                                 <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent" />
                                                             </div>

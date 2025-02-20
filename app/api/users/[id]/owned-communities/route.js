@@ -17,6 +17,7 @@ export async function GET(request, { params }) {
             include: {
                 community_contributors: true,
                 community_learners: true,
+                community_posts: true
             }
         });
 
@@ -29,7 +30,7 @@ export async function GET(request, { params }) {
                 isComplete: Boolean(community.description && community.image_url),
                 stats: {
                     membersCount: community.community_learners.length,
-                    postsCount: 0, // À implémenter
+                    postsCount: community.community_posts.length,
                     revenue: 0 // À implémenter
                 }
             }))
