@@ -8,12 +8,17 @@ export async function GET(request, { params }) {
 
         const { id } = await params;
 
-        const creatorId = await prisma.community.findFirst({
+        const creator = await prisma.community.findFirst({
             where: {
                 id: parseInt(id)
             },
             select: {
-                creator_id: true
+                user: {
+                    select: {
+                        id: true,
+                        fullName: true
+                    }
+                }
             }
         });
 
@@ -43,7 +48,7 @@ export async function GET(request, { params }) {
 
         const objectToReturn = {
             ...community,
-            creator: creatorId
+            creator: creator.user
         };
 
         return NextResponse.json(objectToReturn);

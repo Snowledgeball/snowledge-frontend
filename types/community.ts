@@ -4,11 +4,12 @@ export interface Community {
     name: string;
     description: string;
     category: string;
-    role: string;
+    image_url: string;
     joinDate: string;
     contributionsCount: number;
     creator: {
-        creator_id: number;
+        id: number;
+        fullName: string;
     };
     recentActivity: {
         type: string;
@@ -17,4 +18,23 @@ export interface Community {
         engagement: number;
     }[];
     revenue: string;
-} 
+    community_presentation: {
+        video_url: string;
+        topic_details: string;
+        code_of_conduct: string;
+        disclaimers: string;
+    };
+    community_posts: {
+        id: number;
+        title: string;
+        content: string;
+        cover_image_url: string;
+        tag: string;
+    }[];
+    community_contributors: {
+        contributor_id: number;
+    }[];
+    community_learners: {
+        learner_id: number;
+    }[];
+}

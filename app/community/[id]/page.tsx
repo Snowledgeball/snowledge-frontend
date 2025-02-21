@@ -135,6 +135,7 @@ const CommunityHub = () => {
                 }
                 const communityData = await communityResponse.json();
                 setCommunityData(communityData);
+                console.log(communityData);
 
                 // Si l'utilisateur n'est pas membre, récupérer la présentation
                 if (!membershipData.isMember) {
@@ -365,7 +366,7 @@ const CommunityHub = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Modal de présentation */}
-            {userId && communityData && communityData?.creator.creator_id !== parseInt(userId) && showJoinModal && presentation && (
+            {userId && communityData && communityData?.creator.id !== parseInt(userId) && showJoinModal && presentation && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-xl p-8 max-w-2xl w-full shadow-2xl">
                         {/* En-tête avec gradient */}
@@ -445,7 +446,6 @@ const CommunityHub = () => {
                 </div>
             )}
 
-
             {/* Header avec gradient */}
             {communityData && (
                 <div className="bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#003E8A] to-[#16215B]">
@@ -500,7 +500,7 @@ const CommunityHub = () => {
                                     </div>
                                 </div>
                             </div>
-                            {session && communityData?.creator.creator_id === parseInt(session?.user?.id) && (
+                            {session && communityData?.creator.id === parseInt(session?.user?.id) && (
                                 <div className="flex items-center space-x-4">
                                     <button onClick={() => router.push(`/community/${params.id}/settings`)} className="text-white/80 hover:text-white transition-colors">
                                         <Settings className="w-5 h-5" />
@@ -511,6 +511,20 @@ const CommunityHub = () => {
                     </div>
                 </div>
             )}
+
+            {/* Banner section */}
+            <div className="w-full h-[255px] relative overflow-hidden">
+                <Image
+                    src={`https://${communityData?.image_url}`}
+                    alt="Banner pattern"
+                    layout="fill"
+                    objectFit="cover"
+                />
+            </div>
+            <div className="flex items-center justify-center flex-col py-8">
+                <h1 className="text-4xl font-bold text-gray-900">{communityData?.name}</h1>
+                <p className="text-gray-600 text-sm mt-2">Créé par {communityData?.creator.fullName}</p>
+            </div>
 
             {/* Main Content avec mise à jour du style */}
             <div className="max-w-7xl mx-auto px-4">
