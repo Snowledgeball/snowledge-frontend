@@ -57,9 +57,9 @@ export async function GET(
         // Construire la réponse
         const members = users.map(user => {
             const isContributor = contributorIds.includes(user.id);
-            const memberData = isContributor
-                ? contributors.find(c => c.contributor_id === user.id)
-                : learners.find(l => l.learner_id === user.id);
+            // On cherche toujours dans les learners pour avoir la date de join
+            const learnerData = learners.find(l => l.learner_id === user.id);
+            const contributorData = isContributor ? contributors.find(c => c.contributor_id === user.id) : null;
 
             return {
                 id: user.id,
@@ -67,13 +67,11 @@ export async function GET(
                 userName: user.userName,
                 profilePicture: user.profilePicture,
                 status: isContributor ? 'Contributeur' : 'Apprenant',
-                joinedAt: isContributor
-                    ? memberData?.added_at
-                    : memberData?.joined_at,
-                // Ces valeurs devraient être calculées à partir d'autres tables
-                revisions: 0,
-                posts: 0,
-                gains: 0
+                // On utilise la date de join des learners en priorité
+                joinedAt: learnerData?.joined_at,
+                revisions: contributorData?.revisions_count || 0,
+                posts: contributorData?.posts_count || 0,
+                gains: contributorData?.earnings || 0
             };
         });
 

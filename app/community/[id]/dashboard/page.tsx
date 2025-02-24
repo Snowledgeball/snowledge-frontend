@@ -9,7 +9,7 @@ import {
     BarChart2, FileText, ChevronRight, Inbox,
     Rss, Search, Bookmark, PinIcon, Link2,
     NotebookPen, Hash, Globe, BookMarked, ArrowUpRight,
-    ImageIcon, Eye, PenTool
+    ImageIcon, Eye, PenTool, Edit, MoreVertical, UserMinus, UserPlus, UserX
 } from "lucide-react";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
@@ -22,6 +22,7 @@ import TinyEditor from "@/components/shared/TinyEditor";
 import { Switch } from "@/components/ui/switch";
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface DashboardData {
     stats: {
@@ -175,6 +176,9 @@ export default function CommunityDashboard() {
     const [coverImage, setCoverImage] = useState('');
     const [selectedTag, setSelectedTag] = useState('');
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [isBanModalOpen, setIsBanModalOpen] = useState(false);
+    const [banReason, setBanReason] = useState('');
+    const [selectedMemberToBan, setSelectedMemberToBan] = useState<{ id: number, fullName: string } | null>(null);
 
     useEffect(() => {
         const userId = session?.user?.id;
@@ -205,22 +209,21 @@ export default function CommunityDashboard() {
     }, [userId, communityId, router]);
 
 
-    useEffect(() => {
-        const fetchMembers = async () => {
-            if (activeTab === 'members') {
+    const fetchMembers = async () => {
+        if (activeTab === 'members') {
 
-                try {
-                    const response = await fetch(`/api/communities/${communityId}/members`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        setMembers(data);
-                    }
-                } catch (error) {
-                    console.error('Erreur lors de la récupération des membres:', error);
+            try {
+                const response = await fetch(`/api/communities/${communityId}/members`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setMembers(data);
                 }
+            } catch (error) {
+                console.error('Erreur lors de la récupération des membres:', error);
             }
-        };
-
+        }
+    };
+    useEffect(() => {
         fetchMembers();
     }, [activeTab, communityId]);
 
@@ -410,6 +413,75 @@ export default function CommunityDashboard() {
             fetchPosts();
         }
     }, [activeTab, communityId]);
+
+    const handlePromoteMember = async (memberId: number, memberName: string) => {
+        try {
+            const response = await fetch(`/api/communities/${params.id}/members/${memberId}`, {
+                method: 'POST'
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de la promotion');
+
+            toast.success(`${memberName} est maintenant contributeur`);
+            await fetchMembers();
+        } catch (error) {
+            toast.error("Erreur lors de la promotion du membre");
+        }
+    };
+
+    const handleDemoteMember = async (memberId: number, memberName: string) => {
+        try {
+            const response = await fetch(`/api/communities/${params.id}/members/${memberId}`, {
+                method: 'PUT'
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de la rétrogradation');
+
+            toast.success(`${memberName} n'est plus contributeur`);
+            await fetchMembers();
+        } catch (error) {
+            toast.error("Erreur lors de la rétrogradation du membre");
+        }
+    };
+
+    const handleExcludeMember = async (memberId: number, memberName: string) => {
+        try {
+            const response = await fetch(`/api/communities/${params.id}/members/${memberId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de l\'exclusion');
+
+            toast.success(`${memberName} a été exclu`);
+            await fetchMembers();
+        } catch (error) {
+            toast.error("Erreur lors de l'exclusion du membre");
+        }
+    };
+
+    const handleBanMember = async () => {
+        if (!selectedMemberToBan || !banReason.trim()) return;
+
+        try {
+            const response = await fetch(`/api/communities/${params.id}/members/${selectedMemberToBan.id}/ban`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ reason: banReason }),
+            });
+
+            if (!response.ok) throw new Error('Erreur lors du bannissement');
+
+            toast.success(`${selectedMemberToBan.fullName} a été banni`);
+            await fetchMembers();
+            setIsBanModalOpen(false);
+            setBanReason('');
+            setSelectedMemberToBan(null);
+        } catch (error) {
+            toast.error("Erreur lors du bannissement du membre");
+        }
+    };
 
     if (loading) {
         return <div>Chargement...</div>;
@@ -696,12 +768,22 @@ export default function CommunityDashboard() {
                                                         <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">
                                                             {POST_TAGS.find(t => t.value === post.tag)?.label || post.tag}
                                                         </span>
-                                                        <span className="text-sm text-gray-500">
-                                                            {formatDistanceToNow(new Date(post.created_at), {
-                                                                addSuffix: true,
-                                                                locale: fr
-                                                            })}
-                                                        </span>
+                                                        <div className="flex items-center space-x-2">
+                                                            <span className="text-sm text-gray-500">
+                                                                {formatDistanceToNow(new Date(post.created_at), {
+                                                                    addSuffix: true,
+                                                                    locale: fr
+                                                                })}
+                                                            </span>
+                                                            {Number(session?.user?.id) === post.user.id && (
+                                                                <button
+                                                                    onClick={() => router.push(`/community/${communityId}/post/${post.id}/edit`)}
+                                                                    className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                                                                >
+                                                                    <Edit className="w-4 h-4" />
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                     <h3 className="text-xl font-bold text-gray-900 mb-2">{post.title}</h3>
                                                     <div className="flex items-center justify-between">
@@ -848,10 +930,43 @@ export default function CommunityDashboard() {
                                                             <td className="p-4 hidden sm:table-cell">{member.revisions}</td>
                                                             <td className="p-4 hidden sm:table-cell">{member.posts}</td>
                                                             <td className="p-4 font-medium">{member.gains}€</td>
-                                                            <td className="p-4 text-right">
-                                                                <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                                                                    <ChevronRight className="w-5 h-5" />
-                                                                </button>
+                                                            <td className="px-4 py-2 text-right">
+                                                                <Popover>
+                                                                    <PopoverTrigger asChild>
+                                                                        <div className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer inline-block">
+                                                                            <MoreVertical className="w-4 h-4 text-gray-500" />
+                                                                        </div>
+                                                                    </PopoverTrigger>
+                                                                    <PopoverContent className="w-48" align="end">
+                                                                        {member.status === 'Apprenant' ? (
+                                                                            <button
+                                                                                onClick={() => handlePromoteMember(member.id, member.fullName)}
+                                                                                className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                                                            >
+                                                                                <UserPlus className="w-4 h-4" />
+                                                                                <span>Promouvoir contributeur</span>
+                                                                            </button>
+                                                                        ) : (
+                                                                            <button
+                                                                                onClick={() => handleDemoteMember(member.id, member.fullName)}
+                                                                                className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                                                            >
+                                                                                <UserMinus className="w-4 h-4" />
+                                                                                <span>Retirer contributeur</span>
+                                                                            </button>
+                                                                        )}
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setSelectedMemberToBan({ id: member.id, fullName: member.fullName });
+                                                                                setIsBanModalOpen(true);
+                                                                            }}
+                                                                            className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                                        >
+                                                                            <UserX className="w-4 h-4" />
+                                                                            <span>Bannir</span>
+                                                                        </button>
+                                                                    </PopoverContent>
+                                                                </Popover>
                                                             </td>
                                                         </tr>
                                                     ))}
@@ -1170,6 +1285,44 @@ export default function CommunityDashboard() {
                             </div>
                         </div>
                     </div>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isBanModalOpen} onOpenChange={setIsBanModalOpen}>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+                    <DialogHeader>
+                        <DialogTitle>Bannir {selectedMemberToBan?.fullName}</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4 ">
+                        <p className="text-sm text-gray-500 mb-4">
+                            Cette action est irréversible. Le membre ne pourra plus rejoindre la communauté.
+                        </p>
+                        <Textarea
+                            placeholder="Veuillez expliquer la raison du bannissement..."
+                            value={banReason}
+                            onChange={(e) => setBanReason(e.target.value)}
+                            className="min-h-[100px]"
+                        />
+                    </div>
+                    <DialogFooter className="flex space-x-2">
+                        <button
+                            onClick={() => {
+                                setIsBanModalOpen(false);
+                                setBanReason('');
+                                setSelectedMemberToBan(null);
+                            }}
+                            className="px-4 py-2 text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                            Annuler
+                        </button>
+                        <button
+                            onClick={handleBanMember}
+                            disabled={!banReason.trim()}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Confirmer le bannissement
+                        </button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>

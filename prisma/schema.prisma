@@ -16,6 +16,7 @@ model community {
   category_id                     Int
   category                        community_category                @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_community_category")
   user                            user                              @relation(fields: [creator_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_community_creator")
+  community_bans                  community_bans[]
   community_contributors          community_contributors[]
   community_contributors_requests community_contributors_requests[]
   community_learners              community_learners[]
@@ -73,6 +74,7 @@ model user {
   created_at      DateTime          @default(now()) @db.Timestamp(6)
   updated_at      DateTime          @default(now()) @db.Timestamp(6)
   community       community[]
+  community_bans  community_bans[]
   community_posts community_posts[]
 }
 
@@ -106,4 +108,19 @@ model community_contributors_requests {
   community        community @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([community_id, requester_id], map: "community_contributors_requests_community_id_contributor_id_key")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model community_bans {
+  id           Int       @id @default(autoincrement())
+  community_id Int
+  user_id      Int
+  reason       String
+  banned_at    DateTime? @default(now()) @db.Timestamptz(6)
+  community    community @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_community_bans_community")
+  user         user      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_community_bans_user")
+
+  @@unique([community_id, user_id], map: "unique_community_user_ban")
+  @@index([community_id], map: "idx_community_bans_community_id")
+  @@index([user_id], map: "idx_community_bans_user_id")
 }
