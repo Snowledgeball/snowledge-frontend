@@ -12,12 +12,14 @@ interface CustomSession extends Session {
         id: string;
         email: string;
         name: string;
+        image?: string;
         address?: string;
     }
 }
 
 interface CustomJWT extends JWT {
     id: string;
+    image?: string;
     address?: string;
 }
 
@@ -40,6 +42,7 @@ export const authOptions = {
                         id: String(user.id),
                         email: user.email,
                         name: user.fullName,
+                        image: user.profilePicture,
                         accountAddress: user.accountAddress
                     };
                 }
@@ -57,11 +60,13 @@ export const authOptions = {
                 id: string;
                 email: string;
                 name: string;
+                image: string;
                 accountAddress: string;
             }
         }) {
             if (user) {
                 token.id = user.id;
+                token.image = user.image;
                 token.address = user.accountAddress;
             }
             return token;
@@ -72,6 +77,7 @@ export const authOptions = {
         }) {
             if (token) {
                 session.user.id = token.id;
+                session.user.image = token.image;
                 session.user.address = token.address;
             }
             return session;

@@ -48,7 +48,6 @@ export default function PendingPosts() {
 
     const [pendingPosts, setPendingPosts] = useState<PendingPost[]>([]);
     const [selectedPost, setSelectedPost] = useState<PendingPost | null>(null);
-    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [reviewContent, setReviewContent] = useState("");
     const [reviewStatus, setReviewStatus] = useState<"APPROVED" | "REJECTED">("APPROVED");
     const { data: session } = useSession();
@@ -70,35 +69,7 @@ export default function PendingPosts() {
         fetchPendingPosts();
     }, [params.id, router]);
 
-    const handleSubmitReview = async () => {
-        if (!selectedPost || !reviewContent.trim()) return;
 
-        try {
-            const response = await fetch(`/api/communities/${params.id}/posts/pending/${selectedPost.id}/reviews`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    content: reviewContent,
-                    status: reviewStatus
-                }),
-            });
-
-            if (!response.ok) throw new Error('Erreur lors de l\'envoi de la review');
-
-            toast.success('Review envoyée avec succès');
-            setIsReviewModalOpen(false);
-            setReviewContent("");
-
-            // Rafraîchir la liste des posts
-            const updatedResponse = await fetch(`/api/communities/${params.id}/posts/pending`);
-            const updatedData = await updatedResponse.json();
-            setPendingPosts(updatedData);
-        } catch (error) {
-            toast.error("Erreur lors de l'envoi de la review");
-        }
-    };
 
     const handlePublish = async (postId: number) => {
         try {
@@ -166,10 +137,7 @@ export default function PendingPosts() {
                                             </button>
                                         ) : (
                                             <button
-                                                onClick={() => {
-                                                    setSelectedPost(post);
-                                                    setIsReviewModalOpen(true);
-                                                }}
+                                                onClick={() => router.push(`/community/${params.id}/post/${post.id}/review`)}
                                                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                                             >
                                                 <MessageCircle className="w-4 h-4 mr-2 inline-block" />
@@ -251,68 +219,6 @@ export default function PendingPosts() {
                     </div>
                 )}
             </div>
-
-            {/* Modal de révision */}
-            <Dialog open={isReviewModalOpen} onOpenChange={setIsReviewModalOpen}>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
-                    <DialogHeader>
-                        <DialogTitle>Réviser le post</DialogTitle>
-                    </DialogHeader>
-
-                    <div className="py-4">
-                        <div className="space-y-4">
-                            <div className="flex items-center space-x-4">
-                                <button
-                                    onClick={() => setReviewStatus("APPROVED")}
-                                    className={`flex-1 p-4 rounded-lg border ${reviewStatus === "APPROVED"
-                                        ? "border-green-500 bg-green-50"
-                                        : "border-gray-200"
-                                        }`}
-                                >
-                                    <CheckCircle className={`w-6 h-6 mx-auto ${reviewStatus === "APPROVED" ? "text-green-500" : "text-gray-400"
-                                        }`} />
-                                    <p className="text-center mt-2">Approuver</p>
-                                </button>
-
-                                <button
-                                    onClick={() => setReviewStatus("REJECTED")}
-                                    className={`flex-1 p-4 rounded-lg border ${reviewStatus === "REJECTED"
-                                        ? "border-red-500 bg-red-50"
-                                        : "border-gray-200"
-                                        }`}
-                                >
-                                    <XCircle className={`w-6 h-6 mx-auto ${reviewStatus === "REJECTED" ? "text-red-500" : "text-gray-400"
-                                        }`} />
-                                    <p className="text-center mt-2">Rejeter</p>
-                                </button>
-                            </div>
-
-                            <Textarea
-                                placeholder="Écrivez votre révision..."
-                                value={reviewContent}
-                                onChange={(e) => setReviewContent(e.target.value)}
-                                className="min-h-[200px]"
-                            />
-                        </div>
-                    </div>
-
-                    <DialogFooter>
-                        <button
-                            onClick={() => setIsReviewModalOpen(false)}
-                            className="px-4 py-2 text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                        >
-                            Annuler
-                        </button>
-                        <button
-                            onClick={handleSubmitReview}
-                            disabled={!reviewContent.trim()}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                        >
-                            Envoyer la révision
-                        </button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 } 

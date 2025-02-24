@@ -62,6 +62,7 @@ export async function GET(
         const totalEarnings = 0;
 
         const userData = {
+            id: user.id,
             userName: user.userName,
             fullName: user.fullName,
             level: level,
