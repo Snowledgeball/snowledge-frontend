@@ -91,4 +91,53 @@ export async function GET(request, { params }) {
     } finally {
         await prisma.$disconnect();
     }
+}
+
+export async function PUT(request, { params }) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session) {
+            return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+        }
+
+        const { id, postId } = await params;
+        const { title, content, cover_image_url, tag, accept_contributions } = await request.json();
+        const communityId = parseInt(id);
+        const postIdInt = parseInt(postId);
+        const userId = parseInt(session.user.id);
+
+        // Vérifier que l'utilisateur est l'auteur du post
+        const post = await prisma.community_posts.findUnique({
+            where: { id: postIdInt }
+        });
+
+        if (!post || post.author_id !== userId) {
+            return NextResponse.json(
+                { error: "Non autorisé à modifier ce post" },
+                { status: 403 }
+            );
+        }
+
+        // Mettre à jour le post
+        const updatedPost = await prisma.community_posts.update({
+            where: { id: postIdInt },
+            data: {
+                title,
+                content,
+                cover_image_url,
+                tag,
+                accept_contributions
+            }
+        });
+
+        return NextResponse.json(updatedPost);
+    } catch (error) {
+        console.error("Erreur lors de la modification du post:", error);
+        return NextResponse.json(
+            { error: "Erreur lors de la modification du post" },
+            { status: 500 }
+        );
+    } finally {
+        await prisma.$disconnect();
+    }
 } 

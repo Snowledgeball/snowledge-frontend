@@ -448,7 +448,7 @@ const CommunityHub = () => {
 
             {/* Header avec gradient */}
             {communityData && (
-                <div className="bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#003E8A] to-[#16215B]">
+                <div id="no-header" className="bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#003E8A] to-[#16215B]">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex items-center justify-between h-16">
                             <div className="flex items-center">
@@ -515,20 +515,20 @@ const CommunityHub = () => {
 
             {/* Banner section */}
             {communityData && (
-            <> 
-                <div className="w-full h-[255px] relative overflow-hidden">
-                    <Image
-                        src={`https://${communityData?.image_url}`}
-                        alt="Banner pattern"
-                        layout="fill"
-                        objectFit="cover"
-                    />
-                </div>
-                <div className="flex items-center justify-center flex-col py-8">
-                    <h1 className="text-4xl font-bold text-gray-900">{communityData?.name}</h1>
-                    <p className="text-gray-600 text-sm mt-2">Créé par {communityData?.creator.fullName}</p>
-                </div>
-            </>
+                <>
+                    <div className="w-full h-[255px] relative overflow-hidden">
+                        <Image
+                            src={`https://${communityData?.image_url}`}
+                            alt="Banner pattern"
+                            layout="fill"
+                            objectFit="cover"
+                        />
+                    </div>
+                    <div className="flex items-center justify-center flex-col py-8">
+                        <h1 className="text-4xl font-bold text-gray-900">{communityData?.name}</h1>
+                        <p className="text-gray-600 text-sm mt-2">Créé par {communityData?.creator.fullName}</p>
+                    </div>
+                </>
             )}
 
             {/* Main Content avec mise à jour du style */}

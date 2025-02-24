@@ -6,9 +6,10 @@ import { useState, useEffect } from 'react';
 interface TinyEditorProps {
     value: string;
     onChange: (content: string) => void;
+    initialValue?: string;
 }
 
-const TinyEditor = ({ value, onChange }: TinyEditorProps) => {
+const TinyEditor = ({ value, onChange, initialValue }: TinyEditorProps) => {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -31,7 +32,7 @@ const TinyEditor = ({ value, onChange }: TinyEditorProps) => {
                 apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
                 value={value}
                 onEditorChange={handleEditorChange}
-                initialValue="<p>Écrivez ici...</p><p></p><p></p><p></p><p></p>"
+                initialValue={initialValue || "<p>Écrivez ici...</p><p></p><p></p><p></p><p></p>"}
                 init={{
                     plugins: 'quickbars advlist autolink lists link image media table',
                     toolbar: false,

@@ -4,11 +4,12 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
-import { Users, ArrowLeft, MessageCircle, Send, HelpCircle, ChevronDown } from "lucide-react";
+import { Users, ArrowLeft, MessageCircle, Send, HelpCircle, ChevronDown, Edit } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { toast } from "sonner";
 import { Disclosure } from "@/components/ui/disclosure";
+import { useSession } from "next-auth/react";
 
 interface Post {
     id: number;
@@ -52,6 +53,7 @@ export default function PostPage() {
     const router = useRouter();
     const [post, setPost] = useState<Post | null>(null);
     const [message, setMessage] = useState("");
+    const { data: session } = useSession();
     const [messages, setMessages] = useState<Message[]>([
         {
             id: 1,
@@ -329,6 +331,15 @@ export default function PostPage() {
                                     <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">
                                         {post.tag}
                                     </span>
+                                    {Number(session?.user?.id) === post.user.id && (
+                                        <button
+                                            onClick={() => router.push(`/community/${params.id}/post/${post.id}/edit`)}
+                                            className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                                        >
+                                            <Edit className="w-4 h-4" />
+                                            <span>Modifier</span>
+                                        </button>
+                                    )}
                                 </div>
 
                                 <h1 className="text-3xl font-bold text-gray-900 mb-6">{post.title}</h1>
@@ -338,7 +349,7 @@ export default function PostPage() {
                                     dangerouslySetInnerHTML={{ __html: post.content }}
                                 />
 
-                                {post.accept_contributions && (
+                                {post.accept_contributions ? (
                                     <div className="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
                                         <div className="flex items-center text-green-700">
                                             <Users className="w-5 h-5 mr-2" />
@@ -348,7 +359,15 @@ export default function PostPage() {
                                             Vous pouvez proposer des modifications à ce post
                                         </p>
                                     </div>
+                                ) : (
+                                    <div className="mt-8 p-4 bg-red-50 rounded-lg border border-red-200">
+                                        <div className="flex items-center text-red-700">
+                                            <Users className="w-5 h-5 mr-2" />
+                                            <span className="font-medium">Contributions désactivées</span>
+                                        </div>
+                                    </div>
                                 )}
+
                             </div>
                         </Card>
 
