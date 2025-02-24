@@ -573,8 +573,12 @@ export default function CommunityDashboard() {
                                 ✍️ Création & édition
                                 <ChevronRight className="ml-auto w-4 h-4" />
                             </button>
-                            <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="w-full flex items-center text-white p-2 rounded-lg hover:bg-gray-800">
-                                📢 Publication & diffusion
+                            <button
+                                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === 'pending' ? 'bg-gray-800' : 'hover:bg-gray-800'
+                                    }`}
+                                onClick={() => router.push(`/community/${params.id}/posts/pending`)}
+                            >
+                                📝 Posts en attente
                                 <ChevronRight className="ml-auto w-4 h-4" />
                             </button>
                         </div>

@@ -114,6 +114,8 @@ const CommunityHub = () => {
     const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
     const [userCommunities, setUserCommunities] = useState<Community[]>([]);
     const [posts, setPosts] = useState<Post[]>([]);
+    const [isContributor, setIsContributor] = useState(false);
+    const [pendingPostsCount, setPendingPostsCount] = useState(0);
 
     useEffect(() => {
         if (!session) {
@@ -146,12 +148,32 @@ const CommunityHub = () => {
                     setShowJoinModal(true);
                 }
 
-
                 // Récupérer les communautés de l'utilisateur
                 const userCommunitiesResponse = await fetch(`/api/users/${session?.user?.id}/joined-communities`);
                 if (userCommunitiesResponse.ok) {
                     const userCommunitiesData = await userCommunitiesResponse.json();
                     setUserCommunities(userCommunitiesData.communities);
+                }
+
+                console.log("membershipData", membershipData);
+
+                // Vérifier si l'utilisateur est contributeur
+                setIsContributor(membershipData.isContributor);
+
+                // Si l'utilisateur est contributeur, récupérer le nombre de posts en attente
+                if (membershipData.isContributor) {
+                    const fetchPendingPosts = async () => {
+                        try {
+                            const response = await fetch(`/api/communities/${params.id}/posts/pending`);
+                            if (response.ok) {
+                                const data = await response.json();
+                                setPendingPostsCount(data.length);
+                            }
+                        } catch (error) {
+                            console.error('Erreur:', error);
+                        }
+                    };
+                    fetchPendingPosts();
                 }
 
             } catch (error) {
@@ -172,7 +194,7 @@ const CommunityHub = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await fetch(`/api/communities/${params.id}/posts`);
+                const response = await fetch(`/api/communities/${params.id}/posts?status=PUBLISHED`);
                 if (!response.ok) throw new Error('Erreur lors de la récupération des posts');
                 const data = await response.json();
                 setPosts(data);
@@ -463,6 +485,11 @@ const CommunityHub = () => {
                                 <div className="relative group">
                                     <button className="flex items-center space-x-2 text-white">
                                         <h1 className="text-xl font-bold">{communityData.name}</h1>
+                                        {isContributor && pendingPostsCount > 0 && (
+                                            <span className="ml-2 px-2 py-1 bg-red-100 text-red-600 text-xs font-medium rounded-full">
+                                                {pendingPostsCount} en attente
+                                            </span>
+                                        )}
                                         <ChevronDown className="w-5 h-5 group-hover:rotate-180 transition-transform" />
                                     </button>
 
@@ -607,6 +634,17 @@ const CommunityHub = () => {
                                     Cours
                                     <Lock className="w-4 h-4" />
                                 </button>
+                                {isContributor && (
+                                    <button
+                                        className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "pending"
+                                            ? "border-blue-500 text-blue-600"
+                                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                            }`}
+                                        onClick={() => router.push(`/community/${params.id}/posts/pending`)}
+                                    >
+                                        Posts en attente
+                                    </button>
+                                )}
                             </nav>
                         </div>
 
@@ -669,13 +707,18 @@ const CommunityHub = () => {
                             </Card>
                         ) : (
                             <div className="space-y-8">
-                                {/* Bouton Nouveau Post */}
-                                {/* <div className="flex justify-end">
-                                    <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                        <PlusCircle className="w-4 h-4" />
-                                        <span>Nouveau post</span>
-                                    </button>
-                                </div> */}
+                                {/* Bouton Nouveau Post pour les contributeurs */}
+                                <div className="flex justify-end">
+                                    {isContributor && (
+                                        <button
+                                            onClick={() => router.push(`/community/${params.id}/post/create`)}
+                                            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                        >
+                                            <PlusCircle className="w-4 h-4" />
+                                            <span>Proposer un post</span>
+                                        </button>
+                                    )}
+                                </div>
 
                                 {/* Posts groupés par catégories */}
                                 {POST_CATEGORIES.map((category) => {

@@ -51,7 +51,7 @@ export async function POST(request, { params }) {
                 community_id: communityId,
                 author_id: userId,
                 accept_contributions,
-                status: 'published'
+                status: 'PUBLISHED'
             }
         });
 

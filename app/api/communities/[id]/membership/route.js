@@ -30,8 +30,17 @@ export async function GET(
             }
         });
 
+        const isContributor = await prisma.community_contributors.findUnique({
+            where: {
+                community_id_contributor_id: {
+                    community_id: parseInt(id),
+                    contributor_id: parseInt(session.user.id),
+                }
+            }
+        });
 
-        return NextResponse.json({ isMember: !!membership });
+
+        return NextResponse.json({ isMember: !!membership, isContributor: !!isContributor });
     } catch (error) {
         console.log('Erreur lors de la vérification du membership:', error.stack);
         return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
