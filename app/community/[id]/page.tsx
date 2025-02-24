@@ -15,6 +15,7 @@ import {
     ChevronDown,
     Users,
     Lock,
+    Edit,
 } from "lucide-react";
 import { Community } from "@/types/community";
 import Image from 'next/image';
@@ -724,6 +725,14 @@ const CommunityHub = () => {
                                                                         </p>
                                                                     </div>
                                                                 </div>
+                                                                {Number(session?.user?.id) === post.user.id && (
+                                                                    <button
+                                                                        onClick={() => router.push(`/community/${params.id}/post/${post.id}/edit`)}
+                                                                        className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                                                                    >
+                                                                        <Edit className="w-4 h-4" />
+                                                                    </button>
+                                                                )}
                                                             </div>
 
                                                             <h4 className="text-lg font-semibold text-gray-900 mb-2">{post.title}</h4>
