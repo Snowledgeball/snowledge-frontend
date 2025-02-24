@@ -512,19 +512,24 @@ const CommunityHub = () => {
                 </div>
             )}
 
+
             {/* Banner section */}
-            <div className="w-full h-[255px] relative overflow-hidden">
-                <Image
-                    src={`https://${communityData?.image_url}`}
-                    alt="Banner pattern"
-                    layout="fill"
-                    objectFit="cover"
-                />
-            </div>
-            <div className="flex items-center justify-center flex-col py-8">
-                <h1 className="text-4xl font-bold text-gray-900">{communityData?.name}</h1>
-                <p className="text-gray-600 text-sm mt-2">Créé par {communityData?.creator.fullName}</p>
-            </div>
+            {communityData && (
+            <> 
+                <div className="w-full h-[255px] relative overflow-hidden">
+                    <Image
+                        src={`https://${communityData?.image_url}`}
+                        alt="Banner pattern"
+                        layout="fill"
+                        objectFit="cover"
+                    />
+                </div>
+                <div className="flex items-center justify-center flex-col py-8">
+                    <h1 className="text-4xl font-bold text-gray-900">{communityData?.name}</h1>
+                    <p className="text-gray-600 text-sm mt-2">Créé par {communityData?.creator.fullName}</p>
+                </div>
+            </>
+            )}
 
             {/* Main Content avec mise à jour du style */}
             <div className="max-w-7xl mx-auto px-4">
@@ -696,7 +701,7 @@ const CommunityHub = () => {
                                             </div>
 
                                             {/* Liste des posts de la catégorie */}
-                                            {selectedPostCategory === category.id && (
+                                            {selectedPostCategory === category.id && categoryPosts && (
                                                 <div className="divide-y divide-gray-100">
                                                     {categoryPosts.map((post) => (
                                                         <div key={post.id} className="p-4 hover:bg-gray-50 transition-colors">
