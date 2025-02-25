@@ -43,21 +43,21 @@ model community_learners {
 }
 
 model community_posts {
-  id                                    Int                                    @id @default(autoincrement())
+  id                                    Int                                     @id @default(autoincrement())
   community_id                          Int
   author_id                             Int
   content                               String
-  created_at                            DateTime?                              @default(now()) @db.Timestamp(6)
-  updated_at                            DateTime?                              @default(now()) @db.Timestamp(6)
-  likes_count                           Int?                                   @default(0)
-  title                                 String                                 @db.VarChar(255)
-  tag                                   String                                 @db.VarChar(50)
-  cover_image_url                       String                                 @db.VarChar(255)
-  accept_contributions                  Boolean?                               @default(false)
-  status                                String                                 @default("PENDING") @db.VarChar(50)
-  user                                  user                                   @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "author_id_fkey")
-  community                             community                              @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  community_posts_comment_conversations community_posts_comment_conversations?
+  created_at                            DateTime?                               @default(now()) @db.Timestamp(6)
+  updated_at                            DateTime?                               @default(now()) @db.Timestamp(6)
+  likes_count                           Int?                                    @default(0)
+  title                                 String                                  @db.VarChar(255)
+  tag                                   String                                  @db.VarChar(50)
+  cover_image_url                       String                                  @db.VarChar(255)
+  accept_contributions                  Boolean?                                @default(false)
+  status                                String                                  @default("PENDING") @db.VarChar(50)
+  user                                  user                                    @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "author_id_fkey")
+  community                             community                               @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  community_posts_comment_conversations community_posts_comment_conversations[]
   community_posts_reviews               community_posts_reviews[]
 }
 
@@ -160,8 +160,9 @@ model community_posts_comments {
 
 model community_posts_comment_conversations {
   id                       Int                        @id @default(autoincrement())
-  post_id                  Int                        @unique(map: "unique_post_conversation")
+  post_id                  Int
   created_at               DateTime?                  @default(now()) @db.Timestamptz(6)
+  resolved                 Boolean                    @default(false)
   community_posts          community_posts            @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_conversation_post")
   community_posts_comments community_posts_comments[]
 

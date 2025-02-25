@@ -195,7 +195,7 @@ export default function CreatePost() {
                         />
 
                         <TinyEditor
-                            value={editorContent}
+                            initialValue={editorContent}
                             onChange={setEditorContent}
                         />
                     </div>
