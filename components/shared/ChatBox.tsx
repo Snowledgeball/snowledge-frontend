@@ -177,7 +177,7 @@ export default function ChatBox({ user }: ChatBoxProps) {
                 <div className="p-4 border-b border-gray-700">
                     <h2 className="text-white font-semibold">Canaux</h2>
                 </div>
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
                     {DEFAULT_CHANNELS.map((channel) => (
                         <button
                             key={channel.id}
@@ -204,7 +204,7 @@ export default function ChatBox({ user }: ChatBoxProps) {
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
                     {messages.map((msg) => (
                         <div key={msg.id} className="group hover:bg-gray-600/20 rounded-lg transition-colors duration-200">
                             {/* Message répondu */}
