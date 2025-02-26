@@ -98,7 +98,6 @@ export const authOptions = {
                 session.user.id = token.id;
                 session.user.image = token.image; // Ajout d'une valeur par défaut
                 session.user.address = token.address;
-                console.log("Session:", session); // Ajout d'un log pour déboguer
             }
             return session;
         },

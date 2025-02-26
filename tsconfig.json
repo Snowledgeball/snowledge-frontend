@@ -47,7 +47,7 @@
     "app/api/communities/[id]/contributor-request/route.js",
     "app/api/users/[id]/joined-communities/route.js",
     "app/api/firebase/route.js"
-  ],
+, "app/api/communities/[communityId]/channels/[channelId]/route.js", "app/api/communities/[communityId]/channels/route.js"  ],
   "exclude": [
     "node_modules"
   ]

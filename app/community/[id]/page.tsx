@@ -233,10 +233,6 @@ const CommunityHub = () => {
         return <LoadingComponent />;
     }
 
-    if (session) {
-        console.log("session", session);
-    }
-
     // Si non authentifié, ne rien afficher (la redirection est gérée par le hook)
     if (!isAuthenticated) {
         return null;
@@ -839,9 +835,8 @@ const CommunityHub = () => {
                         )}
                     </main>
                 </div>
-
                 {session && (
-                    <ChatBox user={session.user} />
+                    <ChatBox user={session.user} communityId={parseInt(String(params.id))} />
                 )}
 
                 {/* Section Q&A avec Disclosure */}
