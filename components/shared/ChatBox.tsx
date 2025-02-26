@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { db } from "../../lib/firebaseConfig";
 import {
     collection,
@@ -66,6 +66,9 @@ const MAX_MESSAGE_LENGTH = 500;
 export default function ChatBox({ user, communityId }: ChatBoxProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState<string>("");
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+    const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
     const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
     const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
     const [replyingTo, setReplyingTo] = useState<Message | null>(null);
@@ -86,6 +89,46 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
         textarea.style.height = 'auto';
         textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
     };
+
+    const scrollToBottom = () => {
+        if (shouldAutoScroll && messagesContainerRef.current) {
+            const container = messagesContainerRef.current;
+            const targetScrollTop = container.scrollHeight;
+            const startScrollTop = container.scrollTop;
+            const distance = targetScrollTop - startScrollTop;
+            const duration = 300; // durée en ms
+            let start: number | null = null;
+
+            const animate = (currentTime: number) => {
+                if (start === null) start = currentTime;
+                const elapsed = currentTime - start;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Fonction d'easing pour un mouvement plus naturel
+                const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+
+                container.scrollTop = startScrollTop + (distance * easeOutCubic);
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            };
+
+            requestAnimationFrame(animate);
+        }
+    };
+
+    const handleScroll = () => {
+        if (messagesContainerRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+            const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
+            setShouldAutoScroll(isAtBottom);
+        }
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
     useEffect(() => {
         if (!selectedChannel?.id) return;
@@ -224,6 +267,7 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
             });
 
             if (response.ok) {
+                channels.length === 1 ? setSelectedChannel(null) : setSelectedChannel(channels[0]);
                 setIsDeleteModalOpen(false);
                 setChannelToDelete(null);
                 fetchChannels();
@@ -403,13 +447,21 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
                         </div>
 
                         {/* Messages */}
-                        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                        <div
+                            ref={messagesContainerRef}
+                            onScroll={handleScroll}
+                            className="flex-1 overflow-y-auto p-6 custom-scrollbar"
+                        >
                             {messages.map((msg, index) => {
                                 const previousMessage = index > 0 ? messages[index - 1] : null;
                                 const isConsecutive = previousMessage
                                     && previousMessage.userId === msg.userId
                                     && !msg.replyTo
-                                    && ((msg.timestamp as FirestoreTimestamp).seconds - (previousMessage.timestamp as FirestoreTimestamp).seconds < 3600);
+                                    && (!msg.timestamp || !previousMessage.timestamp || (
+                                        'seconds' in (msg.timestamp as FirestoreTimestamp)
+                                        && 'seconds' in (previousMessage.timestamp as FirestoreTimestamp)
+                                        && ((msg.timestamp as FirestoreTimestamp).seconds - (previousMessage.timestamp as FirestoreTimestamp).seconds < 3600)
+                                    ));
 
                                 return (
                                     <div key={msg.id} className={`group hover:bg-gray-600/20 rounded-lg transition-colors duration-200 ${isConsecutive ? 'mt-0' : 'mt-6'}`}>
@@ -536,6 +588,7 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
                                     </div>
                                 );
                             })}
+                            <div ref={messagesEndRef} />
                         </div>
 
                         {/* Zone de saisie */}
