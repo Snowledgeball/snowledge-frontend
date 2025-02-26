@@ -403,124 +403,139 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
                         </div>
 
                         {/* Messages */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-                            {messages.map((msg) => (
-                                <div key={msg.id} className="group hover:bg-gray-600/20 rounded-lg transition-colors duration-200">
-                                    {/* Message répondu */}
-                                    {msg.replyTo && messages.find(m => m.id === msg.replyTo) && (
-                                        <div className="relative ml-12 mb-2">
-                                            <div className="absolute left-[5px] top-0 w-[2px] h-[calc(100%+3px)] bg-gray-500"></div>
-                                            <div className="flex items-center space-x-2 pl-4">
-                                                <Image
-                                                    src={messages.find(m => m.id === msg.replyTo)?.userImage || `https://ui-avatars.com/api/?name=${messages.find(m => m.id === msg.replyTo)?.username}`}
-                                                    alt={messages.find(m => m.id === msg.replyTo)?.username || ''}
-                                                    width={16}
-                                                    height={16}
-                                                    className="rounded-full"
-                                                />
-                                                <span className="text-sm font-medium text-gray-400">{messages.find(m => m.id === msg.replyTo)?.username}</span>
-                                                <p className="text-gray-400 text-sm">
-                                                    {(() => {
-                                                        const replyMessage = messages.find(m => m.id === msg.replyTo);
-                                                        if (!replyMessage?.text) return '';
-                                                        return replyMessage.text.length > 100
-                                                            ? `${replyMessage.text.substring(0, 100)}...`
-                                                            : replyMessage.text;
-                                                    })()}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
+                        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                            {messages.map((msg, index) => {
+                                const previousMessage = index > 0 ? messages[index - 1] : null;
+                                const isConsecutive = previousMessage
+                                    && previousMessage.userId === msg.userId
+                                    && !msg.replyTo
+                                    && ((msg.timestamp as FirestoreTimestamp).seconds - (previousMessage.timestamp as FirestoreTimestamp).seconds < 3600);
 
-                                    {/* Message principal */}
-                                    <div className="flex items-start justify-between group">
-                                        <div className="flex items-start space-x-3">
-                                            <Image
-                                                src={msg.userImage || `https://ui-avatars.com/api/?name=${msg.username}`}
-                                                alt={msg.username}
-                                                width={40}
-                                                height={40}
-                                                className="rounded-full"
-                                            />
-                                            <div className="flex-1">
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="text-white font-medium">{msg.username}</span>
-                                                    <span className="text-gray-400 text-xs">
-                                                        {msg.timestamp && (msg.timestamp as FirestoreTimestamp).seconds !== undefined
-                                                            ? new Date((msg.timestamp as FirestoreTimestamp).seconds * 1000).toLocaleString()
-                                                            : msg.timestamp instanceof Date
-                                                                ? msg.timestamp.toLocaleString()
-                                                                : ''}
-                                                    </span>
+                                return (
+                                    <div key={msg.id} className={`group hover:bg-gray-600/20 rounded-lg transition-colors duration-200 ${isConsecutive ? 'mt-0' : 'mt-6'}`}>
+                                        {/* Message répondu */}
+                                        {msg.replyTo && messages.find(m => m.id === msg.replyTo) && (
+                                            <div className="relative ml-12 mb-2">
+                                                <div className="absolute left-[5px] top-0 w-[2px] h-[calc(100%+3px)] bg-gray-500"></div>
+                                                <div className="flex items-center space-x-2 pl-4">
+                                                    <Image
+                                                        src={messages.find(m => m.id === msg.replyTo)?.userImage || `https://ui-avatars.com/api/?name=${messages.find(m => m.id === msg.replyTo)?.username}`}
+                                                        alt={messages.find(m => m.id === msg.replyTo)?.username || ''}
+                                                        width={16}
+                                                        height={16}
+                                                        className="rounded-full"
+                                                    />
+                                                    <span className="text-sm font-medium text-gray-400">{messages.find(m => m.id === msg.replyTo)?.username}</span>
+                                                    <p className="text-gray-400 text-sm">
+                                                        {(() => {
+                                                            const replyMessage = messages.find(m => m.id === msg.replyTo);
+                                                            if (!replyMessage?.text) return '';
+                                                            return replyMessage.text.length > 100
+                                                                ? `${replyMessage.text.substring(0, 100)}...`
+                                                                : replyMessage.text;
+                                                        })()}
+                                                    </p>
                                                 </div>
-                                                <p className="text-gray-300 mt-1 max-w-[750px] break-words whitespace-pre-wrap">{msg.text}</p>
                                             </div>
-                                        </div>
+                                        )}
 
-                                        {/* Actions du message et réactions */}
-                                        <div className="flex flex-col items-end space-y-2 ml-4">
-                                            {/* Actions du message */}
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-2">
-                                                <div className="relative">
-                                                    <button
-                                                        onClick={() => setShowEmojiPicker(showEmojiPicker === msg.id ? null : msg.id)}
-                                                        className="text-gray-400 hover:text-white p-2 hover:bg-gray-700 rounded-full text-xl relative group/emoji"
-                                                    >
-                                                        😊
-                                                        <span className="absolute bottom-full right-0 mb-2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover/emoji:opacity-100 transition-opacity whitespace-nowrap">
-                                                            Ajouter une réaction
-                                                        </span>
-                                                    </button>
-                                                    {showEmojiPicker === msg.id && (
-                                                        <div className="absolute right-0 bottom-full mb-2 bg-gray-800 rounded-lg shadow-lg p-2 flex items-center space-x-2">
-                                                            {DEFAULT_REACTIONS.map((emoji) => (
-                                                                <button
-                                                                    key={emoji}
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        addReaction(msg.id, emoji);
-                                                                        setShowEmojiPicker(null);
-                                                                    }}
-                                                                    className="p-2 hover:bg-gray-700 rounded-full transition-colors text-xl"
-                                                                >
-                                                                    {emoji}
-                                                                </button>
-                                                            ))}
+                                        {/* Message principal */}
+                                        <div className="flex items-start relative group">
+                                            <div className="flex items-start space-x-3 flex-1">
+                                                {!isConsecutive && (
+                                                    <Image
+                                                        src={msg.userImage || `https://ui-avatars.com/api/?name=${msg.username}`}
+                                                        alt={msg.username}
+                                                        width={50}
+                                                        height={50}
+                                                        className="rounded-full"
+                                                    />
+                                                )}
+                                                <div className={`flex-1 ${isConsecutive ? 'ml-[62px]' : ''}`}>
+                                                    {!isConsecutive && (
+                                                        <div className="flex items-center space-x-2">
+                                                            <span className="text-white font-medium">{msg.username}</span>
+                                                            <span className="text-gray-400 text-xs">
+                                                                {msg.timestamp && (msg.timestamp as FirestoreTimestamp).seconds !== undefined
+                                                                    ? new Date((msg.timestamp as FirestoreTimestamp).seconds * 1000).toLocaleString()
+                                                                    : msg.timestamp instanceof Date
+                                                                        ? msg.timestamp.toLocaleString()
+                                                                        : ''}
+                                                            </span>
                                                         </div>
                                                     )}
+                                                    <p className={`text-gray-300 break-words whitespace-pre-wrap ${isConsecutive ? '' : 'mt-1'} py-[1px] max-w-[750px]`}>{msg.text}</p>
                                                 </div>
-                                                <button
-                                                    onClick={() => setReplyingTo(msg)}
-                                                    className="text-gray-400 hover:text-white p-2 hover:bg-gray-700 rounded-full relative group/reply text-xl"
-                                                >
-                                                    ↩️
-                                                    <span className="absolute bottom-full right-0 mb-2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover/reply:opacity-100 transition-opacity whitespace-nowrap">
-                                                        Répondre au message
-                                                    </span>
-                                                </button>
+                                            </div>
+
+                                            {/* Actions du message et réactions */}
+                                            <div className="absolute right-0 top-0 -translate-y-1/4 z-10">
+                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1 bg-gray-700 rounded-md shadow-lg">
+                                                    <div className="relative group/emoji">
+                                                        <button
+                                                            onClick={() => setShowEmojiPicker(showEmojiPicker === msg.id ? null : msg.id)}
+                                                            className="text-gray-400 hover:text-white p-0.5 hover:bg-gray-600 rounded-md text-lg"
+                                                        >
+                                                            😊
+                                                        </button>
+                                                        <span className="absolute bottom-full right-0 mb-2 hidden group-hover/emoji:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                                                            Ajouter une réaction
+                                                        </span>
+                                                        {showEmojiPicker === msg.id && (
+                                                            <div className="absolute right-0 bottom-full mb-2 bg-gray-800 rounded-lg shadow-lg p-2 flex items-center space-x-2 z-20">
+                                                                {DEFAULT_REACTIONS.map((emoji) => (
+                                                                    <button
+                                                                        key={emoji}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            addReaction(msg.id, emoji);
+                                                                            setShowEmojiPicker(null);
+                                                                        }}
+                                                                        className="p-1.5 hover:bg-gray-700 rounded-md transition-colors text-lg"
+                                                                    >
+                                                                        {emoji}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="relative group/reply">
+                                                        <button
+                                                            onClick={() => setReplyingTo(msg)}
+                                                            className="text-gray-400 hover:text-white p-0.5 hover:bg-gray-600 rounded-md text-lg"
+                                                        >
+                                                            ↩️
+                                                        </button>
+                                                        <span className="absolute bottom-full right-0 mb-2 hidden group-hover/reply:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                                                            Répondre
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             {/* Réactions existantes */}
-                                            <div className="flex items-center space-x-2">
-                                                {Object.entries(msg.reactions || {}).map(([emoji, users]) => (
-                                                    users.length > 0 && (
-                                                        <button
-                                                            key={emoji}
-                                                            onClick={() => addReaction(msg.id, emoji)}
-                                                            className={`px-3 py-1.5 rounded-full text-base ${users.includes(user.id)
-                                                                ? 'bg-blue-600 text-white'
-                                                                : 'bg-gray-600 text-gray-300'
-                                                                }`}
-                                                        >
-                                                            {emoji} {users.length}
-                                                        </button>
-                                                    )
-                                                ))}
-                                            </div>
+                                            {Object.entries(msg.reactions || {}).some(([_, users]) => users.length > 0) && (
+                                                <div className="mt-1 flex items-center space-x-1">
+                                                    {Object.entries(msg.reactions || {}).map(([emoji, users]) => (
+                                                        users.length > 0 && (
+                                                            <button
+                                                                key={emoji}
+                                                                onClick={() => addReaction(msg.id, emoji)}
+                                                                className={`px-2 py-0.5 rounded-md text-sm ${users.includes(user.id)
+                                                                    ? 'bg-blue-600 text-white'
+                                                                    : 'bg-gray-600 text-gray-300'
+                                                                    }`}
+                                                            >
+                                                                {emoji} {users.length}
+                                                            </button>
+                                                        )
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         {/* Zone de saisie */}
