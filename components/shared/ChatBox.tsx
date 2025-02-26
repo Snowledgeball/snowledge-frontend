@@ -433,90 +433,89 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
                                     )}
 
                                     {/* Message principal */}
-                                    <div className="flex items-start space-x-3 relative">
-                                        <Image
-                                            src={msg.userImage || `https://ui-avatars.com/api/?name=${msg.username}`}
-                                            alt={msg.username}
-                                            width={40}
-                                            height={40}
-                                            className="rounded-full"
-                                        />
-                                        <div className="flex-1">
-                                            <div className="flex items-center space-x-2">
-                                                <span className="text-white font-medium">{msg.username}</span>
-                                                <span className="text-gray-400 text-xs">
-                                                    {msg.timestamp && (msg.timestamp as FirestoreTimestamp).seconds !== undefined
-                                                        ? new Date((msg.timestamp as FirestoreTimestamp).seconds * 1000).toLocaleString()
-                                                        : msg.timestamp instanceof Date
-                                                            ? msg.timestamp.toLocaleString()
-                                                            : ''}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-start justify-between">
+                                    <div className="flex items-start justify-between group">
+                                        <div className="flex items-start space-x-3">
+                                            <Image
+                                                src={msg.userImage || `https://ui-avatars.com/api/?name=${msg.username}`}
+                                                alt={msg.username}
+                                                width={40}
+                                                height={40}
+                                                className="rounded-full"
+                                            />
+                                            <div className="flex-1">
+                                                <div className="flex items-center space-x-2">
+                                                    <span className="text-white font-medium">{msg.username}</span>
+                                                    <span className="text-gray-400 text-xs">
+                                                        {msg.timestamp && (msg.timestamp as FirestoreTimestamp).seconds !== undefined
+                                                            ? new Date((msg.timestamp as FirestoreTimestamp).seconds * 1000).toLocaleString()
+                                                            : msg.timestamp instanceof Date
+                                                                ? msg.timestamp.toLocaleString()
+                                                                : ''}
+                                                    </span>
+                                                </div>
                                                 <p className="text-gray-300 mt-1 max-w-[750px] break-words whitespace-pre-wrap">{msg.text}</p>
+                                            </div>
+                                        </div>
 
-                                                {/* Actions du message et réactions */}
-                                                <div className="flex items-center space-x-1 ml-4">
-                                                    {/* Réactions existantes */}
-                                                    <div className="flex items-center space-x-2">
-                                                        {Object.entries(msg.reactions || {}).map(([emoji, users]) => (
-                                                            users.length > 0 && (
+                                        {/* Actions du message et réactions */}
+                                        <div className="flex flex-col items-end space-y-2 ml-4">
+                                            {/* Actions du message */}
+                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-2">
+                                                <div className="relative">
+                                                    <button
+                                                        onClick={() => setShowEmojiPicker(showEmojiPicker === msg.id ? null : msg.id)}
+                                                        className="text-gray-400 hover:text-white p-2 hover:bg-gray-700 rounded-full text-xl relative group/emoji"
+                                                    >
+                                                        😊
+                                                        <span className="absolute bottom-full right-0 mb-2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover/emoji:opacity-100 transition-opacity whitespace-nowrap">
+                                                            Ajouter une réaction
+                                                        </span>
+                                                    </button>
+                                                    {showEmojiPicker === msg.id && (
+                                                        <div className="absolute right-0 bottom-full mb-2 bg-gray-800 rounded-lg shadow-lg p-2 flex items-center space-x-2">
+                                                            {DEFAULT_REACTIONS.map((emoji) => (
                                                                 <button
                                                                     key={emoji}
-                                                                    onClick={() => addReaction(msg.id, emoji)}
-                                                                    className={`px-3 py-1.5 rounded-full text-base ${users.includes(user.id)
-                                                                        ? 'bg-blue-600 text-white'
-                                                                        : 'bg-gray-600 text-gray-300'
-                                                                        }`}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        addReaction(msg.id, emoji);
+                                                                        setShowEmojiPicker(null);
+                                                                    }}
+                                                                    className="p-2 hover:bg-gray-700 rounded-full transition-colors text-xl"
                                                                 >
-                                                                    {emoji} {users.length}
+                                                                    {emoji}
                                                                 </button>
-                                                            )
-                                                        ))}
-                                                    </div>
-
-                                                    {/* Actions du message */}
-                                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-2">
-                                                        <div className="relative">
-                                                            <button
-                                                                onClick={() => setShowEmojiPicker(showEmojiPicker === msg.id ? null : msg.id)}
-                                                                className="text-gray-400 hover:text-white p-2 hover:bg-gray-700 rounded-full text-xl relative group/emoji"
-                                                            >
-                                                                😊
-                                                                <span className="absolute bottom-full right-0 mb-2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover/emoji:opacity-100 transition-opacity whitespace-nowrap">
-                                                                    Ajouter une réaction
-                                                                </span>
-                                                            </button>
-                                                            {/* Menu des réactions */}
-                                                            {showEmojiPicker === msg.id && (
-                                                                <div className="absolute right-0 bottom-full mb-2 bg-gray-800 rounded-lg shadow-lg p-2 flex items-center space-x-2">
-                                                                    {DEFAULT_REACTIONS.map((emoji) => (
-                                                                        <button
-                                                                            key={emoji}
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                addReaction(msg.id, emoji);
-                                                                                setShowEmojiPicker(null);
-                                                                            }}
-                                                                            className="p-2 hover:bg-gray-700 rounded-full transition-colors text-xl"
-                                                                        >
-                                                                            {emoji}
-                                                                        </button>
-                                                                    ))}
-                                                                </div>
-                                                            )}
+                                                            ))}
                                                         </div>
-                                                        <button
-                                                            onClick={() => setReplyingTo(msg)}
-                                                            className="text-gray-400 hover:text-white p-2 hover:bg-gray-700 rounded-full relative group/reply text-xl"
-                                                        >
-                                                            ↩️
-                                                            <span className="absolute bottom-full right-0 mb-2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover/reply:opacity-100 transition-opacity whitespace-nowrap">
-                                                                Répondre au message
-                                                            </span>
-                                                        </button>
-                                                    </div>
+                                                    )}
                                                 </div>
+                                                <button
+                                                    onClick={() => setReplyingTo(msg)}
+                                                    className="text-gray-400 hover:text-white p-2 hover:bg-gray-700 rounded-full relative group/reply text-xl"
+                                                >
+                                                    ↩️
+                                                    <span className="absolute bottom-full right-0 mb-2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover/reply:opacity-100 transition-opacity whitespace-nowrap">
+                                                        Répondre au message
+                                                    </span>
+                                                </button>
+                                            </div>
+
+                                            {/* Réactions existantes */}
+                                            <div className="flex items-center space-x-2">
+                                                {Object.entries(msg.reactions || {}).map(([emoji, users]) => (
+                                                    users.length > 0 && (
+                                                        <button
+                                                            key={emoji}
+                                                            onClick={() => addReaction(msg.id, emoji)}
+                                                            className={`px-3 py-1.5 rounded-full text-base ${users.includes(user.id)
+                                                                ? 'bg-blue-600 text-white'
+                                                                : 'bg-gray-600 text-gray-300'
+                                                                }`}
+                                                        >
+                                                            {emoji} {users.length}
+                                                        </button>
+                                                    )
+                                                ))}
                                             </div>
                                         </div>
                                     </div>
