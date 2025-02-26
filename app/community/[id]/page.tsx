@@ -24,6 +24,7 @@ import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Disclosure } from "@/components/ui/disclosure";
+import ChatBox from "@/components/shared/ChatBox";
 
 // Ajouter ces catégories de posts
 const POST_CATEGORIES = [
@@ -230,6 +231,10 @@ const CommunityHub = () => {
     // Si en cours de chargement, afficher le loader
     if (isLoading) {
         return <LoadingComponent />;
+    }
+
+    if (session) {
+        console.log("session", session);
     }
 
     // Si non authentifié, ne rien afficher (la redirection est gérée par le hook)
@@ -834,6 +839,10 @@ const CommunityHub = () => {
                         )}
                     </main>
                 </div>
+
+                {session && (
+                    <ChatBox user={session.user} />
+                )}
 
                 {/* Section Q&A avec Disclosure */}
                 <div className="mt-8">

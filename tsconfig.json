@@ -45,7 +45,8 @@
     "app/api/communities/[id]/join/route.js",
     "app/api/communities/[id]/presentation/route.js",
     "app/api/communities/[id]/contributor-request/route.js",
-    "app/api/users/[id]/joined-communities/route.js"
+    "app/api/users/[id]/joined-communities/route.js",
+    "app/api/firebase/route.js"
   ],
   "exclude": [
     "node_modules"
