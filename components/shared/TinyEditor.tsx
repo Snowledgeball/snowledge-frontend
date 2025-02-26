@@ -4,6 +4,27 @@ import { Editor } from '@tinymce/tinymce-react';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 
+type tinycomments_fetch = {
+    conversations: {
+        [conversationUid: string]: {
+            uid: string,
+            comments: [
+                {
+                    uid: string,
+                    author: string,
+                    authorName?: string,
+                    authorAvatar?: string,
+                    content: string,
+                    createdAt: string, // ISO 8601 date string
+                    modifiedAt: string // ISO 8601 date string
+                },
+                // ... more comments
+            ]
+        },
+        // ... more conversations
+    }
+}
+
 interface TinyEditorProps {
     onChange?: (content: string) => void;
     initialValue?: string;
@@ -268,36 +289,21 @@ const TinyEditor = ({
             }
         },
 
-        tinycomments_fetch: (conversationUids: string[], done: Function, fail: Function) => {
+        tinycomments_fetch: (conversationUids: string[], done: (data: tinycomments_fetch) => void, fail: Function) => {
             console.log("tinycomments_fetch", conversationUids);
-            const requests = conversationUids.map((uid) =>
-                fetch(`/api/communities/${communityId}/posts/${postId}/comments/conversations/${uid}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                })
-                    .then((response) => response.json())
-                    .then((data) => ({
-                        [uid]: {
-                            uid: uid,
-                            comments: data.comments
-                        }
-                    }))
-            );
 
-            Promise.all(requests)
-                .then((data) => {
-                    console.log('data', data);
-                    const conversations = data.reduce((conv, d) => ({
-                        ...conv,
-                        ...d
-                    }), {});
-                    console.log(`Fetch success ${conversationUids}`, conversations);
-                    done({ conversations });
+            // Récupérer tous les commentaires du post
+            fetch(`/api/communities/${communityId}/posts/${postId}/comments/conversations`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(response => response.json())
+                .then((data: tinycomments_fetch) => {
+                    console.log('Toutes les conversations:', data);
+                    done(data);
                 })
-                .catch((err) => {
-                    console.error(`Fetch failure ${conversationUids}`, err);
+                .catch(err => {
+                    console.error('Erreur fetch:', err);
                     fail('Fetching conversations failed');
                 });
         },

@@ -5,6 +5,49 @@ import { authOptions } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
+
+// Récupère toutes les conversations
+export async function GET(request, { params }) {
+    try {
+        const { postId } = await params;
+
+        const conversations = await prisma.community_posts_comment_conversations.findMany({
+            where: {
+                post_id: parseInt(postId)
+            },
+            include: {
+                community_posts_comments: {
+                    include: { user: true }
+                }
+            }
+        });
+
+        return NextResponse.json({
+            conversations: conversations.reduce((acc, conv) => ({
+                ...acc,
+                [conv.id]: {
+                    uid: conv.id.toString(),
+                    comments: conv.community_posts_comments.map(comment => ({
+                        uid: comment.id.toString(),
+                        author: comment.author_id.toString(),
+                        authorName: comment.user.fullName,
+                        authorAvatar: comment.user.profilePicture,
+                        content: comment.content,
+                        createdAt: comment.created_at.toISOString(),
+                        modifiedAt: comment.modified_at?.toISOString() || comment.created_at.toISOString()
+                    }))
+                }
+            }), {})
+        });
+    } catch (error) {
+        console.error("Erreur:", error);
+        return NextResponse.json(
+            { error: "Erreur lors de la récupération des conversations" },
+            { status: 500 }
+        );
+    }
+}
+
 // Créer une nouvelle conversation
 export async function POST(request, { params }) {
     try {
