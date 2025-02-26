@@ -158,14 +158,15 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
             userId: user.id,
             username: user.name,
             userImage: user.image,
-            channelId: selectedChannel.id.toString(), // Assurons-nous que c'est une chaîne
+            channelId: selectedChannel.id.toString(),
             communityId: communityId,
             timestamp: serverTimestamp(),
-            reactions: {}
+            reactions: {},
+            ...(replyingTo?.id ? { replyTo: replyingTo.id } : {})
         };
 
         try {
-            console.log('Sending message:', messageData); // Debug
+            console.log('Sending message:', messageData);
             await addDoc(collection(db, "messages"), messageData);
         } catch (error) {
             console.error('Error sending message:', error);
@@ -407,19 +408,26 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
                                 <div key={msg.id} className="group hover:bg-gray-600/20 rounded-lg transition-colors duration-200">
                                     {/* Message répondu */}
                                     {msg.replyTo && messages.find(m => m.id === msg.replyTo) && (
-                                        <div className="ml-12 mb-1 text-gray-400 text-sm">
-                                            <div className="flex items-center">
-                                                <span className="mr-2">↱</span>
-                                                <span className="font-medium">{messages.find(m => m.id === msg.replyTo)?.username}</span>
-                                            </div>
-                                            <div className="ml-5 pl-2 border-l-2 border-gray-500 mt-1">
-                                                {(() => {
-                                                    const repliedMessage = messages.find(m => m.id === msg.replyTo);
-                                                    const text = repliedMessage?.text || '';
-                                                    return text.length > 100
-                                                        ? `${text.substring(0, 100)}...`
-                                                        : text;
-                                                })()}
+                                        <div className="relative ml-12 mb-2">
+                                            <div className="absolute left-[5px] top-0 w-[2px] h-[calc(100%+3px)] bg-gray-500"></div>
+                                            <div className="flex items-center space-x-2 pl-4">
+                                                <Image
+                                                    src={messages.find(m => m.id === msg.replyTo)?.userImage || `https://ui-avatars.com/api/?name=${messages.find(m => m.id === msg.replyTo)?.username}`}
+                                                    alt={messages.find(m => m.id === msg.replyTo)?.username || ''}
+                                                    width={16}
+                                                    height={16}
+                                                    className="rounded-full"
+                                                />
+                                                <span className="text-sm font-medium text-gray-400">{messages.find(m => m.id === msg.replyTo)?.username}</span>
+                                                <p className="text-gray-400 text-sm">
+                                                    {(() => {
+                                                        const replyMessage = messages.find(m => m.id === msg.replyTo);
+                                                        if (!replyMessage?.text) return '';
+                                                        return replyMessage.text.length > 100
+                                                            ? `${replyMessage.text.substring(0, 100)}...`
+                                                            : replyMessage.text;
+                                                    })()}
+                                                </p>
                                             </div>
                                         </div>
                                     )}
