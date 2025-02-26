@@ -77,6 +77,10 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
         description: '',
         icon: '💬'
     });
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [channelToDelete, setChannelToDelete] = useState<number | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [isCreator, setIsCreator] = useState(false);
 
     const adjustTextareaHeight = (textarea: HTMLTextAreaElement) => {
         textarea.style.height = 'auto';
@@ -111,6 +115,19 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
     useEffect(() => {
         fetchChannels();
     }, [communityId]);
+
+    useEffect(() => {
+        const checkCreatorStatus = async () => {
+            try {
+                const response = await fetch(`/api/communities/${communityId}`);
+                const data = await response.json();
+                setIsCreator(data.creator_id === parseInt(user.id));
+            } catch (error) {
+                console.error('Erreur lors de la vérification du statut de créateur:', error);
+            }
+        };
+        checkCreatorStatus();
+    }, [communityId, user.id]);
 
     const fetchChannels = async () => {
         try {
@@ -196,19 +213,27 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
         }
     };
 
-    const deleteChannel = async (channelId: number) => {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer ce canal ?')) return;
+    const handleDeleteChannel = async () => {
+        if (!channelToDelete) return;
 
         try {
-            const response = await fetch(`/api/communities/${communityId}/channels/${channelId}`, {
+            const response = await fetch(`/api/communities/${communityId}/channels/${channelToDelete}`, {
                 method: 'DELETE',
+                credentials: 'include', // Ajoute les cookies à la requête
             });
 
             if (response.ok) {
+                setIsDeleteModalOpen(false);
+                setChannelToDelete(null);
                 fetchChannels();
+            } else if (response.status === 403) {
+                setError("Vous n'avez pas les permissions nécessaires pour supprimer ce canal.");
+            } else {
+                setError("Une erreur est survenue lors de la suppression du canal.");
             }
         } catch (error) {
             console.error('Erreur lors de la suppression du canal:', error);
+            setError("Une erreur est survenue lors de la suppression du canal.");
         }
     };
 
@@ -218,12 +243,14 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
             <div className="w-64 bg-gray-800 flex flex-col">
                 <div className="p-4 border-b border-gray-700 flex justify-between items-center">
                     <h2 className="text-white font-semibold">Canaux</h2>
-                    <button
-                        onClick={() => setIsCreateChannelModalOpen(true)}
-                        className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
-                    >
-                        <span className="text-xl">+</span>
-                    </button>
+                    {isCreator && (
+                        <button
+                            onClick={() => setIsCreateChannelModalOpen(true)}
+                            className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
+                        >
+                            <span className="text-xl">+</span>
+                        </button>
+                    )}
                 </div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                     {channels.map((channel) => (
@@ -237,16 +264,18 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
                                 <span>{channel.icon}</span>
                                 <span>{channel.name}</span>
                             </div>
-                            {/* Ne pas montrer le bouton de suppression pour les canaux par défaut */}
-                            {!['Chat général', 'Bienvenue', 'Annonces'].includes(channel.name) && (
+                            {isCreator && (
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        deleteChannel(channel.id);
+                                        setChannelToDelete(channel.id);
+                                        setIsDeleteModalOpen(true);
                                     }}
-                                    className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500"
+                                    className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500 p-1"
                                 >
-                                    <span className="text-sm">×</span>
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
                                 </button>
                             )}
                         </div>
@@ -317,6 +346,41 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
                                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                                 >
                                     Créer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Ajouter la modale de confirmation */}
+                {isDeleteModalOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                            <h3 className="text-white text-lg font-semibold mb-4">Supprimer le canal</h3>
+                            <p className="text-gray-300 mb-6">
+                                Êtes-vous sûr de vouloir supprimer ce canal ? Cette action est irréversible.
+                            </p>
+                            {error && (
+                                <p className="text-red-500 mb-4">
+                                    {error}
+                                </p>
+                            )}
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    onClick={() => {
+                                        setIsDeleteModalOpen(false);
+                                        setChannelToDelete(null);
+                                        setError(null);
+                                    }}
+                                    className="px-4 py-2 text-gray-400 hover:text-white"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    onClick={handleDeleteChannel}
+                                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                                >
+                                    Supprimer
                                 </button>
                             </div>
                         </div>
