@@ -14,15 +14,15 @@ interface CustomSession extends Session {
         id: string;
         email: string;
         name: string;
-        image?: string;
-        address?: string;
+        image: string;
+        address: string;
     }
 }
 
 interface CustomJWT extends JWT {
     id: string;
-    image?: string;
-    address?: string;
+    image: string;
+    address: string;
 }
 
 // Configuration principale de l'authentification
