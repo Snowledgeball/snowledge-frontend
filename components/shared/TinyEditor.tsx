@@ -43,6 +43,7 @@ interface TinyEditorProps {
     commentOnly?: boolean;
     communityId?: string;
     postId?: string;
+    testMode?: boolean;
 }
 
 interface BlobInfo {
@@ -82,7 +83,8 @@ const TinyEditor = ({
     commentMode,
     commentOnly,
     communityId,
-    postId
+    postId,
+    testMode = false
 }: TinyEditorProps) => {
     const { data: session } = useSession();
     const [mounted, setMounted] = useState(false);
@@ -98,6 +100,14 @@ const TinyEditor = ({
             onChange(content);
         }
     };
+
+    const testUser = {
+        id: '99999',
+        name: 'Utilisateur Test',
+        image: 'https://via.placeholder.com/150'
+    };
+
+    const currentUser = (!session && testMode) ? testUser : session?.user;
 
     const baseConfig = {
         plugins: commentMode ? ['tinycomments', 'quickbars'] : ['quickbars', 'advlist', 'autolink', 'lists', 'link', 'image', 'media', 'table', 'tinycomments'].join(' '),
@@ -116,9 +126,9 @@ const TinyEditor = ({
                 canEdit: session?.user?.id === req.author
             };
         },
-        tinycomments_author: session?.user?.id?.toString() || '',
-        tinycomments_author_name: session?.user?.name || 'Anonymous',
-        tinycomments_author_avatar: session?.user?.image || '',
+        tinycomments_author: currentUser?.id?.toString() || '',
+        tinycomments_author_name: currentUser?.name || 'Anonymous',
+        tinycomments_author_avatar: currentUser?.image || '',
         file_picker_types: 'image',
         automatic_uploads: true,
         images_upload_url: '/api/upload',
