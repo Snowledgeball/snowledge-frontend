@@ -23,6 +23,7 @@ model community {
   community_learners              community_learners[]
   community_posts                 community_posts[]
   community_presentation          community_presentation?
+  community_qa_questions          community_qa_questions[]
 }
 
 model community_contributors {
@@ -81,6 +82,8 @@ model user {
   community_posts          community_posts[]
   community_posts_comments community_posts_comments[]
   community_posts_reviews  community_posts_reviews[]
+  community_qa_answers     community_qa_answers[]
+  community_qa_questions   community_qa_questions[]
 }
 
 model community_category {
@@ -181,4 +184,36 @@ model community_channels {
   community    community @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([community_id], map: "idx_community_channels_community")
+}
+
+model community_qa_answers {
+  id                     Int                    @id @default(autoincrement())
+  question_id            Int
+  author_id              Int
+  content                String
+  created_at             DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?              @default(now()) @db.Timestamptz(6)
+  is_accepted            Boolean?               @default(false)
+  user                   user                   @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  community_qa_questions community_qa_questions @relation(fields: [question_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([author_id], map: "idx_qa_answers_author")
+  @@index([question_id], map: "idx_qa_answers_question")
+}
+
+model community_qa_questions {
+  id                   Int                    @id @default(autoincrement())
+  community_id         Int
+  author_id            Int
+  question             String
+  category             String                 @db.VarChar(50)
+  created_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  status               String?                @default("ACTIVE") @db.VarChar(50)
+  community_qa_answers community_qa_answers[]
+  user                 user                   @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  community            community              @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([author_id], map: "idx_qa_questions_author")
+  @@index([community_id], map: "idx_qa_questions_community")
 }

@@ -16,6 +16,8 @@ import {
     Users,
     Lock,
     Edit,
+    MoreVertical,
+    Trash2,
 } from "lucide-react";
 import { Community } from "@/types/community";
 import Image from 'next/image';
@@ -25,6 +27,13 @@ import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Disclosure } from "@/components/ui/disclosure";
 import ChatBox from "@/components/shared/ChatBox";
+import CreateQuestionModal from '@/components/shared/CreateQuestionModal';
+import CreateAnswerModal from '@/components/shared/CreateAnswerModal';
+import EditQuestionModal from '@/components/shared/EditQuestionModal';
+import EditAnswerModal from '@/components/shared/EditAnswerModal';
+import { Menu, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 // Ajouter ces catégories de posts
 const POST_CATEGORIES = [
@@ -66,40 +75,6 @@ type QAItem = {
     category: string;
 };
 
-// Ajouter ces données fictives
-const faqData: QAItem[] = [
-    {
-        id: 1,
-        question: "Quelles sont les meilleures plateformes pour faire de la DeFi quand on débute ?",
-        answer: "Pour commencer en DeFi, les plateformes les plus accessibles sont Aave, Uniswap, Curve et PancakeSwap. Elles offrent une interface intuitive et une bonne liquidité. Il est conseillé d'utiliser des wallets non-custodiaux comme MetaMask ou Rabby et d'interagir avec des blockchains à faibles frais comme Polygon ou Arbitrum.",
-        category: "Débutant"
-    },
-    {
-        id: 2,
-        question: "Quels sont les risques principaux en DeFi et comment s'en protéger ?",
-        answer: "Les principaux risques en DeFi sont les smart contracts mal sécurisés, l'impermanent loss, la volatilité des tokens et les attaques par phishing. Pour s'en protéger : 1) Vérifiez la sécurité des protocoles en consultant des audits et la réputation du projet. 2) Utilisez plusieurs wallets (un pour l'exploration, un autre pour les fonds importants). 3) Activez un hardware wallet (ex. Ledger) pour protéger vos actifs.",
-        category: "Sécurité"
-    },
-    {
-        id: 3,
-        question: "Quels sont les meilleurs moyens de générer des rendements passifs en DeFi ?",
-        answer: "Les stratégies les plus courantes incluent : 1) Le staking : Verrouiller des tokens (ex. Ethereum 2.0, Cosmos). 2) Le lending : Prêter des cryptos sur des plateformes comme Aave. 3) Le yield farming : Fournir de la liquidité sur Uniswap ou Curve. 4) Les auto-compounders : Utiliser des protocoles comme Beefy Finance pour optimiser les rendements.",
-        category: "Rendements"
-    },
-    {
-        id: 4,
-        question: "Comment éviter les scams et rug pulls en DeFi ?",
-        answer: "Pour minimiser les risques : 1) Évitez les projets trop beaux pour être vrais (APY exagérés, pas d'audit). 2) Analysez l'équipe et la communauté : Si les fondateurs sont anonymes et absents des discussions, méfiez-vous. 3) Vérifiez le TVL (Total Value Locked) et l'historique du projet sur des plateformes comme DeFiLlama.",
-        category: "Sécurité"
-    },
-    {
-        id: 5,
-        question: "Quels outils utiliser pour suivre son portefeuille DeFi ?",
-        answer: "Pour suivre tes positions et ton rendement en DeFi, voici quelques outils utiles : 1) Zapper & DeBank : Visualisation multi-wallet et gestion DeFi. 2) Dune Analytics : Données et graphiques avancés sur les protocoles DeFi. 3) DefiLlama : Classement des protocoles par TVL et analyse des rendements.",
-        category: "Outil"
-    }
-];
-
 const CommunityHub = () => {
     const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
     const { data: session } = useSession();
@@ -116,7 +91,66 @@ const CommunityHub = () => {
     const [userCommunities, setUserCommunities] = useState<Community[]>([]);
     const [posts, setPosts] = useState<Post[]>([]);
     const [isContributor, setIsContributor] = useState(false);
+    const [isCreator, setIsCreator] = useState(false);
     const [pendingPostsCount, setPendingPostsCount] = useState(0);
+
+    // Déplacer la déclaration du state questions ici
+    const [questions, setQuestions] = useState<{
+        id: number;
+        question: string;
+        category: string;
+        created_at: string;
+        author: {
+            id: number;
+            fullName: string;
+            profilePicture: string;
+        };
+        answers: {
+            id: number;
+            content: string;
+            created_at: string;
+            is_accepted: boolean;
+            author: {
+                id: number;
+                fullName: string;
+                profilePicture: string;
+            };
+        }[];
+    }[]>([]);
+
+    // Ajouter ces états pour gérer les modales
+    const [showQuestionModal, setShowQuestionModal] = useState(false);
+    const [showAnswerModal, setShowAnswerModal] = useState(false);
+    const [selectedQuestion, setSelectedQuestion] = useState<{ id: number, question: string } | null>(null);
+
+    // Ajouter ces nouveaux états
+    const [editQuestionData, setEditQuestionData] = useState<{
+        id: number;
+        question: string;
+        category: string;
+    } | null>(null);
+
+    const [editAnswerData, setEditAnswerData] = useState<{
+        id: number;
+        content: string;
+        questionText: string;
+    } | null>(null);
+
+    // Ajouter ces états pour gérer les dialogues de confirmation
+    const [deleteQuestionDialog, setDeleteQuestionDialog] = useState<{ isOpen: boolean; questionId: number | null }>({
+        isOpen: false,
+        questionId: null
+    });
+
+    const [deleteAnswerDialog, setDeleteAnswerDialog] = useState<{
+        isOpen: boolean;
+        questionId: number | null;
+        answerId: number | null;
+    }>({
+        isOpen: false,
+        questionId: null,
+        answerId: null
+    });
 
     useEffect(() => {
         if (!session) {
@@ -160,6 +194,7 @@ const CommunityHub = () => {
 
                 // Vérifier si l'utilisateur est contributeur
                 setIsContributor(membershipData.isContributor);
+                setIsCreator(communityData?.creator_id === parseInt(session?.user.id));
 
                 // Si l'utilisateur est contributeur, récupérer le nombre de posts en attente
                 if (membershipData.isContributor) {
@@ -208,6 +243,24 @@ const CommunityHub = () => {
         fetchPosts();
     }, [params.id]);
 
+    useEffect(() => {
+        const fetchQuestions = async () => {
+            try {
+                const response = await fetch(`/api/communities/${params.id}/qa`);
+                if (!response.ok) throw new Error('Erreur lors de la récupération des questions');
+                const data = await response.json();
+                setQuestions(data);
+            } catch (error) {
+                console.error('Erreur:', error);
+                toast.error('Erreur lors de la récupération des questions');
+            }
+        };
+
+        if (params.id) {
+            fetchQuestions();
+        }
+    }, [params.id]);
+
     const handleJoinCommunity = async () => {
         try {
             const response = await fetch(`/api/communities/${params.id}/join`, {
@@ -244,6 +297,141 @@ const CommunityHub = () => {
     // Modifier la fonction de gestion du clic sur une catégorie
     const handleCategoryClick = (categoryId: string) => {
         setSelectedPostCategory(selectedPostCategory === categoryId ? null : categoryId);
+    };
+
+    // Ajouter cette fonction pour créer une nouvelle question
+    const handleCreateQuestion = async (questionData: { question: string; category: string }) => {
+        try {
+            const response = await fetch(`/api/communities/${params.id}/qa`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(questionData),
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de la création de la question');
+
+            // Rafraîchir les questions
+            const updatedQuestionsResponse = await fetch(`/api/communities/${params.id}/qa`);
+            const updatedQuestions = await updatedQuestionsResponse.json();
+            setQuestions(updatedQuestions);
+
+            toast.success('Question créée avec succès');
+        } catch (error) {
+            console.error('Erreur:', error);
+            toast.error('Erreur lors de la création de la question');
+        }
+    };
+
+    // Ajouter cette fonction pour créer une réponse
+    const handleCreateAnswer = async (questionId: number, content: string) => {
+        try {
+            const response = await fetch(`/api/communities/${params.id}/qa/${questionId}/answers`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ content }),
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de la création de la réponse');
+
+            // Rafraîchir les questions
+            const updatedQuestionsResponse = await fetch(`/api/communities/${params.id}/qa`);
+            const updatedQuestions = await updatedQuestionsResponse.json();
+            setQuestions(updatedQuestions);
+
+            toast.success('Réponse ajoutée avec succès');
+        } catch (error) {
+            console.error('Erreur:', error);
+            toast.error('Erreur lors de la création de la réponse');
+        }
+    };
+
+    // Ajouter ces nouvelles fonctions de gestion
+    const handleEditQuestion = async (questionId: number, data: { question: string; category: string }) => {
+        try {
+            const response = await fetch(`/api/communities/${params.id}/qa/${questionId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de la modification');
+
+            // Rafraîchir les questions
+            const updatedQuestionsResponse = await fetch(`/api/communities/${params.id}/qa`);
+            const updatedQuestions = await updatedQuestionsResponse.json();
+            setQuestions(updatedQuestions);
+            toast.success('Question modifiée avec succès');
+        } catch (error) {
+            console.error('Erreur:', error);
+            toast.error('Erreur lors de la modification de la question');
+        }
+    };
+
+    const handleDeleteQuestion = async (questionId: number) => {
+        try {
+            const response = await fetch(`/api/communities/${params.id}/qa/${questionId}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de la suppression');
+
+            // Rafraîchir les questions
+            const updatedQuestionsResponse = await fetch(`/api/communities/${params.id}/qa`);
+            const updatedQuestions = await updatedQuestionsResponse.json();
+            setQuestions(updatedQuestions);
+            toast.success('Question supprimée avec succès');
+        } catch (error) {
+            console.error('Erreur:', error);
+            toast.error('Erreur lors de la suppression de la question');
+        }
+    };
+
+    const handleEditAnswer = async (answerId: number, content: string) => {
+        try {
+            const response = await fetch(`/api/communities/${params.id}/qa/${selectedQuestion?.id}/answers/${answerId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ content }),
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de la modification');
+
+            // Rafraîchir les questions
+            const updatedQuestionsResponse = await fetch(`/api/communities/${params.id}/qa`);
+            const updatedQuestions = await updatedQuestionsResponse.json();
+            setQuestions(updatedQuestions);
+            toast.success('Réponse modifiée avec succès');
+        } catch (error) {
+            console.error('Erreur:', error);
+            toast.error('Erreur lors de la modification de la réponse');
+        }
+    };
+
+    const handleDeleteAnswer = async (questionId: number, answerId: number) => {
+        try {
+            const response = await fetch(`/api/communities/${params.id}/qa/${questionId}/answers/${answerId}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de la suppression');
+
+            // Rafraîchir les questions
+            const updatedQuestionsResponse = await fetch(`/api/communities/${params.id}/qa`);
+            const updatedQuestions = await updatedQuestionsResponse.json();
+            setQuestions(updatedQuestions);
+            toast.success('Réponse supprimée avec succès');
+        } catch (error) {
+            console.error('Erreur:', error);
+            toast.error('Erreur lors de la suppression de la réponse');
+        }
     };
 
     return (
@@ -419,247 +607,471 @@ const CommunityHub = () => {
                 </>
             )}
 
-            {/* Main Content avec mise à jour du style */}
-            <div className="max-w-7xl mx-auto px-4">
-                <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Sidebar gauche - Supprimée car plus nécessaire */}
+            {session && (
+                <div className="max-w-7xl mx-auto px-4 pb-12 ">
+                    <div className="flex flex-col lg:flex-row gap-8">
+                        {/* Sidebar gauche - Supprimée car plus nécessaire */}
 
-                    {/* Contenu principal */}
-                    <main className="flex-1 order-1">
-                        {/* Tabs */}
-                        <div className="border-b border-gray-200 mb-6">
-                            <nav className="-mb-px flex justify-center space-x-8">
-                                <button
-                                    className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "general"
-                                        ? "border-blue-500 text-blue-600"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                        }`}
-                                    onClick={() => setActiveTab("general")}
-                                >
-                                    Général
-                                </button>
-                                <button
-                                    className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "posts"
-                                        ? "border-blue-500 text-blue-600"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                        }`}
-                                    onClick={() => setActiveTab("posts")}
-                                >
-                                    Les posts
-                                </button>
-                                {/* Bouton Cours verrouillé */}
-                                <button
-                                    onClick={() => toast.info("Les cours ne sont pas encore disponibles. Revenez bientôt !")}
-                                    className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors opacity-60 cursor-not-allowed flex items-center gap-2
-                                        ${activeTab === "courses"
-                                            ? "border-blue-500 text-blue-600"
-                                            : "border-transparent text-gray-500"
-                                        }`}
-                                >
-                                    Cours
-                                    <Lock className="w-4 h-4" />
-                                </button>
-                                {isContributor && (
+                        {/* Contenu principal */}
+                        <main className="flex-1 order-1">
+                            {/* Tabs */}
+                            <div className="border-b border-gray-200 mb-6">
+                                <nav className="-mb-px flex justify-center space-x-8">
                                     <button
-                                        className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "pending"
+                                        className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "general"
                                             ? "border-blue-500 text-blue-600"
                                             : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                             }`}
-                                        onClick={() => router.push(`/community/${params.id}/posts/pending`)}
+                                        onClick={() => setActiveTab("general")}
                                     >
-                                        Posts en attente
+                                        Général
                                     </button>
-                                )}
-                            </nav>
-                        </div>
-
-                        {/* Chat Area */}
-                        {activeTab === "general" ? (
-                            <Card className="bg-white shadow-sm">
-                                <div className="h-[600px] flex flex-col">
-                                    {session && (
-                                        <ChatBox
-                                            user={session.user}
-                                            communityId={parseInt(String(params.id))}
-                                            className="h-full"
-                                        />
-                                    )}
-                                </div>
-                            </Card>
-                        ) : (
-                            <div className="space-y-8">
-                                {/* Bouton Nouveau Post pour les contributeurs */}
-                                <div className="flex justify-end">
+                                    <button
+                                        className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "posts"
+                                            ? "border-blue-500 text-blue-600"
+                                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                            }`}
+                                        onClick={() => setActiveTab("posts")}
+                                    >
+                                        Les posts
+                                    </button>
+                                    {/* Bouton Cours verrouillé */}
+                                    <button
+                                        onClick={() => toast.info("Les cours ne sont pas encore disponibles. Revenez bientôt !")}
+                                        className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors opacity-60 cursor-not-allowed flex items-center gap-2
+                                        ${activeTab === "courses"
+                                                ? "border-blue-500 text-blue-600"
+                                                : "border-transparent text-gray-500"
+                                            }`}
+                                    >
+                                        Cours
+                                        <Lock className="w-4 h-4" />
+                                    </button>
                                     {isContributor && (
                                         <button
-                                            onClick={() => router.push(`/community/${params.id}/posts/create`)}
-                                            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                            className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "pending"
+                                                ? "border-blue-500 text-blue-600"
+                                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                                }`}
+                                            onClick={() => router.push(`/community/${params.id}/posts/pending`)}
                                         >
-                                            <PlusCircle className="w-4 h-4" />
-                                            <span>Proposer un post</span>
+                                            Posts en attente
                                         </button>
                                     )}
-                                </div>
+                                </nav>
+                            </div>
 
-                                {/* Posts groupés par catégories */}
-                                {POST_CATEGORIES.map((category) => {
-                                    const categoryPosts = posts.filter(post => post.tag === category.id);
-                                    if (categoryPosts.length === 0) return null;
-                                    return (
-                                        <div key={category.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
-                                            {/* En-tête de la catégorie */}
-                                            <div className="border-b border-gray-100">
-                                                <button
-                                                    onClick={() => handleCategoryClick(category.id)}
-                                                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
-                                                >
-                                                    <div className="flex items-center space-x-3">
-                                                        <FileText className="w-5 h-5 text-blue-600" />
-                                                        <h3 className="font-medium text-gray-900">{category.label}</h3>
-                                                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
-                                                            {categoryPosts.length}
-                                                        </span>
+                            {/* Chat Area */}
+                            {activeTab === "general" ? (
+                                <Card className="bg-white shadow-sm">
+                                    <div className="h-[600px] flex flex-col">
+                                        {session && (
+                                            <ChatBox
+                                                user={session.user}
+                                                communityId={parseInt(String(params.id))}
+                                                className="h-full"
+                                            />
+                                        )}
+                                    </div>
+                                </Card>
+                            ) : (
+                                <div className="space-y-8">
+                                    {/* Bouton Nouveau Post pour les contributeurs */}
+                                    <div className="flex justify-end">
+                                        {isContributor && (
+                                            <button
+                                                onClick={() => router.push(`/community/${params.id}/posts/create`)}
+                                                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                            >
+                                                <PlusCircle className="w-4 h-4" />
+                                                <span>Proposer un post</span>
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Posts groupés par catégories */}
+                                    {POST_CATEGORIES.map((category) => {
+                                        const categoryPosts = posts.filter(post => post.tag === category.id);
+                                        if (categoryPosts.length === 0) return null;
+                                        return (
+                                            <div key={category.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
+                                                {/* En-tête de la catégorie */}
+                                                <div className="border-b border-gray-100">
+                                                    <button
+                                                        onClick={() => handleCategoryClick(category.id)}
+                                                        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                                                    >
+                                                        <div className="flex items-center space-x-3">
+                                                            <FileText className="w-5 h-5 text-blue-600" />
+                                                            <h3 className="font-medium text-gray-900">{category.label}</h3>
+                                                            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
+                                                                {categoryPosts.length}
+                                                            </span>
+                                                        </div>
+                                                        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${selectedPostCategory === category.id ? 'rotate-180' : ''
+                                                            }`} />
+                                                    </button>
+                                                </div>
+
+                                                {/* Liste des posts de la catégorie */}
+                                                {selectedPostCategory === category.id && categoryPosts && (
+                                                    <div className="divide-y divide-gray-100">
+                                                        {categoryPosts.map((post) => (
+                                                            <div key={post.id} className="p-4 hover:bg-gray-50 transition-colors">
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <div className="flex items-center space-x-3">
+                                                                        <Image
+                                                                            src={post.user.profilePicture}
+                                                                            alt={post.user.fullName}
+                                                                            width={32}
+                                                                            height={32}
+                                                                            className="rounded-full"
+                                                                        />
+                                                                        <div>
+                                                                            <p className="font-medium text-gray-900">{post.user.fullName}</p>
+                                                                            <p className="text-sm text-gray-500">
+                                                                                {formatDistanceToNow(new Date(post.created_at), {
+                                                                                    addSuffix: true,
+                                                                                    locale: fr
+                                                                                })}
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                    {Number(session?.user?.id) === post.user.id && (
+                                                                        <button
+                                                                            onClick={() => router.push(`/community/${params.id}/posts/${post.id}/edit`)}
+                                                                            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                                                                        >
+                                                                            <Edit className="w-4 h-4" />
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+
+                                                                <h4 className="text-lg font-semibold text-gray-900 mb-2">{post.title}</h4>
+
+                                                                {/* Image de couverture */}
+                                                                {post.cover_image_url && (
+                                                                    <div className="mb-3 rounded-lg overflow-hidden">
+                                                                        <Image
+                                                                            src={`https://${post.cover_image_url}`}
+                                                                            alt={post.title}
+                                                                            width={800}
+                                                                            height={400}
+                                                                            className="w-full h-[200px] object-cover"
+                                                                        />
+                                                                    </div>
+                                                                )}
+
+                                                                <div
+                                                                    className="prose prose-sm max-w-none text-gray-600 mb-3 max-h-[300px] overflow-hidden relative"
+                                                                >
+                                                                    <div
+                                                                        dangerouslySetInnerHTML={{
+                                                                            __html: post.content
+                                                                        }}
+                                                                        className="line-clamp-[12] p-6"
+                                                                    />
+                                                                    <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent" />
+                                                                </div>
+                                                                <div className="flex items-center justify-between">
+                                                                    {post.accept_contributions ? (
+                                                                        <span className="text-sm text-green-600 flex items-center">
+                                                                            <Users className="w-4 h-4 mr-1" />
+                                                                            Contributions activées
+                                                                        </span>
+                                                                    ) : (
+                                                                        <span className="text-sm text-red-600 flex items-center">
+                                                                            <Users className="w-4 h-4 mr-1" />
+                                                                            Contributions désactivées
+                                                                        </span>
+                                                                    )}
+                                                                    <button
+                                                                        onClick={() => router.push(`/community/${params.id}/posts/${post.id}#post-page`)}
+                                                                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                                                                    >
+                                                                        Lire la suite →
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
                                                     </div>
-                                                    <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${selectedPostCategory === category.id ? 'rotate-180' : ''
-                                                        }`} />
-                                                </button>
+                                                )}
                                             </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </main>
+                    </div>
 
-                                            {/* Liste des posts de la catégorie */}
-                                            {selectedPostCategory === category.id && categoryPosts && (
-                                                <div className="divide-y divide-gray-100">
-                                                    {categoryPosts.map((post) => (
-                                                        <div key={post.id} className="p-4 hover:bg-gray-50 transition-colors">
-                                                            <div className="flex items-center justify-between mb-2">
-                                                                <div className="flex items-center space-x-3">
+                    {/* Section Q&A avec Disclosure */}
+                    <div className="mt-8">
+                        <div className="bg-white rounded-lg shadow-sm p-6">
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-bold text-gray-900">Questions fréquentes</h2>
+                                <button
+                                    onClick={() => setShowQuestionModal(true)}
+                                    className="flex items-center space-x-2 text-blue-600 hover:text-blue-700"
+                                >
+                                    <PlusCircle className="w-5 h-5" />
+                                    <span>Poser une question</span>
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                {questions.map((item) => (
+                                    <Disclosure key={item.id}>
+                                        <div className="border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                                            <Disclosure.Button as="div" className="w-full">
+                                                <div className="flex justify-between items-center p-4">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center justify-between ">
+                                                            <div>
+                                                                <div className="flex items-center space-x-3 flex-1">
                                                                     <Image
-                                                                        src={post.user.profilePicture}
-                                                                        alt={post.user.fullName}
-                                                                        width={32}
-                                                                        height={32}
+                                                                        src={item.author.profilePicture}
+                                                                        alt={item.author.fullName}
+                                                                        width={24}
+                                                                        height={24}
                                                                         className="rounded-full"
                                                                     />
+                                                                    <h3 className="font-medium text-gray-900">{item.question}</h3>
+                                                                </div>
+                                                            </div>
+
+                                                            <div
+                                                                className="relative"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                <Menu as="div" className="relative inline-block text-left">
                                                                     <div>
-                                                                        <p className="font-medium text-gray-900">{post.user.fullName}</p>
-                                                                        <p className="text-sm text-gray-500">
-                                                                            {formatDistanceToNow(new Date(post.created_at), {
+                                                                        <Menu.Button className="p-1 hover:bg-gray-200 rounded-full">
+                                                                            <MoreVertical className="w-5 h-5 text-gray-500" />
+                                                                        </Menu.Button>
+                                                                    </div>
+
+                                                                    <Transition
+                                                                        as={Fragment}
+                                                                        enter="transition ease-out duration-100"
+                                                                        enterFrom="transform opacity-0 scale-95"
+                                                                        enterTo="transform opacity-100 scale-100"
+                                                                        leave="transition ease-in duration-75"
+                                                                        leaveFrom="transform opacity-100 scale-100"
+                                                                        leaveTo="transform opacity-0 scale-95"
+                                                                    >
+                                                                        <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                                                            {item.author.id === parseInt(session?.user.id) && item.answers.length === 0 && (
+                                                                                <Menu.Item>
+                                                                                    {({ active }) => (
+                                                                                        <button
+                                                                                            className={`${active ? 'bg-gray-100' : ''} flex w-full items-center px-4 py-2 text-sm text-gray-700`}
+                                                                                            onClick={() => setEditQuestionData({
+                                                                                                id: item.id,
+                                                                                                question: item.question,
+                                                                                                category: item.category
+                                                                                            })}
+                                                                                        >
+                                                                                            <Edit className="w-4 h-4 mr-2" />
+                                                                                            Modifier
+                                                                                        </button>
+                                                                                    )}
+                                                                                </Menu.Item>
+                                                                            )}
+                                                                            <Menu.Item>
+                                                                                {({ active }) => (
+                                                                                    <button
+                                                                                        className={`${active ? 'bg-gray-100' : ''} flex w-full items-center px-4 py-2 text-sm text-red-600`}
+                                                                                        onClick={() => setDeleteQuestionDialog({ isOpen: true, questionId: item.id })}
+                                                                                    >
+                                                                                        <Trash2 className="w-4 h-4 mr-2" />
+                                                                                        Supprimer
+                                                                                    </button>
+                                                                                )}
+                                                                            </Menu.Item>
+                                                                        </Menu.Items>
+                                                                    </Transition>
+                                                                </Menu>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </Disclosure.Button>
+
+                                            <Disclosure.Panel>
+                                                {item.answers.map((answer) => (
+                                                    <div key={answer.id} className="p-4 bg-white">
+                                                        <div className="flex items-start space-x-3">
+                                                            <Image
+                                                                src={answer.author.profilePicture}
+                                                                alt={answer.author.fullName}
+                                                                width={24}
+                                                                height={24}
+                                                                className="rounded-full"
+                                                            />
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center justify-between mb-1">
+                                                                    <span className="font-medium text-gray-900">
+                                                                        {answer.author.fullName}
+                                                                    </span>
+                                                                    <div className="flex items-center space-x-3">
+                                                                        {(answer.author.id === parseInt(session?.user.id) || isCreator) && (
+                                                                            <Menu as="div" className="relative">
+                                                                                <Menu.Button className="p-1 hover:bg-gray-200 rounded-full">
+                                                                                    <MoreVertical className="w-5 h-5 text-gray-500" />
+                                                                                </Menu.Button>
+                                                                                <Menu.Items className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-10 border">
+                                                                                    {answer.author.id === parseInt(session?.user.id) && (
+                                                                                        <Menu.Item>
+                                                                                            {({ active }) => (
+                                                                                                <button
+                                                                                                    className={`${active ? 'bg-gray-100' : ''} flex w-full items-center px-4 py-2 text-sm text-gray-700`}
+                                                                                                    onClick={() => setEditAnswerData({
+                                                                                                        id: answer.id,
+                                                                                                        content: answer.content,
+                                                                                                        questionText: item.question
+                                                                                                    })}
+                                                                                                >
+                                                                                                    <Edit className="w-4 h-4 mr-2" />
+                                                                                                    Modifier
+                                                                                                </button>
+                                                                                            )}
+                                                                                        </Menu.Item>
+                                                                                    )}
+                                                                                    <Menu.Item>
+                                                                                        {({ active }) => (
+                                                                                            <button
+                                                                                                className={`${active ? 'bg-gray-100' : ''} flex w-full items-center px-4 py-2 text-sm text-red-600`}
+                                                                                                onClick={() => setDeleteAnswerDialog({
+                                                                                                    isOpen: true,
+                                                                                                    questionId: item.id,
+                                                                                                    answerId: answer.id
+                                                                                                })}
+                                                                                            >
+                                                                                                <Trash2 className="w-4 h-4 mr-2" />
+                                                                                                Supprimer
+                                                                                            </button>
+                                                                                        )}
+                                                                                    </Menu.Item>
+                                                                                </Menu.Items>
+                                                                            </Menu>
+                                                                        )}
+                                                                        <span className="text-sm text-gray-500">
+                                                                            {formatDistanceToNow(new Date(answer.created_at), {
                                                                                 addSuffix: true,
                                                                                 locale: fr
                                                                             })}
-                                                                        </p>
+                                                                        </span>
                                                                     </div>
                                                                 </div>
-                                                                {Number(session?.user?.id) === post.user.id && (
-                                                                    <button
-                                                                        onClick={() => router.push(`/community/${params.id}/posts/${post.id}/edit`)}
-                                                                        className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                                                                    >
-                                                                        <Edit className="w-4 h-4" />
-                                                                    </button>
-                                                                )}
-                                                            </div>
-
-                                                            <h4 className="text-lg font-semibold text-gray-900 mb-2">{post.title}</h4>
-
-                                                            {/* Image de couverture */}
-                                                            {post.cover_image_url && (
-                                                                <div className="mb-3 rounded-lg overflow-hidden">
-                                                                    <Image
-                                                                        src={`https://${post.cover_image_url}`}
-                                                                        alt={post.title}
-                                                                        width={800}
-                                                                        height={400}
-                                                                        className="w-full h-[200px] object-cover"
-                                                                    />
-                                                                </div>
-                                                            )}
-
-                                                            <div
-                                                                className="prose prose-sm max-w-none text-gray-600 mb-3 max-h-[300px] overflow-hidden relative"
-                                                            >
-                                                                <div
-                                                                    dangerouslySetInnerHTML={{
-                                                                        __html: post.content
-                                                                    }}
-                                                                    className="line-clamp-[12] p-6"
-                                                                />
-                                                                <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent" />
-                                                            </div>
-                                                            <div className="flex items-center justify-between">
-                                                                {post.accept_contributions ? (
-                                                                    <span className="text-sm text-green-600 flex items-center">
-                                                                        <Users className="w-4 h-4 mr-1" />
-                                                                        Contributions activées
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="text-sm text-red-600 flex items-center">
-                                                                        <Users className="w-4 h-4 mr-1" />
-                                                                        Contributions désactivées
-                                                                    </span>
-                                                                )}
-                                                                <button
-                                                                    onClick={() => router.push(`/community/${params.id}/posts/${post.id}#post-page`)}
-                                                                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                                                                >
-                                                                    Lire la suite →
-                                                                </button>
+                                                                <p className="text-gray-600">{answer.content}</p>
                                                             </div>
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </main>
-                </div>
+                                                    </div>
+                                                ))}
 
-                {/* Section Q&A avec Disclosure */}
-                <div className="mt-8">
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold text-gray-900">Questions fréquentes</h2>
-                            <HelpCircle onClick={() => toast.info("Posez vos questions à l'équipe de la communauté")} className="cursor-pointer w-5 h-5 text-blue-500" />
-                        </div>
-
-                        <div className="space-y-4">
-                            {faqData.map((item) => (
-                                <Disclosure key={item.id}>
-                                    {({ open }: { open: boolean }) => (
-                                        <div className="border rounded-lg overflow-hidden">
-                                            <Disclosure.Button className="w-full p-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors">
-                                                <div className="flex items-center space-x-3">
-                                                    <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm">
-                                                        Q
-                                                    </span>
-                                                    <h3 className="font-medium text-gray-900">{item.question}</h3>
-                                                </div>
-                                                <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`} />
-                                            </Disclosure.Button>
-
-                                            <Disclosure.Panel className="p-4 bg-white">
-                                                <div className="flex items-start space-x-3">
-                                                    <span className="flex-shrink-0 w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm">
-                                                        R
-                                                    </span>
-                                                    <p className="flex-1 text-gray-600 text-sm leading-relaxed">
-                                                        {item.answer}
-                                                    </p>
-                                                </div>
-                                                <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full mt-3">
-                                                    {item.category}
-                                                </span>
+                                                {/* Bouton pour répondre (visible uniquement pour les contributeurs) */}
+                                                {(isContributor || isCreator) && (
+                                                    <div className="p-4 bg-gray-50">
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedQuestion({
+                                                                    id: item.id,
+                                                                    question: item.question
+                                                                });
+                                                                setShowAnswerModal(true);
+                                                            }}
+                                                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                                                        >
+                                                            Répondre à cette question
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </Disclosure.Panel>
                                         </div>
-                                    )}
-                                </Disclosure>
-                            ))}
+                                    </Disclosure>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
+
+            {/* Modales */}
+            <CreateQuestionModal
+                isOpen={showQuestionModal}
+                onClose={() => setShowQuestionModal(false)}
+                onSubmit={handleCreateQuestion}
+            />
+
+            <CreateAnswerModal
+                isOpen={showAnswerModal}
+                onClose={() => setShowAnswerModal(false)}
+                onSubmit={async (content) => {
+                    if (selectedQuestion) {
+                        await handleCreateAnswer(selectedQuestion.id, content);
+                        setSelectedQuestion(null);
+                    }
+                }}
+                questionText={selectedQuestion?.question || ''}
+            />
+
+            {/* Ajouter les modales d'édition */}
+            <EditQuestionModal
+                isOpen={!!editQuestionData}
+                onClose={() => setEditQuestionData(null)}
+                onSubmit={async (data) => {
+                    if (editQuestionData) {
+                        await handleEditQuestion(editQuestionData.id, data);
+                        setEditQuestionData(null);
+                    }
+                }}
+                initialQuestion={editQuestionData?.question || ''}
+                initialCategory={editQuestionData?.category || ''}
+            />
+
+            <EditAnswerModal
+                isOpen={!!editAnswerData}
+                onClose={() => setEditAnswerData(null)}
+                onSubmit={async (content) => {
+                    if (editAnswerData) {
+                        await handleEditAnswer(editAnswerData.id, content);
+                        setEditAnswerData(null);
+                    }
+                }}
+                initialContent={editAnswerData?.content || ''}
+                questionText={editAnswerData?.questionText || ''}
+            />
+
+            {/* Ajouter les dialogues de confirmation */}
+            <ConfirmationDialog
+                isOpen={deleteQuestionDialog.isOpen}
+                onClose={() => setDeleteQuestionDialog({ isOpen: false, questionId: null })}
+                onConfirm={() => {
+                    if (deleteQuestionDialog.questionId) {
+                        handleDeleteQuestion(deleteQuestionDialog.questionId);
+                    }
+                }}
+                title="Supprimer la question"
+                description="Êtes-vous sûr de vouloir supprimer cette question ? Cette action est irréversible."
+                confirmText="Supprimer"
+                cancelText="Annuler"
+                variant="destructive"
+            />
+
+            <ConfirmationDialog
+                isOpen={deleteAnswerDialog.isOpen}
+                onClose={() => setDeleteAnswerDialog({ isOpen: false, questionId: null, answerId: null })}
+                onConfirm={() => {
+                    if (deleteAnswerDialog.questionId && deleteAnswerDialog.answerId) {
+                        handleDeleteAnswer(deleteAnswerDialog.questionId, deleteAnswerDialog.answerId);
+                    }
+                }}
+                title="Supprimer la réponse"
+                description="Êtes-vous sûr de vouloir supprimer cette réponse ? Cette action est irréversible."
+                confirmText="Supprimer"
+                cancelText="Annuler"
+                variant="destructive"
+            />
         </div>
     );
 };
