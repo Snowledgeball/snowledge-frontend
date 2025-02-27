@@ -267,7 +267,11 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
             });
 
             if (response.ok) {
-                channels.length === 1 ? setSelectedChannel(null) : setSelectedChannel(channels[0]);
+                if (channels.length === 1) {
+                    setSelectedChannel(null);
+                } else {
+                    setSelectedChannel(channels[0]);
+                }
                 setIsDeleteModalOpen(false);
                 setChannelToDelete(null);
                 fetchChannels();

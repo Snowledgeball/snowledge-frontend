@@ -24,17 +24,13 @@ export async function DELETE(request, { params }) {
             return NextResponse.json({ error: "Seul le créateur de la communauté peut supprimer des canaux" }, { status: 403 });
         }
 
-        // Vérifier que ce n'est pas un canal par défaut
-        const channel = await prisma.community_channels.findUnique({
-            where: { id: parseInt(channelId) }
-        });
-
         await prisma.community_channels.delete({
             where: { id: parseInt(channelId) }
         });
 
         return NextResponse.json({ success: true });
     } catch (error) {
+        console.error('Erreur lors de la suppression du canal:', error);
         return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
     }
 } 

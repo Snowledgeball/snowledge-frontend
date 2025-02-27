@@ -25,6 +25,16 @@ type tinycomments_fetch = {
     }
 }
 
+// Définir des types pour les paramètres de callback
+type CallbackFunction = (response: any) => void;
+type TinyCommentsRequest = {
+    author?: string;
+    content?: string;
+    conversationUid?: string;
+    commentUid?: string;
+    modifiedAt?: string;
+};
+
 interface TinyEditorProps {
     onChange?: (content: string) => void;
     initialValue?: string;
@@ -38,6 +48,32 @@ interface TinyEditorProps {
 interface BlobInfo {
     blob: () => Blob;
 }
+
+// Ajout de nouveaux types pour les callbacks et les requêtes
+type DoneCallback<T> = (response: T) => void;
+type FailCallback = (error: unknown) => void;
+
+type DeleteResponse = {
+    canDelete: boolean;
+    reason?: string;
+};
+
+type EditResponse = {
+    canEdit: boolean;
+    reason?: string;
+};
+
+type ResolveResponse = {
+    canResolve: boolean;
+    reason?: string;
+};
+
+type CommentRequest = {
+    conversationUid: string;
+    commentUid?: string;
+    content?: string;
+    modifiedAt?: string;
+};
 
 const TinyEditor = ({
     onChange,
@@ -58,7 +94,9 @@ const TinyEditor = ({
 
     const handleEditorChange = (content: string) => {
         setEditorContent(content);
-        onChange && onChange(content);
+        if (onChange) {
+            onChange(content);
+        }
     };
 
     const baseConfig = {
@@ -71,7 +109,7 @@ const TinyEditor = ({
         advlist_bullet_styles: 'default',
         advlist_number_styles: 'default',
         tinycomments_mode: 'callback',
-        tinycomments_access: (req: any) => {
+        tinycomments_access: (req: TinyCommentsRequest) => {
             return {
                 canRead: true,
                 canDelete: session?.user?.id === req.author,
@@ -159,9 +197,13 @@ const TinyEditor = ({
             `,
 
         // Callbacks pour les commentaires
-        tinycomments_create: async (req: any, done: Function, fail: Function) => {
+        tinycomments_create: async (
+            req: TinyCommentsRequest,
+            done: CallbackFunction,
+            fail: CallbackFunction
+        ) => {
             try {
-                const response = await fetch(`/api/communities/${communityId}/posts/${postId}/comments/conversations`, {
+                const response = await fetch(`/api/communities/${communityId}/posts/${postId}/conversations`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -186,9 +228,13 @@ const TinyEditor = ({
             }
         },
 
-        tinycomments_reply: async (req: any, done: Function, fail: Function) => {
+        tinycomments_reply: async (
+            req: TinyCommentsRequest,
+            done: CallbackFunction,
+            fail: CallbackFunction
+        ) => {
             try {
-                const response = await fetch(`/api/communities/${communityId}/posts/${postId}/comments/conversations/${req.conversationUid}/comments`, {
+                const response = await fetch(`/api/communities/${communityId}/posts/${postId}/conversations/${req.conversationUid}/comments`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -213,9 +259,13 @@ const TinyEditor = ({
             }
         },
 
-        tinycomments_delete: async (req: any, done: Function, fail: Function) => {
+        tinycomments_delete: async (
+            req: CommentRequest,
+            done: DoneCallback<DeleteResponse>,
+            fail: FailCallback
+        ) => {
             try {
-                const response = await fetch(`/api/communities/${communityId}/posts/${postId}/comments/conversations/${req.conversationUid}`, {
+                const response = await fetch(`/api/communities/${communityId}/posts/${postId}/conversations/${req.conversationUid}`, {
                     method: 'DELETE'
                 });
 
@@ -233,9 +283,13 @@ const TinyEditor = ({
             }
         },
 
-        tinycomments_delete_comment: async (req: any, done: Function, fail: Function) => {
+        tinycomments_delete_comment: async (
+            req: CommentRequest,
+            done: DoneCallback<DeleteResponse>,
+            fail: FailCallback
+        ) => {
             try {
-                const response = await fetch(`/api/communities/${communityId}/posts/${postId}/comments/conversations/${req.conversationUid}/comments/${req.commentUid}`, {
+                const response = await fetch(`/api/communities/${communityId}/posts/${postId}/conversations/${req.conversationUid}/comments/${req.commentUid}`, {
                     method: 'DELETE'
                 });
 
@@ -254,9 +308,13 @@ const TinyEditor = ({
             }
         },
 
-        tinycomments_lookup: async (req: any, done: Function, fail: Function) => {
+        tinycomments_lookup: async (
+            req: CommentRequest,
+            done: DoneCallback<{ conversation: { uid: string; comments: any[] } }>,
+            fail: FailCallback
+        ) => {
             try {
-                const response = await fetch(`/api/communities/${communityId}/posts/${postId}/comments/conversations/${req.conversationUid}`);
+                const response = await fetch(`/api/communities/${communityId}/posts/${postId}/conversations/${req.conversationUid}`);
                 if (!response.ok) throw new Error('Failed to lookup conversation');
                 const data = await response.json();
 
@@ -277,7 +335,7 @@ const TinyEditor = ({
             console.log("tinycomments_fetch", conversationUids);
 
             // Récupérer tous les commentaires du post
-            fetch(`/api/communities/${communityId}/posts/${postId}/comments/conversations`, {
+            fetch(`/api/communities/${communityId}/posts/${postId}/conversations`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' }
             })
@@ -292,10 +350,14 @@ const TinyEditor = ({
                 });
         },
 
-        tinycomments_edit_comment: async (req: any, done: Function, fail: Function) => {
+        tinycomments_edit_comment: async (
+            req: CommentRequest,
+            done: DoneCallback<EditResponse>,
+            fail: FailCallback
+        ) => {
             try {
                 const response = await fetch(
-                    `/api/communities/${communityId}/posts/${postId}/comments/conversations/${req.conversationUid}/comments/${req.commentUid}`,
+                    `/api/communities/${communityId}/posts/${postId}/conversations/${req.conversationUid}/comments/${req.commentUid}`,
                     {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
@@ -321,10 +383,14 @@ const TinyEditor = ({
             }
         },
 
-        tinycomments_delete_all: async (_req: any, done: Function, fail: Function) => {
+        tinycomments_delete_all: async (
+            req: CommentRequest,
+            done: DoneCallback<DeleteResponse>,
+            fail: FailCallback
+        ) => {
             try {
                 const response = await fetch(
-                    `/api/communities/${communityId}/posts/${postId}/comments/conversations`,
+                    `/api/communities/${communityId}/posts/${postId}/conversations`,
                     {
                         method: 'DELETE'
                     }
@@ -345,10 +411,14 @@ const TinyEditor = ({
             }
         },
 
-        tinycomments_resolve: async (req: any, done: Function, fail: Function) => {
+        tinycomments_resolve: async (
+            req: CommentRequest,
+            done: DoneCallback<ResolveResponse>,
+            fail: FailCallback
+        ) => {
             try {
                 const response = await fetch(
-                    `/api/communities/${communityId}/posts/${postId}/comments/conversations/${req.conversationUid}/resolve`,
+                    `/api/communities/${communityId}/posts/${postId}/conversations/${req.conversationUid}/resolve`,
                     {
                         method: 'PUT'
                     }

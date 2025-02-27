@@ -22,6 +22,7 @@ export async function GET(
         });
         return NextResponse.json(channels);
     } catch (error) {
+        console.error('Erreur lors de la récupération des canaux:', error);
         return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
     }
 }
@@ -58,6 +59,7 @@ export async function POST(
         });
         return NextResponse.json(channel);
     } catch (error) {
+        console.error('Erreur lors de la création du canal:', error);
         return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
     }
 } 

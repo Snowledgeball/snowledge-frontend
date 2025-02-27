@@ -172,7 +172,6 @@ export async function PUT(
                 const result = await pinata.upload.file(updates.image)
                 const profilePictureUrl = `https://${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${result.IpfsHash}`;
                 updates.image = profilePictureUrl;
-                let test = "ezez"
             }
         }
 

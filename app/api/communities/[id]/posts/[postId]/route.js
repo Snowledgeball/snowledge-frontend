@@ -30,6 +30,7 @@ export async function GET(request, { params }) {
 
         const isInThisCommunity = await prisma.community.findFirst({
             where: {
+                id: communityId,
                 OR: [
                     { creator_id: parseInt(session.user.id) },
                     {
@@ -100,9 +101,8 @@ export async function PUT(request, { params }) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { id, postId } = await params;
+        const { postId } = await params;
         const { title, content, cover_image_url, tag, accept_contributions } = await request.json();
-        const communityId = parseInt(id);
         const postIdInt = parseInt(postId);
         const userId = parseInt(session.user.id);
 

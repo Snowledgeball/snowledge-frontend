@@ -57,7 +57,7 @@ export async function POST(request, { params }) {
         }
 
         const { content } = await request.json();
-        const { id: communityId, postId } = await params;
+        const { postId } = await params;
 
         // Créer la conversation et le premier commentaire
         const conversation = await prisma.community_posts_comment_conversations.create({

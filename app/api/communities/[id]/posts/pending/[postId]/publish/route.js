@@ -17,7 +17,10 @@ export async function POST(request, { params }) {
 
         // Récupérer le post et ses reviews
         const post = await prisma.community_posts.findUnique({
-            where: { id: parseInt(postId) },
+            where: {
+                id: parseInt(postId),
+                community_id: parseInt(communityId)
+            },
             include: {
                 community_posts_reviews: true
             }
