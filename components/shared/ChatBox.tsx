@@ -14,9 +14,11 @@ import {
     doc,
     getDoc,
     updateDoc,
-    FieldValue
+    FieldValue,
+    deleteDoc
 } from "firebase/firestore";
 import Image from "next/image";
+import { Trash2, Pencil, Check, X } from 'lucide-react';
 
 interface Channel {
     id: number;
@@ -57,13 +59,14 @@ interface Message {
 interface ChatBoxProps {
     user: User;
     communityId: number;
+    className?: string;
 }
 
 const DEFAULT_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '😡'];
 
 const MAX_MESSAGE_LENGTH = 500;
 
-export default function ChatBox({ user, communityId }: ChatBoxProps) {
+export default function ChatBox({ user, communityId, className }: ChatBoxProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState<string>("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -84,6 +87,10 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
     const [channelToDelete, setChannelToDelete] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isCreator, setIsCreator] = useState(false);
+    const [messageToDelete, setMessageToDelete] = useState<Message | null>(null);
+    const [isDeleteMessageModalOpen, setIsDeleteMessageModalOpen] = useState(false);
+    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+    const [editedMessageText, setEditedMessageText] = useState<string>("");
 
     const adjustTextareaHeight = (textarea: HTMLTextAreaElement) => {
         textarea.style.height = 'auto';
@@ -286,8 +293,36 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
         }
     };
 
+    const handleDeleteMessage = async () => {
+        if (!messageToDelete) return;
+
+        try {
+            // Supprimer le message de Firestore
+            await deleteDoc(doc(db, "messages", messageToDelete.id));
+            setIsDeleteMessageModalOpen(false);
+            setMessageToDelete(null);
+        } catch (error) {
+            console.error('Erreur lors de la suppression du message:', error);
+        }
+    };
+
+    const handleEditMessage = async (messageId: string) => {
+        if (!editedMessageText.trim() || editedMessageText.length > MAX_MESSAGE_LENGTH) return;
+
+        try {
+            const messageRef = doc(db, "messages", messageId);
+            await updateDoc(messageRef, {
+                text: editedMessageText
+            });
+            setEditingMessageId(null);
+            setEditedMessageText("");
+        } catch (error) {
+            console.error('Erreur lors de la modification du message:', error);
+        }
+    };
+
     return (
-        <div className="flex h-screen bg-gray-900">
+        <div className={`flex h-screen bg-gray-900 ${className}`}>
             {/* Sidebar des canaux */}
             <div className="w-64 bg-gray-800 flex flex-col">
                 <div className="p-4 border-b border-gray-700 flex justify-between items-center">
@@ -520,7 +555,50 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
                                                             </span>
                                                         </div>
                                                     )}
-                                                    <p className={`text-gray-300 break-words whitespace-pre-wrap ${isConsecutive ? '' : 'mt-1'} py-[1px] max-w-[750px]`}>{msg.text}</p>
+                                                    {editingMessageId === msg.id ? (
+                                                        <div className="flex items-start space-x-2">
+                                                            <textarea
+                                                                value={editedMessageText}
+                                                                onChange={(e) => {
+                                                                    if (e.target.value.length <= MAX_MESSAGE_LENGTH) {
+                                                                        setEditedMessageText(e.target.value);
+                                                                        adjustTextareaHeight(e.target);
+                                                                    }
+                                                                }}
+                                                                className="flex-1 bg-gray-600 text-white px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                                                        e.preventDefault();
+                                                                        handleEditMessage(msg.id);
+                                                                    }
+                                                                    if (e.key === 'Escape') {
+                                                                        setEditingMessageId(null);
+                                                                        setEditedMessageText("");
+                                                                    }
+                                                                }}
+                                                                autoFocus
+                                                            />
+                                                            <div className="flex items-center space-x-1">
+                                                                <button
+                                                                    onClick={() => handleEditMessage(msg.id)}
+                                                                    className="p-1 hover:bg-gray-600 rounded-md text-green-500 hover:text-green-400"
+                                                                >
+                                                                    <Check className="w-4 h-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setEditingMessageId(null);
+                                                                        setEditedMessageText("");
+                                                                    }}
+                                                                    className="p-1 hover:bg-gray-600 rounded-md text-gray-400 hover:text-gray-300"
+                                                                >
+                                                                    <X className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <p className={`text-gray-300 break-words whitespace-pre-wrap ${isConsecutive ? '' : 'mt-1'} py-[1px] max-w-[750px]`}>{msg.text}</p>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -566,6 +644,38 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
                                                             Répondre
                                                         </span>
                                                     </div>
+                                                    {msg.userId === user.id && !editingMessageId && (
+                                                        <div className="relative group/edit">
+                                                            <button
+                                                                onClick={() => {
+                                                                    setEditingMessageId(msg.id);
+                                                                    setEditedMessageText(msg.text);
+                                                                }}
+                                                                className="text-gray-400 hover:text-blue-500 p-0.5 hover:bg-gray-600 rounded-md"
+                                                            >
+                                                                <Pencil className="w-4 h-4" />
+                                                            </button>
+                                                            <span className="absolute bottom-full right-0 mb-2 hidden group-hover/edit:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                                                                Modifier le message
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    {(isCreator || msg.userId === user.id) && (
+                                                        <div className="relative group/delete">
+                                                            <button
+                                                                onClick={() => {
+                                                                    setMessageToDelete(msg);
+                                                                    setIsDeleteMessageModalOpen(true);
+                                                                }}
+                                                                className="text-gray-400 hover:text-red-500 p-0.5 hover:bg-gray-600 rounded-md"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                            <span className="absolute bottom-full right-0 mb-2 hidden group-hover/delete:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                                                                Supprimer le message
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -658,6 +768,35 @@ export default function ChatBox({ user, communityId }: ChatBoxProps) {
                     </div>
                 )}
             </div>
+
+            {/* Ajouter la modale de confirmation de suppression */}
+            {isDeleteMessageModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                        <h3 className="text-white text-lg font-semibold mb-4">Supprimer le message</h3>
+                        <p className="text-gray-300 mb-6">
+                            Êtes-vous sûr de vouloir supprimer ce message ? Cette action est irréversible.
+                        </p>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => {
+                                    setIsDeleteMessageModalOpen(false);
+                                    setMessageToDelete(null);
+                                }}
+                                className="px-4 py-2 text-gray-400 hover:text-white"
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                onClick={handleDeleteMessage}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                            >
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

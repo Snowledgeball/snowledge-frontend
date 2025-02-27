@@ -237,151 +237,10 @@ const CommunityHub = () => {
     if (!isAuthenticated) {
         return null;
     }
-
-    // Données mockées plus réalistes
-    const onlineUsers = [
-        {
-            id: 1,
-            name: "Thomas Dubois",
-            status: "online",
-            role: "Expert Crypto",
-            avatar: "https://ui-avatars.com/api/?name=Thomas+Dubois&background=0D8ABC&color=fff"
-        },
-        {
-            id: 2,
-            name: "Sophie Laurent",
-            status: "online",
-            role: "Analyste Senior",
-            avatar: "https://ui-avatars.com/api/?name=Sophie+Laurent&background=7C3AED&color=fff"
-        },
-        {
-            id: 3,
-            name: "Marc Lefebvre",
-            status: "online",
-            role: "Contributeur",
-            avatar: "https://ui-avatars.com/api/?name=Marc+Lefebvre&background=059669&color=fff"
-        },
-        {
-            id: 4,
-            name: "Julie Moreau",
-            status: "online",
-            role: "Modératrice",
-            avatar: "https://ui-avatars.com/api/?name=Julie+Moreau&background=DC2626&color=fff"
-        }
-    ];
-
-    const messages = [
-        {
-            id: 1,
-            user: "Thomas Dubois",
-            avatar: "https://ui-avatars.com/api/?name=Thomas+Dubois&background=0D8ABC&color=fff",
-            content: "Le Bitcoin montre des signes de reprise intéressants sur le support des 40k$. Qu'en pensez-vous ?",
-            timestamp: "10:30",
-            reactions: ["👍", "🤔"]
-        },
-        {
-            id: 2,
-            user: "Sophie Laurent",
-            avatar: "https://ui-avatars.com/api/?name=Sophie+Laurent&background=7C3AED&color=fff",
-            content: "Les indicateurs techniques suggèrent une consolidation à court terme. Je partage une analyse détaillée dans l'après-midi.",
-            timestamp: "10:31",
-            reactions: ["🚀", "👀"]
-        },
-        {
-            id: 3,
-            user: "Marc Lefebvre",
-            avatar: "https://ui-avatars.com/api/?name=Marc+Lefebvre&background=059669&color=fff",
-            content: "Attention aux résistances importantes autour des 42k$. Le volume reste faible.",
-            timestamp: "10:32",
-            reactions: ["💯"]
-        }
-    ];
-
-    // Ajouter ces données mockées en haut du fichier
-    const postsExample = [
-        {
-            id: 1,
-            author: {
-                name: "Thomas Dubois",
-                avatar: "https://ui-avatars.com/api/?name=Thomas+Dubois&background=0D8ABC&color=fff",
-                role: "Expert Crypto"
-            },
-            content: "Analyse technique BTC/USD : Formation d'un double fond sur le support des 40k$. Objectif potentiel : 45k$ à court terme. Les volumes sont en augmentation et le RSI montre une divergence haussière.",
-            image: "https://images.unsplash.com/photo-1640340434855-6084b1f4901c",
-            timestamp: "Il y a 2h",
-            metrics: { likes: 124, comments: 38, shares: 12 },
-            tags: ["Bitcoin", "Analyse Technique", "Trading"]
-        },
-        {
-            id: 2,
-            author: {
-                name: "Sophie Laurent",
-                avatar: "https://ui-avatars.com/api/?name=Sophie+Laurent&background=7C3AED&color=fff",
-                role: "Analyste Senior"
-            },
-            content: "🚨 BREAKING NEWS : La SEC approuve les ETF Bitcoin spot ! Une nouvelle ère s'ouvre pour l'adoption institutionnelle des cryptomonnaies.",
-            image: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d",
-            timestamp: "Il y a 5h",
-            metrics: { likes: 89, comments: 24, shares: 8 },
-            tags: ["News", "Bitcoin", "Institutionnel"]
-        },
-        {
-            id: 3,
-            author: {
-                name: "Marc Lefebvre",
-                avatar: "https://ui-avatars.com/api/?name=Marc+Lefebvre&background=059669&color=fff",
-                role: "Analyste Technique"
-            },
-            content: "Analyse technique ETH/USD : Triangle ascendant en formation sur le H4. Résistance majeure à 2800$. Stop loss suggéré sous 2500$.",
-            image: "https://images.unsplash.com/photo-1621761191319-c6fb62004040",
-            timestamp: "Il y a 1h",
-            metrics: { likes: 76, comments: 15, shares: 5 },
-            tags: ["Ethereum", "Analyse Technique", "Trading"]
-        },
-        {
-            id: 4,
-            author: {
-                name: "Julie Moreau",
-                avatar: "https://ui-avatars.com/api/?name=Julie+Moreau&background=DC2626&color=fff",
-                role: "Responsable Recherche"
-            },
-            content: "📊 Rapport mensuel : Performance des cryptomonnaies - Janvier 2024. Analyse détaillée des mouvements de capitaux et des tendances sectorielles.",
-            image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71",
-            timestamp: "Il y a 3h",
-            metrics: { likes: 156, comments: 42, shares: 28 },
-            tags: ["Rapport", "Analyse", "Recherche"]
-        },
-        {
-            id: 5,
-            author: {
-                name: "Alexandre Martin",
-                avatar: "https://ui-avatars.com/api/?name=Alexandre+Martin&background=4F46E5&color=fff",
-                role: "Expert DeFi"
-            },
-            content: "🔥 Flash News : Nouveau record de TVL sur le protocole XYZ ! Les rendements dépassent les 15% APY.",
-            timestamp: "Il y a 30min",
-            metrics: { likes: 67, comments: 12, shares: 4 },
-            tags: ["News", "DeFi", "Rendement"]
-        },
-        {
-            id: 6,
-            author: {
-                name: "Emma Bernard",
-                avatar: "https://ui-avatars.com/api/?name=Emma+Bernard&background=EA580C&color=fff",
-                role: "Analyste Quantitative"
-            },
-            content: "📈 Rapport hebdomadaire : Analyse des corrélations entre le Bitcoin et les marchés traditionnels. Focus sur l'impact des taux d'intérêt.",
-            image: "https://images.unsplash.com/photo-1642543492481-44e81e3914a7",
-            timestamp: "Il y a 4h",
-            metrics: { likes: 93, comments: 31, shares: 15 },
-            tags: ["Rapport", "Bitcoin", "Macro"]
-        }
-    ];
     const getYoutubeVideoId = (url: string) => {
         const videoId = url.split('v=')[1];
         return videoId;
     }
-
     // Modifier la fonction de gestion du clic sur une catégorie
     const handleCategoryClick = (categoryId: string) => {
         setSelectedPostCategory(selectedPostCategory === categoryId ? null : categoryId);
@@ -563,45 +422,10 @@ const CommunityHub = () => {
             {/* Main Content avec mise à jour du style */}
             <div className="max-w-7xl mx-auto px-4">
                 <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Sidebar gauche */}
-                    <aside className="w-full lg:w-64 order-2 lg:order-1">
-                        <Card className="p-4 bg-white shadow-sm">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="font-semibold text-gray-900">Membres actifs</h2>
-                                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                                    {onlineUsers.length} en ligne
-                                </span>
-                            </div>
-                            <div className="space-y-3">
-                                {onlineUsers.map((user) => (
-                                    <div
-                                        key={user.id}
-                                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-all cursor-pointer"
-                                    >
-                                        <div className="relative">
-                                            <Image
-                                                src={user.avatar}
-                                                alt={user.name}
-                                                width={40}
-                                                height={40}
-                                                className="rounded-full"
-                                            />
-                                            <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full ring-2 ring-white" />
-                                        </div>
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-900">
-                                                {user.name}
-                                            </span>
-                                            <p className="text-xs text-gray-500">{user.role}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </Card>
-                    </aside>
+                    {/* Sidebar gauche - Supprimée car plus nécessaire */}
 
                     {/* Contenu principal */}
-                    <main className="flex-1 order-1 lg:order-2">
+                    <main className="flex-1 order-1">
                         {/* Tabs */}
                         <div className="border-b border-gray-200 mb-6">
                             <nav className="-mb-px flex justify-center space-x-8">
@@ -653,57 +477,13 @@ const CommunityHub = () => {
                         {activeTab === "general" ? (
                             <Card className="bg-white shadow-sm">
                                 <div className="h-[600px] flex flex-col">
-                                    <div className="flex-1 overflow-y-auto space-y-4 p-4">
-                                        {messages.map((msg) => (
-                                            <div key={msg.id} className="flex items-start space-x-3 group">
-                                                <Image
-                                                    src={msg.avatar}
-                                                    alt={msg.user}
-                                                    width={40}
-                                                    height={40}
-                                                    className="rounded-full"
-                                                />
-                                                <div className="flex-1">
-                                                    <div className="flex items-center space-x-2">
-                                                        <span className="text-sm font-medium text-gray-900">
-                                                            {msg.user}
-                                                        </span>
-                                                        <span className="text-xs text-gray-500">
-                                                            {msg.timestamp}
-                                                        </span>
-                                                    </div>
-                                                    <p className="text-gray-700 mt-1">{msg.content}</p>
-                                                    <div className="flex items-center space-x-2 mt-2">
-                                                        {msg.reactions.map((reaction, index) => (
-                                                            <span key={index} className="text-sm bg-gray-100 px-2 py-1 rounded-full">
-                                                                {reaction}
-                                                            </span>
-                                                        ))}
-                                                        <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            + 😊
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Input de message amélioré */}
-                                    <div className="border-t p-4">
-                                        <div className="flex items-center space-x-2">
-                                            <input
-                                                onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")}
-                                                type="text"
-                                                value={message}
-                                                onChange={(e) => setMessage(e.target.value)}
-                                                placeholder="Écrivez votre message..."
-                                                className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                            />
-                                            <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="p-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
-                                                <Send className="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                    </div>
+                                    {session && (
+                                        <ChatBox
+                                            user={session.user}
+                                            communityId={parseInt(String(params.id))}
+                                            className="h-full"
+                                        />
+                                    )}
                                 </div>
                             </Card>
                         ) : (
@@ -835,9 +615,6 @@ const CommunityHub = () => {
                         )}
                     </main>
                 </div>
-                {session && (
-                    <ChatBox user={session.user} communityId={parseInt(String(params.id))} />
-                )}
 
                 {/* Section Q&A avec Disclosure */}
                 <div className="mt-8">
