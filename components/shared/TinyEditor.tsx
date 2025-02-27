@@ -76,6 +76,9 @@ type CommentRequest = {
     modifiedAt?: string;
 };
 
+// Ajout du type pour la fonction fail
+type TinyCommentsFetchFailCallback = (error: string) => void;
+
 const TinyEditor = ({
     onChange,
     initialValue,
@@ -341,10 +344,13 @@ const TinyEditor = ({
             }
         },
 
-        tinycomments_fetch: (conversationUids: string[], done: (data: tinycomments_fetch) => void, fail: Function) => {
+        tinycomments_fetch: (
+            conversationUids: string[],
+            done: (data: tinycomments_fetch) => void,
+            fail: TinyCommentsFetchFailCallback
+        ) => {
             console.log("tinycomments_fetch", conversationUids);
 
-            // Récupérer tous les commentaires du post
             fetch(`/api/communities/${communityId}/posts/${postId}/conversations`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' }
