@@ -137,30 +137,37 @@ export default function ChatBox({ user, communityId, className }: ChatBoxProps) 
         scrollToBottom();
     }, [messages]);
 
+    // Ce useEffect gère l'écoute en temps réel des messages pour un canal spécifique
     useEffect(() => {
+        // Si aucun canal n'est sélectionné, on sort de la fonction
         if (!selectedChannel?.id) return;
 
-        console.log('Fetching messages for channel:', selectedChannel.id.toString()); // Debug
-        console.log('Community ID:', communityId); // Debug
-
+        // Création de la requête Firebase
         const q = query(
-            collection(db, "messages"),
-            where("communityId", "==", Number(communityId)), // Conversion en nombre
-            where("channelId", "==", selectedChannel.id.toString()),
-            orderBy("timestamp", "asc")
+            collection(db, "messages"),  // Sélectionne la collection messages
+            where("communityId", "==", Number(communityId)),  // Filtre par communauté
+            where("channelId", "==", selectedChannel.id.toString()),  // Filtre par canal
+            orderBy("timestamp", "asc")  // Trie par date croissante
         );
 
+        // Démarre l'écoute en temps réel
         const unsubscribe = onSnapshot(q, (snapshot) => {
+            // Pour chaque changement dans Firebase :
             const newMessages = snapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data()
             } as Message));
-            console.log('Received messages:', newMessages); // Debug
+            // Met à jour l'état des messages dans React
             setMessages(newMessages);
         });
 
+        // Fonction de nettoyage : s'exécute quand
+        // - On change de canal
+        // - On change de communauté
+        // - Le composant est démonté
         return () => unsubscribe();
-    }, [selectedChannel?.id, communityId]);
+
+    }, [selectedChannel?.id, communityId]); // Se déclenche quand ces valeurs changent
 
     useEffect(() => {
         fetchChannels();
