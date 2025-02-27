@@ -34,8 +34,8 @@ export default function TestPost() {
     const [loginAttempted, setLoginAttempted] = useState(false);
 
     // Fixed IDs for post and community
-    const communityId = "32";
-    const postId = "11";
+    const communityId = "38";
+    const postId = "12";
 
     // Automatic login
     useEffect(() => {
@@ -45,8 +45,8 @@ export default function TestPost() {
                 try {
                     const result = await signIn("credentials", {
                         redirect: false,
-                        email: "Leanou@gmail.com",
-                        password: "Leanou@gmail.com"
+                        email: "test@test",
+                        password: "test@test"
                     });
 
                     if (result?.error) {
