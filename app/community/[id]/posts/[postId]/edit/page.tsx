@@ -211,7 +211,6 @@ export default function EditPost() {
                         />
 
                         <TinyEditor
-                            value={editorContent}
                             onChange={setEditorContent}
                             initialValue={post.content}
                         />

@@ -1196,7 +1196,7 @@ export default function CommunityDashboard() {
 
 
                                 <TinyEditor
-                                    value={editorContent}
+                                    initialValue={editorContent}
                                     onChange={setEditorContent}
                                 />
                             </div>
