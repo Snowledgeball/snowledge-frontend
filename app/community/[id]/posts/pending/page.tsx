@@ -129,7 +129,7 @@ export default function PendingPosts() {
                                     <div className="flex items-center space-x-2">
                                         {post.user.id === parseInt(session?.user?.id) ? (
                                             <button
-                                                onClick={() => router.push(`/community/${params.id}/post/${post.id}/edit`)}
+                                                onClick={() => router.push(`/community/${params.id}/posts/${post.id}/edit`)}
                                                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                                             >
                                                 <Edit className="w-4 h-4 mr-2 inline-block" />
@@ -137,7 +137,7 @@ export default function PendingPosts() {
                                             </button>
                                         ) : (
                                             <button
-                                                onClick={() => router.push(`/community/${params.id}/post/${post.id}/review`)}
+                                                onClick={() => router.push(`/community/${params.id}/posts/${post.id}/review`)}
                                                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                                             >
                                                 <MessageCircle className="w-4 h-4 mr-2 inline-block" />

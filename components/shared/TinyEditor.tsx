@@ -62,21 +62,10 @@ const TinyEditor = ({
     };
 
     const baseConfig = {
-        plugins_url: '/tinymce/plugins',
-        plugins: commentMode ? ['tinycomments', 'quickbars'] : [
-            'quickbars',
-            'advlist',
-            'autolink',
-            'lists',
-            'link',
-            'image',
-            'media',
-            'table',
-            'tinycomments'
-        ].join(' '),
+        plugins: commentMode ? ['tinycomments', 'quickbars'] : ['quickbars', 'advlist', 'autolink', 'lists', 'link', 'image', 'media', 'table', 'tinycomments'].join(' '),
         toolbar: false,
         menubar: false,
-        sidebar_show: commentMode ? 'showcomments' : false,
+        sidebar_show: commentMode ? 'showcomments' : undefined,
         quickbars_selection_toolbar: commentMode ? 'addcomment showcomments' : 'blocks | bold italic underline | forecolor backcolor align | link',
         quickbars_insert_toolbar: commentMode ? false : 'blocks |bullist numlist | table | image media | link',
         advlist_bullet_styles: 'default',
@@ -230,8 +219,6 @@ const TinyEditor = ({
                     method: 'DELETE'
                 });
 
-                console.log("ici1");
-
                 if (!response.ok) {
                     if (response.status === 403) {
                         done({ canDelete: false, reason: "Non autorisé à supprimer cette conversation" });
@@ -279,9 +266,6 @@ const TinyEditor = ({
                         comments: data.comments
                     }
                 };
-
-                console.log("obj tinycomments_lookup", obj);
-
                 done(obj);
             } catch (err) {
                 console.error('Error looking up conversation:', err);
@@ -346,8 +330,6 @@ const TinyEditor = ({
                     }
                 );
 
-                console.log("ici3");
-
                 if (!response.ok) {
                     if (response.status === 403) {
                         done({ canDelete: false, reason: "Non autorisé à supprimer tous les commentaires" });
@@ -397,7 +379,7 @@ const TinyEditor = ({
                 apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
                 onEditorChange={handleEditorChange}
                 initialValue={editorContent}
-                init={baseConfig as any}
+                init={baseConfig}
             />
         </div >
     );

@@ -119,7 +119,7 @@ export default function EditPost() {
             if (!response.ok) throw new Error('Erreur lors de la modification');
 
             toast.success('Post modifié avec succès');
-            router.push(`/community/${params.id}/post/${params.postId}`);
+            router.push(`/community/${params.id}/posts/${params.postId}`);
         } catch (error) {
             toast.error("Erreur lors de la modification du post");
         }

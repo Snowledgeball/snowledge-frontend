@@ -333,7 +333,7 @@ export default function PostPage() {
                                     </span>
                                     {Number(session?.user?.id) === post.user.id && (
                                         <button
-                                            onClick={() => router.push(`/community/${params.id}/post/${post.id}/edit`)}
+                                            onClick={() => router.push(`/community/${params.id}/posts/${post.id}/edit`)}
                                             className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                                         >
                                             <Edit className="w-4 h-4" />
