@@ -165,7 +165,6 @@ const CommunityHub = () => {
                 }
                 const communityData = await communityResponse.json();
                 setCommunityData(communityData);
-                console.log(communityData);
 
                 // Si l'utilisateur n'est pas membre, récupérer la présentation
                 if (!membershipData.isMember) {
@@ -181,8 +180,6 @@ const CommunityHub = () => {
                     const userCommunitiesData = await userCommunitiesResponse.json();
                     setUserCommunities(userCommunitiesData.communities);
                 }
-
-                console.log("membershipData", membershipData);
 
                 // Vérifier si l'utilisateur est contributeur
                 setIsContributor(membershipData.isContributor);
