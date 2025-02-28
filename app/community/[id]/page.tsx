@@ -18,6 +18,7 @@ import {
     Edit,
     MoreVertical,
     Trash2,
+    X,
 } from "lucide-react";
 import { Community } from "@/types/community";
 import Image from 'next/image';
@@ -27,10 +28,6 @@ import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Disclosure } from "@/components/ui/disclosure";
 import ChatBox from "@/components/shared/ChatBox";
-import CreateQuestionModal from '@/components/shared/CreateQuestionModal';
-import CreateAnswerModal from '@/components/shared/CreateAnswerModal';
-import EditQuestionModal from '@/components/shared/EditQuestionModal';
-import EditAnswerModal from '@/components/shared/EditAnswerModal';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -98,7 +95,6 @@ const CommunityHub = () => {
     const [questions, setQuestions] = useState<{
         id: number;
         question: string;
-        category: string;
         created_at: string;
         author: {
             id: number;
@@ -118,24 +114,6 @@ const CommunityHub = () => {
         }[];
     }[]>([]);
 
-    // Ajouter ces états pour gérer les modales
-    const [showQuestionModal, setShowQuestionModal] = useState(false);
-    const [showAnswerModal, setShowAnswerModal] = useState(false);
-    const [selectedQuestion, setSelectedQuestion] = useState<{ id: number, question: string } | null>(null);
-
-    // Ajouter ces nouveaux états
-    const [editQuestionData, setEditQuestionData] = useState<{
-        id: number;
-        question: string;
-        category: string;
-    } | null>(null);
-
-    const [editAnswerData, setEditAnswerData] = useState<{
-        id: number;
-        content: string;
-        questionText: string;
-    } | null>(null);
-
     // Ajouter ces états pour gérer les dialogues de confirmation
     const [deleteQuestionDialog, setDeleteQuestionDialog] = useState<{ isOpen: boolean; questionId: number | null }>({
         isOpen: false,
@@ -151,6 +129,20 @@ const CommunityHub = () => {
         questionId: null,
         answerId: null
     });
+
+    // Ajouter ces nouveaux états
+    const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
+    const [editingAnswerId, setEditingAnswerId] = useState<number | null>(null);
+    const [newQuestionText, setNewQuestionText] = useState('');
+    const [newAnswerText, setNewAnswerText] = useState('');
+    const [showNewQuestionInput, setShowNewQuestionInput] = useState(false);
+    const [showNewAnswerInput, setShowNewAnswerInput] = useState<number | null>(null);
+
+    // Ajouter avec les autres états
+    const [selectedQuestion, setSelectedQuestion] = useState<{
+        id: number;
+        question: string;
+    } | null>(null);
 
     useEffect(() => {
         if (!session) {
@@ -300,7 +292,7 @@ const CommunityHub = () => {
     };
 
     // Ajouter cette fonction pour créer une nouvelle question
-    const handleCreateQuestion = async (questionData: { question: string; category: string }) => {
+    const handleCreateQuestion = async (questionData: { question: string }) => {
         try {
             const response = await fetch(`/api/communities/${params.id}/qa`, {
                 method: 'POST',
@@ -350,7 +342,7 @@ const CommunityHub = () => {
     };
 
     // Ajouter ces nouvelles fonctions de gestion
-    const handleEditQuestion = async (questionId: number, data: { question: string; category: string }) => {
+    const handleEditQuestion = async (questionId: number, data: { question: string }) => {
         try {
             const response = await fetch(`/api/communities/${params.id}/qa/${questionId}`, {
                 method: 'PUT',
@@ -394,12 +386,12 @@ const CommunityHub = () => {
 
     const handleEditAnswer = async (answerId: number, content: string) => {
         try {
-            const response = await fetch(`/api/communities/${params.id}/qa/${selectedQuestion?.id}/answers/${answerId}`, {
+            const response = await fetch(`/api/communities/${params.id}/qa/answers/${answerId}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ content }),
+                body: JSON.stringify({ content })
             });
 
             if (!response.ok) throw new Error('Erreur lors de la modification');
@@ -411,7 +403,7 @@ const CommunityHub = () => {
             toast.success('Réponse modifiée avec succès');
         } catch (error) {
             console.error('Erreur:', error);
-            toast.error('Erreur lors de la modification de la réponse');
+            toast.error("Erreur lors de la modification de la réponse");
         }
     };
 
@@ -809,14 +801,65 @@ const CommunityHub = () => {
                         <div className="bg-white rounded-lg shadow-sm p-6">
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-xl font-bold text-gray-900">Questions fréquentes</h2>
-                                <button
-                                    onClick={() => setShowQuestionModal(true)}
-                                    className="flex items-center space-x-2 text-blue-600 hover:text-blue-700"
-                                >
-                                    <PlusCircle className="w-5 h-5" />
-                                    <span>Poser une question</span>
-                                </button>
+                                {!showNewQuestionInput ? (
+                                    <button
+                                        onClick={() => setShowNewQuestionInput(true)}
+                                        className="flex items-center space-x-2 text-blue-600 hover:text-blue-700"
+                                    >
+                                        <PlusCircle className="w-5 h-5" />
+                                        <span>Poser une question</span>
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => setShowNewQuestionInput(false)}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                )}
                             </div>
+
+                            {/* Formulaire pour nouvelle question */}
+                            {showNewQuestionInput && (
+                                <div className="mb-6 p-4 border rounded-lg bg-blue-50">
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Votre question
+                                            </label>
+                                            <textarea
+                                                value={newQuestionText}
+                                                onChange={(e) => setNewQuestionText(e.target.value)}
+                                                rows={3}
+                                                className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white"
+                                                placeholder="Posez votre question ici..."
+                                            />
+                                        </div>
+                                        <div className="flex justify-end space-x-2">
+                                            <button
+                                                onClick={() => setShowNewQuestionInput(false)}
+                                                className="px-3 py-1.5 text-gray-600 hover:text-gray-800"
+                                            >
+                                                Annuler
+                                            </button>
+                                            <button
+                                                onClick={async () => {
+                                                    if (newQuestionText.trim()) {
+                                                        await handleCreateQuestion({
+                                                            question: newQuestionText
+                                                        });
+                                                        setNewQuestionText('');
+                                                        setShowNewQuestionInput(false);
+                                                    }
+                                                }}
+                                                className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                            >
+                                                Publier
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="space-y-4">
                                 {questions.map((item) => (
@@ -825,81 +868,88 @@ const CommunityHub = () => {
                                             <Disclosure.Button as="div" className="w-full">
                                                 <div className="flex justify-between items-center p-4">
                                                     <div className="flex-1">
-                                                        <div className="flex items-center justify-between ">
-                                                            <div>
-                                                                <div className="flex items-center space-x-3 flex-1">
-                                                                    <Image
-                                                                        src={item.author.profilePicture}
-                                                                        alt={item.author.fullName}
-                                                                        width={24}
-                                                                        height={24}
-                                                                        className="rounded-full"
-                                                                    />
-                                                                    <h3 className="font-medium text-gray-900">{item.question}</h3>
+                                                        {editingQuestionId === item.id ? (
+                                                            <div className="space-y-3 pr-8">
+                                                                <textarea
+                                                                    value={newQuestionText}
+                                                                    onChange={(e) => setNewQuestionText(e.target.value)}
+                                                                    rows={2}
+                                                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white"
+                                                                    placeholder="Modifiez votre question..."
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                />
+                                                                <div className="flex justify-end space-x-2">
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setEditingQuestionId(null);
+                                                                        }}
+                                                                        className="px-3 py-1 text-gray-600 hover:text-gray-800 text-sm"
+                                                                    >
+                                                                        Annuler
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={async (e) => {
+                                                                            e.stopPropagation();
+                                                                            if (newQuestionText.trim()) {
+                                                                                await handleEditQuestion(item.id, {
+                                                                                    question: newQuestionText
+                                                                                });
+                                                                                setEditingQuestionId(null);
+                                                                            }
+                                                                        }}
+                                                                        className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                                                                    >
+                                                                        Enregistrer
+                                                                    </button>
                                                                 </div>
                                                             </div>
-
-                                                            <div
-                                                                className="relative"
-                                                                onClick={(e) => e.stopPropagation()}
-                                                            >
-                                                                <Menu as="div" className="relative inline-block text-left">
-                                                                    <div>
-                                                                        <Menu.Button className="p-1 hover:bg-gray-200 rounded-full">
-                                                                            <MoreVertical className="w-5 h-5 text-gray-500" />
-                                                                        </Menu.Button>
-                                                                    </div>
-
-                                                                    <Transition
-                                                                        as={Fragment}
-                                                                        enter="transition ease-out duration-100"
-                                                                        enterFrom="transform opacity-0 scale-95"
-                                                                        enterTo="transform opacity-100 scale-100"
-                                                                        leave="transition ease-in duration-75"
-                                                                        leaveFrom="transform opacity-100 scale-100"
-                                                                        leaveTo="transform opacity-0 scale-95"
-                                                                    >
-                                                                        <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                                                            {item.author.id === parseInt(session?.user.id) && item.answers.length === 0 && (
-                                                                                <Menu.Item>
-                                                                                    {({ active }) => (
-                                                                                        <button
-                                                                                            className={`${active ? 'bg-gray-100' : ''} flex w-full items-center px-4 py-2 text-sm text-gray-700`}
-                                                                                            onClick={() => setEditQuestionData({
-                                                                                                id: item.id,
-                                                                                                question: item.question,
-                                                                                                category: item.category
-                                                                                            })}
-                                                                                        >
-                                                                                            <Edit className="w-4 h-4 mr-2" />
-                                                                                            Modifier
-                                                                                        </button>
-                                                                                    )}
-                                                                                </Menu.Item>
-                                                                            )}
-                                                                            <Menu.Item>
-                                                                                {({ active }) => (
-                                                                                    <button
-                                                                                        className={`${active ? 'bg-gray-100' : ''} flex w-full items-center px-4 py-2 text-sm text-red-600`}
-                                                                                        onClick={() => setDeleteQuestionDialog({ isOpen: true, questionId: item.id })}
-                                                                                    >
-                                                                                        <Trash2 className="w-4 h-4 mr-2" />
-                                                                                        Supprimer
-                                                                                    </button>
-                                                                                )}
-                                                                            </Menu.Item>
-                                                                        </Menu.Items>
-                                                                    </Transition>
-                                                                </Menu>
+                                                        ) : (
+                                                            <div className="flex items-center space-x-3 flex-1">
+                                                                <Image
+                                                                    src={item.author.profilePicture}
+                                                                    alt={item.author.fullName}
+                                                                    width={24}
+                                                                    height={24}
+                                                                    className="rounded-full"
+                                                                />
+                                                                <h3 className="font-medium text-gray-900">{item.question}</h3>
                                                             </div>
-                                                        </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div
+                                                        className="relative"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        {item.author.id === parseInt(session?.user.id) && item.answers.length === 0 && !editingQuestionId && (
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setEditingQuestionId(item.id);
+                                                                    setNewQuestionText(item.question);
+                                                                }}
+                                                                className="p-1 hover:bg-gray-200 rounded-full mr-2"
+                                                            >
+                                                                <Edit className="w-4 h-4 text-gray-500" />
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setDeleteQuestionDialog({ isOpen: true, questionId: item.id });
+                                                            }}
+                                                            className="p-1 hover:bg-gray-200 rounded-full"
+                                                        >
+                                                            <Trash2 className="w-4 h-4 text-red-500" />
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </Disclosure.Button>
 
                                             <Disclosure.Panel>
                                                 {item.answers.map((answer) => (
-                                                    <div key={answer.id} className="p-4 bg-white">
+                                                    <div key={answer.id} className="p-4 bg-white border-t border-gray-100">
                                                         <div className="flex items-start space-x-3">
                                                             <Image
                                                                 src={answer.author.profilePicture}
@@ -914,47 +964,27 @@ const CommunityHub = () => {
                                                                         {answer.author.fullName}
                                                                     </span>
                                                                     <div className="flex items-center space-x-3">
-                                                                        {(answer.author.id === parseInt(session?.user.id) || isCreator) && (
-                                                                            <Menu as="div" className="relative">
-                                                                                <Menu.Button className="p-1 hover:bg-gray-200 rounded-full">
-                                                                                    <MoreVertical className="w-5 h-5 text-gray-500" />
-                                                                                </Menu.Button>
-                                                                                <Menu.Items className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-10 border">
-                                                                                    {answer.author.id === parseInt(session?.user.id) && (
-                                                                                        <Menu.Item>
-                                                                                            {({ active }) => (
-                                                                                                <button
-                                                                                                    className={`${active ? 'bg-gray-100' : ''} flex w-full items-center px-4 py-2 text-sm text-gray-700`}
-                                                                                                    onClick={() => setEditAnswerData({
-                                                                                                        id: answer.id,
-                                                                                                        content: answer.content,
-                                                                                                        questionText: item.question
-                                                                                                    })}
-                                                                                                >
-                                                                                                    <Edit className="w-4 h-4 mr-2" />
-                                                                                                    Modifier
-                                                                                                </button>
-                                                                                            )}
-                                                                                        </Menu.Item>
-                                                                                    )}
-                                                                                    <Menu.Item>
-                                                                                        {({ active }) => (
-                                                                                            <button
-                                                                                                className={`${active ? 'bg-gray-100' : ''} flex w-full items-center px-4 py-2 text-sm text-red-600`}
-                                                                                                onClick={() => setDeleteAnswerDialog({
-                                                                                                    isOpen: true,
-                                                                                                    questionId: item.id,
-                                                                                                    answerId: answer.id
-                                                                                                })}
-                                                                                            >
-                                                                                                <Trash2 className="w-4 h-4 mr-2" />
-                                                                                                Supprimer
-                                                                                            </button>
-                                                                                        )}
-                                                                                    </Menu.Item>
-                                                                                </Menu.Items>
-                                                                            </Menu>
+                                                                        {answer.author.id === parseInt(session?.user.id) && !editingAnswerId && (
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    setEditingAnswerId(answer.id);
+                                                                                    setNewAnswerText(answer.content);
+                                                                                }}
+                                                                                className="p-1 hover:bg-gray-200 rounded-full"
+                                                                            >
+                                                                                <Edit className="w-4 h-4 text-gray-500" />
+                                                                            </button>
                                                                         )}
+                                                                        <button
+                                                                            onClick={() => setDeleteAnswerDialog({
+                                                                                isOpen: true,
+                                                                                questionId: item.id,
+                                                                                answerId: answer.id
+                                                                            })}
+                                                                            className="p-1 hover:bg-gray-200 rounded-full"
+                                                                        >
+                                                                            <Trash2 className="w-4 h-4 text-red-500" />
+                                                                        </button>
                                                                         <span className="text-sm text-gray-500">
                                                                             {formatDistanceToNow(new Date(answer.created_at), {
                                                                                 addSuffix: true,
@@ -963,27 +993,91 @@ const CommunityHub = () => {
                                                                         </span>
                                                                     </div>
                                                                 </div>
-                                                                <p className="text-gray-600">{answer.content}</p>
+                                                                {editingAnswerId === answer.id ? (
+                                                                    <div className="space-y-3">
+                                                                        <textarea
+                                                                            value={newAnswerText}
+                                                                            onChange={(e) => setNewAnswerText(e.target.value)}
+                                                                            rows={3}
+                                                                            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                                                            placeholder="Modifiez votre réponse..."
+                                                                        />
+                                                                        <div className="flex justify-end space-x-2">
+                                                                            <button
+                                                                                onClick={() => setEditingAnswerId(null)}
+                                                                                className="px-3 py-1 text-gray-600 hover:text-gray-800 text-sm"
+                                                                            >
+                                                                                Annuler
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={async () => {
+                                                                                    if (newAnswerText.trim()) {
+                                                                                        await handleEditAnswer(item.id, newAnswerText);
+                                                                                        setEditingAnswerId(null);
+                                                                                    }
+                                                                                }}
+                                                                                className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                                                                            >
+                                                                                Enregistrer
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <p className="text-gray-600">{answer.content}</p>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 ))}
 
-                                                {/* Bouton pour répondre (visible uniquement pour les contributeurs) */}
+                                                {/* Formulaire pour nouvelle réponse */}
                                                 {(isContributor || isCreator) && (
-                                                    <div className="p-4 bg-gray-50">
-                                                        <button
-                                                            onClick={() => {
-                                                                setSelectedQuestion({
-                                                                    id: item.id,
-                                                                    question: item.question
-                                                                });
-                                                                setShowAnswerModal(true);
-                                                            }}
-                                                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                                                        >
-                                                            Répondre à cette question
-                                                        </button>
+                                                    <div className="p-4 bg-gray-50 border-t border-gray-100">
+                                                        {showNewAnswerInput === item.id ? (
+                                                            <div className="space-y-3">
+                                                                <textarea
+                                                                    value={newAnswerText}
+                                                                    onChange={(e) => setNewAnswerText(e.target.value)}
+                                                                    rows={3}
+                                                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white"
+                                                                    placeholder="Rédigez votre réponse ici..."
+                                                                />
+                                                                <div className="flex justify-end space-x-2">
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setShowNewAnswerInput(null);
+                                                                            setNewAnswerText('');
+                                                                        }}
+                                                                        className="px-3 py-1.5 text-gray-600 hover:text-gray-800"
+                                                                    >
+                                                                        Annuler
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            if (newAnswerText.trim()) {
+                                                                                await handleCreateAnswer(item.id, newAnswerText);
+                                                                                setNewAnswerText('');
+                                                                                setShowNewAnswerInput(null);
+                                                                            }
+                                                                        }}
+                                                                        className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                                                    >
+                                                                        Publier
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => {
+                                                                    setShowNewAnswerInput(item.id);
+                                                                    setNewAnswerText('');
+                                                                }}
+                                                                className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
+                                                            >
+                                                                <MessageCircle className="w-4 h-4 mr-1" />
+                                                                Répondre à cette question
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 )}
                                             </Disclosure.Panel>
@@ -995,52 +1089,6 @@ const CommunityHub = () => {
                     </div>
                 </div>
             )}
-
-            {/* Modales */}
-            <CreateQuestionModal
-                isOpen={showQuestionModal}
-                onClose={() => setShowQuestionModal(false)}
-                onSubmit={handleCreateQuestion}
-            />
-
-            <CreateAnswerModal
-                isOpen={showAnswerModal}
-                onClose={() => setShowAnswerModal(false)}
-                onSubmit={async (content) => {
-                    if (selectedQuestion) {
-                        await handleCreateAnswer(selectedQuestion.id, content);
-                        setSelectedQuestion(null);
-                    }
-                }}
-                questionText={selectedQuestion?.question || ''}
-            />
-
-            {/* Ajouter les modales d'édition */}
-            <EditQuestionModal
-                isOpen={!!editQuestionData}
-                onClose={() => setEditQuestionData(null)}
-                onSubmit={async (data) => {
-                    if (editQuestionData) {
-                        await handleEditQuestion(editQuestionData.id, data);
-                        setEditQuestionData(null);
-                    }
-                }}
-                initialQuestion={editQuestionData?.question || ''}
-                initialCategory={editQuestionData?.category || ''}
-            />
-
-            <EditAnswerModal
-                isOpen={!!editAnswerData}
-                onClose={() => setEditAnswerData(null)}
-                onSubmit={async (content) => {
-                    if (editAnswerData) {
-                        await handleEditAnswer(editAnswerData.id, content);
-                        setEditAnswerData(null);
-                    }
-                }}
-                initialContent={editAnswerData?.content || ''}
-                questionText={editAnswerData?.questionText || ''}
-            />
 
             {/* Ajouter les dialogues de confirmation */}
             <ConfirmationDialog
