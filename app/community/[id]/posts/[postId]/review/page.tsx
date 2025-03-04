@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
@@ -31,12 +31,16 @@ export default function ReviewPost() {
   const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
   const { data: session } = useSession();
   const params = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [post, setPost] = useState<Post | null>(null);
   const [reviewContent, setReviewContent] = useState("");
   const [reviewStatus, setReviewStatus] = useState<"APPROVED" | "REJECTED">(
     "APPROVED"
   );
+  const authorId = searchParams.get("authorId");
+  const isNotAuthor = authorId !== session?.user?.id;
+  console.log("isNotAuthor", isNotAuthor);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -182,7 +186,7 @@ export default function ReviewPost() {
               // value={post.content}
               initialValue={post.content}
               onChange={() => {}} // Lecture seule
-              commentMode={true}
+              commentMode={isNotAuthor}
               communityId={params.id as string}
               postId={params.postId as string}
             />

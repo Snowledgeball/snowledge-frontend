@@ -87,6 +87,7 @@ const TinyEditor = ({
   const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
   const editorRef = useRef<Editor | null>(null);
+  const [isReadOnly, setIsReadOnly] = useState(commentMode);
 
   // Initialiser le contenu une seule fois
   const [initialContent] = useState(
@@ -97,11 +98,19 @@ const TinyEditor = ({
     setMounted(true);
   }, []);
 
+  // Supprimer l'effet qui met l'éditeur en mode readonly
+  useEffect(() => {
+    setIsReadOnly(commentMode);
+  }, [commentMode]);
+
   const handleEditorChange = (content: string) => {
-    if (onChange) {
+    // En mode commentaire, ne pas permettre les changements au contenu principal
+    if (!commentMode && onChange) {
       onChange(content);
     }
   };
+
+  console.log("commentMode", commentMode);
 
   const saveContent = async (content: string) => {
     try {
@@ -520,6 +529,51 @@ const TinyEditor = ({
         fail(err);
       }
     },
+
+    // Ajouter cette fonction setup pour désactiver l'édition du contenu mais permettre les commentaires
+    setup: (editor: Editor) => {
+      editor.on("init", () => {
+        if (commentMode) {
+          // Désactiver l'édition du contenu principal
+          const originalExecCommand = editor.execCommand;
+
+          // Remplacer execCommand pour bloquer les commandes d'édition
+          editor.execCommand = function (cmd: string, ui: any, value: any) {
+            const allowedCommands = [
+              "mceToggleComment",
+              "mceShowComments",
+              "mceAddComment",
+            ];
+
+            if (allowedCommands.includes(cmd) || !cmd.startsWith("mce")) {
+              return originalExecCommand.call(editor, cmd, ui, value);
+            }
+
+            // Bloquer les autres commandes d'édition
+            return false;
+          };
+
+          // Désactiver les événements de frappe pour le contenu principal
+          editor.on("keydown", (e) => {
+            // Vérifier si l'utilisateur est dans un commentaire
+            const node = editor.selection.getNode();
+            const isInComment = node.closest(".tox-comment") !== null;
+
+            // Permettre la frappe uniquement dans les commentaires
+            if (!isInComment) {
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            }
+          });
+
+          // Activer les commentaires
+          setTimeout(() => {
+            editor.execCommand("mceShowComments");
+          }, 200);
+        }
+      });
+    },
   };
 
   return (
@@ -532,6 +586,7 @@ const TinyEditor = ({
           initialValue={initialContent}
           onInit={(_, editor) => {
             editorRef.current = editor;
+            // Ne pas utiliser mode.set("readonly") car cela désactive les commentaires
           }}
           init={baseConfig}
         />
