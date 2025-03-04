@@ -946,12 +946,14 @@ const CommunityHub = () => {
 
           {/* Section Q&A avec Disclosure */}
           <div className="mt-8">
-            <QASection
-              communityId={params.id as string}
-              isContributor={isContributor}
-              isCreator={isCreator}
-              userId={session?.user?.id}
-            />
+            {activeTab === "general" && session && (
+              <QASection
+                communityId={params.id as string}
+                isContributor={isContributor}
+                isCreator={isCreator}
+                userId={session?.user?.id}
+              />
+            )}
           </div>
         </div>
       )}
