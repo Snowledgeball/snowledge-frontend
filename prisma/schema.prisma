@@ -57,10 +57,12 @@ model community_posts {
   cover_image_url                       String                                  @db.VarChar(255)
   accept_contributions                  Boolean?                                @default(false)
   status                                String                                  @default("PENDING") @db.VarChar(50)
+  qa_enabled                            Boolean?                                @default(true)
   user                                  user                                    @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "author_id_fkey")
   community                             community                               @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   community_posts_comment_conversations community_posts_comment_conversations[]
   community_posts_reviews               community_posts_reviews[]
+  community_qa_questions                community_qa_questions[]
 }
 
 model user {
@@ -206,14 +208,16 @@ model community_qa_questions {
   community_id         Int
   author_id            Int
   question             String
-  category             String                 @db.VarChar(50)
   created_at           DateTime?              @default(now()) @db.Timestamptz(6)
   updated_at           DateTime?              @default(now()) @db.Timestamptz(6)
   status               String?                @default("ACTIVE") @db.VarChar(50)
+  post_id              Int?
   community_qa_answers community_qa_answers[]
   user                 user                   @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   community            community              @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post                 community_posts?       @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_question_post")
 
   @@index([author_id], map: "idx_qa_questions_author")
   @@index([community_id], map: "idx_qa_questions_community")
+  @@index([post_id], map: "idx_qa_questions_post")
 }
