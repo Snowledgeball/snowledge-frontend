@@ -3,8 +3,6 @@
 import { Editor } from "@tinymce/tinymce-react";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { isSameQuarter } from "date-fns";
-import { useRouter } from "next/navigation";
 
 type tinycomments_fetch = {
   conversations: {
@@ -45,7 +43,6 @@ interface TinyEditorProps {
   commentOnly?: boolean;
   communityId?: string;
   postId?: string;
-  testMode?: boolean;
 }
 
 interface BlobInfo {
@@ -84,19 +81,15 @@ type TinyCommentsFetchFailCallback = (error: string) => void;
 const TinyEditor = ({
   onChange,
   initialValue,
-  readOnly,
   commentMode,
-  commentOnly,
   communityId,
   postId,
-  testMode = false,
 }: TinyEditorProps) => {
   const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
   const [editorContent, setEditorContent] = useState(
     initialValue || "<p>Écrivez ici...</p><p></p><p></p><p></p><p></p>"
   );
-  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -127,14 +120,6 @@ const TinyEditor = ({
       console.error("Error saving content:", error);
     }
   };
-
-  const testUser = {
-    id: "99999",
-    name: "Utilisateur Test",
-    image: "https://via.placeholder.com/150",
-  };
-
-  const currentUser = !session && testMode ? testUser : session?.user;
 
   const baseConfig = {
     plugins: commentMode
@@ -169,9 +154,9 @@ const TinyEditor = ({
         canEdit: session?.user?.id === req.author,
       };
     },
-    tinycomments_author: currentUser?.id?.toString() || "",
-    tinycomments_author_name: currentUser?.name || "Anonymous",
-    tinycomments_author_avatar: currentUser?.image || "",
+    tinycomments_author: session?.user?.id?.toString() || "",
+    tinycomments_author_name: session?.user?.name || "Anonymous",
+    tinycomments_author_avatar: session?.user?.image || "",
     file_picker_types: "image",
     automatic_uploads: true,
     images_upload_url: "/api/upload",
