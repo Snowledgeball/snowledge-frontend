@@ -1,7 +1,8 @@
 "use client";
 
-import { Editor } from "@tinymce/tinymce-react";
-import { useState, useEffect } from "react";
+import { Editor as TinyMCEEditor } from "@tinymce/tinymce-react";
+import { Editor } from "tinymce";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 
 type tinycomments_fetch = {
@@ -38,9 +39,7 @@ type TinyCommentsRequest = {
 interface TinyEditorProps {
   onChange?: (content: string) => void;
   initialValue?: string;
-  readOnly?: boolean;
   commentMode?: boolean;
-  commentOnly?: boolean;
   communityId?: string;
   postId?: string;
 }
@@ -87,7 +86,10 @@ const TinyEditor = ({
 }: TinyEditorProps) => {
   const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
-  const [editorContent, setEditorContent] = useState(
+  const editorRef = useRef<Editor | null>(null);
+
+  // Initialiser le contenu une seule fois
+  const [initialContent] = useState(
     initialValue || "<p>Écrivez ici...</p><p></p><p></p><p></p><p></p>"
   );
 
@@ -96,7 +98,6 @@ const TinyEditor = ({
   }, []);
 
   const handleEditorChange = (content: string) => {
-    setEditorContent(content);
     if (onChange) {
       onChange(content);
     }
@@ -147,13 +148,6 @@ const TinyEditor = ({
     advlist_bullet_styles: "default",
     advlist_number_styles: "default",
     tinycomments_mode: "callback",
-    tinycomments_access: (req: TinyCommentsRequest) => {
-      return {
-        canRead: true,
-        canDelete: session?.user?.id === req.author,
-        canEdit: session?.user?.id === req.author,
-      };
-    },
     tinycomments_author: session?.user?.id?.toString() || "",
     tinycomments_author_name: session?.user?.name || "Anonymous",
     tinycomments_author_avatar: session?.user?.image || "",
@@ -233,49 +227,6 @@ const TinyEditor = ({
                         list-style-type: decimal;
                     }
             `,
-
-    // setup: (editor: {
-    //   on: (arg0: string, arg1: () => Promise<void>) => void;
-    //   setContent: (arg0: any) => void;
-    //   execCommand: (
-    //     arg0: string,
-    //     arg1: boolean | undefined,
-    //     arg2: undefined
-    //   ) => void;
-    // }) => {
-    //   editor.on("init", async () => {
-    //     try {
-    //       // Récupérer d'abord le contenu du post depuis la BD
-    //       const contentResponse = await fetch(
-    //         `/api/communities/${communityId}/posts/${postId}/content`
-    //       );
-
-    //       if (!contentResponse.ok) {
-    //         throw new Error("Failed to fetch post content");
-    //       }
-
-    //       const { content } = await contentResponse.json();
-    //       editor.setContent(content); // Charger le contenu sauvegardé avec les balises Tiny Comments
-
-    //       // Récupération des conversations
-    //       const commentsResponse = await fetch(
-    //         `/api/communities/${communityId}/posts/${postId}/comments/conversations`
-    //       );
-
-    //       if (!commentsResponse.ok) {
-    //         throw new Error("Failed to fetch conversations");
-    //       }
-
-    //       const data = await commentsResponse.json();
-    //       editor.execCommand("mceInitComments", false, data.conversations);
-    //       if (commentMode) {
-    //         editor.execCommand("mceShowComments", false, undefined);
-    //       }
-    //     } catch (error) {
-    //       console.error("Error initializing editor:", error);
-    //     }
-    //   });
-    // },
 
     // Callbacks pour les commentaires
     tinycomments_create: async (
@@ -571,17 +522,20 @@ const TinyEditor = ({
     },
   };
 
-  if (!mounted) return null;
-
   return (
     <div className="tiny-editor">
-      <Editor
-        id="my-tiny-editor"
-        apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
-        onEditorChange={handleEditorChange}
-        initialValue={editorContent}
-        init={baseConfig}
-      />
+      {mounted && (
+        <TinyMCEEditor
+          id="my-tiny-editor"
+          apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
+          onEditorChange={handleEditorChange}
+          initialValue={initialContent}
+          onInit={(_, editor) => {
+            editorRef.current = editor;
+          }}
+          init={baseConfig}
+        />
+      )}
     </div>
   );
 };
