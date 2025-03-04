@@ -35,7 +35,19 @@ interface User {
   image?: string;
 }
 
-type MessageData = Omit<Message, "id">;
+interface MessageData {
+  text: string;
+  userId: string;
+  username: string;
+  userImage?: string;
+  channelId: string;
+  communityId: number;
+  timestamp?: Date | FieldValue | FirestoreTimestamp;
+  reactions?: { [key: string]: string[] };
+  replyTo?: string;
+  attachments?: string[];
+  postId?: number;
+}
 
 interface FirestoreTimestamp {
   seconds: number;
@@ -57,9 +69,11 @@ interface Message {
 }
 
 interface ChatBoxProps {
-  user: User;
+  user: any;
   communityId: number;
+  postId?: number;
   className?: string;
+  variant?: "community" | "post";
 }
 
 const DEFAULT_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"];
@@ -69,7 +83,9 @@ const MAX_MESSAGE_LENGTH = 500;
 export default function ChatBox({
   user,
   communityId,
+  postId,
   className,
+  variant = "community",
 }: ChatBoxProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
@@ -144,22 +160,44 @@ export default function ChatBox({
     scrollToBottom();
   }, [messages]);
 
-  // Ce useEffect gère l'écoute en temps réel des messages pour un canal spécifique
   useEffect(() => {
-    // Si aucun canal n'est sélectionné, on sort de la fonction
+    if (variant === "post") {
+      // Pour les posts, on crée un canal virtuel unique
+      setSelectedChannel({
+        id: postId as number,
+        name: "Discussion",
+        type: "text",
+        description: "Discussion du post",
+        icon: "💬",
+      });
+      setChannels([]);
+    } else {
+      // Pour la communauté, on garde le comportement existant
+      fetchChannels();
+    }
+  }, [communityId, postId, variant]);
+
+  useEffect(() => {
     if (!selectedChannel?.id) return;
 
-    // Création de la requête Firebase
-    const q = query(
-      collection(db, "messages"), // Sélectionne la collection messages
-      where("communityId", "==", Number(communityId)), // Filtre par communauté
-      where("channelId", "==", selectedChannel.id.toString()), // Filtre par canal
-      orderBy("timestamp", "asc") // Trie par date croissante
-    );
+    let q;
+    if (variant === "post") {
+      q = query(
+        collection(db, "messages"),
+        where("communityId", "==", Number(communityId)),
+        where("postId", "==", Number(postId)),
+        orderBy("timestamp", "asc")
+      );
+    } else {
+      q = query(
+        collection(db, "messages"),
+        where("communityId", "==", Number(communityId)),
+        where("channelId", "==", selectedChannel.id.toString()),
+        orderBy("timestamp", "asc")
+      );
+    }
 
-    // Démarre l'écoute en temps réel
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      // Pour chaque changement dans Firebase :
       const newMessages = snapshot.docs.map(
         (doc) =>
           ({
@@ -167,20 +205,11 @@ export default function ChatBox({
             ...doc.data(),
           } as Message)
       );
-      // Met à jour l'état des messages dans React
       setMessages(newMessages);
     });
 
-    // Fonction de nettoyage : s'exécute quand
-    // - On change de canal
-    // - On change de communauté
-    // - Le composant est démonté
     return () => unsubscribe();
-  }, [selectedChannel?.id, communityId]); // Se déclenche quand ces valeurs changent
-
-  useEffect(() => {
-    fetchChannels();
-  }, [communityId]);
+  }, [selectedChannel?.id, communityId, postId, variant]);
 
   useEffect(() => {
     const checkCreatorStatus = async () => {
@@ -232,15 +261,19 @@ export default function ChatBox({
       userId: user.id,
       username: user.name,
       userImage: user.image,
-      channelId: selectedChannel.id.toString(),
+      channelId: variant === "post" ? "post" : selectedChannel.id.toString(),
       communityId: communityId,
       timestamp: serverTimestamp(),
       reactions: {},
       ...(replyingTo?.id ? { replyTo: replyingTo.id } : {}),
     };
 
+    // Ajouter postId seulement s'il est défini
+    if (variant === "post" && postId !== undefined) {
+      messageData.postId = postId;
+    }
+
     try {
-      console.log("Sending message:", messageData);
       await addDoc(collection(db, "messages"), messageData);
     } catch (error) {
       console.error("Error sending message:", error);
@@ -355,209 +388,219 @@ export default function ChatBox({
   };
 
   return (
-    <div className={`flex bg-gray-900 ${className}`}>
-      {/* Sidebar des canaux */}
-      <div className="w-64 bg-gray-800 flex flex-col">
-        <div className="p-4 border-b border-gray-700 flex justify-between items-center">
-          <h2 className="text-white font-semibold">Canaux</h2>
-          {isCreator && (
-            <button
-              onClick={() => setIsCreateChannelModalOpen(true)}
-              className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
-            >
-              <span className="text-xl">+</span>
-            </button>
+    <div className={`flex bg-gray-900 ${className} overflow-x-hidden`}>
+      {/* Afficher la sidebar uniquement pour la variante community */}
+      {variant === "community" && (
+        <div className="w-64 bg-gray-800 flex flex-col">
+          <div className="p-4 border-b border-gray-700 flex justify-between items-center">
+            <h2 className="text-white font-semibold">Canaux</h2>
+            {isCreator && (
+              <button
+                onClick={() => setIsCreateChannelModalOpen(true)}
+                className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
+              >
+                <span className="text-xl">+</span>
+              </button>
+            )}
+          </div>
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
+            {channels.map((channel) => (
+              <div
+                key={channel.id}
+                onClick={() => setSelectedChannel(channel)}
+                className={`flex items-center justify-between px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white cursor-pointer group ${
+                  selectedChannel?.id === channel.id
+                    ? "bg-gray-700 text-white"
+                    : ""
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <span>{channel.icon}</span>
+                  <span>{channel.name}</span>
+                </div>
+                {isCreator && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setChannelToDelete(channel.id);
+                      setIsDeleteModalOpen(true);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500 p-1"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Modal de création de canal */}
+          {isCreateChannelModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                <h3 className="text-white text-lg font-semibold mb-4">
+                  Créer un nouveau canal
+                </h3>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-gray-400 mb-1">
+                      Nom du canal
+                    </label>
+                    <input
+                      type="text"
+                      value={newChannel.name}
+                      onChange={(e) =>
+                        setNewChannel({ ...newChannel, name: e.target.value })
+                      }
+                      className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-400 mb-1">Type</label>
+                    <select
+                      value={newChannel.type}
+                      onChange={(e) =>
+                        setNewChannel({ ...newChannel, type: e.target.value })
+                      }
+                      className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="text">Texte</option>
+                      <option value="resources">Ressources</option>
+                      <option value="questions">Questions</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-400 mb-1">
+                      Description
+                    </label>
+                    <textarea
+                      value={newChannel.description}
+                      onChange={(e) =>
+                        setNewChannel({
+                          ...newChannel,
+                          description: e.target.value,
+                        })
+                      }
+                      className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-400 mb-1">
+                      Icône (emoji)
+                    </label>
+                    <input
+                      type="text"
+                      value={newChannel.icon}
+                      onChange={(e) =>
+                        setNewChannel({ ...newChannel, icon: e.target.value })
+                      }
+                      className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="💬"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    onClick={() => setIsCreateChannelModalOpen(false)}
+                    className="px-4 py-2 text-gray-400 hover:text-white"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={createChannel}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Créer
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Ajouter la modale de confirmation */}
+          {isDeleteModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                <h3 className="text-white text-lg font-semibold mb-4">
+                  Supprimer le canal
+                </h3>
+                <p className="text-gray-300 mb-6">
+                  Êtes-vous sûr de vouloir supprimer ce canal ? Cette action est
+                  irréversible.
+                </p>
+                {error && <p className="text-red-500 mb-4">{error}</p>}
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => {
+                      setIsDeleteModalOpen(false);
+                      setChannelToDelete(null);
+                      setError(null);
+                    }}
+                    className="px-4 py-2 text-gray-400 hover:text-white"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={handleDeleteChannel}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
-          {channels.map((channel) => (
-            <div
-              key={channel.id}
-              onClick={() => setSelectedChannel(channel)}
-              className={`flex items-center justify-between px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white cursor-pointer group ${
-                selectedChannel?.id === channel.id
-                  ? "bg-gray-700 text-white"
-                  : ""
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <span>{channel.icon}</span>
-                <span>{channel.name}</span>
-              </div>
-              {isCreator && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setChannelToDelete(channel.id);
-                    setIsDeleteModalOpen(true);
-                  }}
-                  className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500 p-1"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Modal de création de canal */}
-        {isCreateChannelModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-white text-lg font-semibold mb-4">
-                Créer un nouveau canal
-              </h3>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-gray-400 mb-1">
-                    Nom du canal
-                  </label>
-                  <input
-                    type="text"
-                    value={newChannel.name}
-                    onChange={(e) =>
-                      setNewChannel({ ...newChannel, name: e.target.value })
-                    }
-                    className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-400 mb-1">Type</label>
-                  <select
-                    value={newChannel.type}
-                    onChange={(e) =>
-                      setNewChannel({ ...newChannel, type: e.target.value })
-                    }
-                    className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="text">Texte</option>
-                    <option value="resources">Ressources</option>
-                    <option value="questions">Questions</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-gray-400 mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    value={newChannel.description}
-                    onChange={(e) =>
-                      setNewChannel({
-                        ...newChannel,
-                        description: e.target.value,
-                      })
-                    }
-                    className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-400 mb-1">
-                    Icône (emoji)
-                  </label>
-                  <input
-                    type="text"
-                    value={newChannel.icon}
-                    onChange={(e) =>
-                      setNewChannel({ ...newChannel, icon: e.target.value })
-                    }
-                    className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="💬"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  onClick={() => setIsCreateChannelModalOpen(false)}
-                  className="px-4 py-2 text-gray-400 hover:text-white"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={createChannel}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Créer
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Ajouter la modale de confirmation */}
-        {isDeleteModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-white text-lg font-semibold mb-4">
-                Supprimer le canal
-              </h3>
-              <p className="text-gray-300 mb-6">
-                Êtes-vous sûr de vouloir supprimer ce canal ? Cette action est
-                irréversible.
-              </p>
-              {error && <p className="text-red-500 mb-4">{error}</p>}
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={() => {
-                    setIsDeleteModalOpen(false);
-                    setChannelToDelete(null);
-                    setError(null);
-                  }}
-                  className="px-4 py-2 text-gray-400 hover:text-white"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={handleDeleteChannel}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                >
-                  Supprimer
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Zone principale de chat */}
-      <div className="flex-1 flex flex-col bg-gray-700">
+      <div
+        className={`flex-1 flex flex-col bg-gray-700 ${
+          variant === "post" ? "max-w-full" : ""
+        }`}
+      >
         {selectedChannel ? (
           <>
-            {/* En-tête du canal */}
-            <div className="p-4 border-b border-gray-600">
-              <div className="flex items-center">
-                <span className="mr-2">{selectedChannel.icon}</span>
-                <h2 className="text-white font-semibold">
-                  {selectedChannel.name}
-                </h2>
+            {/* En-tête du canal uniquement pour la variante community */}
+            {variant === "community" && (
+              <div className="p-4 border-b border-gray-600">
+                <div className="flex items-center">
+                  <span className="mr-2">{selectedChannel.icon}</span>
+                  <h2 className="text-white font-semibold">
+                    {selectedChannel.name}
+                  </h2>
+                </div>
+                <p className="text-gray-400 text-sm">
+                  {selectedChannel.description}
+                </p>
               </div>
-              <p className="text-gray-400 text-sm">
-                {selectedChannel.description}
-              </p>
-            </div>
+            )}
 
             {/* Messages */}
             <div
               ref={messagesContainerRef}
               onScroll={handleScroll}
-              className="flex-1 overflow-y-auto p-6 custom-scrollbar"
+              className={`flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar ${
+                variant === "post" ? "p-4" : "p-6"
+              }`}
             >
               {messages.map((msg, index) => {
                 const previousMessage = index > 0 ? messages[index - 1] : null;
@@ -585,7 +628,11 @@ export default function ChatBox({
                     {/* Message répondu */}
                     {msg.replyTo &&
                       messages.find((m) => m.id === msg.replyTo) && (
-                        <div className="relative ml-12 mb-2">
+                        <div
+                          className={`relative ${
+                            variant === "post" ? "ml-6 mb-1" : "ml-12 mb-2"
+                          }`}
+                        >
                           <div className="absolute left-[5px] top-0 w-[2px] h-[calc(100%+3px)] bg-gray-500"></div>
                           <div className="flex items-center space-x-2 pl-4">
                             <Image
@@ -636,14 +683,18 @@ export default function ChatBox({
                               `https://ui-avatars.com/api/?name=${msg.username}`
                             }
                             alt={msg.username}
-                            width={50}
-                            height={50}
+                            width={variant === "post" ? 20 : 50}
+                            height={variant === "post" ? 20 : 50}
                             className="rounded-full"
                           />
                         )}
                         <div
                           className={`flex-1 ${
-                            isConsecutive ? "ml-[62px]" : ""
+                            isConsecutive
+                              ? variant === "post"
+                                ? "ml-[32px]"
+                                : "ml-[62px]"
+                              : ""
                           }`}
                         >
                           {!isConsecutive && (
@@ -712,7 +763,11 @@ export default function ChatBox({
                             <p
                               className={`text-gray-300 break-words whitespace-pre-wrap ${
                                 isConsecutive ? "" : "mt-1"
-                              } py-[1px] max-w-[750px]`}
+                              } py-[1px] ${
+                                variant === "post"
+                                  ? "max-w-[65%]"
+                                  : "max-w-[750px]"
+                              } overflow-x-hidden`}
                             >
                               {msg.text}
                             </p>
@@ -738,7 +793,11 @@ export default function ChatBox({
                               Ajouter une réaction
                             </span>
                             {showEmojiPicker === msg.id && (
-                              <div className="absolute right-0 bottom-full mb-2 bg-gray-800 rounded-lg shadow-lg p-2 flex items-center space-x-2 z-20">
+                              <div
+                                className={`absolute right-0 bottom-full mb-2 bg-gray-800 rounded-lg shadow-lg p-2 flex items-center space-x-2 z-20 ${
+                                  variant === "post" ? "translate-x-1/4" : ""
+                                }`}
+                              >
                                 {DEFAULT_REACTIONS.map((emoji) => (
                                   <button
                                     key={emoji}

@@ -40,7 +40,6 @@ export default function ReviewPost() {
   );
   const authorId = searchParams.get("authorId");
   const isNotAuthor = authorId !== session?.user?.id;
-  console.log("isNotAuthor", isNotAuthor);
 
   useEffect(() => {
     const fetchPost = async () => {

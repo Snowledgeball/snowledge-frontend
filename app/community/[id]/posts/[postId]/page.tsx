@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { Disclosure } from "@/components/ui/disclosure";
 import { useSession } from "next-auth/react";
 import QASection from "@/components/shared/QASection";
+import ChatBox from "@/components/shared/ChatBox";
 
 interface Post {
   id: number;
@@ -502,65 +503,16 @@ export default function PostPage() {
                 </h2>
               </div>
 
-              <div className="h-[1000px] flex flex-col">
-                <div className="flex-1 overflow-y-auto">
-                  <div className="p-4 space-y-4">
-                    {messages.map((msg) => (
-                      <div key={msg.id} className="group">
-                        <div className="flex items-start space-x-3">
-                          <Image
-                            src={msg.user.profilePicture}
-                            alt={msg.user.fullName}
-                            width={32}
-                            height={32}
-                            className="rounded-full"
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2">
-                              <span className="font-medium text-sm text-gray-900">
-                                {msg.user.fullName}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {formatDistanceToNow(new Date(msg.timestamp), {
-                                  addSuffix: true,
-                                  locale: fr,
-                                })}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-700 mt-1">
-                              {msg.content}
-                            </p>
-                            <div className="flex items-center space-x-1 mt-2">
-                              {msg.reactions.map((reaction, index) => (
-                                <span
-                                  key={index}
-                                  className="text-sm bg-gray-50 px-2 py-1 rounded-full hover:bg-gray-100 cursor-pointer"
-                                >
-                                  {reaction}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="border-t p-4 bg-white">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="text"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Votre message..."
-                      className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <button className="p-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
-                      <Send className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
+              <div className="h-[600px]">
+                {session && (
+                  <ChatBox
+                    user={session.user}
+                    communityId={parseInt(params.id as string)}
+                    postId={parseInt(params.postId as string)}
+                    className="h-full"
+                    variant="post"
+                  />
+                )}
               </div>
             </Card>
           </aside>
