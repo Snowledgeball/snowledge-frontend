@@ -494,7 +494,7 @@ export default function PostPage() {
           </main>
 
           {/* Sidebar Chat - maintenant responsive */}
-          <aside className="w-full lg:w-[320px] order-1 lg:order-2 sticky top-4">
+          <aside className="w-full lg:w-[320px] order-1 lg:order-2 sticky top-4 self-start">
             <Card className="overflow-hidden">
               <div className="p-4 border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900 flex items-center">
@@ -503,7 +503,7 @@ export default function PostPage() {
                 </h2>
               </div>
 
-              <div className="h-[600px]">
+              <div className="h-[calc(100vh-11rem)] sticky">
                 {session && (
                   <ChatBox
                     user={session.user}
