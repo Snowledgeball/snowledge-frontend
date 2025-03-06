@@ -42,7 +42,10 @@
     "app/api/communities/[communityId]/channels/[channelId]/route.js",
     "app/api/communities/[communityId]/channels/route.js",
     "app/api/communities/[id]/qa/route.js",
-    "app/api/communities/[id]/contributors/route.js"
+    "app/api/communities/[id]/contributors/route.js",
+    "app/api/notifications/route.js",
+    "app/api/communities/[id]/posts/pending/route.js",
+    "app/api/notifications/[id]/route.js"
   ],
   "exclude": ["node_modules"]
 }
