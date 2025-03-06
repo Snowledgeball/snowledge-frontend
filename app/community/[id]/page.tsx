@@ -5,19 +5,14 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
 import {
-  MessageCircle,
   ArrowLeft,
-  Send,
   PlusCircle,
-  HelpCircle,
   FileText,
   Settings,
   ChevronDown,
   Users,
   Lock,
   Edit,
-  MoreVertical,
-  Trash2,
   X,
 } from "lucide-react";
 import { Community } from "@/types/community";
@@ -84,7 +79,6 @@ const CommunityHub = () => {
   const [selectedPostCategory, setSelectedPostCategory] = useState<
     string | null
   >(null);
-  const [message, setMessage] = useState("");
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [presentation, setPresentation] = useState<Presentation | null>(null);
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
@@ -93,32 +87,6 @@ const CommunityHub = () => {
   const [isContributor, setIsContributor] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
   const [pendingPostsCount, setPendingPostsCount] = useState(0);
-
-  // Déplacer la déclaration du state questions ici
-  const [questions, setQuestions] = useState<
-    {
-      id: number;
-      question: string;
-      created_at: string;
-      author: {
-        id: number;
-        fullName: string;
-        profilePicture: string;
-      };
-      answers: {
-        id: number;
-        content: string;
-        created_at: string;
-        is_accepted: boolean;
-        author: {
-          id: number;
-          fullName: string;
-          profilePicture: string;
-        };
-      }[];
-    }[]
-  >([]);
-
   // Ajouter ces états pour gérer les dialogues de confirmation
   const [deleteQuestionDialog, setDeleteQuestionDialog] = useState<{
     isOpen: boolean;
@@ -138,23 +106,6 @@ const CommunityHub = () => {
     answerId: null,
   });
 
-  // Ajouter ces nouveaux états
-  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(
-    null
-  );
-  const [editingAnswerId, setEditingAnswerId] = useState<number | null>(null);
-  const [newQuestionText, setNewQuestionText] = useState("");
-  const [newAnswerText, setNewAnswerText] = useState("");
-  const [showNewQuestionInput, setShowNewQuestionInput] = useState(false);
-  const [showNewAnswerInput, setShowNewAnswerInput] = useState<number | null>(
-    null
-  );
-
-  // Ajouter avec les autres états
-  const [selectedQuestion, setSelectedQuestion] = useState<{
-    id: number;
-    question: string;
-  } | null>(null);
 
   useEffect(() => {
     if (!session) {
@@ -254,25 +205,6 @@ const CommunityHub = () => {
     fetchPosts();
   }, [params.id]);
 
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const response = await fetch(`/api/communities/${params.id}/qa`);
-        if (!response.ok)
-          throw new Error("Erreur lors de la récupération des questions");
-        const data = await response.json();
-        setQuestions(data);
-      } catch (error) {
-        console.error("Erreur:", error);
-        toast.error("Erreur lors de la récupération des questions");
-      }
-    };
-
-    if (params.id) {
-      fetchQuestions();
-    }
-  }, [params.id]);
-
   const handleJoinCommunity = async () => {
     try {
       const response = await fetch(`/api/communities/${params.id}/join`, {
@@ -313,172 +245,6 @@ const CommunityHub = () => {
     );
   };
 
-  // Ajouter cette fonction pour créer une nouvelle question
-  const handleCreateQuestion = async (questionData: { question: string }) => {
-    try {
-      const response = await fetch(`/api/communities/${params.id}/qa`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(questionData),
-      });
-
-      if (!response.ok)
-        throw new Error("Erreur lors de la création de la question");
-
-      // Rafraîchir les questions
-      const updatedQuestionsResponse = await fetch(
-        `/api/communities/${params.id}/qa`
-      );
-      const updatedQuestions = await updatedQuestionsResponse.json();
-      setQuestions(updatedQuestions);
-
-      toast.success("Question créée avec succès");
-    } catch (error) {
-      console.error("Erreur:", error);
-      toast.error("Erreur lors de la création de la question");
-    }
-  };
-
-  // Ajouter cette fonction pour créer une réponse
-  const handleCreateAnswer = async (questionId: number, content: string) => {
-    try {
-      const response = await fetch(
-        `/api/communities/${params.id}/qa/${questionId}/answers`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ content }),
-        }
-      );
-
-      if (!response.ok)
-        throw new Error("Erreur lors de la création de la réponse");
-
-      // Rafraîchir les questions
-      const updatedQuestionsResponse = await fetch(
-        `/api/communities/${params.id}/qa`
-      );
-      const updatedQuestions = await updatedQuestionsResponse.json();
-      setQuestions(updatedQuestions);
-
-      toast.success("Réponse ajoutée avec succès");
-    } catch (error) {
-      console.error("Erreur:", error);
-      toast.error("Erreur lors de la création de la réponse");
-    }
-  };
-
-  // Ajouter ces nouvelles fonctions de gestion
-  const handleEditQuestion = async (
-    questionId: number,
-    data: { question: string }
-  ) => {
-    try {
-      const response = await fetch(
-        `/api/communities/${params.id}/qa/${questionId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
-
-      if (!response.ok) throw new Error("Erreur lors de la modification");
-
-      // Rafraîchir les questions
-      const updatedQuestionsResponse = await fetch(
-        `/api/communities/${params.id}/qa`
-      );
-      const updatedQuestions = await updatedQuestionsResponse.json();
-      setQuestions(updatedQuestions);
-      toast.success("Question modifiée avec succès");
-    } catch (error) {
-      console.error("Erreur:", error);
-      toast.error("Erreur lors de la modification de la question");
-    }
-  };
-
-  const handleDeleteQuestion = async (questionId: number) => {
-    try {
-      const response = await fetch(
-        `/api/communities/${params.id}/qa/${questionId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) throw new Error("Erreur lors de la suppression");
-
-      // Rafraîchir les questions
-      const updatedQuestionsResponse = await fetch(
-        `/api/communities/${params.id}/qa`
-      );
-      const updatedQuestions = await updatedQuestionsResponse.json();
-      setQuestions(updatedQuestions);
-      toast.success("Question supprimée avec succès");
-    } catch (error) {
-      console.error("Erreur:", error);
-      toast.error("Erreur lors de la suppression de la question");
-    }
-  };
-
-  const handleEditAnswer = async (answerId: number, content: string) => {
-    try {
-      const response = await fetch(
-        `/api/communities/${params.id}/qa/answers/${answerId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ content }),
-        }
-      );
-
-      if (!response.ok) throw new Error("Erreur lors de la modification");
-
-      // Rafraîchir les questions
-      const updatedQuestionsResponse = await fetch(
-        `/api/communities/${params.id}/qa`
-      );
-      const updatedQuestions = await updatedQuestionsResponse.json();
-      setQuestions(updatedQuestions);
-      toast.success("Réponse modifiée avec succès");
-    } catch (error) {
-      console.error("Erreur:", error);
-      toast.error("Erreur lors de la modification de la réponse");
-    }
-  };
-
-  const handleDeleteAnswer = async (questionId: number, answerId: number) => {
-    try {
-      const response = await fetch(
-        `/api/communities/${params.id}/qa/${questionId}/answers/${answerId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) throw new Error("Erreur lors de la suppression");
-
-      // Rafraîchir les questions
-      const updatedQuestionsResponse = await fetch(
-        `/api/communities/${params.id}/qa`
-      );
-      const updatedQuestions = await updatedQuestionsResponse.json();
-      setQuestions(updatedQuestions);
-      toast.success("Réponse supprimée avec succès");
-    } catch (error) {
-      console.error("Erreur:", error);
-      toast.error("Erreur lors de la suppression de la réponse");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -517,9 +283,8 @@ const CommunityHub = () => {
 
                 {/* Colonne de droite avec les détails */}
                 <div
-                  className={`space-y-4 ${
-                    presentation.video_url ? "col-span-1" : "col-span-2"
-                  }`}
+                  className={`space-y-4 ${presentation.video_url ? "col-span-1" : "col-span-2"
+                    }`}
                 >
                   <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm h-[200px] overflow-y-auto">
                     <h3 className="font-semibold mb-2 text-gray-900">
@@ -576,11 +341,10 @@ const CommunityHub = () => {
                   <button
                     onClick={handleJoinCommunity}
                     disabled={!hasAcceptedTerms}
-                    className={`px-6 py-2 rounded-lg transition-colors ${
-                      hasAcceptedTerms
-                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-md"
-                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    }`}
+                    className={`px-6 py-2 rounded-lg transition-colors ${hasAcceptedTerms
+                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-md"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      }`}
                   >
                     Rejoindre la communauté →
                   </button>
@@ -628,12 +392,11 @@ const CommunityHub = () => {
                               router.push(`/community/${community.id}`)
                             }
                             className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left hover:bg-gray-50 transition-colors
-                                                    ${
-                                                      String(community.id) ===
-                                                      params.id
-                                                        ? "bg-blue-50 text-blue-600"
-                                                        : "text-gray-700"
-                                                    }`}
+                                                    ${String(community.id) ===
+                                params.id
+                                ? "bg-blue-50 text-blue-600"
+                                : "text-gray-700"
+                              }`}
                           >
                             <div>
                               <div className="font-medium">
@@ -716,21 +479,19 @@ const CommunityHub = () => {
               <div className="border-b border-gray-200 mb-6">
                 <nav className="-mb-px flex justify-center space-x-8">
                   <button
-                    className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${
-                      activeTab === "general"
-                        ? "border-blue-500 text-blue-600"
-                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                    }`}
+                    className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "general"
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      }`}
                     onClick={() => setActiveTab("general")}
                   >
                     Général
                   </button>
                   <button
-                    className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${
-                      activeTab === "posts"
-                        ? "border-blue-500 text-blue-600"
-                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                    }`}
+                    className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "posts"
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      }`}
                     onClick={() => setActiveTab("posts")}
                   >
                     Les posts
@@ -743,22 +504,20 @@ const CommunityHub = () => {
                       )
                     }
                     className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors opacity-60 cursor-not-allowed flex items-center gap-2
-                                        ${
-                                          activeTab === "courses"
-                                            ? "border-blue-500 text-blue-600"
-                                            : "border-transparent text-gray-500"
-                                        }`}
+                                        ${activeTab === "courses"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500"
+                      }`}
                   >
                     Cours
                     <Lock className="w-4 h-4" />
                   </button>
                   {isContributor && (
                     <button
-                      className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${
-                        activeTab === "pending"
-                          ? "border-blue-500 text-blue-600"
-                          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                      }`}
+                      className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "pending"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        }`}
                       onClick={() =>
                         router.push(`/community/${params.id}/posts/pending`)
                       }
@@ -826,11 +585,10 @@ const CommunityHub = () => {
                               </span>
                             </div>
                             <ChevronDown
-                              className={`w-5 h-5 text-gray-400 transition-transform ${
-                                selectedPostCategory === category.id
-                                  ? "rotate-180"
-                                  : ""
-                              }`}
+                              className={`w-5 h-5 text-gray-400 transition-transform ${selectedPostCategory === category.id
+                                ? "rotate-180"
+                                : ""
+                                }`}
                             />
                           </button>
                         </div>
@@ -870,17 +628,17 @@ const CommunityHub = () => {
                                     </div>
                                     {Number(session?.user?.id) ===
                                       post.user.id && (
-                                      <button
-                                        onClick={() =>
-                                          router.push(
-                                            `/community/${params.id}/posts/${post.id}/edit`
-                                          )
-                                        }
-                                        className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                                      >
-                                        <Edit className="w-4 h-4" />
-                                      </button>
-                                    )}
+                                        <button
+                                          onClick={() =>
+                                            router.push(
+                                              `/community/${params.id}/posts/${post.id}/edit`
+                                            )
+                                          }
+                                          className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                                        >
+                                          <Edit className="w-4 h-4" />
+                                        </button>
+                                      )}
                                   </div>
 
                                   <h4 className="text-lg font-semibold text-gray-900 mb-2">
@@ -957,48 +715,6 @@ const CommunityHub = () => {
           </div>
         </div>
       )}
-
-      {/* Ajouter les dialogues de confirmation */}
-      <ConfirmationDialog
-        isOpen={deleteQuestionDialog.isOpen}
-        onClose={() =>
-          setDeleteQuestionDialog({ isOpen: false, questionId: null })
-        }
-        onConfirm={() => {
-          if (deleteQuestionDialog.questionId) {
-            handleDeleteQuestion(deleteQuestionDialog.questionId);
-          }
-        }}
-        title="Supprimer la question"
-        description="Êtes-vous sûr de vouloir supprimer cette question ? Cette action est irréversible."
-        confirmText="Supprimer"
-        cancelText="Annuler"
-        variant="destructive"
-      />
-
-      <ConfirmationDialog
-        isOpen={deleteAnswerDialog.isOpen}
-        onClose={() =>
-          setDeleteAnswerDialog({
-            isOpen: false,
-            questionId: null,
-            answerId: null,
-          })
-        }
-        onConfirm={() => {
-          if (deleteAnswerDialog.questionId && deleteAnswerDialog.answerId) {
-            handleDeleteAnswer(
-              deleteAnswerDialog.questionId,
-              deleteAnswerDialog.answerId
-            );
-          }
-        }}
-        title="Supprimer la réponse"
-        description="Êtes-vous sûr de vouloir supprimer cette réponse ? Cette action est irréversible."
-        confirmText="Supprimer"
-        cancelText="Annuler"
-        variant="destructive"
-      />
     </div>
   );
 };
