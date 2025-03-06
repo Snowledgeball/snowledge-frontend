@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { db } from "@/lib/firebaseConfig";
+import { PrismaClient } from "@prisma/client";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+const prisma = new PrismaClient();
+
+export async function GET(req, { params }) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -17,7 +16,7 @@ export async function GET(
     const communityId = parseInt(params.id);
 
     // Récupérer tous les learners de la communauté
-    const learners = await db.community_learner.findMany({
+    const learners = await prisma.community_learners.findMany({
       where: {
         community_id: communityId,
       },
