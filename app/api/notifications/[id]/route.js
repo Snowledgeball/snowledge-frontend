@@ -4,10 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/firebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req, { params }) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {

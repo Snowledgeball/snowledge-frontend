@@ -54,15 +54,6 @@ export async function GET(request, { params }) {
   }
 }
 
-interface Contributor {
-  id: number;
-  fullName: string;
-  userName: string;
-  profilePicture: string;
-  status: string;
-  joinedAt: Date | null;
-}
-
 // Créer un nouveau post en attente
 export async function POST(request, { params }) {
   try {
