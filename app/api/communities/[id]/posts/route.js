@@ -2,6 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { createBulkNotifications } from "@/lib/notifications";
+import { NotificationType } from "@/types/notification";
 
 const prisma = new PrismaClient();
 
@@ -56,6 +58,59 @@ export async function POST(request, { params }) {
         author_id: userId,
         accept_contributions,
         status: "PUBLISHED",
+      },
+    });
+
+    const author = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        fullName: true,
+      },
+    });
+
+    // Créer des notifications pour tous les membres de la communauté
+
+    const learners = await prisma.community_learners.findMany({
+      where: {
+        community_id: communityId,
+      },
+    });
+
+    console.log("learners", learners);
+
+    const contributors = await prisma.community_contributors.findMany({
+      where: {
+        community_id: communityId,
+      },
+    });
+
+    console.log("contributors", contributors);
+
+
+
+
+    const membersId = [...learners.map((learner) => learner.learner_id), ...contributors.map((contributor) => contributor.contributor_id)];
+
+    //Filter pour ne pas avoir de doublons
+    const membersIdFiltered = membersId.filter((id, index, self) => self.indexOf(id) === index);
+
+    console.log("membersId", membersIdFiltered);
+
+
+    if (membersId.length === 0) return; // Pas de membres à notifier
+
+
+    // Créer des notifications pour tous les membres en une seule opération
+    await createBulkNotifications({
+      userIds: membersIdFiltered,
+      title: `Nouveau post !`,
+      message: `Un nouveau post à été publié dans ${community.name}`,
+      type: NotificationType.NEW_POST,
+      link: `/community/${communityId}/posts/${post.id}`,
+      metadata: {
+        communityId,
+        postId: post.id,
+        creatorId: post.author_id,
       },
     });
 

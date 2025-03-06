@@ -446,6 +446,8 @@ export default function CommunityDashboard() {
       toast.error("Erreur lors de la publication du post");
       console.error(error);
     }
+
+
   };
 
   const fetchPosts = async () => {
@@ -604,9 +606,8 @@ export default function CommunityDashboard() {
             </h3>
             <div className="space-y-1">
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${
-                  activeTab === "overview" ? "bg-gray-800" : "hover:bg-gray-800"
-                }`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "overview" ? "bg-gray-800" : "hover:bg-gray-800"
+                  }`}
                 onClick={() => setActiveTab("overview")}
               >
                 📊 Tableau de bord
@@ -615,9 +616,8 @@ export default function CommunityDashboard() {
             </div>
             <div className="space-y-1">
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${
-                  activeTab === "members" ? "bg-gray-800" : "hover:bg-gray-800"
-                }`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "members" ? "bg-gray-800" : "hover:bg-gray-800"
+                  }`}
                 onClick={() => setActiveTab("members")}
               >
                 👥 Membres
@@ -632,9 +632,8 @@ export default function CommunityDashboard() {
             </h3>
             <div className="space-y-1">
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${
-                  activeTab === "veille" ? "bg-gray-800" : "hover:bg-gray-800"
-                }`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "veille" ? "bg-gray-800" : "hover:bg-gray-800"
+                  }`}
                 onClick={() => {
                   setActiveTab("veille");
                   toast.error("Cette fonctionnalité n'est pas encore définie");
@@ -644,18 +643,16 @@ export default function CommunityDashboard() {
                 <ChevronRight className="ml-auto w-4 h-4" />
               </button>
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${
-                  activeTab === "creation" ? "bg-gray-800" : "hover:bg-gray-800"
-                }`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "creation" ? "bg-gray-800" : "hover:bg-gray-800"
+                  }`}
                 onClick={() => setActiveTab("creation")}
               >
                 ✍️ Création & édition
                 <ChevronRight className="ml-auto w-4 h-4" />
               </button>
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${
-                  activeTab === "pending" ? "bg-gray-800" : "hover:bg-gray-800"
-                }`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "pending" ? "bg-gray-800" : "hover:bg-gray-800"
+                  }`}
                 onClick={() =>
                   router.push(`/community/${params.id}/posts/pending`)
                 }
@@ -1116,11 +1113,10 @@ export default function CommunityDashboard() {
                               </td>
                               <td className="p-4">
                                 <span
-                                  className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-                                    member.status === "Contributeur"
+                                  className={`px-3 py-1.5 rounded-full text-sm font-medium ${member.status === "Contributeur"
                                       ? "bg-blue-100 text-blue-700"
                                       : "bg-green-100 text-green-700"
-                                  }`}
+                                    }`}
                                 >
                                   {member.status}
                                 </span>
@@ -1128,8 +1124,8 @@ export default function CommunityDashboard() {
                               <td className="p-4 hidden lg:table-cell">
                                 {member.joinedAt
                                   ? new Date(
-                                      member.joinedAt
-                                    ).toLocaleDateString("fr-FR")
+                                    member.joinedAt
+                                  ).toLocaleDateString("fr-FR")
                                   : "Date inconnue"}
                               </td>
                               <td className="p-4 hidden sm:table-cell">
@@ -1401,9 +1397,8 @@ export default function CommunityDashboard() {
                     {coverImage && (
                       <label
                         htmlFor="cover-image"
-                        className={`px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors ${
-                          isUploading ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                        className={`px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors ${isUploading ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
                       >
                         Modifier
                       </label>

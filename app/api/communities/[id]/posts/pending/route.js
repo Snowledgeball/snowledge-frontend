@@ -96,7 +96,6 @@ export async function POST(request, { params }) {
 
     console.log("post", post);
 
-    // Au lieu de faire un appel API, utilisez directement Prisma
     const contributors = await prisma.community_contributors.findMany({
       where: {
         community_id: parseInt(communityId),
@@ -121,14 +120,14 @@ export async function POST(request, { params }) {
       joinedAt: contributor.added_at,
     }));
 
-    // 2. Extraire les IDs des membres (sauf le créateur qui a publié le post)
+    //Extraire les IDs des membres (sauf le créateur qui a publié le post)
     const contributorsFiltered = formattedContributors.filter(
       (contributor) => contributor.id !== parseInt(session.user.id)
     );
 
     if (contributorsFiltered.length === 0) return; // Pas de membres à notifier
 
-    // 3. Créer des notifications pour tous les membres en une seule opération
+    // Créer des notifications pour tous les membres en une seule opération
     await createBulkNotifications({
       userIds: contributorsFiltered.map((contributor) => contributor.id),
       title: "Nouveau post en attente de validation",
