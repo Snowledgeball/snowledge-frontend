@@ -72,4 +72,20 @@ export async function POST(request, { params }) {
     } finally {
         await prisma.$disconnect();
     }
-} 
+}
+
+export async function GET(request, { params }) {
+    const { id, memberId } = await params;
+
+    const bans = await prisma.community_bans.findMany({
+        where: {
+            community_id: parseInt(id),
+            user_id: parseInt(memberId)
+        },
+        include: {
+            user: true
+        }
+    });
+
+    return NextResponse.json(bans);
+}
