@@ -13,7 +13,7 @@ import {
   doc,
 } from "firebase/firestore";
 
-export async function GET(req: NextRequest) {
+export async function GET(req) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
