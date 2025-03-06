@@ -23,6 +23,7 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import ChatBox from "@/components/shared/ChatBox";
 import QASection from "@/components/shared/QASection";
+import VotingSession from "@/components/community/VotingSession";
 
 // Ajouter ces catégories de posts
 const POST_CATEGORIES = [
@@ -76,6 +77,9 @@ const CommunityHub = () => {
   const [isCreator, setIsCreator] = useState(false);
   const [pendingPostsCount, setPendingPostsCount] = useState(0);
   const [bans, setBans] = useState<any[]>([]);
+  const [activeSubTab, setActiveSubTab] = useState<"general" | "creation" | "enrichissement">("general");
+  const [votingSubTab, setVotingSubTab] = useState<"creation" | "enrichissement">("creation");
+
   useEffect(() => {
     if (!session) {
       return;
@@ -220,6 +224,10 @@ const CommunityHub = () => {
     );
   };
 
+  // Fonction pour gérer le changement de sous-onglet
+  const handleVotingSubTabChange = (tab: "creation" | "enrichissement") => {
+    setVotingSubTab(tab);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -497,7 +505,10 @@ const CommunityHub = () => {
                       ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                       }`}
-                    onClick={() => setActiveTab("general")}
+                    onClick={() => {
+                      setActiveTab("general");
+                      setActiveSubTab("general");
+                    }}
                   >
                     Général
                   </button>
@@ -506,9 +517,12 @@ const CommunityHub = () => {
                       ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                       }`}
-                    onClick={() => setActiveTab("posts")}
+                    onClick={() => {
+                      setActiveTab("posts");
+                      setActiveSubTab("general");
+                    }}
                   >
-                    Les posts
+                    Posts
                   </button>
                   {/* Bouton Cours verrouillé */}
                   <button
@@ -518,7 +532,7 @@ const CommunityHub = () => {
                       )
                     }
                     className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors opacity-60 cursor-not-allowed flex items-center gap-2
-                                        ${activeTab === "courses"
+                      ${activeTab === "courses"
                         ? "border-blue-500 text-blue-600"
                         : "border-transparent text-gray-500"
                       }`}
@@ -528,21 +542,30 @@ const CommunityHub = () => {
                   </button>
                   {isContributor && (
                     <button
-                      className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "pending"
+                      className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors flex items-center ${activeTab === "voting"
                         ? "border-blue-500 text-blue-600"
                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                         }`}
-                      onClick={() =>
-                        router.push(`/community/${params.id}/posts/pending`)
-                      }
+                      onClick={() => {
+                        setActiveTab("voting");
+                        setActiveSubTab("creation");
+                      }}
                     >
-                      Posts en attente
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      Sessions de vote
+                      {pendingPostsCount > 0 && (
+                        <span className="ml-2 px-2 py-1 bg-red-100 text-red-600 text-xs font-medium rounded-full">
+                          {pendingPostsCount}
+                        </span>
+                      )}
                     </button>
                   )}
                 </nav>
               </div>
 
-              {/* Chat Area */}
+              {/* Contenu basé sur l'onglet actif */}
               {activeTab === "general" ? (
                 <Card className="bg-white shadow-sm">
                   <div className="h-[600px] flex flex-col">
@@ -555,6 +578,14 @@ const CommunityHub = () => {
                     )}
                   </div>
                 </Card>
+              ) : activeTab === "voting" ? (
+                <div>
+                  <VotingSession
+                    communityId={params.id as string}
+                    activeTab={votingSubTab}
+                    onTabChange={handleVotingSubTabChange}
+                  />
+                </div>
               ) : (
                 <div className="space-y-8">
                   {/* Bouton Nouveau Post pour les contributeurs */}
