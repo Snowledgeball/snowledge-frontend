@@ -18,8 +18,6 @@ export async function GET(request, { params }) {
       },
     });
 
-    console.log("contributors", contributors);
-
     // Récupérer les apprenants
     const learners = await prisma.community_learners.findMany({
       where: {

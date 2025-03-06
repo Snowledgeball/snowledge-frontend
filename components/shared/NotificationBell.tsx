@@ -117,6 +117,12 @@ export default function NotificationBell() {
         return "🤝";
       case NotificationType.ROLE_CHANGE:
         return "👑";
+      case NotificationType.BAN:
+        return "🚫";
+      case NotificationType.CONTRIBUTOR_ACCEPTED:
+        return "✅";
+      case NotificationType.CONTRIBUTOR_REFUSED:
+        return "❌";
       default:
         return "🔔";
     }
@@ -168,9 +174,8 @@ export default function NotificationBell() {
                   onClick={() => markAsRead(notification.id)}
                 >
                   <div
-                    className={`p-4 hover:bg-gray-50 transition-colors flex items-start space-x-3 ${
-                      !notification.read ? "bg-blue-50" : ""
-                    }`}
+                    className={`p-4 hover:bg-gray-50 transition-colors flex items-start space-x-3 ${!notification.read ? "bg-blue-50" : ""
+                      }`}
                   >
                     <div className="flex-shrink-0 text-2xl">
                       {getNotificationIcon(notification.type)}
@@ -179,22 +184,22 @@ export default function NotificationBell() {
                       <p className="text-sm font-medium text-gray-900">
                         {notification.title}
                       </p>
-                      <p className="text-sm text-gray-500 line-clamp-2">
+                      <p className="text-sm text-gray-500 line-clamp-3">
                         {notification.message}
                       </p>
                       <p className="text-xs text-gray-400 mt-1">
                         {typeof notification.createdAt === "string"
                           ? formatDistanceToNow(
-                              new Date(notification.createdAt),
-                              {
-                                addSuffix: true,
-                                locale: fr,
-                              }
-                            )
+                            new Date(notification.createdAt),
+                            {
+                              addSuffix: true,
+                              locale: fr,
+                            }
+                          )
                           : formatDistanceToNow(
-                              (notification.createdAt as any).toDate(),
-                              { addSuffix: true, locale: fr }
-                            )}
+                            (notification.createdAt as any).toDate(),
+                            { addSuffix: true, locale: fr }
+                          )}
                       </p>
                     </div>
                     {!notification.read && (

@@ -25,4 +25,7 @@ export enum NotificationType {
   MENTION = "mention",
   COMMUNITY_INVITATION = "community_invitation",
   ROLE_CHANGE = "role_change",
+  BAN = "ban",
+  CONTRIBUTOR_ACCEPTED = "contributor_accepted",
+  CONTRIBUTOR_REFUSED = "contributor_refused",
 }

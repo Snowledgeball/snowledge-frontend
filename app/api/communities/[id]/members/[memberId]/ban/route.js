@@ -2,6 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { createBulkNotifications } from "@/lib/notifications";
+import { NotificationType } from "@/types/notification";
 
 const prisma = new PrismaClient();
 
@@ -48,6 +50,17 @@ export async function POST(request, { params }) {
                 }
             })
         ]);
+
+        await createBulkNotifications({
+            userIds: [parseInt(memberId)],
+            title: `Vous avez été banni de la communauté ${community.name}`,
+            message: `Raison : ${reason}`,
+            type: NotificationType.BAN,
+            link: `/`,
+            metadata: {
+                communityId,
+            },
+        });
 
         return NextResponse.json({ message: "Membre banni avec succès" });
     } catch (error) {

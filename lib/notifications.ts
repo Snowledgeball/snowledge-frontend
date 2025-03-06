@@ -8,47 +8,6 @@ import {
   doc,
 } from "firebase/firestore";
 
-export async function createNotification({
-  userId,
-  title,
-  message,
-  type,
-  link,
-  metadata,
-}: {
-  userId: string;
-  title: string;
-  message: string;
-  type: NotificationType;
-  link?: string;
-  metadata?: Record<string, any>;
-}) {
-  try {
-    const response = await fetch("/api/notifications", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId,
-        title,
-        message,
-        type,
-        link,
-        metadata,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Erreur lors de la création de la notification");
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Erreur:", error);
-    throw error;
-  }
-}
 
 export async function createBulkNotifications({
   userIds,

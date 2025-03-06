@@ -55,6 +55,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 
 interface DashboardData {
   stats: {
@@ -1114,8 +1115,8 @@ export default function CommunityDashboard() {
                               <td className="p-4">
                                 <span
                                   className={`px-3 py-1.5 rounded-full text-sm font-medium ${member.status === "Contributeur"
-                                      ? "bg-blue-100 text-blue-700"
-                                      : "bg-green-100 text-green-700"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-green-100 text-green-700"
                                     }`}
                                 >
                                   {member.status}
@@ -1533,11 +1534,11 @@ export default function CommunityDashboard() {
               Cette action est irréversible. Le membre ne pourra plus rejoindre
               la communauté.
             </p>
-            <Textarea
+            <Input
+              type="text"
               placeholder="Veuillez expliquer la raison du bannissement..."
               value={banReason}
               onChange={(e) => setBanReason(e.target.value)}
-              className="min-h-[100px]"
             />
           </div>
           <DialogFooter className="flex space-x-2">

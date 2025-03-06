@@ -84,11 +84,6 @@ export async function POST(request, { params }) {
       },
     });
 
-    console.log("contributors", contributors);
-
-
-
-
     const membersId = [...learners.map((learner) => learner.learner_id), ...contributors.map((contributor) => contributor.contributor_id)];
 
     //Filter pour ne pas avoir de doublons
