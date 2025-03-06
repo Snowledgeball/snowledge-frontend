@@ -59,6 +59,7 @@ export async function GET(request, { params }) {
       where: {
         id: postIdInt,
         community_id: communityId,
+        status: "PUBLISHED",
       },
       include: {
         user: {
