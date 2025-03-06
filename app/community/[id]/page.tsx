@@ -21,11 +21,7 @@ import { toast } from "sonner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Disclosure } from "@/components/ui/disclosure";
 import ChatBox from "@/components/shared/ChatBox";
-import { Menu, Transition } from "@headlessui/react";
-import { Fragment } from "react";
-import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import QASection from "@/components/shared/QASection";
 
 // Ajouter ces catégories de posts
@@ -111,7 +107,7 @@ const CommunityHub = () => {
         setBans(bansData);
 
         // Si l'utilisateur n'est pas membre ou banni, récupérer la présentation
-        if (!membershipData.isMember || bansData.length > 0) {
+        if (!membershipData.isMember && bansData.length === 0) {
           const presentationResponse = await fetch(
             `/api/communities/${params.id}/presentation`
           );
