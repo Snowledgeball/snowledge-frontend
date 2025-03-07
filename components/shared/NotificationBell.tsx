@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell } from "lucide-react";
+import { Bell, UserPlus, MessageCircle, Award, AlertCircle, Check, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Notification, NotificationType } from "@/types/notification";
 import { formatDistanceToNow } from "date-fns";
@@ -118,11 +118,21 @@ export default function NotificationBell() {
       case NotificationType.ROLE_CHANGE:
         return "👑";
       case NotificationType.BAN:
-        return "🚫";
+        return <X className="h-5 w-5 text-red-600" />;
       case NotificationType.CONTRIBUTOR_ACCEPTED:
         return "✅";
       case NotificationType.CONTRIBUTOR_REFUSED:
         return "❌";
+      case NotificationType.CONTRIBUTOR_REQUEST:
+        return <UserPlus className="h-5 w-5 text-blue-500" />;
+      // case NotificationType.MESSAGE:
+      //   return <MessageCircle className="h-5 w-5 text-green-500" />;
+      // case NotificationType.ACHIEVEMENT:
+      //   return <Award className="h-5 w-5 text-yellow-500" />;
+      // case NotificationType.WARNING:
+      //   return <AlertCircle className="h-5 w-5 text-red-500" />;
+      // case NotificationType.APPROVAL:
+      //   return <Check className="h-5 w-5 text-green-600" />;
       default:
         return "🔔";
     }

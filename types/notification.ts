@@ -28,4 +28,5 @@ export enum NotificationType {
   BAN = "ban",
   CONTRIBUTOR_ACCEPTED = "contributor_accepted",
   CONTRIBUTOR_REFUSED = "contributor_refused",
+  CONTRIBUTOR_REQUEST = "contributor_request",
 }

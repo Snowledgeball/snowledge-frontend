@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
 import {
@@ -145,10 +145,16 @@ const POST_TAGS = [
 export default function CommunityDashboard() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
 
   const communityId = params.id;
   const { data: session } = useSession();
-  const [activeTab, setActiveTab] = useState("overview");
+
+  // Récupérer le paramètre tab de l'URL
+  const tabParam = searchParams.get('tab');
+
+  // Initialiser l'onglet actif en fonction du paramètre d'URL
+  const [activeTab, setActiveTab] = useState(tabParam === "members" ? "members" : "overview");
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
   );
@@ -551,6 +557,20 @@ export default function CommunityDashboard() {
     }
   };
 
+  useEffect(() => {
+    // Mettre à jour l'onglet actif si le paramètre d'URL change
+    if (tabParam === "members") {
+      setActiveTab("members");
+    }
+  }, [tabParam]);
+
+  // Fonction pour changer d'onglet et mettre à jour l'URL
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    // Mettre à jour l'URL sans recharger la page
+    router.push(`/community/${communityId}/dashboard?tab=${tab}`, { scroll: false });
+  };
+
   if (loading) {
     return <div>Chargement...</div>;
   }
@@ -607,9 +627,8 @@ export default function CommunityDashboard() {
             </h3>
             <div className="space-y-1">
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "overview" ? "bg-gray-800" : "hover:bg-gray-800"
-                  }`}
-                onClick={() => setActiveTab("overview")}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "overview" ? "bg-gray-800" : "hover:bg-gray-800"}`}
+                onClick={() => handleTabChange("overview")}
               >
                 📊 Tableau de bord
                 <ChevronRight className="ml-auto w-4 h-4" />
@@ -617,9 +636,8 @@ export default function CommunityDashboard() {
             </div>
             <div className="space-y-1">
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "members" ? "bg-gray-800" : "hover:bg-gray-800"
-                  }`}
-                onClick={() => setActiveTab("members")}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "members" ? "bg-gray-800" : "hover:bg-gray-800"}`}
+                onClick={() => handleTabChange("members")}
               >
                 👥 Membres
                 <ChevronRight className="ml-auto w-4 h-4" />
@@ -633,8 +651,7 @@ export default function CommunityDashboard() {
             </h3>
             <div className="space-y-1">
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "veille" ? "bg-gray-800" : "hover:bg-gray-800"
-                  }`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "veille" ? "bg-gray-800" : "hover:bg-gray-800"}`}
                 onClick={() => {
                   setActiveTab("veille");
                   toast.error("Cette fonctionnalité n'est pas encore définie");
@@ -644,16 +661,14 @@ export default function CommunityDashboard() {
                 <ChevronRight className="ml-auto w-4 h-4" />
               </button>
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "creation" ? "bg-gray-800" : "hover:bg-gray-800"
-                  }`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "creation" ? "bg-gray-800" : "hover:bg-gray-800"}`}
                 onClick={() => setActiveTab("creation")}
               >
                 ✍️ Création & édition
                 <ChevronRight className="ml-auto w-4 h-4" />
               </button>
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "pending" ? "bg-gray-800" : "hover:bg-gray-800"
-                  }`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "pending" ? "bg-gray-800" : "hover:bg-gray-800"}`}
                 onClick={() =>
                   router.push(`/community/${params.id}/posts/pending`)
                 }
@@ -1436,7 +1451,7 @@ export default function CommunityDashboard() {
       </div>
 
       <Dialog open={isRejectModalOpen} onOpenChange={setIsRejectModalOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
             <DialogTitle>Justification du refus</DialogTitle>
           </DialogHeader>

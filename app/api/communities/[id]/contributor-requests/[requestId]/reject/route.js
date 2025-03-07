@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { createBulkNotifications } from "@/lib/notifications";
+import { NotificationType } from "@/types/notification";
 
 const prisma = new PrismaClient();
 
@@ -37,6 +39,16 @@ export async function PUT(
             );
         }
 
+        const contributorRequest = await prisma.community_contributors_requests.findUnique({
+            where: {
+                id: reqId,
+                community_id: communityId
+            },
+            select: {
+                requester_id: true
+            }
+        });
+
         await prisma.community_contributors_requests.update({
             where: {
                 id: reqId,
@@ -47,6 +59,17 @@ export async function PUT(
                 updated_at: new Date(),
                 rejection_reason: rejection_reason
             }
+        });
+
+        await createBulkNotifications({
+            userIds: [contributorRequest.requester_id],
+            title: `Demande refusée`,
+            message: `Votre demande de contribution à la communauté ${community.name} a été refusée`,
+            type: NotificationType.CONTRIBUTOR_REFUSED,
+            link: `/community/${communityId}/`,
+            metadata: {
+                communityId,
+            },
         });
 
         return NextResponse.json(

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { createBulkNotifications } from "@/lib/notifications";
+import { NotificationType } from "@/types/notification";
 
 const prisma = new PrismaClient();
 
@@ -94,6 +96,17 @@ export async function POST(
         await fetch(`${process.env.API_URL}/api/auth/upload`, {
             method: "PUT",
             body: formData,
+        });
+
+        await createBulkNotifications({
+            userIds: [contributorRequest.requester_id],
+            title: `Demande approuvée`,
+            message: `Votre demande de contribution à la communauté ${community.name} a été approuvée`,
+            type: NotificationType.CONTRIBUTOR_ACCEPTED,
+            link: `/community/${communityId}/`,
+            metadata: {
+                communityId,
+            },
         });
 
         return NextResponse.json(

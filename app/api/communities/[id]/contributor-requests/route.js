@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { createBulkNotifications } from "@/lib/notifications";
+import { NotificationType } from "@/types/notification";
 
 const prisma = new PrismaClient();
 
@@ -72,6 +74,19 @@ export async function POST(
                 expertise_domain: expertiseDomain,
                 status: 'PENDING',
 
+            },
+        });
+
+        //Notifier le créateur de la communauté 
+        await createBulkNotifications({
+            userIds: [parseInt(community.creator_id)],
+            title: `Nouvelle demande pour devenir contributeur`,
+            message: ` ${session.user.userName} souhaite devenir contributeur de la communauté ${community.name}`,
+            type: NotificationType.CONTRIBUTOR_REQUEST,
+            link: `/community/${communityId}/dashboard?tab=members`,
+            metadata: {
+                communityId,
+                tab: "members"
             },
         });
 
