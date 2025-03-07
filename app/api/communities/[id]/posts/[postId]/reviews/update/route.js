@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { checkPostPublishability } from "@/lib/postUtils";
 import { createBulkNotifications } from "@/lib/notifications";
+import { NotificationType } from "@/types/notification";
 
 const prisma = new PrismaClient();
 
@@ -154,7 +155,7 @@ export async function PUT(request, { params }) {
                     userIds: [updatedPost.author_id],
                     title: "Votre post peut être publié !",
                     message: `Votre post "${updatedPost.title}" a reçu suffisamment de votes positifs et peut maintenant être publié.`,
-                    type: "publish_ready", // Utilisez une chaîne directe
+                    type: NotificationType.PUBLISH_READY, // Utilisez une chaîne directe
                     link: `/community/${communityId}/posts/${postId}`,
                     metadata: {
                         communityId,

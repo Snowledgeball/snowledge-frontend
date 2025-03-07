@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createBulkNotifications } from "@/lib/notifications";
 import { NotificationType } from "@/types/notification";
-import { checkPostPublishability } from "@/lib/postUtils";
+import { checkPostPublishability, checkPostStatus } from "@/lib/postUtils";
 
 const prisma = new PrismaClient();
 
@@ -119,7 +119,7 @@ export async function POST(request, { params }) {
             }
         });
 
-        // Après avoir créé la review, vérifier si le post peut maintenant être publié
+        // Après avoir créé la review, vérifier le statut du post
 
         // Récupérer le post avec toutes ses reviews
         const updatedPost = await prisma.community_posts.findUnique({
@@ -129,6 +129,7 @@ export async function POST(request, { params }) {
             include: {
                 community_posts_reviews: true,
                 user: true,
+                community: true,
             },
         });
 
@@ -141,49 +142,97 @@ export async function POST(request, { params }) {
 
         const isContributorsCountEven = contributorsCount % 2 === 0;
 
-        // Vérifier si le post peut être publié
-        const publishStatus = checkPostPublishability(
+        // Vérifier le statut du post
+        const postStatus = checkPostStatus(
             updatedPost,
             contributorsCount,
             isContributorsCountEven
         );
 
-        // Si le post peut être publié, envoyer une notification à l'auteur
-        if (publishStatus.canPublish) {
+        // Variable pour suivre si une notification spéciale a été envoyée
+        let specialNotificationSent = false;
+
+        // Si le post est approuvé, envoyer une notification à l'auteur
+        if (postStatus.status === "APPROVED") {
             try {
-                // Notifier l'auteur du post qu'il peut publier son post
                 await createBulkNotifications({
                     userIds: [updatedPost.author_id],
                     title: "Votre post peut être publié !",
                     message: `Votre post "${updatedPost.title}" a reçu suffisamment de votes positifs et peut maintenant être publié.`,
-                    type: NotificationType.PUBLISH_READY, // Utilisez une chaîne directe
+                    type: NotificationType.PUBLISH_READY,
                     link: `/community/${communityId}`,
                     metadata: {
                         communityId,
                         postId,
-                        publishStatus: publishStatus.details
+                        postStatus: postStatus.details
                     }
                 });
+                specialNotificationSent = true;
             } catch (notifError) {
                 console.error("Erreur lors de l'envoi de la notification de publication:", notifError);
-                // On continue même si la notification échoue
             }
-        } else {
-            // Notifier l'auteur du post qu'il a reçu un nouveau feedback
+        }
+
+        // Si le post est rejeté, le déplacer en brouillon et notifier l'auteur
+        if (postStatus.status === "REJECTED") {
+            // Mettre à jour le statut du post en "DRAFT"
+            await prisma.community_posts.update({
+                where: {
+                    id: parseInt(postId),
+                },
+                data: {
+                    status: "DRAFT",
+                },
+            });
+
+            // Récupérer les feedbacks négatifs
+            const rejectionFeedbacks = updatedPost.community_posts_reviews
+                .filter(review => review.status === "REJECTED")
+                .map(review => ({
+                    reviewer: review.user.fullName,
+                    content: review.content
+                }));
+
+            // Notifier l'auteur
             try {
                 await createBulkNotifications({
-                    userIds: [post.author_id],
-                    title: "Nouveau feedback sur votre post",
-                    message: `${contributor.fullName} a laissé un feedback sur votre post "${post.title}" dans la communauté "${community.name}"`,
-                    type: NotificationType.FEEDBACK,
-                    link: `/community/${communityId}/posts/${postId}/edit`,
+                    userIds: [updatedPost.author_id],
+                    title: "Votre post a été rejeté par la communauté",
+                    message: `Votre post "${updatedPost.title}" dans la communauté "${updatedPost.community.name}" a été rejeté par la majorité des contributeurs. Il a été déplacé dans vos brouillons pour que vous puissiez l'améliorer.`,
+                    type: NotificationType.CONTRIBUTION_REJECTED,
+                    link: `/community/${communityId}/posts/${postId}/rejected`,
                     metadata: {
                         communityId,
                         postId,
+                        rejectionFeedbacks
+                    }
+                });
+                specialNotificationSent = true;
+            } catch (notifError) {
+                console.error("Erreur lors de l'envoi de la notification de rejet:", notifError);
+            }
+        }
+
+        // Si aucune notification spéciale n'a été envoyée, envoyer une notification de feedback individuel
+        if (!specialNotificationSent) {
+            try {
+                await createBulkNotifications({
+                    userIds: [post.author_id],
+                    title: status === "APPROVED" ? "Nouveau feedback positif" : "Nouveau feedback négatif",
+                    message: `${contributor.fullName} a laissé un feedback sur votre post "${post.title}" dans la communauté "${community.name}"`,
+                    type: NotificationType.FEEDBACK,
+                    link: `/community/${communityId}`,
+                    metadata: {
+                        communityId,
+                        postId,
+                        reviewerId: session.user.id,
+                        reviewerName: contributor.fullName,
+                        content: content,
+                        status: status
                     }
                 });
             } catch (notifError) {
-                console.error("Erreur lors de l'envoi de la notification:", notifError);
+                console.error("Erreur lors de l'envoi de la notification de feedback:", notifError);
             }
         }
 

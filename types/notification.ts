@@ -34,4 +34,5 @@ export enum NotificationType {
   WARNING = "warning",
   INFO = "info",
   PUBLISH_READY = "publish_ready",
+  POST_REJECTED = "post_rejected",
 }
