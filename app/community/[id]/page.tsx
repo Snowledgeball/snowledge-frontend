@@ -55,6 +55,7 @@ interface Post {
     fullName: string;
     profilePicture: string;
   };
+  status: string;
 }
 
 const CommunityHub = () => {

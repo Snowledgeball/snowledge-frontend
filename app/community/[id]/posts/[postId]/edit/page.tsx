@@ -52,7 +52,7 @@ export default function EditPost() {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const response = await fetch(`/api/communities/${params.id}/posts/${params.postId}`);
+                const response = await fetch(`/api/communities/${params.id}/posts/pending/${params.postId}`);
                 if (!response.ok) throw new Error('Post non trouvé');
                 const data = await response.json();
                 setPost(data);
@@ -104,7 +104,7 @@ export default function EditPost() {
         }
 
         try {
-            const response = await fetch(`/api/communities/${params.id}/posts/${params.postId}`, {
+            const response = await fetch(`/api/communities/${params.id}/posts/pending/${params.postId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ export default function EditPost() {
             if (!response.ok) throw new Error('Erreur lors de la modification');
 
             toast.success('Post modifié avec succès');
-            router.push(`/community/${params.id}/posts/${params.postId}`);
+            router.push(`/community/${params.id}`);
         } catch (error) {
             toast.error("Erreur lors de la modification du post");
         }

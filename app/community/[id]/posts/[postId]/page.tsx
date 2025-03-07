@@ -43,7 +43,7 @@ export default function PostPage() {
     const fetchPost = async () => {
       try {
         const response = await fetch(
-          `/api/communities/${params.id}/posts/${params.postId}`
+          `/api/communities/${params.id}/posts/${params.postId}?status=PUBLISHED`
         );
         if (!response.ok) throw new Error("Post non trouvé");
         const data = await response.json();

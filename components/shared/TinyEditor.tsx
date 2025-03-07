@@ -110,8 +110,6 @@ const TinyEditor = ({
     }
   };
 
-  console.log("commentMode", commentMode);
-
   const saveContent = async (content: string) => {
     try {
       const response = await fetch(
@@ -135,16 +133,16 @@ const TinyEditor = ({
     plugins: commentMode
       ? ["tinycomments", "quickbars"]
       : [
-          "quickbars",
-          "advlist",
-          "autolink",
-          "lists",
-          "link",
-          "image",
-          "media",
-          "table",
-          "tinycomments",
-        ].join(" "),
+        "quickbars",
+        "advlist",
+        "autolink",
+        "lists",
+        "link",
+        "image",
+        "media",
+        "table",
+        "tinycomments",
+      ].join(" "),
     toolbar: false,
     menubar: false,
     sidebar_show: commentMode ? "showcomments" : undefined,
