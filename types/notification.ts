@@ -29,4 +29,9 @@ export enum NotificationType {
   CONTRIBUTOR_ACCEPTED = "contributor_accepted",
   CONTRIBUTOR_REFUSED = "contributor_refused",
   CONTRIBUTOR_REQUEST = "contributor_request",
+  FEEDBACK = "feedback",
+  APPROVAL = "approval",
+  WARNING = "warning",
+  INFO = "info",
+  PUBLISH_READY = "publish_ready",
 }

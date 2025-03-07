@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { checkPostPublishability } from "@/lib/postUtils";
+import { createBulkNotifications } from "@/lib/notifications";
 
 const prisma = new PrismaClient();
 
@@ -115,6 +117,56 @@ export async function PUT(request, { params }) {
                 created_at: new Date(), // Mettre à jour la date pour indiquer la modification
             },
         });
+
+        // Après avoir mis à jour la review, vérifier si le post peut maintenant être publié
+
+        // Récupérer le post avec toutes ses reviews
+        const updatedPost = await prisma.community_posts.findUnique({
+            where: {
+                id: parseInt(postId),
+            },
+            include: {
+                community_posts_reviews: true,
+                user: true,
+            },
+        });
+
+        // Récupérer le nombre de contributeurs
+        const contributorsCount = await prisma.community_contributors.count({
+            where: {
+                community_id: parseInt(communityId),
+            },
+        });
+
+        const isContributorsCountEven = contributorsCount % 2 === 0;
+
+        // Vérifier si le post peut être publié
+        const publishStatus = checkPostPublishability(
+            updatedPost,
+            contributorsCount,
+            isContributorsCountEven
+        );
+
+        // Si le post peut être publié, envoyer une notification à l'auteur
+        if (publishStatus.canPublish) {
+            try {
+                await createBulkNotifications({
+                    userIds: [updatedPost.author_id],
+                    title: "Votre post peut être publié !",
+                    message: `Votre post "${updatedPost.title}" a reçu suffisamment de votes positifs et peut maintenant être publié.`,
+                    type: "publish_ready", // Utilisez une chaîne directe
+                    link: `/community/${communityId}/posts/${postId}`,
+                    metadata: {
+                        communityId,
+                        postId,
+                        publishStatus: publishStatus.details
+                    }
+                });
+            } catch (notifError) {
+                console.error("Erreur lors de l'envoi de la notification de publication:", notifError);
+                // On continue même si la notification échoue
+            }
+        }
 
         return NextResponse.json({
             message: "Vote modifié avec succès",

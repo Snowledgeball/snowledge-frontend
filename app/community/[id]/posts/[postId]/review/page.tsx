@@ -43,7 +43,7 @@ export default function ReviewPost() {
 
         // Récupérer les données du post
         const postResponse = await fetch(
-          `/api/communities/${params.id}/posts/${params.postId}`
+          `/api/communities/${params.id}/posts/pending/${params.postId}`
         );
 
         console.log("postResponse", postResponse);

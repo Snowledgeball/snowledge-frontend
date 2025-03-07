@@ -30,6 +30,8 @@ interface Post {
     fullName: string;
     profilePicture: string;
   };
+  status: string;
+  author_id: number;
 }
 
 export default function PostPage() {

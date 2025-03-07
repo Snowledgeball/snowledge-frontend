@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, UserPlus, MessageCircle, Award, AlertCircle, Check, X } from "lucide-react";
+import { Bell, UserPlus, MessageCircle, Award, AlertCircle, Check, X, CheckCircle, AlertTriangle, Send } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Notification, NotificationType } from "@/types/notification";
 import { formatDistanceToNow } from "date-fns";
@@ -133,6 +133,14 @@ export default function NotificationBell() {
       //   return <AlertCircle className="h-5 w-5 text-red-500" />;
       // case NotificationType.APPROVAL:
       //   return <Check className="h-5 w-5 text-green-600" />;
+      case NotificationType.APPROVAL:
+        return <CheckCircle className="text-green-500" />;
+      case NotificationType.WARNING:
+        return <AlertTriangle className="text-yellow-500" />;
+      case NotificationType.FEEDBACK:
+        return <MessageCircle className="text-blue-500" />;
+      case NotificationType.PUBLISH_READY:
+        return <Send className="text-purple-500" />; // Icône pour les posts prêts à être publiés
       default:
         return "🔔";
     }
