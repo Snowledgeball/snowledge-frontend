@@ -54,15 +54,12 @@ export async function GET(request, { params }) {
       );
     }
 
-    console.log("communityId", communityId);
-    console.log("postId", postId);
-
     // Récupérer le post avec les informations de l'auteur
     const post = await prisma.community_posts.findUnique({
       where: {
         id: postIdInt,
         community_id: communityId,
-        status: "PUBLISHED",
+        // status: "PUBLISHED",
       },
       include: {
         user: {

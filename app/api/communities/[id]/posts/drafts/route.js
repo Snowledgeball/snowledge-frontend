@@ -13,7 +13,7 @@ export async function GET(request, { params }) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { id: communityId } = params;
+        const { id: communityId } = await params;
 
         // Vérifier que l'utilisateur est contributeur
         const membership = await prisma.community_contributors.findUnique({
@@ -64,7 +64,7 @@ export async function POST(request, { params }) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { id: communityId } = params;
+        const { id: communityId } = await params;
         const { title, content, cover_image_url, tag, accept_contributions } = await request.json();
 
         // Vérifier que l'utilisateur est contributeur

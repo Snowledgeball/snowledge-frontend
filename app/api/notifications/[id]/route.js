@@ -12,7 +12,7 @@ export async function PUT(req, { params }) {
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const data = await req.json();
 
     const notifRef = doc(db, "notifications", id);

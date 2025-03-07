@@ -13,7 +13,7 @@ export async function GET(request, { params }) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { id: communityId, draftId } = params;
+        const { id: communityId, draftId } = await params;
 
         // Récupérer le brouillon
         const draft = await prisma.community_posts.findUnique({
@@ -52,7 +52,7 @@ export async function PUT(request, { params }) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { id: communityId, draftId } = params;
+        const { id: communityId, draftId } = await params;
         const { title, content, cover_image_url, tag, accept_contributions } = await request.json();
 
         // Vérifier que le brouillon existe et appartient à l'utilisateur
@@ -105,7 +105,7 @@ export async function DELETE(request, { params }) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { id: communityId, draftId } = params;
+        const { id: communityId, draftId } = await params;
 
         // Vérifier que le brouillon existe et appartient à l'utilisateur
         const existingDraft = await prisma.community_posts.findUnique({

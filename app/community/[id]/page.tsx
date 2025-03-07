@@ -93,7 +93,10 @@ const CommunityHub = () => {
         const membershipResponse = await fetch(
           `/api/communities/${params.id}/membership`
         );
+
         const membershipData = await membershipResponse.json();
+
+        console.log("membershipData", membershipData);
 
         // Récupérer les données de la communauté
         const communityResponse = await fetch(`/api/communities/${params.id}`);
@@ -111,7 +114,7 @@ const CommunityHub = () => {
         setBans(bansData);
 
         // Si l'utilisateur n'est pas membre ou banni, récupérer la présentation
-        if (!membershipData.isMember && bansData.length === 0) {
+        if (!membershipData.isMember && !membershipData.isCreator && !membershipData.isContributor && bansData.length === 0) {
           const presentationResponse = await fetch(
             `/api/communities/${params.id}/presentation`
           );
@@ -134,7 +137,7 @@ const CommunityHub = () => {
         setIsCreator(communityData?.creator_id === parseInt(session?.user.id));
 
         // Si l'utilisateur est contributeur, récupérer le nombre de posts en attente
-        if (membershipData.isContributor) {
+        if (membershipData.isContributor || membershipData.isCreator) {
           const fetchPendingPosts = async () => {
             try {
               const response = await fetch(
@@ -540,7 +543,7 @@ const CommunityHub = () => {
                     Cours
                     <Lock className="w-4 h-4" />
                   </button>
-                  {isContributor && (
+                  {(isContributor || isCreator) && (
                     <button
                       className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors flex items-center ${activeTab === "voting"
                         ? "border-blue-500 text-blue-600"

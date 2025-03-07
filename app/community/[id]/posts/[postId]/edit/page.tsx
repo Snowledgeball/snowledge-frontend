@@ -9,6 +9,7 @@ import TinyEditor from "@/components/shared/TinyEditor";
 import { toast } from "sonner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import Image from "next/image";
+import ReviewsSidebar from "@/components/community/ReviewsSidebar";
 
 const POST_TAGS = [
     { value: 'analyse-technique', label: 'Analyse Technique' },
@@ -32,6 +33,7 @@ interface Post {
         fullName: string;
         profilePicture: string;
     };
+    status: string;
 }
 
 export default function EditPost() {
@@ -154,66 +156,90 @@ export default function EditPost() {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl p-6">
-                        <div className="flex w-full space-x-4">
-                            <div className="flex items-center space-x-2 flex-1">
-                                <input
-                                    type="file"
-                                    id="cover-image"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={handleImageUpload}
-                                />
-                                {coverImage ? (
-                                    <div className="relative">
-                                        <Image
-                                            src={`https://${coverImage}`}
-                                            alt="Cover Image"
-                                            width={75}
-                                            height={75}
-                                            className="rounded-lg"
-                                        />
+                    <div className="flex gap-6">
+                        <div className="flex-1 bg-white rounded-xl p-6">
+                            <div className="flex w-full space-x-4">
+                                <div className="flex items-center space-x-2 flex-1">
+                                    <input
+                                        type="file"
+                                        id="cover-image"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleImageUpload}
+                                    />
+                                    {coverImage ? (
+                                        <div className="relative">
+                                            <Image
+                                                src={`https://${coverImage}`}
+                                                alt="Cover Image"
+                                                width={75}
+                                                height={75}
+                                                className="rounded-lg"
+                                            />
+                                            <label
+                                                htmlFor="cover-image"
+                                                className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow-md cursor-pointer hover:bg-gray-50"
+                                            >
+                                                <ImageIcon className="w-4 h-4 text-gray-600" />
+                                            </label>
+                                        </div>
+                                    ) : (
                                         <label
                                             htmlFor="cover-image"
-                                            className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow-md cursor-pointer hover:bg-gray-50"
-                                        >
-                                            <ImageIcon className="w-4 h-4 text-gray-600" />
+                                            className="w-full px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors text-center">
+                                            {isUploading ? 'Upload...' : 'Ajouter une image de couverture'}
                                         </label>
-                                    </div>
-                                ) : (
-                                    <label
-                                        htmlFor="cover-image"
-                                        className="w-full px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors text-center">
-                                        {isUploading ? 'Upload...' : 'Ajouter une image de couverture'}
-                                    </label>
-                                )}
+                                    )}
+                                </div>
+                                <select
+                                    value={selectedTag}
+                                    onChange={(e) => setSelectedTag(e.target.value)}
+                                    className="flex-1 px-3 py-2 border rounded-lg bg-white"
+                                >
+                                    <option value="">Choisir une catégorie</option>
+                                    {POST_TAGS.map((tag) => (
+                                        <option key={tag.value} value={tag.value}>
+                                            {tag.label}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
-                            <select
-                                value={selectedTag}
-                                onChange={(e) => setSelectedTag(e.target.value)}
-                                className="flex-1 px-3 py-2 border rounded-lg bg-white"
-                            >
-                                <option value="">Choisir une catégorie</option>
-                                {POST_TAGS.map((tag) => (
-                                    <option key={tag.value} value={tag.value}>
-                                        {tag.label}
-                                    </option>
-                                ))}
-                            </select>
+
+                            <input
+                                type="text"
+                                value={postTitle}
+                                onChange={(e) => setPostTitle(e.target.value)}
+                                placeholder="Titre de l'article"
+                                className="mt-8 w-full text-2xl font-bold border border-gray-200 mb-4 px-4 py-2 rounded-lg"
+                            />
+
+                            <TinyEditor
+                                onChange={setEditorContent}
+                                initialValue={post.content}
+                            />
                         </div>
 
-                        <input
-                            type="text"
-                            value={postTitle}
-                            onChange={(e) => setPostTitle(e.target.value)}
-                            placeholder="Titre de l'article"
-                            className="mt-8 w-full text-2xl font-bold border border-gray-200 mb-4 px-4 py-2 rounded-lg"
-                        />
+                        {/* Sidebar des reviews */}
+                        {post && post.status === "PENDING" && (
+                            <div className="w-80">
+                                <div className="sticky top-6">
+                                    <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+                                        <h3 className="text-lg font-medium mb-2">Conseils pour l'édition</h3>
+                                        <p className="text-sm text-gray-600 mb-3">
+                                            Consultez les feedbacks des contributeurs pour améliorer votre post et augmenter vos chances d'approbation.
+                                        </p>
+                                        <div className="text-xs text-gray-500">
+                                            Les modifications que vous apportez seront soumises à un nouveau vote.
+                                        </div>
+                                    </div>
 
-                        <TinyEditor
-                            onChange={setEditorContent}
-                            initialValue={post.content}
-                        />
+                                    <ReviewsSidebar
+                                        communityId={params.id as string}
+                                        postId={params.postId as string}
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </Card>
             </div>

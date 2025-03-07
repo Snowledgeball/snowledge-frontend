@@ -1,197 +1,188 @@
 "use client";
 
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
-import Image from "next/image";
-import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
-import TinyEditor from "@/components/shared/TinyEditor";
+import SimpleReview from "@/components/community/SimpleReview";
+import EditReview from "@/components/community/EditReview";
+// import ContributionReview from "@/components/community/ContributionReview"; // Ce composant sera créé plus tard pour les contributions
+import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { CheckCircle, XCircle } from "lucide-react";
-
-interface Post {
-  id: number;
-  title: string;
-  content: string;
-  cover_image_url: string | null;
-  tag: string;
-  created_at: string;
-  accept_contributions: boolean;
-  user: {
-    id: number;
-    fullName: string;
-    profilePicture: string;
-  };
-}
 
 export default function ReviewPost() {
   const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
-  const { data: session } = useSession();
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [post, setPost] = useState<Post | null>(null);
-  const [reviewContent, setReviewContent] = useState("");
-  const [reviewStatus, setReviewStatus] = useState<"APPROVED" | "REJECTED">(
-    "APPROVED"
-  );
-  const authorId = searchParams.get("authorId");
-  const isNotAuthor = authorId !== session?.user?.id;
 
+  const [post, setPost] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [isContributor, setIsContributor] = useState(false);
+  const [isCreator, setIsCreator] = useState(false);
+  const [hasAlreadyVoted, setHasAlreadyVoted] = useState(false);
+  const [existingReview, setExistingReview] = useState<any>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const { data: session } = useSession();
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(
-          `/api/communities/${params.id}/posts/pending/${params.postId}`
+        // Vérifier que l'utilisateur est contributeur
+        const membershipResponse = await fetch(
+          `/api/communities/${params.id}/membership`
         );
-        if (!response.ok) throw new Error("Post non trouvé");
-        const data = await response.json();
-        setPost(data);
+        const membershipData = await membershipResponse.json();
+        setIsContributor(membershipData.isContributor);
+        setIsCreator(membershipData.isCreator);
+
+        if (!membershipData.isContributor && !membershipData.isCreator) {
+          toast.error("Vous devez être contributeur pour réviser un post");
+          router.push(`/community/${params.id}`);
+          return;
+        }
+
+        // Récupérer les données du post
+        const postResponse = await fetch(
+          `/api/communities/${params.id}/posts/${params.postId}`
+        );
+
+        console.log("postResponse", postResponse);
+        if (!postResponse.ok) {
+          toast.error("Erreur lors de la récupération du post");
+          router.push(`/community/${params.id}`);
+          return;
+        }
+
+        const postData = await postResponse.json();
+        setPost(postData);
+        console.log("postData", postData);
+
+        // Récupérer les données de la communauté
+        const communityResponse = await fetch(`/api/communities/${params.id}`);
+        const communityData = await communityResponse.json();
+
+        console.log("communityData", communityData);
+
+        // Vérifier si l'utilisateur est un contributeur ou le créateur de la communauté
+        const isContributor = membershipData.isContributor;
+        const isCreator = communityData.creator_id == session?.user?.id;
+
+        console.log("communityData.creator_id", communityData.creator_id);
+        console.log("session?.user.id", session?.user.id);
+
+        console.log("isContributor", isContributor);
+        console.log("isCreator", isCreator);
+
+        // Permettre l'accès à la page de revue si l'utilisateur est contributeur OU créateur
+        if (!isContributor && !isCreator) {
+          redirect(`/community/${params.id}`);
+        }
+
+        // Vérifier si l'utilisateur est l'auteur du post
+        if (postData.authorId === session?.user?.id) {
+          redirect(`/community/${params.id}/posts/${params.postId}`);
+        }
+
+        // Vérifier si l'utilisateur a déjà voté    
+        const hasVotedResponse = await fetch(
+          `/api/communities/${params.id}/posts/${params.postId}/reviews/user`
+        );
+        if (hasVotedResponse.ok) {
+          const hasVotedData = await hasVotedResponse.json();
+          setHasAlreadyVoted(hasVotedData.hasVoted);
+
+          if (hasVotedData.hasVoted && hasVotedData.review) {
+            setExistingReview(hasVotedData.review);
+
+            // Vérifier si on est en mode édition
+            const edit = searchParams.get("edit");
+            if (edit === "true") {
+              setIsEditMode(true);
+            } else {
+              toast.info("Vous avez déjà voté sur ce post", {
+                description: `Votre vote: ${hasVotedData.review.status === "APPROVED" ? "Approuvé" : "Rejeté"}`,
+                duration: 5000,
+                action: {
+                  label: "Modifier",
+                  onClick: () => router.push(`/community/${params.id}/posts/${params.postId}/review?authorId=${postData.authorId}&edit=true`),
+                },
+              });
+            }
+          }
+        }
       } catch (error) {
-        toast.error("Erreur lors de la récupération du post");
-        router.push(`/community/${params.id}/posts/pending`);
+        if (error instanceof Error) {
+          console.log("Erreur:", error.stack);
+        } else {
+          console.log("Une erreur inattendue s'est produite");
+        }
+        toast.error("Une erreur est survenue");
+        router.push(`/community/${params.id}`);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchPost();
-  }, [params.id, params.postId, router]);
+    fetchData();
+  }, [params.id, params.postId, router, searchParams]);
 
-  const handleSubmitReview = async () => {
-    // try {
-    //     const response = await fetch(`/api/communities/${params.id}/posts/pending/${params.postId}/reviews`, {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify({
-    //             content: reviewContent,
-    //             status: reviewStatus
-    //         }),
-    //     });
-    //     if (!response.ok) {
-    //         const data = await response.json();
-    //         throw new Error(data.error || 'Erreur lors de la soumission');
-    //     }
-    //     toast.success('Révision soumise avec succès');
-    //     router.push(`/community/${params.id}/posts/pending`);
-    // } catch (error) {
-    //     if (error instanceof Error) {
-    //         toast.error(error.message);
-    //     } else {
-    //         toast.error("Erreur lors de la soumission de la révision");
-    //     }
-    // }
-  };
+  if (isLoading || loading) return <LoadingComponent />;
+  if (!isAuthenticated || !post) return null;
 
-  if (isLoading || !post) return <LoadingComponent />;
-  if (!isAuthenticated) return null;
-
-  return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold">Réviser le post</h1>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setReviewStatus("APPROVED")}
-                  className={`flex-1 p-4 rounded-lg border ${
-                    reviewStatus === "APPROVED"
-                      ? "border-green-500 bg-green-50"
-                      : "border-gray-200"
-                  }`}
-                >
-                  <CheckCircle
-                    className={`w-6 h-6 ${
-                      reviewStatus === "APPROVED"
-                        ? "text-green-500"
-                        : "text-gray-400"
-                    }`}
-                  />
-                  <p className="text-center mt-2">Approuver</p>
-                </button>
-
-                <button
-                  onClick={() => setReviewStatus("REJECTED")}
-                  className={`flex-1 p-4 rounded-lg border ${
-                    reviewStatus === "REJECTED"
-                      ? "border-red-500 bg-red-50"
-                      : "border-gray-200"
-                  }`}
-                >
-                  <XCircle
-                    className={`w-6 h-6 ${
-                      reviewStatus === "REJECTED"
-                        ? "text-red-500"
-                        : "text-gray-400"
-                    }`}
-                  />
-                  <p className="text-center mt-2">Rejeter</p>
-                </button>
-              </div>
-
+  // Si l'utilisateur a déjà voté et n'est pas en mode édition, afficher un message
+  if (hasAlreadyVoted && !isEditMode) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <div className="bg-white p-8 rounded-lg shadow">
+            <h2 className="text-2xl font-bold mb-4">Vous avez déjà voté sur ce post</h2>
+            <p className="mb-6">Votre vote: {existingReview?.status === "APPROVED" ? "Approuvé" : "Rejeté"}</p>
+            <div className="flex justify-center space-x-4">
               <button
-                onClick={handleSubmitReview}
-                disabled={!reviewContent.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                onClick={() => router.push(`/community/${params.id}`)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                Soumettre la révision
+                Retour à la communauté
+              </button>
+              <button
+                onClick={() => router.push(`/community/${params.id}/posts/${params.postId}/review?authorId=${post.authorId}&edit=true`)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Modifier mon vote
               </button>
             </div>
           </div>
-
-          <div className="bg-white rounded-xl p-6">
-            {/* En-tête du post */}
-            <div className="flex items-center space-x-3 mb-6">
-              <Image
-                src={post.user.profilePicture}
-                alt={post.user.fullName}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <div>
-                <p className="font-medium">{post.user.fullName}</p>
-                <p className="text-sm text-gray-500">
-                  {formatDistanceToNow(new Date(post.created_at), {
-                    addSuffix: true,
-                    locale: fr,
-                  })}
-                </p>
-              </div>
-            </div>
-
-            {/* Image de couverture */}
-            {post.cover_image_url && (
-              <div className="w-full h-48 relative mb-6 rounded-lg overflow-hidden">
-                <Image
-                  src={`https://${post.cover_image_url}`}
-                  alt="Cover"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            )}
-
-            {/* Titre */}
-            <h2 className="text-2xl font-bold mb-6">{post.title}</h2>
-
-            {/* Contenu avec TinyMCE en mode commentaire */}
-            <TinyEditor
-              // value={post.content}
-              initialValue={post.content}
-              onChange={() => {}} // Lecture seule
-              commentMode={isNotAuthor}
-              communityId={params.id as string}
-              postId={params.postId as string}
-            />
-          </div>
-        </Card>
+        </div>
       </div>
-    </div>
+    );
+  }
+
+  // Si l'utilisateur est en mode édition, afficher le formulaire d'édition
+  if (isEditMode && existingReview) {
+    return (
+      <EditReview
+        postId={parseInt(params.postId as string)}
+        communityId={params.id as string}
+        postTitle={post.title}
+        postContent={post.content}
+        coverImageUrl={post.cover_image_url}
+        authorName={post.user.fullName}
+        authorId={post.authorId}
+        existingReview={existingReview}
+      />
+    );
+  }
+
+  // Sinon, afficher le formulaire de vote initial
+  return (
+    <SimpleReview
+      postId={parseInt(params.postId as string)}
+      communityId={params.id as string}
+      postTitle={post.title}
+      postContent={post.content}
+      coverImageUrl={post.cover_image_url}
+      authorName={post.user.fullName}
+      authorId={post.authorId}
+    />
   );
 }
