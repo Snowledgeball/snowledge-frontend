@@ -2,41 +2,19 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Eye, ImageIcon } from "lucide-react";
-import TinyEditor from "@/components/shared/TinyEditor";
 import { toast } from "sonner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
-import Image from "next/image";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
-const POST_TAGS = [
-  { value: "analyse-technique", label: "Analyse Technique" },
-  { value: "analyse-macro", label: "Analyse Macro" },
-  { value: "defi", label: "DeFi" },
-  { value: "news", label: "News" },
-  { value: "education", label: "Éducation" },
-  { value: "trading", label: "Trading" },
-];
+import PostEditor, { PostData } from "@/components/community/PostEditor";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 
 export default function CreatePost() {
   const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
   const params = useParams();
   const router = useRouter();
-
-  const [postTitle, setPostTitle] = useState("");
-  const [editorContent, setEditorContent] = useState("");
-  const [coverImage, setCoverImage] = useState("");
-  const [selectedTag, setSelectedTag] = useState("");
-  const [contributionsEnabled, setContributionsEnabled] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [drafts, setDrafts] = useState<PostData[]>([]);
+  const [activeTab, setActiveTab] = useState("new");
+  const [selectedDraft, setSelectedDraft] = useState<PostData | null>(null);
 
   useEffect(() => {
     // Vérifier que l'utilisateur est contributeur
@@ -58,41 +36,22 @@ export default function CreatePost() {
     };
 
     checkContributorStatus();
+    fetchDrafts();
   }, [params.id, router]);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0]) return;
-
-    const file = e.target.files[0];
-    setIsUploading(true);
-
+  const fetchDrafts = async () => {
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error("Erreur lors de l'upload");
-
-      const data = await response.json();
-      setCoverImage(data.url);
-      toast.success("Image uploadée avec succès");
+      const response = await fetch(`/api/communities/${params.id}/posts/drafts`);
+      if (response.ok) {
+        const data = await response.json();
+        setDrafts(data);
+      }
     } catch (error) {
-      toast.error("Erreur lors de l'upload de l'image");
-    } finally {
-      setIsUploading(false);
+      console.error("Erreur lors de la récupération des brouillons:", error);
     }
   };
 
-  const handleSubmit = async () => {
-    if (!postTitle || !editorContent || !selectedTag) {
-      toast.error("Veuillez remplir tous les champs");
-      return;
-    }
-
+  const handleSubmitPost = async (postData: PostData) => {
     try {
       const response = await fetch(
         `/api/communities/${params.id}/posts/pending`,
@@ -101,25 +60,83 @@ export default function CreatePost() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            title: postTitle,
-            content: editorContent,
-            cover_image_url: coverImage,
-            tag: selectedTag,
-            accept_contributions: contributionsEnabled,
-          }),
+          body: JSON.stringify(postData),
         }
       );
-
-      console.log("response", await response.json());
 
       if (!response.ok) throw new Error("Erreur lors de la création");
 
       toast.success("Post soumis pour révision");
+
+      // Si c'était un brouillon, le supprimer
+      if (selectedDraft?.id) {
+        await fetch(`/api/communities/${params.id}/posts/drafts/${selectedDraft.id}`, {
+          method: "DELETE",
+        });
+      }
+
       router.push(`/community/${params.id}`);
     } catch (error) {
       toast.error("Erreur lors de la création du post");
     }
+  };
+
+  const handleSaveDraft = async (postData: PostData) => {
+    try {
+      const method = selectedDraft?.id ? "PUT" : "POST";
+      const url = selectedDraft?.id
+        ? `/api/communities/${params.id}/posts/drafts/${selectedDraft.id}`
+        : `/api/communities/${params.id}/posts/drafts`;
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(postData),
+      });
+
+      if (!response.ok) throw new Error("Erreur lors de la sauvegarde");
+
+      toast.success("Brouillon sauvegardé");
+      fetchDrafts();
+
+      if (!selectedDraft?.id) {
+        // Si c'est un nouveau brouillon, récupérer son ID
+        const data = await response.json();
+        setSelectedDraft({ ...postData, id: data.id });
+      }
+    } catch (error) {
+      toast.error("Erreur lors de la sauvegarde du brouillon");
+    }
+  };
+
+  const handleDeleteDraft = async (draftId: number) => {
+    try {
+      const response = await fetch(
+        `/api/communities/${params.id}/posts/drafts/${draftId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) throw new Error("Erreur lors de la suppression");
+
+      toast.success("Brouillon supprimé");
+      fetchDrafts();
+
+      if (selectedDraft?.id === draftId) {
+        setSelectedDraft(null);
+        setActiveTab("new");
+      }
+    } catch (error) {
+      toast.error("Erreur lors de la suppression du brouillon");
+    }
+  };
+
+  const handleEditDraft = (draft: PostData) => {
+    setSelectedDraft(draft);
+    setActiveTab("edit");
   };
 
   if (isLoading) return <LoadingComponent />;
@@ -128,153 +145,87 @@ export default function CreatePost() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4">
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold">Modifier le post</h1>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-2">
-                <Switch
-                  checked={contributionsEnabled}
-                  onCheckedChange={setContributionsEnabled}
-                  className="data-[state=checked]:bg-green-600"
-                />
-                <label className="text-gray-600">Contributions</label>
-              </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-6">
+            <TabsTrigger value="new">Nouveau post</TabsTrigger>
+            <TabsTrigger value="drafts">
+              Brouillons ({drafts.length})
+            </TabsTrigger>
+            {selectedDraft && (
+              <TabsTrigger value="edit">
+                Modifier le brouillon
+              </TabsTrigger>
+            )}
+          </TabsList>
 
-              <button
-                onClick={handleSubmit}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Soumettre le post
-              </button>
-            </div>
-          </div>
+          <TabsContent value="new">
+            <PostEditor
+              communityId={params.id as string}
+              onSubmit={handleSubmitPost}
+              onSaveDraft={handleSaveDraft}
+              submitButtonText="Soumettre pour révision"
+            />
+          </TabsContent>
 
-          <div className="bg-white rounded-xl p-6">
-            <div className="flex w-full space-x-4">
-              <div className="flex items-center space-x-2 flex-1">
-                <input
-                  type="file"
-                  id="cover-image"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
-                {coverImage ? (
-                  <div className="relative">
-                    <Image
-                      src={`https://${coverImage}`}
-                      alt="Cover Image"
-                      width={75}
-                      height={75}
-                      className="rounded-lg"
-                    />
-                    <label
-                      htmlFor="cover-image"
-                      className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow-md cursor-pointer hover:bg-gray-50"
+          <TabsContent value="drafts">
+            <Card className="p-6">
+              <h2 className="text-xl font-bold mb-4">Mes brouillons</h2>
+              {drafts.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">
+                  Vous n'avez pas de brouillons enregistrés
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {drafts.map((draft) => (
+                    <div
+                      key={draft.id}
+                      className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
                     >
-                      <ImageIcon className="w-4 h-4 text-gray-600" />
-                    </label>
-                  </div>
-                ) : (
-                  <label
-                    htmlFor="cover-image"
-                    className="w-full px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors text-center"
-                  >
-                    {isUploading
-                      ? "Upload..."
-                      : "Ajouter une image de couverture"}
-                  </label>
-                )}
-              </div>
-              <select
-                value={selectedTag}
-                onChange={(e) => setSelectedTag(e.target.value)}
-                className="flex-1 px-3 py-2 border rounded-lg bg-white"
-              >
-                <option value="">Choisir une catégorie</option>
-                {POST_TAGS.map((tag) => (
-                  <option key={tag.value} value={tag.value}>
-                    {tag.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium text-lg">
+                            {draft.title || "(Sans titre)"}
+                          </h3>
+                          <p className="text-gray-500 text-sm mt-1">
+                            Dernière modification: {new Date(draft.updated_at || "").toLocaleDateString("fr-FR")}
+                          </p>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleEditDraft(draft)}
+                            className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            Modifier
+                          </button>
+                          <button
+                            onClick={() => handleDeleteDraft(draft.id!)}
+                            className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          </TabsContent>
 
-            <input
-              type="text"
-              value={postTitle}
-              onChange={(e) => setPostTitle(e.target.value)}
-              placeholder="Titre de l'article"
-              className="mt-8 w-full text-2xl font-bold border border-gray-200 mb-4 px-4 py-2 rounded-lg"
-            />
-
-            <TinyEditor
-              initialValue={editorContent}
-              onChange={setEditorContent}
-            />
-          </div>
-        </Card>
+          <TabsContent value="edit">
+            {selectedDraft && (
+              <PostEditor
+                initialData={selectedDraft}
+                communityId={params.id as string}
+                onSubmit={handleSubmitPost}
+                onSaveDraft={handleSaveDraft}
+                submitButtonText="Soumettre pour révision"
+                isDraft={true}
+              />
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* Modal de prévisualisation */}
-      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
-          <DialogHeader>
-            <DialogTitle>Prévisualisation du post</DialogTitle>
-          </DialogHeader>
-
-          <div className="py-4">
-            {/* Image de couverture */}
-            {coverImage && (
-              <div className="w-full h-48 relative mb-6 rounded-lg overflow-hidden">
-                <Image
-                  src={`https://${coverImage}`}
-                  alt="Cover"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            )}
-
-            {/* Tag */}
-            {selectedTag && (
-              <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm mb-4">
-                {POST_TAGS.find((t) => t.value === selectedTag)?.label}
-              </span>
-            )}
-
-            {/* Titre */}
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">
-              {postTitle || "Sans titre"}
-            </h1>
-
-            {/* Contenu */}
-            <div
-              className="prose max-w-none"
-              dangerouslySetInnerHTML={{ __html: editorContent }}
-            />
-
-            {/* Footer */}
-            <div className="mt-6 pt-4 border-t border-gray-200">
-              <div className="flex items-center justify-between text-sm text-gray-500">
-                <span>
-                  {contributionsEnabled
-                    ? "✅ Contributions activées"
-                    : "❌ Contributions désactivées"}
-                </span>
-                <span>
-                  {new Date().toLocaleDateString("fr-FR", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </span>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
