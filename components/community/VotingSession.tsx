@@ -186,25 +186,21 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
                                             <div className="flex items-center">
                                                 {/* Afficher l'image floutée ou l'icône utilisateur si ce n'est pas l'auteur */}
                                                 <div className="flex-shrink-0 h-8 w-8 relative overflow-hidden rounded-full">
-                                                    {isAuthor ? (
-                                                        <Image
-                                                            src={post.user.profilePicture}
-                                                            alt={post.user.fullName}
-                                                            width={32}
-                                                            height={32}
-                                                            className="rounded-full"
-                                                        />
-                                                    ) : (
-                                                        <div className="bg-gray-200 h-full w-full flex items-center justify-center">
-                                                            <User className="h-4 w-4 text-gray-400" />
-                                                        </div>
-                                                    )}
+
+                                                    <Image
+                                                        src={post.user.profilePicture}
+                                                        alt={post.user.fullName}
+                                                        width={32}
+                                                        height={32}
+                                                        className="rounded-full blur-[5px]"
+                                                    />
+
                                                 </div>
                                                 <div className="ml-3">
                                                     {isAuthor ? (
                                                         <div className="text-sm font-medium text-gray-900">{post.user.fullName}</div>
                                                     ) : (
-                                                        <div className="text-sm font-medium text-gray-500 blur-sm select-none hover:blur-none transition-all duration-300">
+                                                        <div className="text-sm font-medium text-gray-500 blur-sm select-none">
                                                             {post.user.fullName}
                                                         </div>
                                                     )}
