@@ -89,7 +89,7 @@ const CommunityHub = () => {
 
     const checkMembershipAndFetchData = async () => {
       try {
-        // Vérifier si l'utilisateur est membre
+        //  Vérifier si l'utilisateur est membre
         const membershipResponse = await fetch(
           `/api/communities/${params.id}/membership`
         );
