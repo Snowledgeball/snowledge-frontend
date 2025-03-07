@@ -129,6 +129,7 @@ export async function GET(request, { params }) {
     const posts = await prisma.community_posts.findMany({
       where: {
         community_id: communityId,
+        status: "PUBLISHED",
       },
       include: {
         user: {
