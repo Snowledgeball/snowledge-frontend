@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 
 interface PendingPost {
+    status: string;
     id: number;
     title: string;
     content: string;
@@ -367,47 +368,52 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
                                             </div>
                                         </td>
                                         <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            {isAuthor ? (
-                                                <div className="flex justify-end space-x-2">
-                                                    <button
-                                                        onClick={() => router.push(`/community/${communityId}/posts/${post.id}/edit`)}
-                                                        className="text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg px-3 py-1 transition-colors"
-                                                    >
-                                                        Modifier
-                                                    </button>
-                                                    {publishable && (
-                                                        <button
-                                                            onClick={() => handlePublish(post.id)}
-                                                            className="text-white bg-blue-600 hover:bg-blue-700 rounded-lg px-3 py-1 transition-colors"
+                                            <div className="flex justify-end space-x-2">
+                                                {isPostAuthor(post) && (
+                                                    <>
+                                                        <Link
+                                                            href={`/community/${communityId}/posts/${post.id}/edit`}
+                                                            className="text-blue-600 hover:text-blue-800"
                                                         >
-                                                            Publier
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <div className="flex justify-end space-x-2">
-                                                    {userVoted ? (
-                                                        <div className="mt-4">
-                                                            <p className="text-sm text-gray-600 mb-2">
-                                                                Vous avez déjà voté sur ce post.
-                                                            </p>
+                                                            Modifier
+                                                        </Link>
+
+                                                        {canPublish(post) && (
+                                                            <button
+                                                                onClick={() => handlePublish(post.id)}
+                                                                className="text-green-600 hover:text-green-800 ml-3"
+                                                            >
+                                                                Publier
+                                                            </button>
+                                                        )}
+                                                    </>
+                                                )}
+
+                                                {!isPostAuthor(post) && (
+                                                    <div className="flex justify-end space-x-2">
+                                                        {userVoted ? (
+                                                            <div className="mt-4">
+                                                                <p className="text-sm text-gray-600 mb-2">
+                                                                    Vous avez déjà voté sur ce post.
+                                                                </p>
+                                                                <Link
+                                                                    href={`/community/${communityId}/posts/${post.id}/review?edit=true`}
+                                                                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                                                                >
+                                                                    Modifier mon vote
+                                                                </Link>
+                                                            </div>
+                                                        ) : (
                                                             <Link
-                                                                href={`/community/${communityId}/posts/${post.id}/review?edit=true`}
+                                                                href={`/community/${communityId}/posts/${post.id}/review`}
                                                                 className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                                                             >
-                                                                Modifier mon vote
+                                                                Voter sur ce post
                                                             </Link>
-                                                        </div>
-                                                    ) : (
-                                                        <Link
-                                                            href={`/community/${communityId}/posts/${post.id}/review`}
-                                                            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                                                        >
-                                                            Voter sur ce post
-                                                        </Link>
-                                                    )}
-                                                </div>
-                                            )}
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 );

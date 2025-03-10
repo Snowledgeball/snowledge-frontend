@@ -133,7 +133,7 @@ export async function POST(request, { params }) {
       title: "Nouveau post en attente de validation",
       message: `Un nouveau post "${post.title}" a été publié dans votre communauté et est en attente de validation`,
       type: NotificationType.NEW_POST_PENDING,
-      link: `/community/${communityId}/posts/${post.id}/reviews`,
+      link: `/community/${communityId}/posts/${post.id}/review`,
       metadata: {
         communityId,
         postId: post.id,

@@ -185,26 +185,35 @@ export async function POST(request, { params }) {
                 },
             });
 
-            // Récupérer les feedbacks négatifs
-            const rejectionFeedbacks = updatedPost.community_posts_reviews
-                .filter(review => review.status === "REJECTED")
-                .map(review => ({
-                    reviewer: review.user.fullName,
-                    content: review.content
-                }));
+            // Récupérer les utilisateurs qui ont voté contre le post
+            const reviewers = await Promise.all(
+                updatedPost.community_posts_reviews
+                    .filter(review => review.status === "REJECTED")
+                    .map(async review => {
+                        const userInfo = await prisma.user.findUnique({
+                            where: { id: review.reviewer_id },
+                            select: { fullName: true }
+                        });
+                        return {
+                            reviewer: userInfo?.fullName || `Contributeur #${review.reviewer_id}`,
+                            content: review.content
+                        };
+                    })
+            );
 
-            // Notifier l'auteur
+            // Notifier l'auteur avec un lien direct vers l'édition du brouillon
             try {
                 await createBulkNotifications({
                     userIds: [updatedPost.author_id],
                     title: "Votre post a été rejeté par la communauté",
-                    message: `Votre post "${updatedPost.title}" dans la communauté "${updatedPost.community.name}" a été rejeté par la majorité des contributeurs. Il a été déplacé dans vos brouillons pour que vous puissiez l'améliorer.`,
+                    message: `Votre post "${updatedPost.title}" dans la communauté "${updatedPost.community.name}" a été rejeté par la majorité des contributeurs. Consultez les feedbacks pour l'améliorer.`,
                     type: NotificationType.CONTRIBUTION_REJECTED,
-                    link: `/community/${communityId}/posts/${postId}/rejected`,
+                    // Lien direct vers l'édition du brouillon avec un paramètre pour pré-sélectionner ce brouillon
+                    link: `/community/${communityId}/posts/create?draft_id=${postId}`,
                     metadata: {
                         communityId,
                         postId,
-                        rejectionFeedbacks
+                        rejectionFeedbacks: reviewers
                     }
                 });
                 specialNotificationSent = true;
@@ -221,7 +230,7 @@ export async function POST(request, { params }) {
                     title: status === "APPROVED" ? "Nouveau feedback positif" : "Nouveau feedback négatif",
                     message: `${contributor.fullName} a laissé un feedback sur votre post "${post.title}" dans la communauté "${community.name}"`,
                     type: NotificationType.FEEDBACK,
-                    link: `/community/${communityId}`,
+                    link: `/community/${communityId}/posts/${postId}/edit`,
                     metadata: {
                         communityId,
                         postId,
@@ -295,7 +304,7 @@ export async function GET(request, { params }) {
             );
         }
 
-        // Récupérer toutes les reviews du post
+        // Récupérer toutes les reviews du post avec les infos utilisateur
         const reviews = await prisma.community_posts_reviews.findMany({
             where: {
                 post_id: parseInt(postId),

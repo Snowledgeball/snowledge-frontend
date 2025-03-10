@@ -24,6 +24,8 @@ export const POST_TAGS = [
 ];
 
 export interface PostData {
+    created_at: string;
+    was_rejected: any;
     updated_at: string;
     id?: number;
     title: string;
@@ -110,7 +112,9 @@ export default function PostEditor({
                 tag: selectedTag,
                 accept_contributions: contributionsEnabled,
                 status: initialData?.status,
-                updated_at: new Date().toISOString()
+                updated_at: new Date().toISOString(),
+                created_at: "",
+                was_rejected: undefined
             });
         } catch (error) {
             console.error("Erreur lors de la soumission:", error);
@@ -137,7 +141,9 @@ export default function PostEditor({
                 tag: selectedTag,
                 accept_contributions: contributionsEnabled,
                 status: "DRAFT",
-                updated_at: new Date().toISOString()
+                updated_at: new Date().toISOString(),
+                created_at: "",
+                was_rejected: undefined
             });
             toast.success("Brouillon sauvegardé");
         } catch (error) {
