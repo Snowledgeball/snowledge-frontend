@@ -42,6 +42,7 @@ interface TinyEditorProps {
   commentMode?: boolean;
   communityId?: string;
   postId?: string;
+  placeholder?: string;
 }
 
 interface BlobInfo {
@@ -83,6 +84,7 @@ const TinyEditor = ({
   commentMode,
   communityId,
   postId,
+  placeholder,
 }: TinyEditorProps) => {
   const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
@@ -234,6 +236,7 @@ const TinyEditor = ({
                         list-style-type: decimal;
                     }
             `,
+    placeholder: placeholder,
 
     // Callbacks pour les commentaires
     tinycomments_create: async (

@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import QASection from "@/components/shared/QASection";
 import ChatBox from "@/components/shared/ChatBox";
+import Link from "next/link";
 
 interface Post {
   id: number;
@@ -40,6 +41,8 @@ export default function PostPage() {
   const router = useRouter();
   const [post, setPost] = useState<Post | null>(null);
   const { data: session } = useSession();
+  const [isAuthor, setIsAuthor] = useState(false);
+  const [isMember, setIsMember] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -59,6 +62,27 @@ export default function PostPage() {
     fetchPost();
   }, [params.id, params.postId, router]);
 
+  useEffect(() => {
+    // Vérifier si l'utilisateur est l'auteur du post
+    if (post && session) {
+      setIsAuthor(post.author_id === parseInt(session.user.id));
+
+      // Vérifier si l'utilisateur est membre de la communauté
+      const checkMembership = async () => {
+        try {
+          const response = await fetch(`/api/communities/${params.id}/membership`);
+          if (response.ok) {
+            const data = await response.json();
+            setIsMember(data.isMember);
+          }
+        } catch (error) {
+          console.error("Erreur lors de la vérification de l'adhésion:", error);
+        }
+      };
+
+      checkMembership();
+    }
+  }, [post, session, params.id]);
 
   if (!post) return <div>Chargement...</div>;
 
@@ -141,27 +165,14 @@ export default function PostPage() {
                   dangerouslySetInnerHTML={{ __html: post.content }}
                 />
 
-                {post.accept_contributions ? (
-                  <div className="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
-                    <div className="flex items-center text-green-700">
-                      <Users className="w-5 h-5 mr-2" />
-                      <span className="font-medium">
-                        Contributions activées
-                      </span>
-                    </div>
-                    <p className="text-sm text-green-600 mt-1">
-                      Vous pouvez proposer des modifications à ce post
-                    </p>
-                  </div>
-                ) : (
-                  <div className="mt-8 p-4 bg-red-50 rounded-lg border border-red-200">
-                    <div className="flex items-center text-red-700">
-                      <Users className="w-5 h-5 mr-2" />
-                      <span className="font-medium">
-                        Contributions désactivées
-                      </span>
-                    </div>
-                  </div>
+                {post.accept_contributions && session && !isAuthor && isMember && (
+                  <Link
+                    href={`/community/${params.id}/posts/${params.postId}/contribute`}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Contribuer
+                  </Link>
                 )}
               </div>
             </Card>
