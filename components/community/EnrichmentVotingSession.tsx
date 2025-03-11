@@ -197,7 +197,7 @@ export default function EnrichmentVotingSession({
 
     if (loading) {
         return (
-            <div className="mt-4 text-center">
+            <div className="mt-4 text-center" id="enrichment-loading">
                 <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
                 <p className="mt-2 text-gray-600">Chargement des contributions...</p>
             </div>
@@ -206,14 +206,14 @@ export default function EnrichmentVotingSession({
 
     if (pendingContributions.length === 0) {
         return (
-            <div className="mt-4 bg-white rounded-lg shadow-sm p-6 text-center">
+            <div className="mt-4 bg-white rounded-lg shadow-sm p-6 text-center" id="enrichment-empty">
                 <p className="text-gray-600">Aucune contribution en attente de validation</p>
             </div>
         );
     }
 
     return (
-        <div className="mt-4">
+        <div className="mt-4" id="enrichment-contributions-list">
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                 <div className="p-4 border-b border-gray-200">
                     <div className="flex items-center justify-between">

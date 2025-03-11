@@ -21,7 +21,7 @@ export default function CommunityTabs({
     pendingEnrichmentsCount
 }: CommunityTabsProps) {
     return (
-        <div className="border-b border-gray-200 mb-6">
+        <div className="border-b border-gray-200 mb-6" id="community-tabs">
             <nav className="-mb-px flex justify-center space-x-8">
                 <button
                     className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "general"
@@ -29,6 +29,10 @@ export default function CommunityTabs({
                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                         }`}
                     onClick={() => setActiveTab("general")}
+                    aria-controls="general-section"
+                    aria-selected={activeTab === "general"}
+                    role="tab"
+                    id="tab-general"
                 >
                     Général
                 </button>
@@ -38,6 +42,10 @@ export default function CommunityTabs({
                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                         }`}
                     onClick={() => setActiveTab("posts")}
+                    aria-controls="posts-section"
+                    aria-selected={activeTab === "posts"}
+                    role="tab"
+                    id="tab-posts"
                 >
                     Posts
                 </button>
@@ -53,6 +61,8 @@ export default function CommunityTabs({
                             ? "border-blue-500 text-blue-600"
                             : "border-transparent text-gray-500"
                         }`}
+                    aria-disabled="true"
+                    id="tab-courses"
                 >
                     Cours
                     <Lock className="w-4 h-4" />
@@ -64,6 +74,10 @@ export default function CommunityTabs({
                             : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                             }`}
                         onClick={() => setActiveTab("voting")}
+                        aria-controls="voting-section"
+                        aria-selected={activeTab === "voting"}
+                        role="tab"
+                        id="tab-voting"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"

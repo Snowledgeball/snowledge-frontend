@@ -78,13 +78,14 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-white rounded-lg shadow-sm p-6" id="voting-sessions">
             <div className="mb-6">
                 <h2 className="text-xl font-bold mb-4">Sessions de vote</h2>
 
                 <div className="border-b border-gray-200 mb-6">
                     <div className="flex space-x-8">
                         <button
+                            id="creation-tab"
                             className={`border-b-2 py-2 px-4 text-sm font-medium transition-colors ${activeTab === "creation" ? "border-blue-500 text-blue-600" : "border-transparent text-gray-500"
                                 }`}
                             onClick={() => onTabChange("creation")}
@@ -92,6 +93,7 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
                             Création
                         </button>
                         <button
+                            id="enrichissement-tab"
                             className={`border-b-2 py-2 px-4 text-sm font-medium transition-colors ${activeTab === "enrichissement" ? "border-blue-500 text-blue-600" : "border-transparent text-gray-500"
                                 }`}
                             onClick={() => onTabChange("enrichissement")}
@@ -113,9 +115,11 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
             </div>
 
             {activeTab === "creation" ? (
-                <CreationVotingSession communityId={communityId} />
+                <div id="creation-content">
+                    <CreationVotingSession communityId={communityId} />
+                </div>
             ) : (
-                <div className="space-y-6">
+                <div id="enrichissement-content" className="space-y-6">
                     {postsWithPendingEnrichments.length === 0 ? (
                         <div className="text-center py-8 bg-gray-50 rounded-lg">
                             <p className="text-gray-500">Aucun post n'a d'enrichissement en attente de validation</p>

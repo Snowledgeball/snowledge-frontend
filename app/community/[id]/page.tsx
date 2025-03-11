@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
@@ -47,9 +47,14 @@ const CommunityHub = () => {
   const { data: session } = useSession();
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Récupérer l'onglet actif depuis l'URL ou utiliser "general" par défaut
+  const tabFromUrl = searchParams.get('tab');
+
   const [communityData, setCommunityData] = useState<Community | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("general");
+  const [activeTab, setActiveTab] = useState(tabFromUrl || "general");
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [presentation, setPresentation] = useState<Presentation | null>(null);
   const [userCommunities, setUserCommunities] = useState<Community[]>([]);
@@ -59,7 +64,34 @@ const CommunityHub = () => {
   const [pendingPostsCount, setPendingPostsCount] = useState(0);
   const [pendingEnrichmentsCount, setPendingEnrichmentsCount] = useState(0);
   const [bans, setBans] = useState<any[]>([]);
-  const [votingSubTab, setVotingSubTab] = useState<"creation" | "enrichissement">("creation");
+  const [votingSubTab, setVotingSubTab] = useState<"creation" | "enrichissement">(
+    searchParams.get('voting') as "creation" | "enrichissement" || "creation"
+  );
+
+  // Mettre à jour l'URL lorsque l'onglet actif change
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+
+    // Construire la nouvelle URL avec les paramètres
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('tab', tab);
+
+    // Mettre à jour l'URL sans recharger la page
+    router.push(`/community/${params.id}?${newParams.toString()}#community-content`, { scroll: false });
+  };
+
+  // Mettre à jour l'URL lorsque le sous-onglet de vote change
+  const handleVotingSubTabChange = (tab: "creation" | "enrichissement") => {
+    setVotingSubTab(tab);
+
+    // Construire la nouvelle URL avec les paramètres
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('tab', 'voting');
+    newParams.set('voting', tab);
+
+    // Mettre à jour l'URL sans recharger la page
+    router.push(`/community/${params.id}?${newParams.toString()}#voting-section`, { scroll: false });
+  };
 
   useEffect(() => {
     if (!session) {
@@ -169,7 +201,7 @@ const CommunityHub = () => {
     if (params.id) {
       checkMembershipAndFetchData();
     }
-  }, [params.id, router, session]);
+  }, [params.id, router, session, searchParams]);
 
   // Si en cours de chargement, afficher le loader
   if (isLoading) {
@@ -185,13 +217,8 @@ const CommunityHub = () => {
     return videoId;
   };
 
-  // Fonction pour gérer le changement de sous-onglet
-  const handleVotingSubTabChange = (tab: "creation" | "enrichissement") => {
-    setVotingSubTab(tab);
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" id="community-page">
       {/* Modal de présentation */}
       <CommunityPresentationModal
         communityData={communityData}
@@ -218,14 +245,14 @@ const CommunityHub = () => {
       <CommunityBanner communityData={communityData} />
 
       {session && (
-        <div className="max-w-7xl mx-auto px-4 pb-12 ">
+        <div className="max-w-7xl mx-auto px-4 pb-12" id="community-content">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Contenu principal */}
             <main className="flex-1 order-1">
               {/* Tabs */}
               <CommunityTabs
                 activeTab={activeTab}
-                setActiveTab={setActiveTab}
+                setActiveTab={handleTabChange}
                 isContributor={isContributor}
                 isCreator={isCreator}
                 pendingPostsCount={pendingPostsCount}
@@ -234,7 +261,7 @@ const CommunityHub = () => {
 
               {/* Contenu basé sur l'onglet actif */}
               {activeTab === "general" ? (
-                <Card className="bg-white shadow-sm">
+                <Card className="bg-white shadow-sm" id="general-section">
                   <div className="h-[600px] flex flex-col">
                     {session && (
                       <ChatBox
@@ -246,7 +273,7 @@ const CommunityHub = () => {
                   </div>
                 </Card>
               ) : activeTab === "voting" ? (
-                <div>
+                <div id="voting-section">
                   <VotingSession
                     communityId={params.id as string}
                     activeTab={votingSubTab}
@@ -254,18 +281,20 @@ const CommunityHub = () => {
                   />
                 </div>
               ) : (
-                <CommunityPosts
-                  posts={posts}
-                  communityId={params.id as string}
-                  isContributor={isContributor}
-                  userId={session?.user?.id}
-                />
+                <div id="posts-section">
+                  <CommunityPosts
+                    posts={posts}
+                    communityId={params.id as string}
+                    isContributor={isContributor}
+                    userId={session?.user?.id}
+                  />
+                </div>
               )}
             </main>
           </div>
 
           {/* Section Q&A avec Disclosure */}
-          <div className="mt-8">
+          <div className="mt-8" id="qa-section">
             {activeTab === "general" && session && (
               <QASection
                 communityId={params.id as string}

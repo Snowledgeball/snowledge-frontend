@@ -175,7 +175,7 @@ export default function CreationVotingSession({ communityId }: CreationVotingSes
 
     if (loading) {
         return (
-            <div className="text-center py-8">
+            <div className="text-center py-8" id="creation-loading">
                 <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
                 <p className="mt-2 text-gray-600">Chargement des posts en attente...</p>
             </div>
@@ -184,14 +184,14 @@ export default function CreationVotingSession({ communityId }: CreationVotingSes
 
     if (pendingPosts.length === 0) {
         return (
-            <div className="text-center py-8 bg-gray-50 rounded-lg">
+            <div className="text-center py-8 bg-gray-50 rounded-lg" id="creation-empty">
                 <p className="text-gray-500">Aucun post en attente de validation</p>
             </div>
         );
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden" id="creation-posts-list">
             <div className="p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold">
