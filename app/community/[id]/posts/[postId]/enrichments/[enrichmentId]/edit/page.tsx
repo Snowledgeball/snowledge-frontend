@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import TinyEditor from "@/components/shared/TinyEditor";
+import EnrichmentEditor from "@/components/community/EnrichmentEditor";
 
 interface Contribution {
     id: number;
@@ -175,47 +175,15 @@ export default function EditContributionPage() {
                         Modifier votre contribution à "{contribution.community_posts.title}"
                     </h1>
 
-                    <div className="mb-6">
-                        <h2 className="text-lg font-semibold mb-2">Description de vos modifications</h2>
-                        <div className="mb-2 text-sm text-gray-600">
-                            <p className="mb-1">Décrivez brièvement les modifications que vous proposez et leur raison.</p>
-                            <p className="mb-1">Exemple de format :</p>
-                            <ul className="list-disc pl-5 mb-2">
-                                <li>Correction de faute d'orthographe</li>
-                                <li>Ajout d'information sur...</li>
-                                <li>Restructuration de la section...</li>
-                            </ul>
-                        </div>
-                        <textarea
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Décrivez vos modifications ici..."
-                            className="w-full p-3 border rounded-md"
-                            rows={5}
-                        />
-                        {!description && (
-                            <p className="text-sm text-red-500 mt-1">
-                                Une description de vos modifications est requise
-                            </p>
-                        )}
-                    </div>
+                    <EnrichmentEditor
+                        originalContent={contribution.original_content}
+                        initialModifiedContent={modifiedContent}
+                        description={description}
+                        onDescriptionChange={setDescription}
+                        onContentChange={setModifiedContent}
+                    />
 
-                    <div className="mb-6">
-                        <h2 className="text-lg font-semibold mb-2">Contenu modifié</h2>
-                        <div className="border rounded-lg bg-gray-50 p-1">
-                            <TinyEditor
-                                initialValue={contribution.content}
-                                onChange={setModifiedContent}
-                            />
-                        </div>
-                        {modifiedContent === contribution.original_content && (
-                            <p className="text-sm text-red-500 mt-1">
-                                Vous n'avez pas encore modifié le contenu
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="flex justify-end space-x-3">
+                    <div className="flex justify-end space-x-3 mt-6">
                         <Button
                             variant="outline"
                             onClick={() => router.push(`/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`)}

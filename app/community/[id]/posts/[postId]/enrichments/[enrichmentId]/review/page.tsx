@@ -49,8 +49,8 @@ export default function ReviewContribution() {
                 );
                 const membershipData = await membershipResponse.json();
 
-                if (!membershipData.isContributor) {
-                    toast.error("Vous devez être contributeur pour réviser un enrichissement");
+                if (!membershipData.isContributor && !membershipData.isCreator) {
+                    toast.error("Vous devez être contributeur ou créateur pour réviser un enrichissement");
                     router.push(`/community/${params.id}/posts/${params.postId}`);
                     return;
                 }

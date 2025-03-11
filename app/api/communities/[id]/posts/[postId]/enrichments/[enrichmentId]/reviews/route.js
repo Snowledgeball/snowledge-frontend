@@ -3,8 +3,8 @@ import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { checkContributionStatus } from "@/lib/contributionUtils";
-import { NotificationType } from "@/lib/notificationUtils";
-import { createBulkNotifications } from "@/lib/notificationUtils";
+import { NotificationType } from "@/types/notification";
+import { createBulkNotifications } from "@/lib/notifications";
 
 const prisma = new PrismaClient();
 

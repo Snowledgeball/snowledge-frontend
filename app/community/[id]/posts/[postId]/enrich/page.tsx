@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import TinyEditor from "@/components/shared/TinyEditor";
+import EnrichmentEditor from "@/components/community/EnrichmentEditor";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
@@ -156,43 +156,13 @@ export default function ContributePage() {
             <Card className="p-6">
                 <h1 className="text-2xl font-bold mb-6">Contribuer à : {postTitle}</h1>
 
-                <div className="mb-6">
-                    <h2 className="text-lg font-semibold mb-2">Description de vos modifications</h2>
-                    <div className="mb-2 text-sm text-gray-600">
-                        <p className="mb-1">Décrivez brièvement les modifications que vous proposez et leur raison.</p>
-                        <p className="mb-1">Exemple de format :</p>
-                        <ul className="list-disc pl-5 mb-2">
-                            <li>Correction de faute d'orthographe</li>
-                            <li>Ajout d'information sur...</li>
-                            <li>Restructuration de la section...</li>
-                        </ul>
-                    </div>
-                    <textarea
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Décrivez vos modifications ici..."
-                        className="w-full p-3 border rounded-md"
-                        rows={3}
-                    />
-                    {!description && (
-                        <p className="text-sm text-red-500 mt-1">
-                            Une description de vos modifications est requise
-                        </p>
-                    )}
-                </div>
-
-                <div className="mb-6">
-                    <h2 className="text-lg font-semibold mb-2">Éditeur de contenu</h2>
-                    <TinyEditor
-                        initialValue={originalContent}
-                        onChange={setModifiedContent}
-                    />
-                    {originalContent === modifiedContent && (
-                        <p className="text-sm text-red-500 mt-1">
-                            Vous n'avez pas encore apporté de modifications au contenu
-                        </p>
-                    )}
-                </div>
+                <EnrichmentEditor
+                    originalContent={originalContent}
+                    initialModifiedContent={modifiedContent}
+                    description={description}
+                    onDescriptionChange={setDescription}
+                    onContentChange={setModifiedContent}
+                />
 
                 <div className="flex justify-end space-x-4">
                     <Button

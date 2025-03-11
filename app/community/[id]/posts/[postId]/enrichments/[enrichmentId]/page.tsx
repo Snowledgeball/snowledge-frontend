@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, ThumbsDown, Clock, Check, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import GoogleDocsStyleDiff from "@/components/shared/GoogleDocsStyleDiff";
 
 interface Contribution {
     id: number;
@@ -76,7 +77,7 @@ export default function ContributionDetailPage() {
         } catch (error) {
             console.error("Erreur:", error);
             toast.error("Erreur lors de la récupération de la contribution");
-            router.push("/dashboard/enrichments");
+            router.push("/community/" + params.id + "/posts/" + params.postId);
         } finally {
             setLoading(false);
         }
@@ -133,7 +134,7 @@ export default function ContributionDetailPage() {
                     <Button
                         variant="outline"
                         className="mt-4"
-                        onClick={() => router.push("/dashboard/enrichments")}
+                        onClick={() => router.push("/community/" + params.id + "/posts/" + params.postId)}
                     >
                         Retour à mes contributions
                     </Button>
@@ -146,7 +147,7 @@ export default function ContributionDetailPage() {
         <div className="container mx-auto py-8 px-4">
             <div className="mb-6">
                 <Link
-                    href="/dashboard/enrichments"
+                    href={`/community/${params.id}/posts/${params.postId}`}
                     className="inline-flex items-center text-blue-600 hover:underline"
                 >
                     <ArrowLeft className="mr-2 h-4 w-4" />
@@ -196,53 +197,13 @@ export default function ContributionDetailPage() {
                 <div className="mb-6">
                     <h3 className="text-lg font-medium mb-4">Modifications proposées</h3>
 
-                    <div className="flex space-x-2 mb-4 border-b">
-                        <button
-                            className={`px-4 py-2 ${activeTab === "diff" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
-                            onClick={() => setActiveTab("diff")}
-                        >
-                            Différences
-                        </button>
-                        <button
-                            className={`px-4 py-2 ${activeTab === "original" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
-                            onClick={() => setActiveTab("original")}
-                        >
-                            Contenu original
-                        </button>
-                        <button
-                            className={`px-4 py-2 ${activeTab === "modified" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
-                            onClick={() => setActiveTab("modified")}
-                        >
-                            Contenu modifié
-                        </button>
-                    </div>
-
-                    {activeTab === "diff" && (
-                        <div className="border rounded-lg p-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <h3 className="text-lg font-medium mb-2">Contenu original</h3>
-                                    <div className="p-3 border rounded bg-gray-50" dangerouslySetInnerHTML={{ __html: contribution.original_content }} />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-medium mb-2">Contenu modifié</h3>
-                                    <div className="p-3 border rounded bg-gray-50" dangerouslySetInnerHTML={{ __html: contribution.content }} />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === "original" && (
-                        <div className="border rounded-lg p-4">
-                            <div dangerouslySetInnerHTML={{ __html: contribution.original_content }} />
-                        </div>
-                    )}
-
-                    {activeTab === "modified" && (
-                        <div className="border rounded-lg p-4">
-                            <div dangerouslySetInnerHTML={{ __html: contribution.content }} />
-                        </div>
-                    )}
+                    <GoogleDocsStyleDiff
+                        oldHtml={contribution.original_content}
+                        newHtml={contribution.content}
+                        showControls={true}
+                        readOnly={true}
+                        description={contribution.description}
+                    />
                 </div>
             </Card>
 
