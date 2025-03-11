@@ -42,7 +42,7 @@ export default function PostPage() {
   const [post, setPost] = useState<Post | null>(null);
   const { data: session } = useSession();
   const [isAuthor, setIsAuthor] = useState(false);
-  const [isMember, setIsMember] = useState(false);
+  const [isContributorOrCreator, setIsContributorOrCreator] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -73,7 +73,7 @@ export default function PostPage() {
           const response = await fetch(`/api/communities/${params.id}/membership`);
           if (response.ok) {
             const data = await response.json();
-            setIsMember(data.isMember);
+            setIsContributorOrCreator(data.isContributor || data.isCreator);
           }
         } catch (error) {
           console.error("Erreur lors de la vérification de l'adhésion:", error);
@@ -165,7 +165,20 @@ export default function PostPage() {
                   dangerouslySetInnerHTML={{ __html: post.content }}
                 />
 
-                {post.accept_contributions && session && !isAuthor && isMember && (
+                {/* Si le post accepte les contributions on l'indique */}
+                {post.accept_contributions ? (
+                  <span className="text-sm text-green-600 flex items-center">
+                    <Users className="w-4 h-4 mr-1" />
+                    Contributions activées
+                  </span>
+                ) : (
+                  <span className="text-sm text-red-600 flex items-center">
+                    <Users className="w-4 h-4 mr-1" />
+                    Contributions désactivées
+                  </span>
+                )}
+
+                {post.accept_contributions && session && !isAuthor && isContributorOrCreator && (
                   <Link
                     href={`/community/${params.id}/posts/${params.postId}/enrich`}
                     className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
