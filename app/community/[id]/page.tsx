@@ -225,6 +225,7 @@ const CommunityHub = () => {
         presentation={presentation}
         userId={userId}
         showModal={showJoinModal}
+        setShowModal={setShowJoinModal}
       />
 
       {/* Modal de bannissement */}

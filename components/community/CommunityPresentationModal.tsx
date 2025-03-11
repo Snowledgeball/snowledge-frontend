@@ -16,13 +16,16 @@ interface CommunityPresentationModalProps {
     presentation: Presentation | null;
     userId: string | null;
     showModal: boolean;
+    setShowModal: (showModal: boolean) => void;
 }
 
 export default function CommunityPresentationModal({
     communityData,
     presentation,
     userId,
-    showModal
+    showModal,
+    setShowModal
+
 }: CommunityPresentationModalProps) {
     const router = useRouter();
     const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
@@ -49,6 +52,7 @@ export default function CommunityPresentationModal({
             if (!response.ok) {
                 throw new Error("Erreur lors de l'adhésion à la communauté");
             }
+            setShowModal(false);
         } catch (error) {
             console.error("Erreur:", error);
             // Gérer l'erreur (afficher un message à l'utilisateur)
