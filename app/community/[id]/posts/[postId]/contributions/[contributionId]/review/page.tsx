@@ -2,16 +2,16 @@
 
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import ContributionReview from "@/components/community/ContributionReview";
 import { redirect } from "next/navigation";
+import ContributionReview from "@/components/community/ContributionReview";
 
 export default function ReviewContribution() {
-    const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
     const params = useParams();
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { data: session, status } = useSession();
 
     const [contribution, setContribution] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -21,11 +21,17 @@ export default function ReviewContribution() {
     const [isEditMode, setIsEditMode] = useState(false);
 
     useEffect(() => {
+        // Rediriger si l'utilisateur n'est pas connecté
+        if (status === "unauthenticated") {
+            toast.error("Vous devez être connecté pour accéder à cette page");
+            router.push(`/community/${params.id}/posts/${params.postId}`);
+            return;
+        }
+
         const fetchData = async () => {
             try {
-                // Récupérer la session en premier
-                const sessionResponse = await fetch('/api/auth/session');
-                const sessionData = await sessionResponse.json();
+                // Récupérer la session
+                if (!session?.user?.id) return;
 
                 // Vérifier que l'utilisateur est contributeur
                 const membershipResponse = await fetch(
@@ -36,11 +42,9 @@ export default function ReviewContribution() {
 
                 if (!membershipData.isContributor) {
                     toast.error("Vous devez être contributeur pour réviser une contribution");
-                    router.push(`/community/${params.id}`);
+                    router.push(`/community/${params.id}/posts/${params.postId}`);
                     return;
                 }
-
-                console.log("membershipData", membershipData);
 
                 // Récupérer les données de la contribution
                 const contributionResponse = await fetch(
@@ -57,31 +61,24 @@ export default function ReviewContribution() {
                 setContribution(contributionData);
 
                 // Vérifier si l'utilisateur est l'auteur de la contribution
-                if (contributionData.user.id === parseInt(sessionData?.user?.id || "0")) {
+                if (contributionData.user_id === parseInt(session.user.id)) {
                     toast.error("Vous ne pouvez pas réviser votre propre contribution");
                     router.push(`/community/${params.id}/posts/${params.postId}`);
                     return;
                 }
+
                 // Récupérer les données de la communauté
                 const communityResponse = await fetch(`/api/communities/${params.id}`);
                 const communityData = await communityResponse.json();
 
-                console.log("communityData", communityData);
-
                 // Vérifier si l'utilisateur est un contributeur ou le créateur de la communauté
-                const isContributor = communityData.community_contributors.some(
-                    (contributor: any) => contributor.contributor_id === parseInt(sessionData?.user?.id || "0")
+                const isUserContributor = communityData.contributors.some(
+                    (contributor: any) => contributor.userId === session.user.id
                 );
-
-                console.log("isContributor", isContributor);
-
-                const isCreator = communityData.creator.id === parseInt(sessionData?.user?.id || "0");
-
-                console.log("isCreator", isCreator);
+                const isCreator = communityData.createdBy === session.user.id;
 
                 // Permettre l'accès à la page de revue si l'utilisateur est contributeur OU créateur
-                if (!isContributor && !isCreator) {
-                    console.log("redirect");
+                if (!isUserContributor && !isCreator) {
                     redirect(`/community/${params.id}`);
                 }
 
@@ -89,9 +86,6 @@ export default function ReviewContribution() {
                 const hasVotedResponse = await fetch(
                     `/api/communities/${params.id}/posts/${params.postId}/contributions/${params.contributionId}/reviews/user`
                 );
-
-                console.log("hasVotedResponse", hasVotedResponse);
-
                 if (hasVotedResponse.ok) {
                     const hasVotedData = await hasVotedResponse.json();
                     setHasAlreadyVoted(hasVotedData.hasVoted);
@@ -112,23 +106,36 @@ export default function ReviewContribution() {
                                     onClick: () => router.push(`/community/${params.id}/posts/${params.postId}/contributions/${params.contributionId}/review?edit=true`),
                                 },
                             });
+                            router.push(`/community/${params.id}/posts/${params.postId}`);
                         }
                     }
                 }
             } catch (error) {
                 console.error("Erreur:", error);
                 toast.error("Une erreur est survenue");
-                // router.push(`/community/${params.id}/posts/${params.postId}`);
+                router.push(`/community/${params.id}/posts/${params.postId}`);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchData();
-    }, [params.id, params.postId, params.contributionId, router, searchParams]);
+        if (session) {
+            fetchData();
+        }
+    }, [params.id, params.postId, params.contributionId, router, searchParams, session, status]);
 
-    if (isLoading || loading) return <LoadingComponent />;
-    if (!isAuthenticated || !contribution) return null;
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 py-8">
+                <div className="max-w-5xl mx-auto px-4 flex justify-center items-center h-64">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+                    <p className="ml-2">Chargement...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!session || !contribution) return null;
 
     // Si l'utilisateur a déjà voté et n'est pas en mode édition, afficher un message
     if (hasAlreadyVoted && !isEditMode) {
@@ -169,7 +176,7 @@ export default function ReviewContribution() {
                 originalContent={contribution.original_content}
                 modifiedContent={contribution.content}
                 authorName={contribution.user.fullName}
-                authorId={contribution.user.id}
+                authorId={contribution.user_id}
                 existingReview={existingReview}
             />
         );
@@ -185,7 +192,7 @@ export default function ReviewContribution() {
             originalContent={contribution.original_content}
             modifiedContent={contribution.content}
             authorName={contribution.user.fullName}
-            authorId={contribution.user.id}
+            authorId={contribution.user_id}
         />
     );
 } 

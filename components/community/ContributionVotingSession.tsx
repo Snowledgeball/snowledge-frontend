@@ -198,7 +198,7 @@ export default function ContributionVotingSession({
 
     if (loading) {
         return (
-            <div className="mt-8 text-center">
+            <div className="mt-4 text-center">
                 <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
                 <p className="mt-2 text-gray-600">Chargement des contributions...</p>
             </div>
@@ -207,19 +207,29 @@ export default function ContributionVotingSession({
 
     if (pendingContributions.length === 0) {
         return (
-            <div className="mt-8 bg-white rounded-lg shadow-sm p-8 text-center">
+            <div className="mt-4 bg-white rounded-lg shadow-sm p-6 text-center">
                 <p className="text-gray-600">Aucune contribution en attente de validation</p>
             </div>
         );
     }
 
     return (
-        <div className="mt-8">
+        <div className="mt-4">
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-gray-200">
-                    <h2 className="text-xl font-semibold">Contributions en attente de validation</h2>
-                    <p className="text-gray-600 mt-1">
-                        Votez pour approuver ou rejeter les contributions proposées par la communauté
+                <div className="p-4 border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-lg font-semibold">
+                            Contributions en attente
+                            <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                                {pendingContributions.length}
+                            </span>
+                        </h2>
+                        <div className="text-sm text-gray-600 flex items-center">
+                            <span>Contributeurs: {contributorsCount}</span>
+                        </div>
+                    </div>
+                    <p className="text-gray-600 mt-1 text-sm">
+                        Votez pour approuver ou rejeter les contributions proposées
                     </p>
                 </div>
 
@@ -280,13 +290,31 @@ export default function ContributionVotingSession({
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex flex-col">
-                                            <div className="text-sm text-gray-900 mb-1">
-                                                {getParticipationRate(contribution)}% ({contribution.community_posts_contribution_reviews.length}/{contributorsCount})
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <div className="text-sm text-gray-900 mb-1 cursor-help">
+                                                            {getParticipationRate(contribution)}% ({contribution.community_posts_contribution_reviews.length}/{contributorsCount})
+                                                        </div>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Pour: {contribution.community_posts_contribution_reviews.filter(r => r.status === "APPROVED").length}</p>
+                                                        <p>Contre: {contribution.community_posts_contribution_reviews.filter(r => r.status === "REJECTED").length}</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                                <div
+                                                    className={`h-2.5 rounded-full ${getParticipationRate(contribution) >= 50 ? "bg-green-600" :
+                                                        getParticipationRate(contribution) >= 25 ? "bg-yellow-400" :
+                                                            "bg-red-500"
+                                                        }`}
+                                                    style={{ width: `${getParticipationRate(contribution)}%` }}
+                                                ></div>
                                             </div>
-                                            <Progress
-                                                value={getParticipationRate(contribution)}
-                                                className="h-1.5 w-24"
-                                            />
+                                            <div className="text-xs text-gray-500 mt-1">
+                                                {getParticipationRate(contribution) < 50 && "(min 50% requis)"}
+                                            </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -294,11 +322,18 @@ export default function ContributionVotingSession({
                                             <div className="text-sm text-gray-900 mb-1">
                                                 {getApprovalRate(contribution)}%
                                             </div>
-                                            <div className="flex items-center">
-                                                <Progress
-                                                    value={getApprovalRate(contribution)}
-                                                    className="h-1.5 w-24 bg-gray-200"
-                                                />
+                                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                                <div
+                                                    className={`h-2.5 rounded-full ${getApprovalRate(contribution) >= (isContributorsCountEven ? 50 + (100 / contributorsCount) : 50)
+                                                        ? "bg-green-600"
+                                                        : getApprovalRate(contribution) >= 50
+                                                            ? "bg-yellow-400"
+                                                            : "bg-red-500"
+                                                        }`}
+                                                    style={{ width: `${getApprovalRate(contribution)}%` }}
+                                                ></div>
+                                            </div>
+                                            <div className="text-xs text-gray-500 mt-1">
                                                 {isContributorsCountEven && (
                                                     <TooltipProvider>
                                                         <Tooltip>

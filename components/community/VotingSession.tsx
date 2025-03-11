@@ -13,6 +13,8 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Link from "next/link";
+import ContributionVotingSession from "./ContributionVotingSession";
+import CreationVotingSession from "./CreationVotingSession";
 
 interface PendingPost {
     status: string;
@@ -59,11 +61,14 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
     const [creationPosts, setCreationPosts] = useState<PendingPost[]>([]);
     const [enrichissementPosts, setEnrichissementPosts] = useState<PendingPost[]>([]);
     const [publishError, setPublishError] = useState<string | null>(null);
+    const [publishedPosts, setPublishedPosts] = useState<PendingPost[]>([]);
+    const [postsWithPendingContributions, setPostsWithPendingContributions] = useState<PendingPost[]>([]);
 
     useEffect(() => {
+        fetchCommunityData();
         fetchPendingPosts();
         fetchContributorsCount();
-        fetchCommunityData();
+        fetchPostsWithPendingContributions();
     }, [communityId]);
 
     // Fonction pour récupérer les données de la communauté
@@ -104,6 +109,18 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
             }
         } catch (error) {
             console.error("Erreur lors de la récupération du nombre de contributeurs:", error);
+        }
+    };
+
+    const fetchPostsWithPendingContributions = async () => {
+        try {
+            const response = await fetch(`/api/communities/${communityId}/posts/with-pending-contributions`);
+            if (response.ok) {
+                const data = await response.json();
+                setPostsWithPendingContributions(data);
+            }
+        } catch (error) {
+            console.error("Erreur lors de la récupération des posts avec contributions en attente:", error);
         }
     };
 
@@ -231,195 +248,50 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
                 )}
             </div>
 
-            {postsToDisplay.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                    Aucun post en attente de vote dans cette catégorie
-                </div>
+            {activeTab === "creation" ? (
+                <CreationVotingSession communityId={communityId} />
             ) : (
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead>
-                            <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">État</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titre</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Auteur</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Votes</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participation</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approbation</th>
-                                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {postsToDisplay.map((post, index) => {
-                                const participationRate = getParticipationRate(post);
-                                const approvalRate = getApprovalRate(post);
-                                const isAuthor = isPostAuthor(post);
-                                const userVoted = hasUserVoted(post);
-                                const publishable = canPublish(post);
+                <div className="space-y-6">
+                    {postsWithPendingContributions.length === 0 ? (
+                        <div className="text-center py-8 bg-gray-50 rounded-lg">
+                            <p className="text-gray-500">Aucun post n'a de contributions en attente de validation</p>
+                        </div>
+                    ) : (
+                        <div className="bg-white rounded-lg shadow-sm p-6">
+                            <h3 className="text-lg font-semibold mb-4">Contributions en attente de validation</h3>
+                            <p className="text-gray-600 mb-6">
+                                Votez sur les modifications proposées pour améliorer les posts publiés.
+                            </p>
 
-                                return (
-                                    <tr key={post.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-4 whitespace-nowrap">
+                            <div className="space-y-8">
+                                {postsWithPendingContributions.map((post) => (
+                                    <div key={post.id} className="border-t pt-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h4 className="text-lg font-medium">{post.title}</h4>
                                             <div className="flex items-center">
-                                                <span className="text-gray-900 font-medium">{index + 1}</span>
-                                                <div className="ml-2">
-                                                    {publishable ? (
-                                                        <div className="h-5 w-5 rounded-full bg-green-100 flex items-center justify-center">
-                                                            <svg className="h-3 w-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                            </svg>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="h-5 w-5 rounded-full bg-gray-100 flex items-center justify-center">
-                                                            <div className="h-2 w-2 rounded-full bg-gray-400"></div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <div className="text-sm font-medium text-gray-900">{post.title}</div>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <div className="flex items-center">
-                                                <div className="flex-shrink-0 h-8 w-8 relative overflow-hidden rounded-full">
+                                                <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-100 mr-2">
                                                     <Image
-                                                        src={post.user.profilePicture}
+                                                        src={post.user.profilePicture || "/images/default-avatar.png"}
                                                         alt={post.user.fullName}
                                                         width={32}
                                                         height={32}
-                                                        className="rounded-full blur-[5px]"
+                                                        className="h-full w-full object-cover"
                                                     />
                                                 </div>
-                                                <div className="ml-3">
-                                                    {isAuthor ? (
-                                                        <div className="text-sm font-medium text-gray-900">{post.user.fullName}</div>
-                                                    ) : (
-                                                        <div className="text-sm font-medium text-gray-500 blur-sm select-none">
-                                                            {post.user.fullName}
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                <span className="text-sm text-gray-600">
+                                                    {post.user.fullName}
+                                                </span>
                                             </div>
-                                        </td>
-                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <TooltipProvider>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <div className="cursor-help">
-                                                            {post.community_posts_reviews.length}/{contributorsCount}
-                                                        </div>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <p>Pour: {post.community_posts_reviews.filter(r => r.status === "APPROVED").length}</p>
-                                                        <p>Contre: {post.community_posts_reviews.filter(r => r.status === "REJECTED").length}</p>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        </td>
-                                        <td className="px-4 py-4 whitespace-nowrap">
-                                            <div className="w-full bg-gray-200 rounded-full h-2.5">
-                                                <div
-                                                    className={`h-2.5 rounded-full ${participationRate >= 50 ? "bg-green-600" :
-                                                        participationRate >= 25 ? "bg-yellow-400" :
-                                                            "bg-red-500"
-                                                        }`}
-                                                    style={{ width: `${participationRate}%` }}
-                                                ></div>
-                                            </div>
-                                            <div className="text-xs text-gray-500 mt-1">
-                                                {participationRate}% {participationRate < 50 && "(min 50% requis)"}
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-4 whitespace-nowrap">
-                                            <div className="w-full bg-gray-200 rounded-full h-2.5">
-                                                <div
-                                                    className={`h-2.5 rounded-full ${approvalRate >= (isContributorsCountEven ? 50 + (100 / contributorsCount) : 50)
-                                                        ? "bg-green-600"
-                                                        : approvalRate >= 50
-                                                            ? "bg-yellow-400"
-                                                            : "bg-red-500"
-                                                        }`}
-                                                    style={{ width: `${approvalRate}%` }}
-                                                ></div>
-                                            </div>
-                                            <div className="text-xs text-gray-500 mt-1">
-                                                {approvalRate}%
-                                                {isContributorsCountEven && (
-                                                    <TooltipProvider>
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <span className="ml-1 cursor-help text-blue-500">
-                                                                    ({post.community_posts_reviews.filter(r => r.status === "APPROVED").length}/{(contributorsCount / 2) + 1} requis)
-                                                                </span>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                <p>Comme le nombre de contributeurs est pair ({contributorsCount}),
-                                                                    il faut une majorité stricte de {(contributorsCount / 2) + 1} votes positifs.</p>
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                    </TooltipProvider>
-                                                )}
-                                                {!isContributorsCountEven && (
-                                                    <span className="ml-1">
-                                                        ({post.community_posts_reviews.filter(r => r.status === "APPROVED").length}/{Math.ceil(contributorsCount / 2)} requis)
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <div className="flex justify-end space-x-2">
-                                                {isPostAuthor(post) && (
-                                                    <>
-                                                        <Link
-                                                            href={`/community/${communityId}/posts/${post.id}/edit`}
-                                                            className="text-blue-600 hover:text-blue-800"
-                                                        >
-                                                            Modifier
-                                                        </Link>
-
-                                                        {canPublish(post) && (
-                                                            <button
-                                                                onClick={() => handlePublish(post.id)}
-                                                                className="text-green-600 hover:text-green-800 ml-3"
-                                                            >
-                                                                Publier
-                                                            </button>
-                                                        )}
-                                                    </>
-                                                )}
-
-                                                {!isPostAuthor(post) && (
-                                                    <div className="flex justify-end space-x-2">
-                                                        {userVoted ? (
-                                                            <div className="mt-4">
-                                                                <p className="text-sm text-gray-600 mb-2">
-                                                                    Vous avez déjà voté sur ce post.
-                                                                </p>
-                                                                <Link
-                                                                    href={`/community/${communityId}/posts/${post.id}/review?edit=true`}
-                                                                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                                                                >
-                                                                    Modifier mon vote
-                                                                </Link>
-                                                            </div>
-                                                        ) : (
-                                                            <Link
-                                                                href={`/community/${communityId}/posts/${post.id}/review`}
-                                                                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                                                            >
-                                                                Voter sur ce post
-                                                            </Link>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                        </div>
+                                        <ContributionVotingSession
+                                            communityId={communityId}
+                                            postId={post.id.toString()}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

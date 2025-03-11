@@ -24,6 +24,8 @@ import { fr } from "date-fns/locale";
 import ChatBox from "@/components/shared/ChatBox";
 import QASection from "@/components/shared/QASection";
 import VotingSession from "@/components/community/VotingSession";
+import ContributionVotingSession from "@/components/community/ContributionVotingSession";
+import Link from "next/link";
 
 // Ajouter ces catégories de posts
 const POST_CATEGORIES = [
@@ -80,6 +82,8 @@ const CommunityHub = () => {
   const [bans, setBans] = useState<any[]>([]);
   const [activeSubTab, setActiveSubTab] = useState<"general" | "creation" | "enrichissement">("general");
   const [votingSubTab, setVotingSubTab] = useState<"creation" | "enrichissement">("creation");
+  const [pendingPosts, setPendingPosts] = useState<Post[]>([]);
+  const [communityPosts, setCommunityPosts] = useState<Post[]>([]);
 
   useEffect(() => {
     if (!session) {
@@ -147,12 +151,22 @@ const CommunityHub = () => {
               if (response.ok) {
                 const data = await response.json();
                 setPendingPostsCount(data.length);
+                setPendingPosts(data);
               }
             } catch (error) {
               console.error("Erreur:", error);
             }
           };
           fetchPendingPosts();
+        }
+
+        // Récupérer les posts de la communauté
+        const communityPostsResponse = await fetch(
+          `/api/communities/${params.id}/posts?status=PUBLISHED`
+        );
+        if (communityPostsResponse.ok) {
+          const communityPostsData = await communityPostsResponse.json();
+          setCommunityPosts(communityPostsData);
         }
       } catch (error) {
         if (error instanceof Error) {
@@ -168,25 +182,6 @@ const CommunityHub = () => {
       checkMembershipAndFetchData();
     }
   }, [params.id, router, session]);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch(
-          `/api/communities/${params.id}/posts?status=PUBLISHED`
-        );
-        if (!response.ok)
-          throw new Error("Erreur lors de la récupération des posts");
-        const data = await response.json();
-        setPosts(data);
-      } catch (error) {
-        console.error("Erreur:", error);
-        toast.error("Erreur lors de la récupération des posts");
-      }
-    };
-
-    fetchPosts();
-  }, [params.id]);
 
   const handleJoinCommunity = async () => {
     try {
