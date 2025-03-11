@@ -14,8 +14,8 @@ export async function GET(request, { params }) {
 
         const { id: communityId, postId, enrichmentId } = await params;
 
-        // Vérifier que l'utilisateur est contributeur
-        const membership = await prisma.community_contributors.findUnique({
+        // Vérifier que l'utilisateur est contributeur ou créateur de la communauté
+        const contributor = await prisma.community_contributors.findUnique({
             where: {
                 community_id_contributor_id: {
                     community_id: parseInt(communityId),
@@ -24,9 +24,16 @@ export async function GET(request, { params }) {
             },
         });
 
-        if (!membership) {
+        const creator = await prisma.community.findUnique({
+            where: {
+                id: parseInt(communityId),
+                creator_id: parseInt(session.user.id),
+            },
+        });
+
+        if (!contributor && !creator) {
             return NextResponse.json(
-                { error: "Vous n'êtes pas contributeur de cette communauté" },
+                { error: "Vous n'êtes pas contributeur ou créateur de cette communauté" },
                 { status: 403 }
             );
         }

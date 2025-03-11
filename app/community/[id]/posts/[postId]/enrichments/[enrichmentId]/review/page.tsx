@@ -84,17 +84,18 @@ export default function ReviewContribution() {
                 const isContributor = communityData.community_contributors.some(
                     (contributor: any) => contributor.contributor_id === parseInt(session?.user?.id || "0")
                 );
-                const isCreator = communityData.createdBy === session.user.id;
+                const isCreator = communityData.creator.id === parseInt(session?.user?.id || "0");
 
                 // Permettre l'accès à la page de revue si l'utilisateur est contributeur OU créateur
                 if (!isContributor && !isCreator) {
-                    redirect(`/community/${params.id}`);
+                    toast.error("Vous n'avez pas les permissions pour accéder à cette page");
                 }
 
                 // Vérifier si l'utilisateur a déjà voté    
                 const hasVotedResponse = await fetch(
                     `/api/communities/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}/reviews/user`
                 );
+
                 if (hasVotedResponse.ok) {
                     const hasVotedData = await hasVotedResponse.json();
                     setHasAlreadyVoted(hasVotedData.hasVoted);
@@ -120,7 +121,7 @@ export default function ReviewContribution() {
                     }
                 }
             } catch (error) {
-                console.error("Erreur:", error);
+                console.log("Erreur:", error);
                 toast.error("Une erreur est survenue");
                 router.push(`/community/${params.id}/posts/${params.postId}`);
             } finally {

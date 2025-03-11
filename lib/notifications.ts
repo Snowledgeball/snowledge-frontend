@@ -21,8 +21,8 @@ export async function createBulkNotifications({
   title: string;
   message: string;
   type: NotificationType;
-  link?: string;
-  metadata?: Record<string, any>;
+  link: string;
+  metadata: Record<string, any>;
 }) {
   try {
     const batch = writeBatch(db);

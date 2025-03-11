@@ -73,7 +73,7 @@ export default function EnrichmentReview({
             toast.success(
                 existingReview
                     ? "Votre vote a été mis à jour avec succès"
-                    : "Enrichissement approuvé avec succès"
+                    : "Feedback envoyé avec succès"
             );
             router.push(`/community/${communityId}/posts/${postId}`);
         } catch (error) {

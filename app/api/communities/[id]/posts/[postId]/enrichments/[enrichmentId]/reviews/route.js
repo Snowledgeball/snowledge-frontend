@@ -19,7 +19,7 @@ export async function POST(request, { params }) {
         const { content, status } = await request.json();
 
         // Vérifier que l'utilisateur est contributeur
-        const membership = await prisma.community_contributors.findUnique({
+        const contributor = await prisma.community_contributors.findUnique({
             where: {
                 community_id_contributor_id: {
                     community_id: parseInt(communityId),
@@ -28,14 +28,20 @@ export async function POST(request, { params }) {
             },
         });
 
-        if (!membership) {
+        const creator = await prisma.community.findUnique({
+            where: {
+                id: parseInt(communityId),
+                creator_id: parseInt(session.user.id),
+            },
+        });
+
+        if (!contributor && !creator) {
             return NextResponse.json(
-                { error: "Vous n'êtes pas contributeur de cette communauté" },
+                { error: "Vous n'êtes pas contributeur ou créateur de cette communauté" },
                 { status: 403 }
             );
         }
 
-        console.log("la4");
         // Vérifier que la révision existe
         const existingReview = await prisma.community_posts_contribution_reviews.findFirst({
             where: {
@@ -77,20 +83,21 @@ export async function POST(request, { params }) {
         console.log("la3");
 
         // Mettre à jour le statut de la contribution si nécessaire
-        if (shouldUpdate) {
-            const enrichment = await prisma.community_posts_contributions.findUnique({
-                where: {
-                    id: parseInt(enrichmentId),
-                },
-                include: {
-                    user: true,
-                    post: {
-                        select: {
-                            title: true,
-                        },
+        const enrichment = await prisma.community_posts_contributions.findUnique({
+            where: {
+                id: parseInt(enrichmentId),
+            },
+            include: {
+                user: true,
+                community_posts: {
+                    select: {
+                        title: true,
                     },
                 },
-            });
+            },
+        });
+
+        if (shouldUpdate) {
 
             await prisma.community_posts_contributions.update({
                 where: {
@@ -101,24 +108,43 @@ export async function POST(request, { params }) {
                 },
             });
 
-            // Notifier l'auteur de la contribution
             if (newStatus === "APPROVED" || newStatus === "REJECTED") {
-                const notification = {
-                    userId: enrichment.user_id,
+                // Créer une notification pour l'auteur de l'enrichissement pour indiquer que son enrichissement a été approuvé ou rejeté
+                await createBulkNotifications({
+                    userIds: [enrichment.user_id],
                     type: newStatus === "APPROVED"
                         ? NotificationType.ENRICHMENT_APPROVED
                         : NotificationType.ENRICHMENT_REJECTED,
                     title: newStatus === "APPROVED"
-                        ? "Nouveau vote positif sur votre enrichissement"
-                        : "Nouveau vote négatif sur votre enrichissement",
+                        ? "Votre enrichissement a été approuvé"
+                        : "Votre enrichissement a été rejeté",
                     message: newStatus === "APPROVED"
-                        ? `Votre enrichissement sur "${enrichment.post.title}" a reçu un nouveau vote positif par la communauté.`
-                        : `Votre enrichissement sur "${enrichment.post.title}" a reçu un nouveau vote négatif par la communauté.`,
-                    link: `/community/${communityId}/posts/${postId}/enrichments/${enrichmentId}/review`,
-                };
-
-                await createBulkNotifications([notification]);
+                        ? `Votre enrichissement sur "${enrichment.community_posts.title}" a été approuvé par la communauté.`
+                        : `Votre enrichissement sur "${enrichment.community_posts.title}" a été rejeté par la communauté.`,
+                    link: `/community/${communityId}/posts/${postId}`,
+                    metadata: {
+                        communityId: communityId,
+                        postId: postId,
+                        enrichmentId: enrichmentId,
+                    },
+                });
             }
+        }
+        else {
+            // Créer une notification pour l'auteur de la contribution pour indiquer que son enrichissement a reçu un nouveau vote négatif
+            // Notifier l'auteur de la contribution
+            await createBulkNotifications({
+                userIds: [enrichment.user_id],
+                type: NotificationType.FEEDBACK,
+                title: "Nouveau vote sur votre enrichissement",
+                message: `Votre enrichissement sur "${enrichment.community_posts.title}" a reçu un nouveau vote par la communauté.`,
+                link: `/community/${communityId}/posts/${postId}/enrichments/${enrichmentId}`,
+                metadata: {
+                    communityId: communityId,
+                    postId: postId,
+                    enrichmentId: enrichmentId,
+                },
+            });
         }
 
 
