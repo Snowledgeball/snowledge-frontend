@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { AlertCircle, Info } from "lucide-react";
-import ContributionVotingSession from "./ContributionVotingSession";
+import EnrichmentVotingSession from "./EnrichmentVotingSession";
 import CreationVotingSession from "./CreationVotingSession";
 
 interface PendingPost {
@@ -194,7 +194,7 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
                                                 </span>
                                             </div>
                                         </div>
-                                        <ContributionVotingSession
+                                        <EnrichmentVotingSession
                                             communityId={communityId}
                                             postId={post.id.toString()}
                                         />

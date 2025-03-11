@@ -28,6 +28,7 @@ export async function createBulkNotifications({
     const batch = writeBatch(db);
     const notificationsRef = collection(db, "notifications");
 
+
     for (const userId of userIds) {
       const notificationData = {
         userId,
@@ -43,6 +44,7 @@ export async function createBulkNotifications({
       const newNotifRef = doc(notificationsRef);
       batch.set(newNotifRef, notificationData);
     }
+
 
     await batch.commit();
 

@@ -4,9 +4,9 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
-import SimpleReview from "@/components/community/SimpleReview";
-import EditReview from "@/components/community/EditReview";
-// import ContributionReview from "@/components/community/ContributionReview"; // Ce composant sera créé plus tard pour les contributions
+import ReviewCreation from "@/components/community/ReviewCreation";
+import EditReviewCreation from "@/components/community/EditReviewCreation";
+// import EnrichmentReview from "@/components/community/EnrichmentReview"; // Ce composant sera créé plus tard pour les contributions
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
 
@@ -160,7 +160,7 @@ export default function ReviewPost() {
   // Si l'utilisateur est en mode édition, afficher le formulaire d'édition
   if (isEditMode && existingReview) {
     return (
-      <EditReview
+      <EditReviewCreation
         postId={parseInt(params.postId as string)}
         communityId={params.id as string}
         postTitle={post.title}
@@ -175,7 +175,7 @@ export default function ReviewPost() {
 
   // Sinon, afficher le formulaire de vote initial
   return (
-    <SimpleReview
+    <ReviewCreation
       postId={parseInt(params.postId as string)}
       communityId={params.id as string}
       postTitle={post.title}

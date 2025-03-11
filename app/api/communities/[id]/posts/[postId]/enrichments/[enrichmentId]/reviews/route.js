@@ -3,6 +3,8 @@ import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { checkContributionStatus } from "@/lib/contributionUtils";
+import { NotificationType } from "@/lib/notificationUtils";
+import { createBulkNotifications } from "@/lib/notificationUtils";
 
 const prisma = new PrismaClient();
 
@@ -13,7 +15,7 @@ export async function POST(request, { params }) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { id: communityId, postId, contributionId } = await params;
+        const { id: communityId, postId, enrichmentId } = await params;
         const { content, status } = await request.json();
 
         // Vérifier que l'utilisateur est contributeur
@@ -33,10 +35,11 @@ export async function POST(request, { params }) {
             );
         }
 
+        console.log("la4");
         // Vérifier que la révision existe
         const existingReview = await prisma.community_posts_contribution_reviews.findFirst({
             where: {
-                contribution_id: parseInt(contributionId),
+                contribution_id: parseInt(enrichmentId),
                 user_id: parseInt(session.user.id),
             },
         });
@@ -53,7 +56,7 @@ export async function POST(request, { params }) {
             data: {
                 content,
                 status,
-                contribution_id: parseInt(contributionId),
+                contribution_id: parseInt(enrichmentId),
                 user_id: parseInt(session.user.id),
             },
         });
@@ -67,15 +70,17 @@ export async function POST(request, { params }) {
 
         // Vérifier le statut de la contribution après cette nouvelle révision
         const { shouldUpdate, newStatus } = await checkContributionStatus(
-            parseInt(contributionId),
+            parseInt(enrichmentId),
             contributorsCount
         );
 
+        console.log("la3");
+
         // Mettre à jour le statut de la contribution si nécessaire
         if (shouldUpdate) {
-            const contribution = await prisma.community_posts_contributions.findUnique({
+            const enrichment = await prisma.community_posts_contributions.findUnique({
                 where: {
-                    id: parseInt(contributionId),
+                    id: parseInt(enrichmentId),
                 },
                 include: {
                     user: true,
@@ -89,7 +94,7 @@ export async function POST(request, { params }) {
 
             await prisma.community_posts_contributions.update({
                 where: {
-                    id: parseInt(contributionId),
+                    id: parseInt(enrichmentId),
                 },
                 data: {
                     status: newStatus,
@@ -99,22 +104,23 @@ export async function POST(request, { params }) {
             // Notifier l'auteur de la contribution
             if (newStatus === "APPROVED" || newStatus === "REJECTED") {
                 const notification = {
-                    userId: contribution.user_id,
+                    userId: enrichment.user_id,
                     type: newStatus === "APPROVED"
-                        ? NotificationType.CONTRIBUTION_APPROVED
-                        : NotificationType.CONTRIBUTION_REJECTED,
+                        ? NotificationType.ENRICHMENT_APPROVED
+                        : NotificationType.ENRICHMENT_REJECTED,
                     title: newStatus === "APPROVED"
-                        ? "Contribution approuvée!"
-                        : "Contribution rejetée",
+                        ? "Nouveau vote positif sur votre enrichissement"
+                        : "Nouveau vote négatif sur votre enrichissement",
                     message: newStatus === "APPROVED"
-                        ? `Votre contribution sur "${contribution.post.title}" a été approuvée par la communauté.`
-                        : `Votre contribution sur "${contribution.post.title}" a été rejetée par la communauté.`,
-                    link: `/community/${communityId}/posts/${postId}`,
+                        ? `Votre enrichissement sur "${enrichment.post.title}" a reçu un nouveau vote positif par la communauté.`
+                        : `Votre enrichissement sur "${enrichment.post.title}" a reçu un nouveau vote négatif par la communauté.`,
+                    link: `/community/${communityId}/posts/${postId}/enrichments/${enrichmentId}/review`,
                 };
 
                 await createBulkNotifications([notification]);
             }
         }
+
 
         return NextResponse.json({ success: true, review });
     } catch (error) {

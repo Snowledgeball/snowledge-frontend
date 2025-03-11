@@ -12,20 +12,26 @@ export async function GET(request, { params }) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { id: communityId, postId, contributionId } = await params;
+        const { id } = await params;
 
-        // Récupérer la contribution
+        console.log("la5");
+        // Récupérer la contribution spécifique
         const contribution = await prisma.community_posts_contributions.findUnique({
             where: {
-                id: parseInt(contributionId),
-                post_id: parseInt(postId),
+                id: parseInt(id),
+                user_id: parseInt(session.user.id), // S'assurer que l'utilisateur est bien l'auteur
             },
             include: {
-                user: {
+                community_posts: {
                     select: {
                         id: true,
-                        fullName: true,
-                        profilePicture: true,
+                        title: true,
+                        community: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
                     },
                 },
                 community_posts_contribution_reviews: {
@@ -38,12 +44,18 @@ export async function GET(request, { params }) {
                             },
                         },
                     },
+                    orderBy: {
+                        created_at: "desc",
+                    },
                 },
             },
         });
 
         if (!contribution) {
-            return NextResponse.json({ error: "Contribution non trouvée" }, { status: 404 });
+            return NextResponse.json(
+                { error: "Contribution non trouvée ou vous n'êtes pas autorisé à y accéder" },
+                { status: 404 }
+            );
         }
 
         return NextResponse.json(contribution);

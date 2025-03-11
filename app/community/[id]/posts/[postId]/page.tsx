@@ -167,7 +167,7 @@ export default function PostPage() {
 
                 {post.accept_contributions && session && !isAuthor && isMember && (
                   <Link
-                    href={`/community/${params.id}/posts/${params.postId}/contribute`}
+                    href={`/community/${params.id}/posts/${params.postId}/enrich`}
                     className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                   >
                     <Edit className="h-4 w-4 mr-2" />

@@ -15,11 +15,11 @@ import {
 } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 
-interface ContributionReviewProps {
-    contributionId: number;
+interface EnrichmentReviewProps {
+    enrichmentId: number;
     postId: number;
     communityId: string;
-    contributionTitle: string;
+    enrichmentTitle: string;
     originalContent: string;
     modifiedContent: string;
     authorName: string;
@@ -31,17 +31,17 @@ interface ContributionReviewProps {
     };
 }
 
-export default function ContributionReview({
-    contributionId,
+export default function EnrichmentReview({
+    enrichmentId,
     postId,
     communityId,
-    contributionTitle,
+    enrichmentTitle,
     originalContent,
     modifiedContent,
     authorName,
     authorId,
     existingReview,
-}: ContributionReviewProps) {
+}: EnrichmentReviewProps) {
     const router = useRouter();
     const [feedback, setFeedback] = useState(existingReview?.content || "");
     const [decision, setDecision] = useState<"APPROVED" | "REJECTED" | null>(
@@ -60,8 +60,8 @@ export default function ContributionReview({
 
         try {
             const endpoint = existingReview
-                ? `/api/communities/${communityId}/posts/${postId}/contributions/${contributionId}/reviews/update`
-                : `/api/communities/${communityId}/posts/${postId}/contributions/${contributionId}/reviews`;
+                ? `/api/communities/${communityId}/posts/${postId}/enrichments/${enrichmentId}/reviews/update`
+                : `/api/communities/${communityId}/posts/${postId}/enrichments/${enrichmentId}/reviews`;
 
             const method = existingReview ? "PUT" : "POST";
 
@@ -105,7 +105,7 @@ export default function ContributionReview({
                 <Card className="bg-white p-6 shadow-sm rounded-lg">
                     <div className="mb-6">
                         <h1 className="text-2xl font-bold">
-                            Revue de contribution : {contributionTitle}
+                            Revue de contribution : {enrichmentTitle}
                         </h1>
                         <div className="text-gray-500 mt-1">
                             Proposée par {authorName}

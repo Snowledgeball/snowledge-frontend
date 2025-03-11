@@ -16,7 +16,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 
-interface ContributionVotingSessionProps {
+interface EnrichmentVotingSessionProps {
     communityId: string;
     postId: string;
 }
@@ -46,10 +46,10 @@ interface Contribution {
     }[];
 }
 
-export default function ContributionVotingSession({
+export default function EnrichmentVotingSession({
     communityId,
     postId,
-}: ContributionVotingSessionProps) {
+}: EnrichmentVotingSessionProps) {
     const router = useRouter();
     const { data: session } = useSession();
     const [pendingContributions, setPendingContributions] = useState<Contribution[]>([]);
@@ -81,7 +81,7 @@ export default function ContributionVotingSession({
     const fetchPendingContributions = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`/api/communities/${communityId}/posts/${postId}/contributions/pending`);
+            const response = await fetch(`/api/communities/${communityId}/posts/${postId}/enrichments/pending`);
 
             if (response.ok) {
                 const data = await response.json();
@@ -111,18 +111,18 @@ export default function ContributionVotingSession({
     };
 
     // Approuver une contribution
-    const handleApprove = async (contributionId: number) => {
+    const handleApprove = async (enrichmentId: number) => {
         try {
-            const response = await fetch(`/api/communities/${communityId}/posts/${postId}/contributions/${contributionId}/approve`, {
+            const response = await fetch(`/api/communities/${communityId}/posts/${postId}/enrichments/${enrichmentId}/approve`, {
                 method: "POST",
             });
 
             if (response.ok) {
-                toast.success("Contribution approuvée et intégrée au post");
+                toast.success("Enrichissement publié");
                 fetchPendingContributions();
             } else {
                 const data = await response.json();
-                toast.error(data.error || "Erreur lors de l'approbation de la contribution");
+                toast.error(data.error || "Erreur lors de la publication de l'enrichissement");
             }
         } catch (error) {
             console.error("Erreur:", error);
@@ -131,18 +131,18 @@ export default function ContributionVotingSession({
     };
 
     // Rejeter une contribution
-    const handleReject = async (contributionId: number) => {
+    const handleReject = async (enrichmentId: number) => {
         try {
-            const response = await fetch(`/api/communities/${communityId}/posts/${postId}/contributions/${contributionId}/reject`, {
+            const response = await fetch(`/api/communities/${communityId}/posts/${postId}/enrichments/${enrichmentId}/reject`, {
                 method: "POST",
             });
 
             if (response.ok) {
-                toast.success("Contribution rejetée");
+                toast.success("Enrichissement rejeté");
                 fetchPendingContributions();
             } else {
                 const data = await response.json();
-                toast.error(data.error || "Erreur lors du rejet de la contribution");
+                toast.error(data.error || "Erreur lors du rejet de l'enrichissement");
             }
         } catch (error) {
             console.error("Erreur:", error);
@@ -359,19 +359,25 @@ export default function ContributionVotingSession({
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div className="flex items-center justify-end space-x-3">
                                             {isContributionAuthor(contribution) ? (
-                                                <span className="text-gray-500 text-sm italic">Vous ne pouvez pas voter sur votre propre contribution</span>
+                                                // Bouton pour modifier mon enrichissement et le publier si c'est validé
+                                                <Link
+                                                    href={`/community/${communityId}/posts/${postId}/enrichments/${contribution.id}?edit=true`}
+                                                    className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                                                >
+                                                    Modifier mon enrichissement
+                                                </Link>
                                             ) : (
                                                 <>
                                                     {hasUserVoted(contribution) ? (
                                                         <Link
-                                                            href={`/community/${communityId}/posts/${postId}/contributions/${contribution.id}/review?edit=true`}
+                                                            href={`/community/${communityId}/posts/${postId}/enrichments/${contribution.id}/review?edit=true`}
                                                             className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
                                                         >
                                                             Modifier mon vote
                                                         </Link>
                                                     ) : (
                                                         <Link
-                                                            href={`/community/${communityId}/posts/${postId}/contributions/${contribution.id}/review`}
+                                                            href={`/community/${communityId}/posts/${postId}/enrichments/${contribution.id}/review`}
                                                             className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
                                                         >
                                                             Voter
@@ -386,7 +392,7 @@ export default function ContributionVotingSession({
                                                     className="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-sm rounded-md hover:bg-green-700"
                                                 >
                                                     <Check className="h-4 w-4 mr-1" />
-                                                    Approuver
+                                                    Publier
                                                 </button>
                                             )}
 

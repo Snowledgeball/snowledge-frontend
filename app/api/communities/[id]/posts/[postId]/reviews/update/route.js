@@ -155,7 +155,7 @@ export async function PUT(request, { params }) {
                     userIds: [updatedPost.author_id],
                     title: "Votre post peut être publié !",
                     message: `Votre post "${updatedPost.title}" a reçu suffisamment de votes positifs et peut maintenant être publié.`,
-                    type: NotificationType.PUBLISH_READY, // Utilisez une chaîne directe
+                    type: NotificationType.POST_READY_PUBLISH, // Utilisez une chaîne directe
                     link: `/community/${communityId}/posts/${postId}`,
                     metadata: {
                         communityId,

@@ -104,7 +104,7 @@ export default function ContributePage() {
         setIsSubmitting(true);
 
         try {
-            const response = await fetch(`/api/communities/${params.id}/posts/${params.postId}/contributions`, {
+            const response = await fetch(`/api/communities/${params.id}/posts/${params.postId}/enrichments`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

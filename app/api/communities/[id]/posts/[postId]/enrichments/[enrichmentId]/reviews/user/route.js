@@ -12,7 +12,7 @@ export async function GET(request, { params }) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { id: communityId, postId, contributionId } = await params;
+        const { id: communityId, postId, enrichmentId } = await params;
 
         // Vérifier que l'utilisateur est contributeur
         const membership = await prisma.community_contributors.findUnique({
@@ -34,7 +34,7 @@ export async function GET(request, { params }) {
         // Récupérer la révision de l'utilisateur
         const review = await prisma.community_posts_contribution_reviews.findFirst({
             where: {
-                contribution_id: parseInt(contributionId),
+                contribution_id: parseInt(enrichmentId),
                 user_id: parseInt(session.user.id),
             },
         });
@@ -44,7 +44,7 @@ export async function GET(request, { params }) {
             review,
         });
     } catch (error) {
-        console.error("Erreur:", error);
+        console.log("Erreur:", error.stack);
         return NextResponse.json(
             { error: "Erreur lors de la récupération de la révision" },
             { status: 500 }

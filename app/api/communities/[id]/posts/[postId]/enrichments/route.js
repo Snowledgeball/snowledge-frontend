@@ -92,10 +92,10 @@ export async function POST(request, { params }) {
         if (userIds.length > 0) {
             await createBulkNotifications({
                 userIds,
-                type: NotificationType.CONTRIBUTION_SUBMITTED,
+                type: NotificationType.NEW_ENRICHMENT_PENDING,
                 title: "Nouvelle contribution",
                 message: `Une nouvelle contribution a été soumise pour le post "${post.title}"`,
-                link: `/community/${communityId}/posts/${postId}/contributions/${contribution.id}/review`,
+                link: `/community/${communityId}/posts/${postId}/enrichments/${contribution.id}/review`,
                 metadata: {
                     communityId: communityId,
                     postId: postId,

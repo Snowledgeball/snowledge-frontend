@@ -159,7 +159,7 @@ export async function POST(request, { params }) {
                     userIds: [updatedPost.author_id],
                     title: "Votre post peut être publié !",
                     message: `Votre post "${updatedPost.title}" a reçu suffisamment de votes positifs et peut maintenant être publié.`,
-                    type: NotificationType.PUBLISH_READY,
+                    type: NotificationType.POST_READY_PUBLISH,
                     link: `/community/${communityId}`,
                     metadata: {
                         communityId,
@@ -207,7 +207,7 @@ export async function POST(request, { params }) {
                     userIds: [updatedPost.author_id],
                     title: "Votre post a été rejeté par la communauté",
                     message: `Votre post "${updatedPost.title}" dans la communauté "${updatedPost.community.name}" a été rejeté par la majorité des contributeurs. Consultez les feedbacks pour l'améliorer.`,
-                    type: NotificationType.CONTRIBUTION_REJECTED,
+                    type: NotificationType.ENRICHMENT_REJECTED,
                     // Lien direct vers l'édition du brouillon avec un paramètre pour pré-sélectionner ce brouillon
                     link: `/community/${communityId}/posts/create?draft_id=${postId}`,
                     metadata: {

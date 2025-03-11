@@ -101,11 +101,13 @@ export default function NotificationBell() {
         return "📝";
       case NotificationType.NEW_POST_PENDING:
         return "⏳";
-      case NotificationType.CONTRIBUTION_SUBMITTED:
+      case NotificationType.NEW_ENRICHMENT_PENDING:
+        return "⏳";
+      case NotificationType.ENRICHMENT_UPDATED:
         return "🔄";
-      case NotificationType.CONTRIBUTION_APPROVED:
+      case NotificationType.ENRICHMENT_APPROVED:
         return "✅";
-      case NotificationType.CONTRIBUTION_REJECTED:
+      case NotificationType.ENRICHMENT_REJECTED:
         return "❌";
       case NotificationType.COMMENT_ON_POST:
         return "💬";
@@ -139,7 +141,7 @@ export default function NotificationBell() {
         return <AlertTriangle className="text-yellow-500" />;
       case NotificationType.FEEDBACK:
         return <MessageCircle className="text-blue-500" />;
-      case NotificationType.PUBLISH_READY:
+      case NotificationType.POST_READY_PUBLISH:
         return <Send className="text-purple-500" />; // Icône pour les posts prêts à être publiés
       case NotificationType.POST_REJECTED:
         return <XCircle className="text-red-500" />;

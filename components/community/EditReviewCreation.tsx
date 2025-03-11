@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { CheckCircle, XCircle, AlertCircle, Users } from "lucide-react";
 
-interface SimpleReviewProps {
+interface EditReviewCreationProps {
     postId: number;
     communityId: string;
     postTitle: string;
@@ -16,9 +16,14 @@ interface SimpleReviewProps {
     coverImageUrl?: string;
     authorName: string;
     authorId: number;
+    existingReview: {
+        id: number;
+        content: string;
+        status: string;
+    };
 }
 
-export default function SimpleReview({
+export default function EditReviewCreation({
     postId,
     communityId,
     postTitle,
@@ -26,13 +31,18 @@ export default function SimpleReview({
     coverImageUrl,
     authorName,
     authorId,
-}: SimpleReviewProps) {
+    existingReview,
+}: EditReviewCreationProps) {
     const router = useRouter();
-    const [feedback, setFeedback] = useState("");
-    const [decision, setDecision] = useState<"APPROVED" | "REJECTED" | null>(null);
+    const [feedback, setFeedback] = useState(existingReview.content || "");
+    const [decision, setDecision] = useState<"APPROVED" | "REJECTED">(
+        existingReview.status as "APPROVED" | "REJECTED"
+    );
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [contributorsCount, setContributorsCount] = useState(0);
     const [votesCount, setVotesCount] = useState(0);
+    const [isContributorsCountEven, setIsContributorsCountEven] = useState(false);
+    const [requiredApprovals, setRequiredApprovals] = useState(0);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -44,6 +54,14 @@ export default function SimpleReview({
                 if (contributorsResponse.ok) {
                     const contributorsData = await contributorsResponse.json();
                     setContributorsCount(contributorsData.count);
+                    const isEven = contributorsData.count % 2 === 0;
+                    setIsContributorsCountEven(isEven);
+
+                    // Calculer le nombre de votes nécessaires pour une majorité stricte
+                    const required = isEven
+                        ? (contributorsData.count / 2) + 1
+                        : Math.ceil(contributorsData.count / 2);
+                    setRequiredApprovals(required);
                 }
 
                 // Récupérer le nombre de votes déjà soumis
@@ -62,7 +80,7 @@ export default function SimpleReview({
         fetchStats();
     }, [communityId, postId]);
 
-    const handleSubmitReview = async () => {
+    const handleUpdateReview = async () => {
         if (!decision) {
             toast.error("Veuillez choisir d'approuver ou de rejeter le post");
             return;
@@ -77,9 +95,9 @@ export default function SimpleReview({
 
         try {
             const response = await fetch(
-                `/api/communities/${communityId}/posts/${postId}/reviews`,
+                `/api/communities/${communityId}/posts/${postId}/reviews/update`,
                 {
-                    method: "POST",
+                    method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
                     },
@@ -91,14 +109,14 @@ export default function SimpleReview({
             );
 
             if (!response.ok) {
-                throw new Error("Erreur lors de la soumission de la révision");
+                throw new Error("Erreur lors de la modification du vote");
             }
 
-            toast.success("Vote soumis avec succès");
+            toast.success("Vote modifié avec succès");
             router.push(`/community/${communityId}`);
         } catch (error) {
             console.error("Erreur:", error);
-            toast.error("Erreur lors de la soumission du vote");
+            toast.error("Erreur lors de la modification du vote");
         } finally {
             setIsSubmitting(false);
         }
@@ -109,16 +127,12 @@ export default function SimpleReview({
         ? Math.round((votesCount / contributorsCount) * 100)
         : 0;
 
-    // Déterminer si le vote est crucial (proche du seuil de 50%)
-    const isCrucialVote = contributorsCount > 0 &&
-        Math.abs(votesCount - Math.ceil(contributorsCount / 2)) <= 2;
-
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="max-w-5xl mx-auto px-4">
                 <Card className="p-6 mb-6">
                     <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-2xl font-bold">Voter sur ce post</h1>
+                        <h1 className="text-2xl font-bold">Modifier votre vote</h1>
                         <span className="text-sm text-gray-500">
                             Auteur: {authorName}
                         </span>
@@ -139,12 +153,19 @@ export default function SimpleReview({
                                 style={{ width: `${votesPercentage}%` }}
                             ></div>
                         </div>
-                        {isCrucialVote && (
-                            <div className="flex items-center mt-2 text-sm text-orange-700 bg-orange-50 p-2 rounded-lg border border-orange-200">
-                                <AlertCircle className="w-4 h-4 mr-2 text-orange-600" />
-                                Votre vote est crucial ! Il pourrait faire basculer la décision.
-                            </div>
-                        )}
+
+                        <div className="mt-4 text-sm text-blue-700">
+                            <p className="font-medium">Règles de vote :</p>
+                            <ul className="list-disc list-inside mt-1">
+                                <li>Au moins {Math.ceil(contributorsCount / 2)} contributeurs doivent voter</li>
+                                <li>
+                                    {isContributorsCountEven
+                                        ? `Comme il y a ${contributorsCount} contributeurs (nombre pair), il faut au moins ${requiredApprovals} votes positifs pour publier`
+                                        : `Il faut au moins ${requiredApprovals} votes positifs pour publier`
+                                    }
+                                </li>
+                            </ul>
+                        </div>
                     </div>
 
                     {/* Contenu du post */}
@@ -169,7 +190,7 @@ export default function SimpleReview({
 
                     {/* Section de décision */}
                     <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                        <h3 className="text-lg font-semibold mb-4">Votre décision globale</h3>
+                        <h3 className="text-lg font-semibold mb-4">Votre décision</h3>
 
                         <div className="flex flex-col md:flex-row gap-4 mb-6">
                             <button
@@ -202,7 +223,7 @@ export default function SimpleReview({
                             <Textarea
                                 value={feedback}
                                 onChange={(e) => setFeedback(e.target.value)}
-                                placeholder="Expliquez votre décision et donnez des suggestions d'amélioration, que vous ayez approuvé ou rejeté le post"
+                                placeholder="Expliquez votre décision et donnez des suggestions d'amélioration..."
                                 className="min-h-[150px]"
                             />
                         </div>
@@ -215,11 +236,11 @@ export default function SimpleReview({
                                 Annuler
                             </button>
                             <button
-                                onClick={handleSubmitReview}
+                                onClick={handleUpdateReview}
                                 disabled={!decision || !feedback.trim() || isSubmitting}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {isSubmitting ? "Soumission..." : "Soumettre mon vote"}
+                                {isSubmitting ? "Modification..." : "Modifier mon vote"}
                             </button>
                         </div>
                     </div>

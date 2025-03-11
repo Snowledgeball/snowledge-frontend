@@ -74,7 +74,7 @@ export async function POST(request, { params }) {
                 userIds: [post.author_id],
                 title: "Votre post a été rejeté par la communauté",
                 message: `Votre post "${post.title}" dans la communauté "${post.community.name}" a été rejeté par la majorité des contributeurs. Il a été déplacé dans vos brouillons pour que vous puissiez l'améliorer.`,
-                type: NotificationType.CONTRIBUTION_REJECTED,
+                type: NotificationType.ENRICHMENT_REJECTED,
                 link: `/community/${communityId}/posts/${postId}/edit`,
                 metadata: {
                     communityId,

@@ -119,7 +119,7 @@ export async function POST(request, { params }) {
         });
 
         // Récupérer tous les membres de la communauté
-        const communityMembers = await prisma.community_contributors.findMany({
+        const communityMembers = await prisma.community_learners.findMany({
             where: {
                 community_id: parseInt(communityId)
             }
@@ -135,9 +135,11 @@ export async function POST(request, { params }) {
             }
         });
 
+        const learnerAndCreator = [...communityMembers, community.creator_id];
+
         //Notifier tous les membres de la communauté
         await createBulkNotifications({
-            userIds: communityMembers.map((member) => member.contributor_id),
+            userIds: learnerAndCreator,
             title: "Post publié",
             message: `Un nouveau post a été publié dans la communauté "${community.name}"`,
             type: NotificationType.NEW_POST,
@@ -158,19 +160,6 @@ export async function POST(request, { params }) {
             },
             include: {
                 user: true
-            }
-        });
-
-        //Notifier le créateur de la communauté que le post d'un contributeur a été publié
-        await createBulkNotifications({
-            userIds: [community.creator_id],
-            title: `Post publié par un contributeur ${contributor.user.fullName}`,
-            message: `Le post "${post.title}" a été publié dans "${community.name}" suite au vote de la communauté`,
-            type: NotificationType.CONTRIBUTION_APPROVED,
-            link: `/community/${communityId}/posts/${postId}`,
-            metadata: {
-                communityId,
-                postId,
             }
         });
 

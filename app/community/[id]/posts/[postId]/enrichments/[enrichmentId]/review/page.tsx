@@ -5,15 +5,26 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { redirect } from "next/navigation";
-import ContributionReview from "@/components/community/ContributionReview";
+import EnrichmentReview from "@/components/community/EnrichmentReview";
+
+interface Enrichment {
+    id: number;
+    title: string;
+    content: string;
+    original_content: string;
+    created_at: string;
+    user: {
+        id: number;
+        fullName: string;
+    };
+}
 
 export default function ReviewContribution() {
     const params = useParams();
     const searchParams = useSearchParams();
     const router = useRouter();
     const { data: session, status } = useSession();
-
-    const [contribution, setContribution] = useState<any>(null);
+    const [enrichment, setEnrichment] = useState<Enrichment | null>(null);
     const [loading, setLoading] = useState(true);
     const [hasAlreadyVoted, setHasAlreadyVoted] = useState(false);
     const [existingReview, setExistingReview] = useState<any>(null);
@@ -39,28 +50,28 @@ export default function ReviewContribution() {
                 const membershipData = await membershipResponse.json();
 
                 if (!membershipData.isContributor) {
-                    toast.error("Vous devez être contributeur pour réviser une contribution");
+                    toast.error("Vous devez être contributeur pour réviser un enrichissement");
                     router.push(`/community/${params.id}/posts/${params.postId}`);
                     return;
                 }
 
-                // Récupérer les données de la contribution
-                const contributionResponse = await fetch(
-                    `/api/communities/${params.id}/posts/${params.postId}/contributions/${params.contributionId}`
+                // Récupérer les données de la enrichment
+                const enrichmentResponse = await fetch(
+                    `/api/communities/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`
                 );
 
-                if (!contributionResponse.ok) {
-                    toast.error("Erreur lors de la récupération de la contribution");
+                if (!enrichmentResponse.ok) {
+                    toast.error("Erreur lors de la récupération de l'enrichissement");
                     router.push(`/community/${params.id}/posts/${params.postId}`);
                     return;
                 }
 
-                const contributionData = await contributionResponse.json();
-                setContribution(contributionData);
+                const enrichmentData = await enrichmentResponse.json();
+                setEnrichment(enrichmentData);
 
-                // Vérifier si l'utilisateur est l'auteur de la contribution
-                if (contributionData.user_id === parseInt(session.user.id)) {
-                    toast.error("Vous ne pouvez pas réviser votre propre contribution");
+                // Vérifier si l'utilisateur est l'auteur de la enrichment
+                if (enrichmentData.user_id === parseInt(session.user.id)) {
+                    toast.error("Vous ne pouvez pas réviser votre propre enrichissement");
                     router.push(`/community/${params.id}/posts/${params.postId}`);
                     return;
                 }
@@ -82,7 +93,7 @@ export default function ReviewContribution() {
 
                 // Vérifier si l'utilisateur a déjà voté    
                 const hasVotedResponse = await fetch(
-                    `/api/communities/${params.id}/posts/${params.postId}/contributions/${params.contributionId}/reviews/user`
+                    `/api/communities/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}/reviews/user`
                 );
                 if (hasVotedResponse.ok) {
                     const hasVotedData = await hasVotedResponse.json();
@@ -96,12 +107,12 @@ export default function ReviewContribution() {
                         if (edit === "true") {
                             setIsEditMode(true);
                         } else {
-                            toast.info("Vous avez déjà voté sur cette contribution", {
+                            toast.info("Vous avez déjà voté sur cet enrichissement", {
                                 description: `Votre vote: ${hasVotedData.review.status === "APPROVED" ? "Approuvé" : "Rejeté"}`,
                                 duration: 5000,
                                 action: {
                                     label: "Modifier",
-                                    onClick: () => router.push(`/community/${params.id}/posts/${params.postId}/contributions/${params.contributionId}/review?edit=true`),
+                                    onClick: () => router.push(`/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}/review?edit=true`),
                                 },
                             });
                             router.push(`/community/${params.id}/posts/${params.postId}`);
@@ -120,7 +131,7 @@ export default function ReviewContribution() {
         if (session) {
             fetchData();
         }
-    }, [params.id, params.postId, params.contributionId, router, searchParams, session, status]);
+    }, [params.id, params.postId, params.enrichmentId, router, searchParams, session, status]);
 
     if (loading) {
         return (
@@ -133,7 +144,7 @@ export default function ReviewContribution() {
         );
     }
 
-    if (!session || !contribution) return null;
+    if (!session || !enrichment) return null;
 
     // Si l'utilisateur a déjà voté et n'est pas en mode édition, afficher un message
     if (hasAlreadyVoted && !isEditMode) {
@@ -141,7 +152,7 @@ export default function ReviewContribution() {
             <div className="min-h-screen bg-gray-50 py-8">
                 <div className="max-w-5xl mx-auto px-4 text-center">
                     <div className="bg-white p-8 rounded-lg shadow">
-                        <h2 className="text-2xl font-bold mb-4">Vous avez déjà voté sur cette contribution</h2>
+                        <h2 className="text-2xl font-bold mb-4">Vous avez déjà voté sur cet enrichissement</h2>
                         <p className="mb-6">Votre vote: {existingReview?.status === "APPROVED" ? "Approuvé" : "Rejeté"}</p>
                         <div className="flex justify-center space-x-4">
                             <button
@@ -151,7 +162,7 @@ export default function ReviewContribution() {
                                 Retour au post
                             </button>
                             <button
-                                onClick={() => router.push(`/community/${params.id}/posts/${params.postId}/contributions/${params.contributionId}/review?edit=true`)}
+                                onClick={() => router.push(`/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}/review?edit=true`)}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                             >
                                 Modifier mon vote
@@ -166,15 +177,15 @@ export default function ReviewContribution() {
     // Si l'utilisateur est en mode édition, afficher le formulaire d'édition
     if (isEditMode && existingReview) {
         return (
-            <ContributionReview
-                contributionId={parseInt(params.contributionId as string)}
+            <EnrichmentReview
+                enrichmentId={parseInt(params.enrichmentId as string)}
                 postId={parseInt(params.postId as string)}
                 communityId={params.id as string}
-                contributionTitle={contribution.title || "Contribution sans titre"}
-                originalContent={contribution.original_content}
-                modifiedContent={contribution.content}
-                authorName={contribution.user.fullName}
-                authorId={contribution.user.id}
+                enrichmentTitle={enrichment.title || "Enrichissement sans titre"}
+                originalContent={enrichment.original_content}
+                modifiedContent={enrichment.content}
+                authorName={enrichment.user.fullName}
+                authorId={enrichment.user.id}
                 existingReview={existingReview}
             />
         );
@@ -182,15 +193,15 @@ export default function ReviewContribution() {
 
     // Sinon, afficher le formulaire de vote initial
     return (
-        <ContributionReview
-            contributionId={parseInt(params.contributionId as string)}
+        <EnrichmentReview
+            enrichmentId={parseInt(params.enrichmentId as string)}
             postId={parseInt(params.postId as string)}
             communityId={params.id as string}
-            contributionTitle={contribution.title || "Contribution sans titre"}
-            originalContent={contribution.original_content}
-            modifiedContent={contribution.content}
-            authorName={contribution.user.fullName}
-            authorId={contribution.user.id}
+            enrichmentTitle={enrichment.title || "Enrichissement sans titre"}
+            originalContent={enrichment.original_content}
+            modifiedContent={enrichment.content}
+            authorName={enrichment.user.fullName}
+            authorId={enrichment.user.id}
         />
     );
 } 
