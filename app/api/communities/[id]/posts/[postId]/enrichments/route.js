@@ -94,7 +94,7 @@ export async function POST(request, { params }) {
                 userIds,
                 type: NotificationType.NEW_ENRICHMENT_PENDING,
                 title: "Nouvelle contribution",
-                message: `Une nouvelle contribution a été soumise pour le post "${post.title}"`,
+                message: `Un nouvel enrichissement a été soumis pour le post "${post.title}"`,
                 link: `/community/${communityId}/posts/${postId}/enrichments/${contribution.id}/review`,
                 metadata: {
                     communityId: communityId,

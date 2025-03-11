@@ -105,6 +105,7 @@ export default function EnrichmentEditor({
                     <TinyEditor
                         initialValue={modifiedContent}
                         onChange={handleEditorChange}
+                        protectImages={true}
                     />
                 )}
 

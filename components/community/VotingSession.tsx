@@ -98,6 +98,7 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
             if (response.ok) {
                 const data = await response.json();
                 setContributorsCount(data.count);
+
                 setIsContributorsCountEven(data.count % 2 === 0);
             }
         } catch (error) {

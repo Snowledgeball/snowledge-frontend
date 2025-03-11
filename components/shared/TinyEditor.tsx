@@ -43,6 +43,7 @@ interface TinyEditorProps {
   communityId?: string;
   postId?: string;
   placeholder?: string;
+  protectImages?: boolean;
 }
 
 interface BlobInfo {
@@ -85,6 +86,7 @@ const TinyEditor = ({
   communityId,
   postId,
   placeholder,
+  protectImages,
 }: TinyEditorProps) => {
   const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
@@ -163,6 +165,16 @@ const TinyEditor = ({
     file_picker_types: "image",
     automatic_uploads: true,
     images_upload_url: "/api/upload",
+    // Configuration pour empêcher la suppression des images
+    ...(protectImages ? {
+      noneditable_class: "protected-image",
+      noneditable_noneditable_class: "protected-image",
+      extended_valid_elements: "img[*]",
+      protect: [
+        /\<img[^>]*\>/g, // Protéger toutes les balises img
+      ],
+    } : {}),
+    // Fin de la configuration pour empêcher la suppression des images
     images_upload_handler: async (blobInfo: BlobInfo) => {
       const formData = new FormData();
       formData.append("file", blobInfo.blob());
@@ -572,6 +584,114 @@ const TinyEditor = ({
           setTimeout(() => {
             editor.execCommand("mceShowComments");
           }, 200);
+        }
+
+        // Protection des images - uniquement si protectImages est true
+        if (protectImages) {
+          // Empêcher la suppression des images
+          editor.on('PreInit', () => {
+            // Ajouter une classe aux images pour les identifier
+            editor.dom.addClass(editor.dom.select('img'), 'protected-image');
+
+            // Ajouter un style pour mettre en évidence les images protégées
+            editor.dom.addStyle(`
+              img.protected-image {
+                border: 2px solid #4caf50;
+                padding: 2px;
+              }
+            `);
+          });
+
+          // Empêcher la suppression des images avec la touche Delete ou Backspace
+          editor.on('keydown', (e) => {
+            const node = editor.selection.getNode();
+            const isImage = node.nodeName === 'IMG' || node.closest('img') !== null;
+
+            if (isImage && (e.keyCode === 8 || e.keyCode === 46)) { // 8 = Backspace, 46 = Delete
+              e.preventDefault();
+              e.stopPropagation();
+              // Afficher un message à l'utilisateur
+              editor.notificationManager.open({
+                text: 'Les images ne peuvent pas être supprimées',
+                type: 'info',
+                timeout: 2000
+              });
+              return false;
+            }
+          });
+
+          // Empêcher la suppression des images par d'autres moyens (couper, etc.)
+          editor.on('BeforeSetContent', (e) => {
+            // Sauvegarder les images existantes avant de modifier le contenu
+            const existingImages = editor.dom.select('img');
+
+            // Après la modification du contenu, vérifier si des images ont été supprimées
+            setTimeout(() => {
+              const currentImages = editor.dom.select('img');
+              if (existingImages.length > currentImages.length) {
+                // Restaurer le contenu précédent
+                editor.undoManager.undo();
+
+                // Afficher un message à l'utilisateur
+                editor.notificationManager.open({
+                  text: 'Les images ne peuvent pas être supprimées',
+                  type: 'info',
+                  timeout: 2000
+                });
+              }
+            }, 0);
+          });
+
+          // Intercepter les commandes de suppression
+          const originalExecCommand = editor.execCommand;
+          editor.execCommand = function (cmd: string, ui: boolean, value: any) {
+            // Vérifier si la commande est liée à la suppression et si une image est sélectionnée
+            if ((cmd === 'Delete' || cmd === 'ForwardDelete') && editor.selection.getNode().nodeName === 'IMG') {
+              editor.notificationManager.open({
+                text: 'Les images ne peuvent pas être supprimées',
+                type: 'info',
+                timeout: 2000
+              });
+              return false;
+            }
+
+            // Pour toutes les autres commandes, utiliser le comportement par défaut
+            return originalExecCommand.call(editor, cmd, ui, value);
+          };
+
+          // Observer les mutations du DOM pour empêcher la suppression des images
+          const observer = new MutationObserver((mutations) => {
+            let imagesRemoved = false;
+
+            mutations.forEach((mutation) => {
+              if (mutation.type === 'childList') {
+                // Vérifier si des nœuds ont été supprimés
+                mutation.removedNodes.forEach((node) => {
+                  if (node.nodeName === 'IMG' || (node.nodeType === 1 && (node as Element).querySelector('img'))) {
+                    imagesRemoved = true;
+                  }
+                });
+              }
+            });
+
+            if (imagesRemoved) {
+              // Annuler la dernière action
+              editor.undoManager.undo();
+
+              // Informer l'utilisateur
+              editor.notificationManager.open({
+                text: 'Les images ne peuvent pas être supprimées',
+                type: 'info',
+                timeout: 2000
+              });
+            }
+          });
+
+          // Démarrer l'observation du contenu de l'éditeur
+          observer.observe(editor.getBody(), {
+            childList: true,
+            subtree: true
+          });
         }
       });
     },
