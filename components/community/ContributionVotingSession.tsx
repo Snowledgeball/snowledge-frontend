@@ -5,14 +5,13 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ThumbsUp, ThumbsDown, AlertTriangle, Check, Trash } from "lucide-react";
+import { Check, Trash } from "lucide-react";
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Progress } from "@/components/ui/progress";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -275,10 +274,10 @@ export default function ContributionVotingSession({
                                                     alt={contribution.user.fullName}
                                                     width={32}
                                                     height={32}
-                                                    className="h-full w-full object-cover"
+                                                    className="h-full w-full object-cover blur-[5px]"
                                                 />
                                             </div>
-                                            <div className="text-sm font-medium text-gray-900">
+                                            <div className="text-sm font-medium text-gray-900 blur-sm">
                                                 {contribution.user.fullName}
                                             </div>
                                         </div>
