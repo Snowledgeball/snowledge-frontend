@@ -77,6 +77,7 @@ const CommunityHub = () => {
   const [isContributor, setIsContributor] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
   const [pendingPostsCount, setPendingPostsCount] = useState(0);
+  const [pendingEnrichmentsCount, setPendingEnrichmentsCount] = useState(0);
   const [bans, setBans] = useState<any[]>([]);
   const [votingSubTab, setVotingSubTab] = useState<"creation" | "enrichissement">("creation");
 
@@ -151,7 +152,20 @@ const CommunityHub = () => {
               console.error("Erreur:", error);
             }
           };
+          const fetchPendingEnrichments = async () => {
+            try {
+              const response = await fetch(`/api/communities/${params.id}/posts/with-pending-enrichments`);
+              if (response.ok) {
+                const data = await response.json();
+                setPendingEnrichmentsCount(data.length);
+              }
+            }
+            catch (error) {
+              console.error("Erreur:", error);
+            }
+          }
           fetchPendingPosts();
+          fetchPendingEnrichments();
         }
 
         // Récupérer les posts de la communauté
@@ -388,9 +402,9 @@ const CommunityHub = () => {
                 <div className="relative group">
                   <button className="flex items-center space-x-2 text-white">
                     <h1 className="text-xl font-bold">{communityData.name}</h1>
-                    {isContributor && pendingPostsCount > 0 && (
+                    {isContributor && (pendingPostsCount > 0 || pendingEnrichmentsCount > 0) && (
                       <span className="ml-2 px-2 py-1 bg-red-100 text-red-600 text-xs font-medium rounded-full">
-                        {pendingPostsCount} en attente
+                        {pendingPostsCount + pendingEnrichmentsCount} en attente
                       </span>
                     )}
                     <ChevronDown className="w-5 h-5 group-hover:rotate-180 transition-transform" />
@@ -545,9 +559,9 @@ const CommunityHub = () => {
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
                       Sessions de vote
-                      {pendingPostsCount > 0 && (
+                      {(pendingPostsCount > 0 || pendingEnrichmentsCount > 0) && (
                         <span className="ml-2 px-2 py-1 bg-red-100 text-red-600 text-xs font-medium rounded-full">
-                          {pendingPostsCount}
+                          {pendingPostsCount + pendingEnrichmentsCount}
                         </span>
                       )}
                     </button>

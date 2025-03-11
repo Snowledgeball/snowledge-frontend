@@ -44,77 +44,36 @@ interface VotingSessionProps {
 }
 
 export default function VotingSession({ communityId, onTabChange, activeTab }: VotingSessionProps) {
-    const router = useRouter();
-    const session = useSession();
-    const [pendingPosts, setPendingPosts] = useState<PendingPost[]>([]);
     const [contributorsCount, setContributorsCount] = useState(0);
-    const [isContributorsCountEven, setIsContributorsCountEven] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [community, setCommunity] = useState<any>(null);
-    const [creationPosts, setCreationPosts] = useState<PendingPost[]>([]);
-    const [enrichissementPosts, setEnrichissementPosts] = useState<PendingPost[]>([]);
-    const [publishError, setPublishError] = useState<string | null>(null);
-    const [publishedPosts, setPublishedPosts] = useState<PendingPost[]>([]);
-    const [postsWithPendingContributions, setPostsWithPendingContributions] = useState<PendingPost[]>([]);
+    const [postsWithPendingEnrichments, setPostsWithPendingEnrichments] = useState<PendingPost[]>([]);
 
     useEffect(() => {
-        fetchCommunityData();
-        fetchPendingPosts();
         fetchContributorsCount();
-        fetchPostsWithPendingContributions();
+        fetchPostsWithPendingEnrichments();
     }, [communityId]);
 
     // Fonction pour récupérer les données de la communauté
-    const fetchCommunityData = async () => {
-        try {
-            const response = await fetch(`/api/communities/${communityId}`);
-            const data = await response.json();
-            if (response.ok) {
-                setCommunity(data);
-            }
-        } catch (error) {
-            console.error("Erreur lors de la récupération des données de la communauté:", error);
-        }
-    };
-
-    const fetchPendingPosts = async () => {
-        try {
-            const response = await fetch(`/api/communities/${communityId}/posts/pending`);
-            if (!response.ok) throw new Error("Erreur lors de la récupération des posts");
-            const data = await response.json();
-
-            // Pour l'instant, tous les posts sont considérés comme des créations
-            // Dans le futur, il faudra ajouter un champ pour distinguer les types
-            setCreationPosts(data);
-            // setEnrichissementPosts(data.filter((post: PendingPost) => post.accept_contributions));
-        } catch (error) {
-            toast.error("Erreur lors de la récupération des posts en attente");
-        }
-    };
-
     const fetchContributorsCount = async () => {
         try {
             const response = await fetch(`/api/communities/${communityId}/contributors/count`);
             if (response.ok) {
                 const data = await response.json();
                 setContributorsCount(data.count);
-
-                setIsContributorsCountEven(data.count % 2 === 0);
             }
         } catch (error) {
             console.error("Erreur lors de la récupération du nombre de contributeurs:", error);
         }
     };
 
-    const fetchPostsWithPendingContributions = async () => {
+    const fetchPostsWithPendingEnrichments = async () => {
         try {
-            const response = await fetch(`/api/communities/${communityId}/posts/with-pending-contributions`);
+            const response = await fetch(`/api/communities/${communityId}/posts/with-pending-enrichments`);
             if (response.ok) {
                 const data = await response.json();
-                setPostsWithPendingContributions(data);
+                setPostsWithPendingEnrichments(data);
             }
         } catch (error) {
-            console.error("Erreur lors de la récupération des posts avec contributions en attente:", error);
+            console.error("Erreur lors de la récupération des posts avec enrichissements en attente:", error);
         }
     };
 
@@ -151,20 +110,13 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
                         <span>Nombre de contributeurs: {contributorsCount}</span>
                     </div>
                 </div>
-
-                {publishError && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 flex items-center">
-                        <AlertCircle className="w-5 h-5 mr-2 text-red-500" />
-                        {publishError}
-                    </div>
-                )}
             </div>
 
             {activeTab === "creation" ? (
                 <CreationVotingSession communityId={communityId} />
             ) : (
                 <div className="space-y-6">
-                    {postsWithPendingContributions.length === 0 ? (
+                    {postsWithPendingEnrichments.length === 0 ? (
                         <div className="text-center py-8 bg-gray-50 rounded-lg">
                             <p className="text-gray-500">Aucun post n'a d'enrichissement en attente de validation</p>
                         </div>
@@ -176,7 +128,7 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
                             </p>
 
                             <div className="space-y-8">
-                                {postsWithPendingContributions.map((post) => (
+                                {postsWithPendingEnrichments.map((post) => (
                                     <div key={post.id} className="border-t pt-6">
                                         <div className="flex items-center justify-between mb-4">
                                             <h4 className="text-lg font-medium">{post.title}</h4>

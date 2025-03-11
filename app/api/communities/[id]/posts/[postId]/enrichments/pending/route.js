@@ -13,6 +13,8 @@ export async function GET(request, { params }) {
         }
 
         const { id: communityId, postId } = await params;
+        console.log("communityId", communityId);
+        console.log("postId", postId);
 
         // Vérifier que l'utilisateur est membre ou créateur
         const isContributor = await prisma.community_contributors.findUnique({
@@ -32,7 +34,7 @@ export async function GET(request, { params }) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
         }
 
-        // Récupérer les contributions en attente
+        // Récupérer les enrichissements en attente
         const pendingContributions = await prisma.community_posts_contributions.findMany({
             where: {
                 post_id: parseInt(postId),

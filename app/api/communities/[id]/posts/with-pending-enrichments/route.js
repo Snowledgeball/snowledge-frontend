@@ -14,6 +14,8 @@ export async function GET(request, { params }) {
 
         const { id: communityId } = await params;
 
+
+
         // Vérifier que l'utilisateur est contributeur
         const membership = await prisma.community_contributors.findUnique({
             where: {
