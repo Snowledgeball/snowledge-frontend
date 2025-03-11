@@ -70,27 +70,33 @@ const CommunityHub = () => {
 
   // Mettre à jour l'URL lorsque l'onglet actif change
   const handleTabChange = (tab: string) => {
+    // Éviter de recharger si on clique sur l'onglet déjà actif
+    if (tab === activeTab) return;
+
     setActiveTab(tab);
 
-    // Construire la nouvelle URL avec les paramètres
-    const newParams = new URLSearchParams(searchParams);
+    // Construire la nouvelle URL avec uniquement le paramètre tab
+    const newParams = new URLSearchParams();
     newParams.set('tab', tab);
 
     // Mettre à jour l'URL sans recharger la page
-    router.push(`/community/${params.id}?${newParams.toString()}#community-content`, { scroll: false });
+    router.push(`/community/${params.id}?${newParams.toString()}`, { scroll: false });
   };
 
   // Mettre à jour l'URL lorsque le sous-onglet de vote change
   const handleVotingSubTabChange = (tab: "creation" | "enrichissement") => {
+    // Éviter de recharger si on clique sur le sous-onglet déjà actif
+    if (tab === votingSubTab) return;
+
     setVotingSubTab(tab);
 
     // Construire la nouvelle URL avec les paramètres
-    const newParams = new URLSearchParams(searchParams);
+    const newParams = new URLSearchParams();
     newParams.set('tab', 'voting');
     newParams.set('voting', tab);
 
     // Mettre à jour l'URL sans recharger la page
-    router.push(`/community/${params.id}?${newParams.toString()}#voting-section`, { scroll: false });
+    router.push(`/community/${params.id}?${newParams.toString()}`, { scroll: false });
   };
 
   useEffect(() => {
@@ -180,14 +186,10 @@ const CommunityHub = () => {
           fetchPendingEnrichments();
         }
 
-        // Récupérer les posts de la communauté
-        const communityPostsResponse = await fetch(
-          `/api/communities/${params.id}/posts?status=PUBLISHED`
-        );
-        if (!communityPostsResponse.ok)
-          throw new Error("Erreur lors de la récupération des posts");
-        const data = await communityPostsResponse.json();
-        setPosts(data);
+        // Récupérer les posts de la communauté seulement si l'onglet actif est "posts"
+        if (activeTab === "posts") {
+          fetchCommunityPosts();
+        }
       } catch (error) {
         if (error instanceof Error) {
           console.log("Erreur:", error.stack);
@@ -198,10 +200,46 @@ const CommunityHub = () => {
       }
     };
 
+    // Fonction séparée pour récupérer les posts
+    const fetchCommunityPosts = async () => {
+      try {
+        const communityPostsResponse = await fetch(
+          `/api/communities/${params.id}/posts?status=PUBLISHED`
+        );
+        if (!communityPostsResponse.ok)
+          throw new Error("Erreur lors de la récupération des posts");
+        const data = await communityPostsResponse.json();
+        setPosts(data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des posts:", error);
+      }
+    };
+
     if (params.id) {
       checkMembershipAndFetchData();
     }
-  }, [params.id, router, session, searchParams]);
+  }, [params.id, router, session]);
+
+  // Effet pour charger les posts uniquement lorsque l'onglet "posts" est actif
+  useEffect(() => {
+    if (activeTab === "posts" && session && params.id && posts.length === 0) {
+      const fetchCommunityPosts = async () => {
+        try {
+          const communityPostsResponse = await fetch(
+            `/api/communities/${params.id}/posts?status=PUBLISHED`
+          );
+          if (!communityPostsResponse.ok)
+            throw new Error("Erreur lors de la récupération des posts");
+          const data = await communityPostsResponse.json();
+          setPosts(data);
+        } catch (error) {
+          console.error("Erreur lors de la récupération des posts:", error);
+        }
+      };
+
+      fetchCommunityPosts();
+    }
+  }, [activeTab, params.id, session, posts.length]);
 
   // Si en cours de chargement, afficher le loader
   if (isLoading) {
