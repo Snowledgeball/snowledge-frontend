@@ -24,8 +24,6 @@ import { fr } from "date-fns/locale";
 import ChatBox from "@/components/shared/ChatBox";
 import QASection from "@/components/shared/QASection";
 import VotingSession from "@/components/community/VotingSession";
-import ContributionVotingSession from "@/components/community/ContributionVotingSession";
-import Link from "next/link";
 
 // Ajouter ces catégories de posts
 const POST_CATEGORIES = [
@@ -80,10 +78,7 @@ const CommunityHub = () => {
   const [isCreator, setIsCreator] = useState(false);
   const [pendingPostsCount, setPendingPostsCount] = useState(0);
   const [bans, setBans] = useState<any[]>([]);
-  const [activeSubTab, setActiveSubTab] = useState<"general" | "creation" | "enrichissement">("general");
   const [votingSubTab, setVotingSubTab] = useState<"creation" | "enrichissement">("creation");
-  const [pendingPosts, setPendingPosts] = useState<Post[]>([]);
-  const [communityPosts, setCommunityPosts] = useState<Post[]>([]);
 
   useEffect(() => {
     if (!session) {
@@ -151,7 +146,6 @@ const CommunityHub = () => {
               if (response.ok) {
                 const data = await response.json();
                 setPendingPostsCount(data.length);
-                setPendingPosts(data);
               }
             } catch (error) {
               console.error("Erreur:", error);
@@ -164,10 +158,10 @@ const CommunityHub = () => {
         const communityPostsResponse = await fetch(
           `/api/communities/${params.id}/posts?status=PUBLISHED`
         );
-        if (communityPostsResponse.ok) {
-          const communityPostsData = await communityPostsResponse.json();
-          setCommunityPosts(communityPostsData);
-        }
+        if (!communityPostsResponse.ok)
+          throw new Error("Erreur lors de la récupération des posts");
+        const data = await communityPostsResponse.json();
+        setPosts(data);
       } catch (error) {
         if (error instanceof Error) {
           console.log("Erreur:", error.stack);
@@ -506,7 +500,6 @@ const CommunityHub = () => {
                       }`}
                     onClick={() => {
                       setActiveTab("general");
-                      setActiveSubTab("general");
                     }}
                   >
                     Général
@@ -518,7 +511,6 @@ const CommunityHub = () => {
                       }`}
                     onClick={() => {
                       setActiveTab("posts");
-                      setActiveSubTab("general");
                     }}
                   >
                     Posts
@@ -547,7 +539,6 @@ const CommunityHub = () => {
                         }`}
                       onClick={() => {
                         setActiveTab("voting");
-                        setActiveSubTab("creation");
                       }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -675,7 +666,7 @@ const CommunityHub = () => {
                                         <button
                                           onClick={() =>
                                             router.push(
-                                              `/community/${params.id}/posts/${post.id}/edit`
+                                              `/community/${params.id}/posts/${post.id}/edit?status=PUBLISHED`
                                             )
                                           }
                                           className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"

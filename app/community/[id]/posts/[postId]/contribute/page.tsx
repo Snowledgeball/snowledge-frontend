@@ -110,6 +110,7 @@ export default function ContributePage() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
+                    title: description.slice(0, 60),
                     content: modifiedContent,
                     original_content: originalContent,
                     description,
@@ -157,10 +158,19 @@ export default function ContributePage() {
 
                 <div className="mb-6">
                     <h2 className="text-lg font-semibold mb-2">Description de vos modifications</h2>
+                    <div className="mb-2 text-sm text-gray-600">
+                        <p className="mb-1">Décrivez brièvement les modifications que vous proposez et leur raison.</p>
+                        <p className="mb-1">Exemple de format :</p>
+                        <ul className="list-disc pl-5 mb-2">
+                            <li>Correction de faute d'orthographe</li>
+                            <li>Ajout d'information sur...</li>
+                            <li>Restructuration de la section...</li>
+                        </ul>
+                    </div>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Décrivez brièvement les modifications que vous proposez et leur raison..."
+                        placeholder="Décrivez vos modifications ici..."
                         className="w-full p-3 border rounded-md"
                         rows={3}
                     />

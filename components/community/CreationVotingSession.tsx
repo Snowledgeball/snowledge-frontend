@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { User, AlertCircle, Info } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import {
     Tooltip,
     TooltipContent,
@@ -47,7 +47,6 @@ interface CreationVotingSessionProps {
 }
 
 export default function CreationVotingSession({ communityId }: CreationVotingSessionProps) {
-    const router = useRouter();
     const session = useSession();
     const [pendingPosts, setPendingPosts] = useState<PendingPost[]>([]);
     const [contributorsCount, setContributorsCount] = useState(0);
@@ -173,8 +172,6 @@ export default function CreationVotingSession({ communityId }: CreationVotingSes
     const isContributor = community?.contributors?.some(
         (contributor: any) => contributor.userId === session?.data?.user?.id
     ) || false;
-
-    const isCreator = community?.createdBy === session?.data?.user?.id || false;
 
     if (loading) {
         return (

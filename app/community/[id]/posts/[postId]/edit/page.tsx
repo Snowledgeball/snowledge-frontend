@@ -1,10 +1,10 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Eye, ImageIcon } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 import TinyEditor from "@/components/shared/TinyEditor";
 import { toast } from "sonner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
@@ -40,6 +40,7 @@ export default function EditPost() {
     const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const [post, setPost] = useState<Post | null>(null);
     const [postTitle, setPostTitle] = useState("");
@@ -49,10 +50,17 @@ export default function EditPost() {
     const [contributionsEnabled, setContributionsEnabled] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
 
+    const status = searchParams.get("status");
+    console.log(status);
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const response = await fetch(`/api/communities/${params.id}/posts/pending/${params.postId}`);
+                let response;
+                if (status === "PUBLISHED") {
+                    response = await fetch(`/api/communities/${params.id}/posts/${params.postId}`);
+                } else {
+                    response = await fetch(`/api/communities/${params.id}/posts/pending/${params.postId}`);
+                }
                 if (!response.ok) throw new Error('Post non trouvé');
                 const data = await response.json();
                 setPost(data);

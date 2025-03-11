@@ -44,8 +44,8 @@ export default function ContributionReview({
 }: ContributionReviewProps) {
     const router = useRouter();
     const [feedback, setFeedback] = useState(existingReview?.content || "");
-    const [decision, setDecision] = useState<"APPROVED" | "REJECTED">(
-        existingReview?.status as "APPROVED" | "REJECTED" || "REJECTED"
+    const [decision, setDecision] = useState<"APPROVED" | "REJECTED" | null>(
+        existingReview?.status as "APPROVED" | "REJECTED" || null
     );
     const [submitting, setSubmitting] = useState(false);
     const [activeTab, setActiveTab] = useState("diff");

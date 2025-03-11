@@ -5,14 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { User, AlertCircle, Info } from "lucide-react";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
-import Link from "next/link";
+import { AlertCircle, Info } from "lucide-react";
 import ContributionVotingSession from "./ContributionVotingSession";
 import CreationVotingSession from "./CreationVotingSession";
 
@@ -124,88 +117,6 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
         }
     };
 
-    const handlePublish = async (postId: number) => {
-        try {
-            setPublishError(null);
-            const response = await fetch(
-                `/api/communities/${communityId}/posts/pending/${postId}/publish`,
-                { method: "POST" }
-            );
-
-            if (!response.ok) {
-                const data = await response.json();
-                if (data.details) {
-                    setPublishError(`${data.error}. ${data.details.currentVotes}/${data.details.requiredVotes} votes requis.`);
-                } else {
-                    throw new Error(data.error || "Erreur lors de la publication");
-                }
-                return;
-            }
-
-            toast.success("Post publié avec succès");
-            setCreationPosts((prev) => prev.filter((p) => p.id !== postId));
-            setEnrichissementPosts((prev) => prev.filter((p) => p.id !== postId));
-        } catch (error) {
-            if (error instanceof Error) {
-                toast.error(error.message);
-            } else {
-                toast.error("Erreur lors de la publication du post");
-            }
-        }
-    };
-
-    // Calcul du taux de participation pour chaque post
-    const getParticipationRate = (post: PendingPost) => {
-        const totalReviews = post.community_posts_reviews.length;
-        if (contributorsCount === 0) return 0;
-        return Math.round((totalReviews / contributorsCount) * 100);
-    };
-
-    // Calcul du taux d'approbation pour chaque post
-    const getApprovalRate = (post: PendingPost) => {
-        const approvedCount = post.community_posts_reviews.filter(r => r.status === "APPROVED").length;
-        const totalReviews = post.community_posts_reviews.length;
-        if (totalReviews === 0) return 0;
-        return Math.round((approvedCount / totalReviews) * 100);
-    };
-
-    // Fonction pour vérifier si l'utilisateur est l'auteur du post
-    const isPostAuthor = (post: PendingPost) => {
-        return post.user.id === parseInt(session?.data?.user?.id || "0");
-    };
-
-    // Fonction pour vérifier si l'utilisateur a déjà voté
-    const hasUserVoted = (post: PendingPost) => {
-        return post.community_posts_reviews.some(r => r.user.id === parseInt(session?.data?.user?.id || "0"));
-    };
-
-    // Vérifier si le post peut être publié
-    const canPublish = (post: PendingPost) => {
-        const participationRate = getParticipationRate(post);
-        const approvedCount = post.community_posts_reviews.filter(r => r.status === "APPROVED").length;
-
-        // Si pas assez de participation, on ne peut pas publier
-        if (participationRate < 50) return false;
-
-        // Calculer le nombre de votes nécessaires pour une majorité stricte
-        const requiredApprovals = isContributorsCountEven
-            ? (contributorsCount / 2) + 1
-            : Math.ceil(contributorsCount / 2);
-
-        // Vérifier si le post a suffisamment de votes positifs
-        return approvedCount >= requiredApprovals;
-    };
-
-    // Déterminer quels posts afficher en fonction de l'onglet actif
-    const postsToDisplay = activeTab === "creation" ? creationPosts : enrichissementPosts;
-
-    // Vérifier si l'utilisateur est un contributeur ou le créateur de la communauté
-    const isContributor = community?.contributors?.some(
-        (contributor: any) => contributor.userId === session?.data?.user?.id
-    ) || false;
-
-    const isCreator = community?.createdBy === session?.data?.user?.id || false;
-
     return (
         <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="mb-6">
@@ -254,13 +165,13 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
                 <div className="space-y-6">
                     {postsWithPendingContributions.length === 0 ? (
                         <div className="text-center py-8 bg-gray-50 rounded-lg">
-                            <p className="text-gray-500">Aucun post n'a de contributions en attente de validation</p>
+                            <p className="text-gray-500">Aucun post n'a d'enrichissement en attente de validation</p>
                         </div>
                     ) : (
                         <div className="bg-white rounded-lg shadow-sm p-6">
-                            <h3 className="text-lg font-semibold mb-4">Contributions en attente de validation</h3>
+                            <h3 className="text-lg font-semibold mb-4">Enrichissements en attente de validation</h3>
                             <p className="text-gray-600 mb-6">
-                                Votez sur les modifications proposées pour améliorer les posts publiés.
+                                Votez sur les enrichissements proposés pour améliorer les posts publiés.
                             </p>
 
                             <div className="space-y-8">

@@ -15,7 +15,6 @@ export default function ReviewContribution() {
 
     const [contribution, setContribution] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [isContributor, setIsContributor] = useState(false);
     const [hasAlreadyVoted, setHasAlreadyVoted] = useState(false);
     const [existingReview, setExistingReview] = useState<any>(null);
     const [isEditMode, setIsEditMode] = useState(false);
@@ -38,7 +37,6 @@ export default function ReviewContribution() {
                     `/api/communities/${params.id}/membership`
                 );
                 const membershipData = await membershipResponse.json();
-                setIsContributor(membershipData.isContributor);
 
                 if (!membershipData.isContributor) {
                     toast.error("Vous devez être contributeur pour réviser une contribution");
@@ -72,13 +70,13 @@ export default function ReviewContribution() {
                 const communityData = await communityResponse.json();
 
                 // Vérifier si l'utilisateur est un contributeur ou le créateur de la communauté
-                const isUserContributor = communityData.contributors.some(
-                    (contributor: any) => contributor.userId === session.user.id
+                const isContributor = communityData.community_contributors.some(
+                    (contributor: any) => contributor.contributor_id === parseInt(session?.user?.id || "0")
                 );
                 const isCreator = communityData.createdBy === session.user.id;
 
                 // Permettre l'accès à la page de revue si l'utilisateur est contributeur OU créateur
-                if (!isUserContributor && !isCreator) {
+                if (!isContributor && !isCreator) {
                     redirect(`/community/${params.id}`);
                 }
 
@@ -176,7 +174,7 @@ export default function ReviewContribution() {
                 originalContent={contribution.original_content}
                 modifiedContent={contribution.content}
                 authorName={contribution.user.fullName}
-                authorId={contribution.user_id}
+                authorId={contribution.user.id}
                 existingReview={existingReview}
             />
         );
@@ -192,7 +190,7 @@ export default function ReviewContribution() {
             originalContent={contribution.original_content}
             modifiedContent={contribution.content}
             authorName={contribution.user.fullName}
-            authorId={contribution.user_id}
+            authorId={contribution.user.id}
         />
     );
 } 

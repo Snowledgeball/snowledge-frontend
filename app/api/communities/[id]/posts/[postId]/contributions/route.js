@@ -15,7 +15,7 @@ export async function POST(request, { params }) {
         }
 
         const { id: communityId, postId } = await params;
-        const { content, original_content, description } = await request.json();
+        const { content, original_content, title, description } = await request.json();
 
         // Vérifier que l'utilisateur est contributeur
         const contributor = await prisma.community_contributors.findUnique({
@@ -59,12 +59,15 @@ export async function POST(request, { params }) {
             );
         }
 
+
+
         // Créer la contribution
         const contribution = await prisma.community_posts_contributions.create({
             data: {
+                title,
+                description,
                 content,
                 original_content,
-                description,
                 post_id: parseInt(postId),
                 user_id: parseInt(session.user.id),
                 status: "PENDING",
@@ -84,7 +87,7 @@ export async function POST(request, { params }) {
                 },
             },
         });
-        const userIds = contributors.map(contributor => contributor.user.id);
+        const userIds = contributors.filter(contributor => contributor.user.id !== parseInt(session.user.id)).map(contributor => contributor.user.id);
 
         if (userIds.length > 0) {
             await createBulkNotifications({

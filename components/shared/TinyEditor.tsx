@@ -93,7 +93,7 @@ const TinyEditor = ({
 
   // Initialiser le contenu une seule fois
   const [initialContent] = useState(
-    initialValue || "<p>Écrivez ici...</p><p></p><p></p><p></p><p></p>"
+    initialValue || ""
   );
 
   useEffect(() => {
@@ -236,7 +236,7 @@ const TinyEditor = ({
                         list-style-type: decimal;
                     }
             `,
-    placeholder: placeholder,
+    placeholder: placeholder ? placeholder : "<p>Écrivez ici...</p><p></p><p></p><p></p><p></p>",
 
     // Callbacks pour les commentaires
     tinycomments_create: async (
