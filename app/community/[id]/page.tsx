@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
 import { Community } from "@/types/community";
@@ -16,6 +16,11 @@ import CommunityPosts from "@/components/community/CommunityPosts";
 import CommunityPresentationModal from "@/components/community/CommunityPresentationModal";
 import BanModal from "@/components/community/BanModal";
 
+// Cache pour stocker les données
+const communityCache = new Map<string, any>();
+const postsCache = new Map<string, any>();
+const pendingPostsCache = new Map<string, any>();
+const pendingEnrichmentsCache = new Map<string, any>();
 
 // Ajouter ce type avant le composant CommunityHub
 type Presentation = {
@@ -67,179 +72,353 @@ const CommunityHub = () => {
   const [votingSubTab, setVotingSubTab] = useState<"creation" | "enrichissement">(
     searchParams.get('voting') as "creation" | "enrichissement" || "creation"
   );
+  const [isLoadingPosts, setIsLoadingPosts] = useState(false);
+  const [isLoadingCommunity, setIsLoadingCommunity] = useState(true);
+
+  // Mémoriser l'ID de la communauté pour éviter les re-rendus inutiles
+  const communityId = useMemo(() => params.id as string, [params.id]);
 
   // Mettre à jour l'URL lorsque l'onglet actif change
-  const handleTabChange = (tab: string) => {
+  const handleTabChange = useCallback((tab: string) => {
     // Éviter de recharger si on clique sur l'onglet déjà actif
     if (tab === activeTab) return;
 
     setActiveTab(tab);
 
     // Construire la nouvelle URL avec uniquement le paramètre tab
-    const newParams = new URLSearchParams();
+    const newParams = new URLSearchParams(searchParams.toString());
     newParams.set('tab', tab);
 
+    // Si on change pour un onglet autre que "voting", supprimer le paramètre "voting"
+    if (tab !== "voting") {
+      newParams.delete('voting');
+    }
+
     // Mettre à jour l'URL sans recharger la page
-    router.push(`/community/${params.id}?${newParams.toString()}`, { scroll: false });
-  };
+    const newUrl = `/community/${communityId}?${newParams.toString()}`;
+    window.history.pushState({}, '', newUrl);
+  }, [activeTab, communityId, searchParams]);
 
   // Mettre à jour l'URL lorsque le sous-onglet de vote change
-  const handleVotingSubTabChange = (tab: "creation" | "enrichissement") => {
+  const handleVotingSubTabChange = useCallback((tab: "creation" | "enrichissement") => {
     // Éviter de recharger si on clique sur le sous-onglet déjà actif
     if (tab === votingSubTab) return;
 
     setVotingSubTab(tab);
 
     // Construire la nouvelle URL avec les paramètres
-    const newParams = new URLSearchParams();
+    const newParams = new URLSearchParams(searchParams.toString());
     newParams.set('tab', 'voting');
     newParams.set('voting', tab);
 
     // Mettre à jour l'URL sans recharger la page
-    router.push(`/community/${params.id}?${newParams.toString()}`, { scroll: false });
-  };
+    const newUrl = `/community/${communityId}?${newParams.toString()}`;
+    window.history.pushState({}, '', newUrl);
+  }, [votingSubTab, communityId, searchParams]);
 
-  useEffect(() => {
-    if (!session) {
+  // Fonction optimisée pour récupérer les posts
+  const fetchCommunityPosts = useCallback(async (forceRefresh = false) => {
+    if (!communityId || !session) return;
+
+    const cacheKey = `posts-${communityId}`;
+
+    // Vérifier si les données sont dans le cache et si on ne force pas le rafraîchissement
+    if (!forceRefresh && postsCache.has(cacheKey)) {
+      const cachedData = postsCache.get(cacheKey);
+      setPosts(cachedData);
       return;
-    } else if (userId === null) {
+    }
+
+    setIsLoadingPosts(true);
+    try {
+      const communityPostsResponse = await fetch(
+        `/api/communities/${communityId}/posts?status=PUBLISHED`,
+        {
+          headers: {
+            'Cache-Control': 'max-age=300', // Cache de 5 minutes
+          }
+        }
+      );
+
+      if (!communityPostsResponse.ok)
+        throw new Error("Erreur lors de la récupération des posts");
+
+      const data = await communityPostsResponse.json();
+
+      // Mettre en cache les données
+      postsCache.set(cacheKey, data);
+
+      setPosts(data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des posts:", error);
+    } finally {
+      setIsLoadingPosts(false);
+    }
+  }, [communityId, session]);
+
+  // Fonction optimisée pour récupérer les posts en attente
+  const fetchPendingPosts = useCallback(async () => {
+    if (!communityId || !session) return;
+
+    const cacheKey = `pending-posts-${communityId}`;
+
+    // Vérifier si les données sont dans le cache et si elles sont récentes (moins de 2 minutes)
+    if (pendingPostsCache.has(cacheKey)) {
+      const { data, timestamp } = pendingPostsCache.get(cacheKey);
+      const now = Date.now();
+      if (now - timestamp < 2 * 60 * 1000) { // 2 minutes
+        setPendingPostsCount(data.length);
+        return;
+      }
+    }
+
+    try {
+      const response = await fetch(
+        `/api/communities/${communityId}/posts/pending`,
+        {
+          headers: {
+            'Cache-Control': 'max-age=120', // Cache de 2 minutes
+          }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Mettre en cache les données avec un timestamp
+        pendingPostsCache.set(cacheKey, { data, timestamp: Date.now() });
+
+        setPendingPostsCount(data.length);
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+    }
+  }, [communityId, session]);
+
+  // Fonction optimisée pour récupérer les enrichissements en attente
+  const fetchPendingEnrichments = useCallback(async () => {
+    if (!communityId || !session) return;
+
+    const cacheKey = `pending-enrichments-${communityId}`;
+
+    // Vérifier si les données sont dans le cache et si elles sont récentes (moins de 2 minutes)
+    if (pendingEnrichmentsCache.has(cacheKey)) {
+      const { data, timestamp } = pendingEnrichmentsCache.get(cacheKey);
+      const now = Date.now();
+      if (now - timestamp < 2 * 60 * 1000) { // 2 minutes
+        setPendingEnrichmentsCount(data.length);
+        return;
+      }
+    }
+
+    try {
+      const response = await fetch(
+        `/api/communities/${communityId}/posts/with-pending-enrichments`,
+        {
+          headers: {
+            'Cache-Control': 'max-age=120', // Cache de 2 minutes
+          }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Mettre en cache les données avec un timestamp
+        pendingEnrichmentsCache.set(cacheKey, { data, timestamp: Date.now() });
+
+        setPendingEnrichmentsCount(data.length);
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+    }
+  }, [communityId, session]);
+
+  // Fonction principale pour charger les données de la communauté
+  const loadCommunityData = useCallback(async () => {
+    if (!session || !communityId) return;
+
+    if (userId === null) {
       setUserId(session.user.id);
     }
 
-    const checkMembershipAndFetchData = async () => {
-      try {
-        // Vérifier si l'utilisateur est membre
-        const membershipResponse = await fetch(
-          `/api/communities/${params.id}/membership`
-        );
+    setIsLoadingCommunity(true);
 
-        const membershipData = await membershipResponse.json();
+    try {
+      // Vérifier si les données de la communauté sont dans le cache
+      const communityCacheKey = `community-${communityId}`;
+      let communityData;
 
-        console.log("membershipData", membershipData);
+      if (communityCache.has(communityCacheKey)) {
+        const { data, timestamp } = communityCache.get(communityCacheKey);
+        const now = Date.now();
+        if (now - timestamp < 5 * 60 * 1000) { // 5 minutes
+          communityData = data;
+          setCommunityData(data);
+        } else {
+          // Les données sont trop anciennes, on les rafraîchit
+          const communityResponse = await fetch(`/api/communities/${communityId}`, {
+            headers: {
+              'Cache-Control': 'max-age=300', // Cache de 5 minutes
+            }
+          });
 
-        // Récupérer les données de la communauté
-        const communityResponse = await fetch(`/api/communities/${params.id}`);
+          if (!communityResponse.ok) {
+            router.push("/404");
+            return;
+          }
+
+          communityData = await communityResponse.json();
+          communityCache.set(communityCacheKey, { data: communityData, timestamp: Date.now() });
+          setCommunityData(communityData);
+        }
+      } else {
+        // Pas de données en cache, on les récupère
+        const communityResponse = await fetch(`/api/communities/${communityId}`, {
+          headers: {
+            'Cache-Control': 'max-age=300', // Cache de 5 minutes
+          }
+        });
+
         if (!communityResponse.ok) {
           router.push("/404");
           return;
         }
-        const communityData = await communityResponse.json();
+
+        communityData = await communityResponse.json();
+        communityCache.set(communityCacheKey, { data: communityData, timestamp: Date.now() });
         setCommunityData(communityData);
+      }
 
-        // Récupérer les Membres bannis
-        const bansResponse = await fetch(`/api/communities/${params.id}/members/${session?.user?.id}/ban`);
-        const bansData = await bansResponse.json();
-        console.log("bansData", bansData);
-        setBans(bansData);
+      // Vérifier si l'utilisateur est membre
+      const membershipResponse = await fetch(
+        `/api/communities/${communityId}/membership`
+      );
 
-        // Si l'utilisateur n'est pas membre ou banni, récupérer la présentation
-        if (!membershipData.isMember && !membershipData.isCreator && !membershipData.isContributor && bansData.length === 0) {
-          const presentationResponse = await fetch(
-            `/api/communities/${params.id}/presentation`
-          );
-          const presentationData = await presentationResponse.json();
-          setPresentation(presentationData);
-          setShowJoinModal(true);
-        }
+      const membershipData = await membershipResponse.json();
 
-        // Récupérer les communautés de l'utilisateur
+      // Récupérer les Membres bannis
+      const bansResponse = await fetch(`/api/communities/${communityId}/members/${session?.user?.id}/ban`);
+      const bansData = await bansResponse.json();
+      setBans(bansData);
+
+      // Si l'utilisateur n'est pas membre ou banni, récupérer la présentation
+      if (!membershipData.isMember && !membershipData.isCreator && !membershipData.isContributor && bansData.length === 0) {
+        const presentationResponse = await fetch(
+          `/api/communities/${communityId}/presentation`
+        );
+        const presentationData = await presentationResponse.json();
+        setPresentation(presentationData);
+        setShowJoinModal(true);
+      }
+
+      // Récupérer les communautés de l'utilisateur (avec mise en cache côté client)
+      const userCommunitiesCacheKey = `user-communities-${session?.user?.id}`;
+      if (sessionStorage.getItem(userCommunitiesCacheKey)) {
+        setUserCommunities(JSON.parse(sessionStorage.getItem(userCommunitiesCacheKey)!));
+      } else {
         const userCommunitiesResponse = await fetch(
           `/api/users/${session?.user?.id}/joined-communities`
         );
         if (userCommunitiesResponse.ok) {
           const userCommunitiesData = await userCommunitiesResponse.json();
           setUserCommunities(userCommunitiesData.communities);
+          sessionStorage.setItem(userCommunitiesCacheKey, JSON.stringify(userCommunitiesData.communities));
         }
-
-        // Vérifier si l'utilisateur est contributeur
-        setIsContributor(membershipData.isContributor);
-        setIsCreator(communityData?.creator_id === parseInt(session?.user.id));
-
-        // Si l'utilisateur est contributeur, récupérer le nombre de posts en attente
-        if (membershipData.isContributor || membershipData.isCreator) {
-          const fetchPendingPosts = async () => {
-            try {
-              const response = await fetch(
-                `/api/communities/${params.id}/posts/pending`
-              );
-              if (response.ok) {
-                const data = await response.json();
-                setPendingPostsCount(data.length);
-              }
-            } catch (error) {
-              console.error("Erreur:", error);
-            }
-          };
-          const fetchPendingEnrichments = async () => {
-            try {
-              const response = await fetch(`/api/communities/${params.id}/posts/with-pending-enrichments`);
-              if (response.ok) {
-                const data = await response.json();
-                setPendingEnrichmentsCount(data.length);
-              }
-            }
-            catch (error) {
-              console.error("Erreur:", error);
-            }
-          }
-          fetchPendingPosts();
-          fetchPendingEnrichments();
-        }
-
-        // Récupérer les posts de la communauté seulement si l'onglet actif est "posts"
-        if (activeTab === "posts") {
-          fetchCommunityPosts();
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          console.log("Erreur:", error.stack);
-        } else {
-          console.log("Une erreur inattendue s'est produite");
-        }
-        setUserCommunities([]);
       }
-    };
 
-    // Fonction séparée pour récupérer les posts
-    const fetchCommunityPosts = async () => {
-      try {
-        const communityPostsResponse = await fetch(
-          `/api/communities/${params.id}/posts?status=PUBLISHED`
-        );
-        if (!communityPostsResponse.ok)
-          throw new Error("Erreur lors de la récupération des posts");
-        const data = await communityPostsResponse.json();
-        setPosts(data);
-      } catch (error) {
-        console.error("Erreur lors de la récupération des posts:", error);
+      // Vérifier si l'utilisateur est contributeur
+      setIsContributor(membershipData.isContributor);
+      setIsCreator(communityData?.creator_id === parseInt(session?.user.id));
+
+      // Si l'utilisateur est contributeur, récupérer le nombre de posts en attente
+      if (membershipData.isContributor || membershipData.isCreator) {
+        await Promise.all([
+          fetchPendingPosts(),
+          fetchPendingEnrichments()
+        ]);
       }
-    };
 
-    if (params.id) {
-      checkMembershipAndFetchData();
+      // Récupérer les posts de la communauté indépendamment de l'onglet actif
+      // pour éviter le rechargement lors du changement d'onglet
+      await fetchCommunityPosts();
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log("Erreur:", error.stack);
+      } else {
+        console.log("Une erreur inattendue s'est produite");
+      }
+      setUserCommunities([]);
+    } finally {
+      setIsLoadingCommunity(false);
     }
-  }, [params.id, router, session]);
+  }, [communityId, router, session, userId, fetchCommunityPosts, fetchPendingPosts, fetchPendingEnrichments]);
 
-  // Effet pour charger les posts uniquement lorsque l'onglet "posts" est actif
+  // Effet pour charger les données initiales
   useEffect(() => {
-    if (activeTab === "posts" && session && params.id && posts.length === 0) {
-      const fetchCommunityPosts = async () => {
-        try {
-          const communityPostsResponse = await fetch(
-            `/api/communities/${params.id}/posts?status=PUBLISHED`
-          );
-          if (!communityPostsResponse.ok)
-            throw new Error("Erreur lors de la récupération des posts");
-          const data = await communityPostsResponse.json();
-          setPosts(data);
-        } catch (error) {
-          console.error("Erreur lors de la récupération des posts:", error);
-        }
-      };
-
-      fetchCommunityPosts();
+    if (communityId && session) {
+      loadCommunityData();
     }
-  }, [activeTab, params.id, session, posts.length]);
+  }, [communityId, session, loadCommunityData]);
+
+  // Effet pour synchroniser l'état avec l'URL lors des changements de navigation
+  useEffect(() => {
+    // Fonction pour mettre à jour l'état en fonction des paramètres d'URL
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const tabFromUrl = params.get('tab');
+      const votingFromUrl = params.get('voting') as "creation" | "enrichissement" | null;
+
+      if (tabFromUrl) {
+        setActiveTab(tabFromUrl);
+      }
+
+      if (votingFromUrl) {
+        setVotingSubTab(votingFromUrl);
+      }
+    };
+
+    // Ajouter l'écouteur d'événements pour les changements d'URL
+    window.addEventListener('popstate', handlePopState);
+
+    // Nettoyer l'écouteur d'événements lors du démontage du composant
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  // Effet pour surveiller les changements de searchParams et mettre à jour l'état local
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    const votingFromUrl = searchParams.get('voting') as "creation" | "enrichissement" | null;
+
+    if (tabFromUrl && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+
+    if (votingFromUrl && votingFromUrl !== votingSubTab) {
+      setVotingSubTab(votingFromUrl);
+    }
+  }, [searchParams, activeTab, votingSubTab]);
+
+  // Ajouter une fonction pour précharger les données nécessaires pour tous les onglets
+  const preloadTabData = useCallback(async () => {
+    if (!communityId || !session) return;
+
+    // Précharger les posts pour l'onglet "posts"
+    if (posts.length === 0) {
+      await fetchCommunityPosts();
+    }
+
+    // Précharger d'autres données si nécessaire pour d'autres onglets
+    // ...
+
+  }, [communityId, session, posts.length, fetchCommunityPosts]);
+
+  // Ajouter un effet pour précharger les données lors du changement d'onglet
+  useEffect(() => {
+    preloadTabData();
+  }, [activeTab, preloadTabData]);
 
   // Si en cours de chargement, afficher le loader
   if (isLoading) {
@@ -250,10 +429,6 @@ const CommunityHub = () => {
   if (!isAuthenticated) {
     return null;
   }
-  const getYoutubeVideoId = (url: string) => {
-    const videoId = url.split("v=")[1];
-    return videoId;
-  };
 
   return (
     <div className="min-h-screen bg-gray-50" id="community-page">
@@ -298,45 +473,60 @@ const CommunityHub = () => {
                 pendingEnrichmentsCount={pendingEnrichmentsCount}
               />
 
+              {/* Indicateur de chargement */}
+              {isLoadingCommunity && (
+                <div className="flex justify-center items-center py-8">
+                  <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="ml-3 text-blue-600 font-medium">Chargement des données...</p>
+                </div>
+              )}
+
               {/* Contenu basé sur l'onglet actif */}
-              {activeTab === "general" ? (
-                <Card className="bg-white shadow-sm" id="general-section">
-                  <div className="h-[600px] flex flex-col">
-                    {session && (
-                      <ChatBox
-                        user={session.user}
-                        communityId={parseInt(String(params.id))}
-                        className="h-full"
-                      />
-                    )}
-                  </div>
-                </Card>
-              ) : activeTab === "voting" ? (
-                <div id="voting-section">
-                  <VotingSession
-                    communityId={params.id as string}
-                    activeTab={votingSubTab}
-                    onTabChange={handleVotingSubTabChange}
-                  />
-                </div>
-              ) : (
-                <div id="posts-section">
-                  <CommunityPosts
-                    posts={posts}
-                    communityId={params.id as string}
-                    isContributor={isContributor}
-                    userId={session?.user?.id}
-                  />
-                </div>
+              {!isLoadingCommunity && (
+                <>
+                  {activeTab === "general" ? (
+                    <Card className="bg-white shadow-sm" id="general-section">
+                      <div className="h-[600px] flex flex-col">
+                        {session && (
+                          <ChatBox
+                            user={session.user}
+                            communityId={parseInt(String(communityId))}
+                            className="h-full"
+                          />
+                        )}
+                      </div>
+                    </Card>
+                  ) : activeTab === "voting" ? (
+                    <div id="voting-section">
+                      <VotingSession communityId={params.id ? params.id.toString() : ""} />
+                    </div>
+                  ) : (
+                    <div id="posts-section">
+                      {isLoadingPosts ? (
+                        <div className="flex justify-center items-center py-12">
+                          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                          <p className="ml-3 text-blue-600 font-medium">Chargement des posts...</p>
+                        </div>
+                      ) : (
+                        <CommunityPosts
+                          posts={posts}
+                          communityId={communityId}
+                          isContributor={isContributor}
+                          userId={session?.user?.id}
+                        />
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </main>
           </div>
 
           {/* Section Q&A avec Disclosure */}
           <div className="mt-8" id="qa-section">
-            {activeTab === "general" && session && (
+            {activeTab === "general" && session && !isLoadingCommunity && (
               <QASection
-                communityId={params.id as string}
+                communityId={communityId}
                 isContributor={isContributor}
                 isCreator={isCreator}
                 userId={session?.user?.id}

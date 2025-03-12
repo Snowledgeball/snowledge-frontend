@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -8,6 +8,17 @@ import { toast } from "sonner";
 import { AlertCircle, Info } from "lucide-react";
 import EnrichmentVotingSession from "./EnrichmentVotingSession";
 import CreationVotingSession from "./CreationVotingSession";
+
+// Cache pour stocker les données
+const contributorsCache = new Map<string, { count: number, timestamp: number }>();
+const pendingEnrichmentsCache = new Map<string, { data: any[], timestamp: number }>();
+const postsWithPendingEnrichmentsCache = new Map<string, { data: any[], timestamp: number }>();
+
+// Cache pour stocker l'onglet actif
+const activeTabCache = new Map<string, { tab: string, timestamp: number }>();
+
+// Durée de validité du cache (2 minutes)
+const CACHE_DURATION = 2 * 60 * 1000;
 
 interface PendingPost {
     status: string;
@@ -39,43 +50,140 @@ interface PendingPost {
 
 interface VotingSessionProps {
     communityId: string;
-    onTabChange: (tab: "creation" | "enrichissement") => void;
-    activeTab: "creation" | "enrichissement";
 }
 
-export default function VotingSession({ communityId, onTabChange, activeTab }: VotingSessionProps) {
+export default function VotingSession({ communityId }: VotingSessionProps) {
     const [contributorsCount, setContributorsCount] = useState(0);
     const [postsWithPendingEnrichments, setPostsWithPendingEnrichments] = useState<PendingPost[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchContributorsCount();
-        fetchPostsWithPendingEnrichments();
-    }, [communityId]);
+    // Mémoriser l'ID de la communauté pour éviter les re-rendus inutiles
+    const memoizedCommunityId = useMemo(() => communityId, [communityId]);
 
-    // Fonction pour récupérer les données de la communauté
-    const fetchContributorsCount = async () => {
+    // Récupérer l'onglet actif depuis le cache ou utiliser "creation" par défaut
+    const getInitialTab = useCallback(() => {
+        const cacheKey = `voting-tab-${memoizedCommunityId}`;
+        const now = Date.now();
+
+        if (activeTabCache.has(cacheKey)) {
+            const cachedData = activeTabCache.get(cacheKey)!;
+            if (now - cachedData.timestamp < CACHE_DURATION) {
+                return cachedData.tab;
+            }
+        }
+
+        // Si pas de cache ou cache expiré, utiliser "creation" par défaut
+        return "creation";
+    }, [memoizedCommunityId]);
+
+    const [activeTab, setActiveTab] = useState(getInitialTab);
+
+    // Fonction optimisée pour récupérer le nombre de contributeurs
+    const fetchContributorsCount = useCallback(async (forceRefresh = false) => {
         try {
-            const response = await fetch(`/api/communities/${communityId}/contributors/count`);
+            const cacheKey = `contributors-count-${memoizedCommunityId}`;
+            const now = Date.now();
+
+            // Vérifier si les données sont dans le cache et si elles sont encore valides
+            if (!forceRefresh && contributorsCache.has(cacheKey)) {
+                const cachedData = contributorsCache.get(cacheKey)!;
+                if (now - cachedData.timestamp < CACHE_DURATION) {
+                    setContributorsCount(cachedData.count);
+                    return;
+                }
+            }
+
+            const response = await fetch(`/api/communities/${memoizedCommunityId}/contributors/count`, {
+                headers: {
+                    'Cache-Control': 'max-age=120', // Cache de 2 minutes
+                }
+            });
+
             if (response.ok) {
                 const data = await response.json();
                 setContributorsCount(data.count);
+
+                // Mettre en cache les données avec un timestamp
+                contributorsCache.set(cacheKey, {
+                    count: data.count,
+                    timestamp: now
+                });
             }
         } catch (error) {
             console.error("Erreur lors de la récupération du nombre de contributeurs:", error);
         }
-    };
+    }, [memoizedCommunityId]);
 
-    const fetchPostsWithPendingEnrichments = async () => {
+    // Fonction optimisée pour récupérer les posts avec enrichissements en attente
+    const fetchPostsWithPendingEnrichments = useCallback(async (forceRefresh = false) => {
         try {
-            const response = await fetch(`/api/communities/${communityId}/posts/with-pending-enrichments`);
+            const cacheKey = `posts-with-pending-enrichments-${memoizedCommunityId}`;
+            const now = Date.now();
+
+            // Vérifier si les données sont dans le cache et si elles sont encore valides
+            if (!forceRefresh && postsWithPendingEnrichmentsCache.has(cacheKey)) {
+                const cachedData = postsWithPendingEnrichmentsCache.get(cacheKey)!;
+                if (now - cachedData.timestamp < CACHE_DURATION) {
+                    setPostsWithPendingEnrichments(cachedData.data);
+                    return;
+                }
+            }
+
+            const response = await fetch(`/api/communities/${memoizedCommunityId}/posts/with-pending-enrichments`, {
+                headers: {
+                    'Cache-Control': 'max-age=120', // Cache de 2 minutes
+                }
+            });
+
             if (response.ok) {
                 const data = await response.json();
                 setPostsWithPendingEnrichments(data);
+
+                // Mettre en cache les données avec un timestamp
+                postsWithPendingEnrichmentsCache.set(cacheKey, {
+                    data,
+                    timestamp: now
+                });
             }
         } catch (error) {
             console.error("Erreur lors de la récupération des posts avec enrichissements en attente:", error);
         }
-    };
+    }, [memoizedCommunityId]);
+
+    // Fonction pour charger toutes les données nécessaires
+    const loadAllData = useCallback(async () => {
+        setLoading(true);
+        await Promise.all([
+            fetchContributorsCount(),
+            fetchPostsWithPendingEnrichments()
+        ]);
+        setLoading(false);
+    }, [fetchContributorsCount, fetchPostsWithPendingEnrichments]);
+
+    // Effet pour charger les données initiales
+    useEffect(() => {
+        loadAllData();
+
+        // Mettre en place un intervalle pour rafraîchir les données toutes les 2 minutes
+        const intervalId = setInterval(() => {
+            loadAllData();
+        }, CACHE_DURATION);
+
+        // Nettoyer l'intervalle lors du démontage du composant
+        return () => clearInterval(intervalId);
+    }, [loadAllData]);
+
+    // Mettre à jour le cache lorsque l'onglet change
+    const handleTabChange = useCallback((value: string) => {
+        setActiveTab(value);
+
+        // Mettre en cache l'onglet actif
+        const cacheKey = `voting-tab-${memoizedCommunityId}`;
+        activeTabCache.set(cacheKey, {
+            tab: value,
+            timestamp: Date.now()
+        });
+    }, [memoizedCommunityId]);
 
     return (
         <div className="bg-white rounded-lg shadow-sm p-6" id="voting-sessions">
@@ -88,7 +196,7 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
                             id="creation-tab"
                             className={`border-b-2 py-2 px-4 text-sm font-medium transition-colors ${activeTab === "creation" ? "border-blue-500 text-blue-600" : "border-transparent text-gray-500"
                                 }`}
-                            onClick={() => onTabChange("creation")}
+                            onClick={() => handleTabChange("creation")}
                         >
                             Création
                         </button>
@@ -96,7 +204,7 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
                             id="enrichissement-tab"
                             className={`border-b-2 py-2 px-4 text-sm font-medium transition-colors ${activeTab === "enrichissement" ? "border-blue-500 text-blue-600" : "border-transparent text-gray-500"
                                 }`}
-                            onClick={() => onTabChange("enrichissement")}
+                            onClick={() => handleTabChange("enrichissement")}
                         >
                             Enrichissement
                         </button>
@@ -114,26 +222,27 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
                 </div>
             </div>
 
-            {activeTab === "creation" ? (
-                <div id="creation-content">
-                    <CreationVotingSession communityId={communityId} />
+            {loading ? (
+                <div className="text-center py-8">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+                    <p className="mt-2 text-gray-600">Chargement des données...</p>
                 </div>
             ) : (
-                <div id="enrichissement-content" className="space-y-6">
-                    {postsWithPendingEnrichments.length === 0 ? (
-                        <div className="text-center py-8 bg-gray-50 rounded-lg">
-                            <p className="text-gray-500">Aucun post n'a d'enrichissement en attente de validation</p>
-                        </div>
-                    ) : (
-                        <div className="bg-white rounded-lg shadow-sm p-6">
-                            <h3 className="text-lg font-semibold mb-4">Enrichissements en attente de validation</h3>
-                            <p className="text-gray-600 mb-6">
-                                Votez sur les enrichissements proposés pour améliorer les posts publiés.
-                            </p>
+                <>
+                    {/* Précharger les deux composants mais n'afficher que celui qui est actif */}
+                    <div className={activeTab === "creation" ? "block" : "hidden"} id="creation-content">
+                        <CreationVotingSession communityId={memoizedCommunityId} />
+                    </div>
 
+                    <div className={activeTab === "enrichissement" ? "block" : "hidden"} id="enrichissement-content">
+                        {postsWithPendingEnrichments.length === 0 ? (
+                            <div className="text-center py-8 bg-gray-50 rounded-lg">
+                                <p className="text-gray-500">Aucun post n'a d'enrichissement en attente de validation</p>
+                            </div>
+                        ) : (
                             <div className="space-y-8">
                                 {postsWithPendingEnrichments.map((post) => (
-                                    <div key={post.id} className="border-t pt-6">
+                                    <div key={post.id} className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
                                         <div className="flex items-center justify-between mb-4">
                                             <h4 className="text-lg font-medium">{post.title}</h4>
                                             <div className="flex items-center">
@@ -152,15 +261,16 @@ export default function VotingSession({ communityId, onTabChange, activeTab }: V
                                             </div>
                                         </div>
                                         <EnrichmentVotingSession
-                                            communityId={communityId}
+                                            communityId={memoizedCommunityId}
                                             postId={post.id.toString()}
+                                            key={`enrichment-${post.id}`}
                                         />
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </div>
+                </>
             )}
         </div>
     );

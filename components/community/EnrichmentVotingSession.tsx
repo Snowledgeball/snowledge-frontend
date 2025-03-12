@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -15,6 +15,14 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
+
+// Cache pour stocker les données
+const pendingContributionsCache = new Map<string, { data: any[], timestamp: number }>();
+const communityCache = new Map<string, { data: any, timestamp: number }>();
+const contributorsCache = new Map<string, { count: number, isEven: boolean, timestamp: number }>();
+
+// Durée de validité du cache (2 minutes)
+const CACHE_DURATION = 2 * 60 * 1000;
 
 interface EnrichmentVotingSessionProps {
     communityId: string;
@@ -51,41 +59,86 @@ export default function EnrichmentVotingSession({
     postId,
 }: EnrichmentVotingSessionProps) {
     const router = useRouter();
-    const { data: session } = useSession();
+    const { data: sessionData } = useSession();
     const [pendingContributions, setPendingContributions] = useState<Contribution[]>([]);
     const [contributorsCount, setContributorsCount] = useState(0);
     const [isContributorsCountEven, setIsContributorsCountEven] = useState(false);
     const [loading, setLoading] = useState(true);
     const [community, setCommunity] = useState<any>(null);
 
-    useEffect(() => {
-        fetchPendingContributions();
-        fetchContributorsCount();
-        fetchCommunityData();
-    }, [communityId, postId]);
+    // Mémoriser les IDs pour éviter les re-rendus inutiles
+    const memoizedCommunityId = useMemo(() => communityId, [communityId]);
+    const memoizedPostId = useMemo(() => postId, [postId]);
 
-    // Fonction pour récupérer les données de la communauté
-    const fetchCommunityData = async () => {
+    // Fonction optimisée pour récupérer les données de la communauté
+    const fetchCommunityData = useCallback(async (forceRefresh = false) => {
         try {
-            const response = await fetch(`/api/communities/${communityId}`);
-            const data = await response.json();
+            const cacheKey = `community-${memoizedCommunityId}`;
+            const now = Date.now();
+
+            // Vérifier si les données sont dans le cache et si elles sont encore valides
+            if (!forceRefresh && communityCache.has(cacheKey)) {
+                const cachedData = communityCache.get(cacheKey)!;
+                if (now - cachedData.timestamp < CACHE_DURATION) {
+                    setCommunity(cachedData.data);
+                    return;
+                }
+            }
+
+            const response = await fetch(`/api/communities/${memoizedCommunityId}`, {
+                headers: {
+                    'Cache-Control': 'max-age=120', // Cache de 2 minutes
+                }
+            });
+
             if (response.ok) {
+                const data = await response.json();
                 setCommunity(data);
+
+                // Mettre en cache les données avec un timestamp
+                communityCache.set(cacheKey, {
+                    data,
+                    timestamp: now
+                });
             }
         } catch (error) {
             console.error("Erreur lors de la récupération des données de la communauté:", error);
         }
-    };
+    }, [memoizedCommunityId]);
 
-    // Récupérer les contributions en attente
-    const fetchPendingContributions = async () => {
+    // Fonction optimisée pour récupérer les contributions en attente
+    const fetchPendingContributions = useCallback(async (forceRefresh = false) => {
         try {
             setLoading(true);
-            const response = await fetch(`/api/communities/${communityId}/posts/${postId}/enrichments/pending`);
+
+            const cacheKey = `pending-contributions-${memoizedCommunityId}-${memoizedPostId}`;
+            const now = Date.now();
+
+            // Vérifier si les données sont dans le cache et si elles sont encore valides
+            if (!forceRefresh && pendingContributionsCache.has(cacheKey)) {
+                const cachedData = pendingContributionsCache.get(cacheKey)!;
+                if (now - cachedData.timestamp < CACHE_DURATION) {
+                    setPendingContributions(cachedData.data);
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            const response = await fetch(`/api/communities/${memoizedCommunityId}/posts/${memoizedPostId}/enrichments/pending`, {
+                headers: {
+                    'Cache-Control': 'max-age=120', // Cache de 2 minutes
+                }
+            });
 
             if (response.ok) {
                 const data = await response.json();
                 setPendingContributions(data);
+
+                // Mettre en cache les données avec un timestamp
+                pendingContributionsCache.set(cacheKey, {
+                    data,
+                    timestamp: now
+                });
             } else {
                 console.error("Erreur lors de la récupération des contributions");
             }
@@ -94,32 +147,84 @@ export default function EnrichmentVotingSession({
         } finally {
             setLoading(false);
         }
-    };
+    }, [memoizedCommunityId, memoizedPostId]);
 
-    // Récupérer le nombre de contributeurs
-    const fetchContributorsCount = async () => {
+    // Fonction optimisée pour récupérer le nombre de contributeurs
+    const fetchContributorsCount = useCallback(async (forceRefresh = false) => {
         try {
-            const response = await fetch(`/api/communities/${communityId}/contributors/count`);
+            const cacheKey = `contributors-${memoizedCommunityId}`;
+            const now = Date.now();
+
+            // Vérifier si les données sont dans le cache et si elles sont encore valides
+            if (!forceRefresh && contributorsCache.has(cacheKey)) {
+                const cachedData = contributorsCache.get(cacheKey)!;
+                if (now - cachedData.timestamp < CACHE_DURATION) {
+                    setContributorsCount(cachedData.count);
+                    setIsContributorsCountEven(cachedData.isEven);
+                    return;
+                }
+            }
+
+            const response = await fetch(`/api/communities/${memoizedCommunityId}/contributors/count`, {
+                headers: {
+                    'Cache-Control': 'max-age=120', // Cache de 2 minutes
+                }
+            });
+
             if (response.ok) {
                 const { count, isEven } = await response.json();
                 setContributorsCount(count);
                 setIsContributorsCountEven(isEven);
+
+                // Mettre en cache les données avec un timestamp
+                contributorsCache.set(cacheKey, {
+                    count,
+                    isEven,
+                    timestamp: now
+                });
             }
         } catch (error) {
             console.error("Erreur:", error);
         }
-    };
+    }, [memoizedCommunityId]);
+
+    // Fonction pour charger toutes les données nécessaires
+    const loadAllData = useCallback(async () => {
+        setLoading(true);
+        await Promise.all([
+            fetchCommunityData(),
+            fetchPendingContributions(),
+            fetchContributorsCount()
+        ]);
+        setLoading(false);
+    }, [fetchCommunityData, fetchPendingContributions, fetchContributorsCount]);
+
+    // Effet pour charger les données initiales
+    useEffect(() => {
+        loadAllData();
+
+        // Mettre en place un intervalle pour rafraîchir les données toutes les 2 minutes
+        const intervalId = setInterval(() => {
+            loadAllData();
+        }, CACHE_DURATION);
+
+        // Nettoyer l'intervalle lors du démontage du composant
+        return () => clearInterval(intervalId);
+    }, [loadAllData]);
 
     // Approuver une contribution
     const handleApprove = async (enrichmentId: number) => {
         try {
-            const response = await fetch(`/api/communities/${communityId}/posts/${postId}/enrichments/${enrichmentId}/approve`, {
+            const response = await fetch(`/api/communities/${memoizedCommunityId}/posts/${memoizedPostId}/enrichments/${enrichmentId}/approve`, {
                 method: "POST",
             });
 
             if (response.ok) {
                 toast.success("Enrichissement publié");
-                fetchPendingContributions();
+                // Invalider le cache des contributions en attente
+                const cacheKey = `pending-contributions-${memoizedCommunityId}-${memoizedPostId}`;
+                pendingContributionsCache.delete(cacheKey);
+                await fetchPendingContributions(true);
             } else {
                 const data = await response.json();
                 toast.error(data.error || "Erreur lors de la publication de l'enrichissement");
@@ -133,13 +238,16 @@ export default function EnrichmentVotingSession({
     // Rejeter une contribution
     const handleReject = async (enrichmentId: number) => {
         try {
-            const response = await fetch(`/api/communities/${communityId}/posts/${postId}/enrichments/${enrichmentId}/reject`, {
+            const response = await fetch(`/api/communities/${memoizedCommunityId}/posts/${memoizedPostId}/enrichments/${enrichmentId}/reject`, {
                 method: "POST",
             });
 
             if (response.ok) {
                 toast.success("Enrichissement rejeté");
-                fetchPendingContributions();
+                // Invalider le cache des contributions en attente
+                const cacheKey = `pending-contributions-${memoizedCommunityId}-${memoizedPostId}`;
+                pendingContributionsCache.delete(cacheKey);
+                await fetchPendingContributions(true);
             } else {
                 const data = await response.json();
                 toast.error(data.error || "Erreur lors du rejet de l'enrichissement");
@@ -167,12 +275,12 @@ export default function EnrichmentVotingSession({
 
     // Vérifier si l'utilisateur est l'auteur de la contribution
     const isContributionAuthor = (contribution: Contribution) => {
-        return contribution.user.id === parseInt(session?.user?.id || "0");
+        return contribution.user.id === parseInt(sessionData?.user?.id || "0");
     };
 
     // Vérifier si l'utilisateur a déjà voté sur une contribution
     const hasUserVoted = (contribution: Contribution) => {
-        return contribution.community_posts_enrichment_reviews.some(r => r.user.id === parseInt(session?.user?.id || "0"));
+        return contribution.community_posts_enrichment_reviews.some(r => r.user.id === parseInt(sessionData?.user?.id || "0"));
     };
 
     // Vérifier si la contribution peut être publiée
@@ -190,10 +298,10 @@ export default function EnrichmentVotingSession({
 
     // Vérifier si l'utilisateur est un contributeur ou le créateur de la communauté
     const isContributor = community?.contributors?.some(
-        (contributor: any) => contributor.userId === session?.user?.id
+        (contributor: any) => contributor.userId === sessionData?.user?.id
     ) || false;
 
-    const isCreator = community?.createdBy === session?.user?.id || false;
+    const isCreator = community?.createdBy === sessionData?.user?.id || false;
 
     if (loading) {
         return (
@@ -361,7 +469,7 @@ export default function EnrichmentVotingSession({
                                             {isContributionAuthor(contribution) ? (
                                                 // Bouton pour modifier mon enrichissement et le publier si c'est validé
                                                 <Link
-                                                    href={`/community/${communityId}/posts/${postId}/enrichments/${contribution.id}?edit=true`}
+                                                    href={`/community/${memoizedCommunityId}/posts/${memoizedPostId}/enrichments/${contribution.id}?edit=true`}
                                                     className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
                                                 >
                                                     Modifier mon enrichissement
@@ -370,14 +478,14 @@ export default function EnrichmentVotingSession({
                                                 <>
                                                     {hasUserVoted(contribution) ? (
                                                         <Link
-                                                            href={`/community/${communityId}/posts/${postId}/enrichments/${contribution.id}/review?edit=true`}
+                                                            href={`/community/${memoizedCommunityId}/posts/${memoizedPostId}/enrichments/${contribution.id}/review?edit=true`}
                                                             className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
                                                         >
                                                             Modifier mon vote
                                                         </Link>
                                                     ) : (
                                                         <Link
-                                                            href={`/community/${communityId}/posts/${postId}/enrichments/${contribution.id}/review`}
+                                                            href={`/community/${memoizedCommunityId}/posts/${memoizedPostId}/enrichments/${contribution.id}/review`}
                                                             className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
                                                         >
                                                             Voter

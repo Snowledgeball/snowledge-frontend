@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { db } from "../../lib/firebaseConfig";
 import {
   collection,
@@ -16,6 +16,7 @@ import {
   updateDoc,
   FieldValue,
   deleteDoc,
+  limit,
 } from "firebase/firestore";
 import Image from "next/image";
 import { Trash2, Pencil, Check, X } from "lucide-react";
@@ -80,6 +81,16 @@ const DEFAULT_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"];
 
 const MAX_MESSAGE_LENGTH = 500;
 
+// Cache pour stocker les données de la communauté et des canaux
+const communityCache = new Map<string, { data: any, timestamp: number, isCreator: boolean }>();
+const channelsCache = new Map<string, { data: Channel[], timestamp: number }>();
+
+// Durée de validité du cache (5 minutes)
+const CACHE_DURATION = 5 * 60 * 1000;
+
+// Nombre de messages à charger initialement
+const INITIAL_MESSAGE_LIMIT = 50;
+
 export default function ChatBox({
   user,
   communityId,
@@ -113,13 +124,32 @@ export default function ChatBox({
     useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editedMessageText, setEditedMessageText] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [messageLimit, setMessageLimit] = useState(INITIAL_MESSAGE_LIMIT);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
 
-  const adjustTextareaHeight = (textarea: HTMLTextAreaElement) => {
+  // Mémoriser les valeurs qui ne changent pas souvent pour éviter les re-rendus inutiles
+  const memoizedCommunityId = useMemo(() => communityId, [communityId]);
+  const memoizedPostId = useMemo(() => postId, [postId]);
+  const memoizedVariant = useMemo(() => variant, [variant]);
+  const memoizedUserId = useMemo(() => user.id, [user.id]);
+
+  // Générer une clé de cache unique pour cette communauté
+  const getCommunityKey = useCallback(() => {
+    return `community-${memoizedCommunityId}`;
+  }, [memoizedCommunityId]);
+
+  // Générer une clé de cache unique pour les canaux de cette communauté
+  const getChannelsKey = useCallback(() => {
+    return `channels-${memoizedCommunityId}`;
+  }, [memoizedCommunityId]);
+
+  const adjustTextareaHeight = useCallback((textarea: HTMLTextAreaElement) => {
     textarea.style.height = "auto";
     textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
-  };
+  }, []);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (shouldAutoScroll && messagesContainerRef.current) {
       const container = messagesContainerRef.current;
       const targetScrollTop = container.scrollHeight;
@@ -145,110 +175,180 @@ export default function ChatBox({
 
       requestAnimationFrame(animate);
     }
-  };
+  }, [shouldAutoScroll]);
 
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (messagesContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } =
         messagesContainerRef.current;
       const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
       setShouldAutoScroll(isAtBottom);
-    }
-  };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  useEffect(() => {
-    if (variant === "post") {
-      // Pour les posts, on crée un canal virtuel unique
-      setSelectedChannel({
-        id: postId as number,
-        name: "Discussion",
-        type: "text",
-        description: "Discussion du post",
-        icon: "💬",
-      });
-      setChannels([]);
-    } else {
-      // Pour la communauté, on garde le comportement existant
-      fetchChannels();
-    }
-  }, [communityId, postId, variant]);
-
-  useEffect(() => {
-    if (!selectedChannel?.id) return;
-
-    let q;
-    if (variant === "post") {
-      q = query(
-        collection(db, "messages"),
-        where("communityId", "==", Number(communityId)),
-        where("postId", "==", Number(postId)),
-        orderBy("timestamp", "asc")
-      );
-    } else {
-      q = query(
-        collection(db, "messages"),
-        where("communityId", "==", Number(communityId)),
-        where("channelId", "==", selectedChannel.id.toString()),
-        orderBy("timestamp", "asc")
-      );
-    }
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const newMessages = snapshot.docs.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as Message)
-      );
-      setMessages(newMessages);
-    });
-
-    return () => unsubscribe();
-  }, [selectedChannel?.id, communityId, postId, variant]);
-
-  useEffect(() => {
-    const checkCreatorStatus = async () => {
-      try {
-        const response = await fetch(`/api/communities/${communityId}`);
-        const data = await response.json();
-        setIsCreator(data.creator_id === parseInt(user.id));
-      } catch (error) {
-        console.error(
-          "Erreur lors de la vérification du statut de créateur:",
-          error
-        );
+      // Charger plus de messages si l'utilisateur fait défiler vers le haut
+      if (scrollTop < 100 && hasMoreMessages) {
+        setMessageLimit(prev => prev + 50);
       }
-    };
-    checkCreatorStatus();
-  }, [communityId, user.id]);
+    }
+  }, [hasMoreMessages]);
 
-  const fetchChannels = async () => {
+  // Vérifier si l'utilisateur est le créateur de la communauté (avec mise en cache)
+  const checkCreatorStatus = useCallback(async (forceRefresh = false) => {
     try {
-      const response = await fetch(`/api/communities/${communityId}/channels`);
+      const cacheKey = getCommunityKey();
+      const now = Date.now();
+
+      // Vérifier si les données sont dans le cache et si elles sont encore valides
+      if (!forceRefresh && communityCache.has(cacheKey)) {
+        const cachedData = communityCache.get(cacheKey)!;
+        if (now - cachedData.timestamp < CACHE_DURATION) {
+          setIsCreator(cachedData.isCreator);
+          return;
+        }
+      }
+
+      const response = await fetch(`/api/communities/${memoizedCommunityId}`, {
+        headers: {
+          'Cache-Control': 'max-age=300', // Cache de 5 minutes
+        }
+      });
+
       const data = await response.json();
+      const creatorStatus = data.creator_id === parseInt(memoizedUserId);
+
+      // Mettre en cache les données avec un timestamp
+      communityCache.set(cacheKey, {
+        data,
+        timestamp: now,
+        isCreator: creatorStatus
+      });
+
+      setIsCreator(creatorStatus);
+    } catch (error) {
+      console.error(
+        "Erreur lors de la vérification du statut de créateur:",
+        error
+      );
+    }
+  }, [memoizedCommunityId, memoizedUserId, getCommunityKey]);
+
+  // Fonction optimisée pour récupérer les canaux
+  const fetchChannels = useCallback(async (forceRefresh = false) => {
+    try {
+      setIsLoading(true);
+
+      if (memoizedVariant === "post") {
+        // Pour les posts, on crée un canal virtuel unique
+        setSelectedChannel({
+          id: memoizedPostId as number,
+          name: "Discussion",
+          type: "text",
+          description: "Discussion du post",
+          icon: "💬",
+        });
+        setChannels([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const cacheKey = getChannelsKey();
+      const now = Date.now();
+
+      // Vérifier si les données sont dans le cache et si elles sont encore valides
+      if (!forceRefresh && channelsCache.has(cacheKey)) {
+        const cachedData = channelsCache.get(cacheKey)!;
+        if (now - cachedData.timestamp < CACHE_DURATION) {
+          setChannels(cachedData.data);
+          if (cachedData.data.length > 0 && !selectedChannel) {
+            setSelectedChannel(cachedData.data[0]);
+          }
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      const response = await fetch(`/api/communities/${memoizedCommunityId}/channels`, {
+        headers: {
+          'Cache-Control': 'max-age=300', // Cache de 5 minutes
+        }
+      });
+
+      const data = await response.json();
+
+      // Mettre en cache les données avec un timestamp
+      channelsCache.set(cacheKey, {
+        data,
+        timestamp: now
+      });
+
       setChannels(data);
       if (data.length > 0 && !selectedChannel) {
         setSelectedChannel(data[0]);
       }
     } catch (error) {
       console.error("Erreur lors de la récupération des canaux:", error);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [memoizedCommunityId, memoizedPostId, memoizedVariant, selectedChannel, getChannelsKey]);
 
-  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  // Effet pour charger les données initiales
+  useEffect(() => {
+    checkCreatorStatus();
+    fetchChannels();
+  }, [checkCreatorStatus, fetchChannels]);
+
+  // Effet pour écouter les messages
+  useEffect(() => {
+    if (!selectedChannel?.id) return;
+
+    let q;
+    if (memoizedVariant === "post") {
+      q = query(
+        collection(db, "messages"),
+        where("communityId", "==", Number(memoizedCommunityId)),
+        where("postId", "==", Number(memoizedPostId)),
+        orderBy("timestamp", "asc"),
+        limit(messageLimit)
+      );
+    } else {
+      q = query(
+        collection(db, "messages"),
+        where("communityId", "==", Number(memoizedCommunityId)),
+        where("channelId", "==", selectedChannel.id.toString()),
+        orderBy("timestamp", "asc"),
+        limit(messageLimit)
+      );
+    }
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const newMessages = snapshot.docs.map(
+        (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        } as Message)
+      );
+      setMessages(newMessages);
+      setHasMoreMessages(newMessages.length === messageLimit);
+    });
+
+    return () => unsubscribe();
+  }, [selectedChannel?.id, memoizedCommunityId, memoizedPostId, memoizedVariant, messageLimit]);
+
+  // Effet pour faire défiler vers le bas lorsque les messages changent
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, scrollToBottom]);
+
+  const handleMessageChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
     if (text.length <= MAX_MESSAGE_LENGTH) {
       setNewMessage(text);
       adjustTextareaHeight(e.target);
     }
-  };
+  }, [adjustTextareaHeight]);
 
-  const sendMessage = async () => {
+  const sendMessage = useCallback(async () => {
     if (
       !newMessage.trim() ||
       newMessage.length > MAX_MESSAGE_LENGTH ||
@@ -261,29 +361,30 @@ export default function ChatBox({
       userId: user.id,
       username: user.name,
       userImage: user.image,
-      channelId: variant === "post" ? "post" : selectedChannel.id.toString(),
-      communityId: communityId,
+      channelId: memoizedVariant === "post" ? "post" : selectedChannel.id.toString(),
+      communityId: memoizedCommunityId,
       timestamp: serverTimestamp(),
       reactions: {},
       ...(replyingTo?.id ? { replyTo: replyingTo.id } : {}),
     };
 
     // Ajouter postId seulement s'il est défini
-    if (variant === "post" && postId !== undefined) {
-      messageData.postId = postId;
+    if (memoizedVariant === "post" && memoizedPostId !== undefined) {
+      messageData.postId = memoizedPostId;
     }
 
     try {
       await addDoc(collection(db, "messages"), messageData);
+      setShouldAutoScroll(true);
     } catch (error) {
       console.error("Error sending message:", error);
     }
 
     setNewMessage("");
     setReplyingTo(null);
-  };
+  }, [newMessage, selectedChannel, memoizedVariant, memoizedCommunityId, memoizedPostId, user, replyingTo]);
 
-  const addReaction = async (messageId: string, emoji: string) => {
+  const addReaction = useCallback(async (messageId: string, emoji: string) => {
     const messageRef = doc(db, "messages", messageId);
     const messageDoc = await getDoc(messageRef);
 
@@ -299,34 +400,43 @@ export default function ChatBox({
           : [...userReactions, user.id],
       };
 
+      // Remove empty reaction arrays
+      if (updatedReactions[emoji].length === 0) {
+        delete updatedReactions[emoji];
+      }
+
       await updateDoc(messageRef, { reactions: updatedReactions });
     }
-  };
+  }, [user.id]);
 
-  const createChannel = async () => {
+  const createChannel = useCallback(async () => {
     try {
-      const response = await fetch(`/api/communities/${communityId}/channels`, {
+      const response = await fetch(`/api/communities/${memoizedCommunityId}/channels`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newChannel),
       });
 
       if (response.ok) {
+        // Invalider le cache des canaux
+        const cacheKey = getChannelsKey();
+        channelsCache.delete(cacheKey);
+
         setIsCreateChannelModalOpen(false);
         setNewChannel({ name: "", type: "text", description: "", icon: "💬" });
-        fetchChannels();
+        await fetchChannels(true);
       }
     } catch (error) {
       console.error("Erreur lors de la création du canal:", error);
     }
-  };
+  }, [newChannel, memoizedCommunityId, fetchChannels, getChannelsKey]);
 
-  const handleDeleteChannel = async () => {
+  const handleDeleteChannel = useCallback(async () => {
     if (!channelToDelete) return;
 
     try {
       const response = await fetch(
-        `/api/communities/${communityId}/channels/${channelToDelete}`,
+        `/api/communities/${memoizedCommunityId}/channels/${channelToDelete}`,
         {
           method: "DELETE",
           credentials: "include", // Ajoute les cookies à la requête
@@ -334,6 +444,10 @@ export default function ChatBox({
       );
 
       if (response.ok) {
+        // Invalider le cache des canaux
+        const cacheKey = getChannelsKey();
+        channelsCache.delete(cacheKey);
+
         if (channels.length === 1) {
           setSelectedChannel(null);
         } else {
@@ -341,7 +455,7 @@ export default function ChatBox({
         }
         setIsDeleteModalOpen(false);
         setChannelToDelete(null);
-        fetchChannels();
+        await fetchChannels(true);
       } else if (response.status === 403) {
         setError(
           "Vous n'avez pas les permissions nécessaires pour supprimer ce canal."
@@ -353,9 +467,9 @@ export default function ChatBox({
       console.error("Erreur lors de la suppression du canal:", error);
       setError("Une erreur est survenue lors de la suppression du canal.");
     }
-  };
+  }, [channelToDelete, memoizedCommunityId, channels, fetchChannels, getChannelsKey]);
 
-  const handleDeleteMessage = async () => {
+  const handleDeleteMessage = useCallback(async () => {
     if (!messageToDelete) return;
 
     try {
@@ -366,9 +480,9 @@ export default function ChatBox({
     } catch (error) {
       console.error("Erreur lors de la suppression du message:", error);
     }
-  };
+  }, [messageToDelete]);
 
-  const handleEditMessage = async (messageId: string) => {
+  const handleEditMessage = useCallback(async (messageId: string) => {
     if (
       !editedMessageText.trim() ||
       editedMessageText.length > MAX_MESSAGE_LENGTH
@@ -385,7 +499,288 @@ export default function ChatBox({
     } catch (error) {
       console.error("Erreur lors de la modification du message:", error);
     }
-  };
+  }, [editedMessageText]);
+
+  // Mémoriser le rendu des messages pour éviter les re-rendus inutiles
+  const renderMessages = useMemo(() => {
+    return messages.map((msg, index) => {
+      const previousMessage = index > 0 ? messages[index - 1] : null;
+      const isConsecutive =
+        previousMessage &&
+        previousMessage.userId === msg.userId &&
+        !msg.replyTo &&
+        (!msg.timestamp ||
+          !previousMessage.timestamp ||
+          ("seconds" in (msg.timestamp as FirestoreTimestamp) &&
+            "seconds" in
+            (previousMessage.timestamp as FirestoreTimestamp) &&
+            (msg.timestamp as FirestoreTimestamp).seconds -
+            (previousMessage.timestamp as FirestoreTimestamp)
+              .seconds <
+            3600));
+
+      return (
+        <div
+          key={msg.id}
+          className={`group hover:bg-gray-600/20 rounded-lg transition-colors duration-200 ${isConsecutive ? "mt-0" : "mt-6"
+            }`}
+        >
+          {/* Message répondu */}
+          {msg.replyTo &&
+            messages.find((m) => m.id === msg.replyTo) && (
+              <div
+                className={`relative ${variant === "post" ? "ml-6 mb-1" : "ml-12 mb-2"
+                  }`}
+              >
+                <div className="absolute left-[5px] top-0 w-[2px] h-[calc(100%+3px)] bg-gray-500"></div>
+                <div className="flex items-center space-x-2 pl-4">
+                  <Image
+                    src={
+                      messages.find((m) => m.id === msg.replyTo)
+                        ?.userImage ||
+                      `https://ui-avatars.com/api/?name=${messages.find((m) => m.id === msg.replyTo)
+                        ?.username
+                      }`
+                    }
+                    alt={
+                      messages.find((m) => m.id === msg.replyTo)
+                        ?.username || ""
+                    }
+                    width={16}
+                    height={16}
+                    className="rounded-full"
+                  />
+                  <span className="text-sm font-medium text-gray-400">
+                    {
+                      messages.find((m) => m.id === msg.replyTo)
+                        ?.username
+                    }
+                  </span>
+                  <p className="text-gray-400 text-sm">
+                    {(() => {
+                      const replyMessage = messages.find(
+                        (m) => m.id === msg.replyTo
+                      );
+                      if (!replyMessage?.text) return "";
+                      return replyMessage.text.length > 100
+                        ? `${replyMessage.text.substring(0, 100)}...`
+                        : replyMessage.text;
+                    })()}
+                  </p>
+                </div>
+              </div>
+            )}
+
+          {/* Message principal */}
+          <div className="flex items-start relative group">
+            <div className="flex items-start space-x-3 flex-1">
+              {!isConsecutive && (
+                <Image
+                  src={
+                    msg.userImage ||
+                    `https://ui-avatars.com/api/?name=${msg.username}`
+                  }
+                  alt={msg.username}
+                  width={variant === "post" ? 20 : 50}
+                  height={variant === "post" ? 20 : 50}
+                  className="rounded-full"
+                />
+              )}
+              <div
+                className={`flex-1 ${isConsecutive
+                  ? variant === "post"
+                    ? "ml-[32px]"
+                    : "ml-[62px]"
+                  : ""
+                  }`}
+              >
+                {!isConsecutive && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-white font-medium">
+                      {msg.username}
+                    </span>
+                    <span className="text-gray-400 text-xs">
+                      {msg.timestamp &&
+                        (msg.timestamp as FirestoreTimestamp)
+                          .seconds !== undefined
+                        ? new Date(
+                          (msg.timestamp as FirestoreTimestamp)
+                            .seconds * 1000
+                        ).toLocaleString()
+                        : msg.timestamp instanceof Date
+                          ? msg.timestamp.toLocaleString()
+                          : ""}
+                    </span>
+                  </div>
+                )}
+                {editingMessageId === msg.id ? (
+                  <div className="flex items-start space-x-2">
+                    <textarea
+                      value={editedMessageText}
+                      onChange={(e) => {
+                        if (
+                          e.target.value.length <= MAX_MESSAGE_LENGTH
+                        ) {
+                          setEditedMessageText(e.target.value);
+                          adjustTextareaHeight(e.target);
+                        }
+                      }}
+                      className="flex-1 bg-gray-600 text-white px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleEditMessage(msg.id);
+                        }
+                        if (e.key === "Escape") {
+                          setEditingMessageId(null);
+                          setEditedMessageText("");
+                        }
+                      }}
+                      autoFocus
+                    />
+                    <div className="flex items-center space-x-1">
+                      <button
+                        onClick={() => handleEditMessage(msg.id)}
+                        className="p-1 hover:bg-gray-600 rounded-md text-green-500 hover:text-green-400"
+                      >
+                        <Check className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingMessageId(null);
+                          setEditedMessageText("");
+                        }}
+                        className="p-1 hover:bg-gray-600 rounded-md text-gray-400 hover:text-gray-300"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p
+                    className={`text-gray-300 break-words whitespace-pre-wrap ${isConsecutive ? "" : "mt-1"
+                      } py-[1px] ${variant === "post"
+                        ? "max-w-[65%]"
+                        : "max-w-[750px]"
+                      } overflow-x-hidden`}
+                  >
+                    {msg.text}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Actions du message et réactions */}
+            <div className="absolute right-0 top-0 -translate-y-1/4 z-10">
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1 bg-gray-700 rounded-md shadow-lg">
+                <div className="relative group/emoji">
+                  <button
+                    onClick={() =>
+                      setShowEmojiPicker(
+                        showEmojiPicker === msg.id ? null : msg.id
+                      )
+                    }
+                    className="text-gray-400 hover:text-white p-0.5 hover:bg-gray-600 rounded-md text-lg"
+                  >
+                    😊
+                  </button>
+                  <span className="absolute bottom-full right-0 mb-2 hidden group-hover/emoji:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                    Ajouter une réaction
+                  </span>
+                  {showEmojiPicker === msg.id && (
+                    <div
+                      className={`absolute right-0 bottom-full mb-2 bg-gray-800 rounded-lg shadow-lg p-2 flex items-center space-x-2 z-20 ${variant === "post" ? "translate-x-1/4" : ""
+                        }`}
+                    >
+                      {DEFAULT_REACTIONS.map((emoji) => (
+                        <button
+                          key={emoji}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addReaction(msg.id, emoji);
+                            setShowEmojiPicker(null);
+                          }}
+                          className="p-1.5 hover:bg-gray-700 rounded-md transition-colors text-lg"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="relative group/reply">
+                  <button
+                    onClick={() => setReplyingTo(msg)}
+                    className="text-gray-400 hover:text-white p-0.5 hover:bg-gray-600 rounded-md text-lg"
+                  >
+                    ↩️
+                  </button>
+                  <span className="absolute bottom-full right-0 mb-2 hidden group-hover/reply:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                    Répondre
+                  </span>
+                </div>
+                {msg.userId === user.id && !editingMessageId && (
+                  <div className="relative group/edit">
+                    <button
+                      onClick={() => {
+                        setEditingMessageId(msg.id);
+                        setEditedMessageText(msg.text);
+                      }}
+                      className="text-gray-400 hover:text-blue-500 p-0.5 hover:bg-gray-600 rounded-md"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <span className="absolute bottom-full right-0 mb-2 hidden group-hover/edit:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                      Modifier le message
+                    </span>
+                  </div>
+                )}
+                {(isCreator || msg.userId === user.id) && (
+                  <div className="relative group/delete">
+                    <button
+                      onClick={() => {
+                        setMessageToDelete(msg);
+                        setIsDeleteMessageModalOpen(true);
+                      }}
+                      className="text-gray-400 hover:text-red-500 p-0.5 hover:bg-gray-600 rounded-md"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <span className="absolute bottom-full right-0 mb-2 hidden group-hover/delete:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                      Supprimer le message
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Réactions existantes */}
+            {Object.entries(msg.reactions || {}).some(
+              ([_, users]) => users.length > 0
+            ) && (
+                <div className="mt-1 flex items-center space-x-1">
+                  {Object.entries(msg.reactions || {}).map(
+                    ([emoji, users]) =>
+                      users.length > 0 && (
+                        <button
+                          key={emoji}
+                          onClick={() => addReaction(msg.id, emoji)}
+                          className={`px-2 py-0.5 rounded-md text-sm ${users.includes(user.id)
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-600 text-gray-300"
+                            }`}
+                        >
+                          {emoji} {users.length}
+                        </button>
+                      )
+                  )}
+                </div>
+              )}
+          </div>
+        </div>
+      );
+    });
+  }, [messages, user.id, editingMessageId, editedMessageText, showEmojiPicker, handleEditMessage, addReaction, variant, adjustTextareaHeight, isCreator]);
 
   return (
     <div className={`flex bg-gray-900 ${className} overflow-x-hidden`}>
@@ -404,46 +799,56 @@ export default function ChatBox({
             )}
           </div>
           <div className="flex-1 overflow-y-auto custom-scrollbar">
-            {channels.map((channel) => (
-              <div
-                key={channel.id}
-                onClick={() => setSelectedChannel(channel)}
-                className={`flex items-center justify-between px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white cursor-pointer group ${
-                  selectedChannel?.id === channel.id
+            {isLoading ? (
+              <div className="flex justify-center items-center h-24">
+                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
+            ) : channels.length === 0 ? (
+              <div className="p-4 text-gray-400 text-center">
+
+                Aucun canal disponible
+              </div>
+            ) : (
+              channels.map((channel) => (
+                <div
+                  key={channel.id}
+                  onClick={() => setSelectedChannel(channel)}
+                  className={`flex items-center justify-between px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white cursor-pointer group ${selectedChannel?.id === channel.id
                     ? "bg-gray-700 text-white"
                     : ""
-                }`}
-              >
-                <div className="flex items-center space-x-2">
-                  <span>{channel.icon}</span>
-                  <span>{channel.name}</span>
-                </div>
-                {isCreator && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setChannelToDelete(channel.id);
-                      setIsDeleteModalOpen(true);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500 p-1"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                    }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>{channel.icon}</span>
+                    <span>{channel.name}</span>
+                  </div>
+                  {isCreator && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setChannelToDelete(channel.id);
+                        setIsDeleteModalOpen(true);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500 p-1"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            ))}
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              ))
+            )}
           </div>
 
           {/* Modal de création de canal */}
@@ -573,9 +978,8 @@ export default function ChatBox({
 
       {/* Zone principale de chat */}
       <div
-        className={`flex-1 flex flex-col bg-gray-700 ${
-          variant === "post" ? "max-w-full" : ""
-        }`}
+        className={`flex-1 flex flex-col bg-gray-700 ${variant === "post" ? "max-w-full" : ""
+          }`}
       >
         {selectedChannel ? (
           <>
@@ -598,296 +1002,34 @@ export default function ChatBox({
             <div
               ref={messagesContainerRef}
               onScroll={handleScroll}
-              className={`flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar ${
-                variant === "post" ? "p-4" : "p-6"
-              }`}
+              className={`flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar ${variant === "post" ? "p-4" : "p-6"
+                }`}
             >
-              {messages.map((msg, index) => {
-                const previousMessage = index > 0 ? messages[index - 1] : null;
-                const isConsecutive =
-                  previousMessage &&
-                  previousMessage.userId === msg.userId &&
-                  !msg.replyTo &&
-                  (!msg.timestamp ||
-                    !previousMessage.timestamp ||
-                    ("seconds" in (msg.timestamp as FirestoreTimestamp) &&
-                      "seconds" in
-                        (previousMessage.timestamp as FirestoreTimestamp) &&
-                      (msg.timestamp as FirestoreTimestamp).seconds -
-                        (previousMessage.timestamp as FirestoreTimestamp)
-                          .seconds <
-                        3600));
-
-                return (
-                  <div
-                    key={msg.id}
-                    className={`group hover:bg-gray-600/20 rounded-lg transition-colors duration-200 ${
-                      isConsecutive ? "mt-0" : "mt-6"
-                    }`}
-                  >
-                    {/* Message répondu */}
-                    {msg.replyTo &&
-                      messages.find((m) => m.id === msg.replyTo) && (
-                        <div
-                          className={`relative ${
-                            variant === "post" ? "ml-6 mb-1" : "ml-12 mb-2"
-                          }`}
-                        >
-                          <div className="absolute left-[5px] top-0 w-[2px] h-[calc(100%+3px)] bg-gray-500"></div>
-                          <div className="flex items-center space-x-2 pl-4">
-                            <Image
-                              src={
-                                messages.find((m) => m.id === msg.replyTo)
-                                  ?.userImage ||
-                                `https://ui-avatars.com/api/?name=${
-                                  messages.find((m) => m.id === msg.replyTo)
-                                    ?.username
-                                }`
-                              }
-                              alt={
-                                messages.find((m) => m.id === msg.replyTo)
-                                  ?.username || ""
-                              }
-                              width={16}
-                              height={16}
-                              className="rounded-full"
-                            />
-                            <span className="text-sm font-medium text-gray-400">
-                              {
-                                messages.find((m) => m.id === msg.replyTo)
-                                  ?.username
-                              }
-                            </span>
-                            <p className="text-gray-400 text-sm">
-                              {(() => {
-                                const replyMessage = messages.find(
-                                  (m) => m.id === msg.replyTo
-                                );
-                                if (!replyMessage?.text) return "";
-                                return replyMessage.text.length > 100
-                                  ? `${replyMessage.text.substring(0, 100)}...`
-                                  : replyMessage.text;
-                              })()}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                    {/* Message principal */}
-                    <div className="flex items-start relative group">
-                      <div className="flex items-start space-x-3 flex-1">
-                        {!isConsecutive && (
-                          <Image
-                            src={
-                              msg.userImage ||
-                              `https://ui-avatars.com/api/?name=${msg.username}`
-                            }
-                            alt={msg.username}
-                            width={variant === "post" ? 20 : 50}
-                            height={variant === "post" ? 20 : 50}
-                            className="rounded-full"
-                          />
-                        )}
-                        <div
-                          className={`flex-1 ${
-                            isConsecutive
-                              ? variant === "post"
-                                ? "ml-[32px]"
-                                : "ml-[62px]"
-                              : ""
-                          }`}
-                        >
-                          {!isConsecutive && (
-                            <div className="flex items-center space-x-2">
-                              <span className="text-white font-medium">
-                                {msg.username}
-                              </span>
-                              <span className="text-gray-400 text-xs">
-                                {msg.timestamp &&
-                                (msg.timestamp as FirestoreTimestamp)
-                                  .seconds !== undefined
-                                  ? new Date(
-                                      (msg.timestamp as FirestoreTimestamp)
-                                        .seconds * 1000
-                                    ).toLocaleString()
-                                  : msg.timestamp instanceof Date
-                                  ? msg.timestamp.toLocaleString()
-                                  : ""}
-                              </span>
-                            </div>
-                          )}
-                          {editingMessageId === msg.id ? (
-                            <div className="flex items-start space-x-2">
-                              <textarea
-                                value={editedMessageText}
-                                onChange={(e) => {
-                                  if (
-                                    e.target.value.length <= MAX_MESSAGE_LENGTH
-                                  ) {
-                                    setEditedMessageText(e.target.value);
-                                    adjustTextareaHeight(e.target);
-                                  }
-                                }}
-                                className="flex-1 bg-gray-600 text-white px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" && !e.shiftKey) {
-                                    e.preventDefault();
-                                    handleEditMessage(msg.id);
-                                  }
-                                  if (e.key === "Escape") {
-                                    setEditingMessageId(null);
-                                    setEditedMessageText("");
-                                  }
-                                }}
-                                autoFocus
-                              />
-                              <div className="flex items-center space-x-1">
-                                <button
-                                  onClick={() => handleEditMessage(msg.id)}
-                                  className="p-1 hover:bg-gray-600 rounded-md text-green-500 hover:text-green-400"
-                                >
-                                  <Check className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setEditingMessageId(null);
-                                    setEditedMessageText("");
-                                  }}
-                                  className="p-1 hover:bg-gray-600 rounded-md text-gray-400 hover:text-gray-300"
-                                >
-                                  <X className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <p
-                              className={`text-gray-300 break-words whitespace-pre-wrap ${
-                                isConsecutive ? "" : "mt-1"
-                              } py-[1px] ${
-                                variant === "post"
-                                  ? "max-w-[65%]"
-                                  : "max-w-[750px]"
-                              } overflow-x-hidden`}
-                            >
-                              {msg.text}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Actions du message et réactions */}
-                      <div className="absolute right-0 top-0 -translate-y-1/4 z-10">
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1 bg-gray-700 rounded-md shadow-lg">
-                          <div className="relative group/emoji">
-                            <button
-                              onClick={() =>
-                                setShowEmojiPicker(
-                                  showEmojiPicker === msg.id ? null : msg.id
-                                )
-                              }
-                              className="text-gray-400 hover:text-white p-0.5 hover:bg-gray-600 rounded-md text-lg"
-                            >
-                              😊
-                            </button>
-                            <span className="absolute bottom-full right-0 mb-2 hidden group-hover/emoji:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                              Ajouter une réaction
-                            </span>
-                            {showEmojiPicker === msg.id && (
-                              <div
-                                className={`absolute right-0 bottom-full mb-2 bg-gray-800 rounded-lg shadow-lg p-2 flex items-center space-x-2 z-20 ${
-                                  variant === "post" ? "translate-x-1/4" : ""
-                                }`}
-                              >
-                                {DEFAULT_REACTIONS.map((emoji) => (
-                                  <button
-                                    key={emoji}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      addReaction(msg.id, emoji);
-                                      setShowEmojiPicker(null);
-                                    }}
-                                    className="p-1.5 hover:bg-gray-700 rounded-md transition-colors text-lg"
-                                  >
-                                    {emoji}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          <div className="relative group/reply">
-                            <button
-                              onClick={() => setReplyingTo(msg)}
-                              className="text-gray-400 hover:text-white p-0.5 hover:bg-gray-600 rounded-md text-lg"
-                            >
-                              ↩️
-                            </button>
-                            <span className="absolute bottom-full right-0 mb-2 hidden group-hover/reply:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                              Répondre
-                            </span>
-                          </div>
-                          {msg.userId === user.id && !editingMessageId && (
-                            <div className="relative group/edit">
-                              <button
-                                onClick={() => {
-                                  setEditingMessageId(msg.id);
-                                  setEditedMessageText(msg.text);
-                                }}
-                                className="text-gray-400 hover:text-blue-500 p-0.5 hover:bg-gray-600 rounded-md"
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </button>
-                              <span className="absolute bottom-full right-0 mb-2 hidden group-hover/edit:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                Modifier le message
-                              </span>
-                            </div>
-                          )}
-                          {(isCreator || msg.userId === user.id) && (
-                            <div className="relative group/delete">
-                              <button
-                                onClick={() => {
-                                  setMessageToDelete(msg);
-                                  setIsDeleteMessageModalOpen(true);
-                                }}
-                                className="text-gray-400 hover:text-red-500 p-0.5 hover:bg-gray-600 rounded-md"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                              <span className="absolute bottom-full right-0 mb-2 hidden group-hover/delete:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                Supprimer le message
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Réactions existantes */}
-                      {Object.entries(msg.reactions || {}).some(
-                        ([_, users]) => users.length > 0
-                      ) && (
-                        <div className="mt-1 flex items-center space-x-1">
-                          {Object.entries(msg.reactions || {}).map(
-                            ([emoji, users]) =>
-                              users.length > 0 && (
-                                <button
-                                  key={emoji}
-                                  onClick={() => addReaction(msg.id, emoji)}
-                                  className={`px-2 py-0.5 rounded-md text-sm ${
-                                    users.includes(user.id)
-                                      ? "bg-blue-600 text-white"
-                                      : "bg-gray-600 text-gray-300"
-                                  }`}
-                                >
-                                  {emoji} {users.length}
-                                </button>
-                              )
-                          )}
-                        </div>
-                      )}
+              {isLoading ? (
+                <div className="flex justify-center items-center h-full">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                  <p>Aucun message pour le moment</p>
+                  <p className="text-sm mt-2">Soyez le premier à écrire !</p>
+                </div>
+              ) : (
+                <>
+                  {hasMoreMessages && (
+                    <div className="flex justify-center mb-4">
+                      <button
+                        onClick={() => setMessageLimit(prev => prev + 50)}
+                        className="px-4 py-2 text-sm bg-gray-600 hover:bg-gray-500 rounded-md text-white"
+                      >
+                        Charger plus de messages
+                      </button>
                     </div>
-                  </div>
-                );
-              })}
-              <div ref={messagesEndRef} />
+                  )}
+                  {renderMessages}
+                  <div ref={messagesEndRef} />
+                </>
+              )}
             </div>
 
             {/* Zone de saisie */}

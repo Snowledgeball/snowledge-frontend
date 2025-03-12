@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -13,6 +13,14 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Link from "next/link";
+
+// Cache pour stocker les données
+const pendingPostsCache = new Map<string, { data: any[], timestamp: number }>();
+const communityCache = new Map<string, { data: any, timestamp: number }>();
+const contributorsCache = new Map<string, { count: number, isEven: boolean, timestamp: number }>();
+
+// Durée de validité du cache (2 minutes)
+const CACHE_DURATION = 2 * 60 * 1000;
 
 interface PendingPost {
     status: string;
@@ -47,7 +55,7 @@ interface CreationVotingSessionProps {
 }
 
 export default function CreationVotingSession({ communityId }: CreationVotingSessionProps) {
-    const session = useSession();
+    const { data: sessionData } = useSession();
     const [pendingPosts, setPendingPosts] = useState<PendingPost[]>([]);
     const [contributorsCount, setContributorsCount] = useState(0);
     const [isContributorsCountEven, setIsContributorsCountEven] = useState(false);
@@ -55,33 +63,78 @@ export default function CreationVotingSession({ communityId }: CreationVotingSes
     const [community, setCommunity] = useState<any>(null);
     const [publishError, setPublishError] = useState<string | null>(null);
 
-    useEffect(() => {
-        fetchCommunityData();
-        fetchPendingPosts();
-        fetchContributorsCount();
-    }, [communityId]);
+    // Mémoriser l'ID de la communauté pour éviter les re-rendus inutiles
+    const memoizedCommunityId = useMemo(() => communityId, [communityId]);
 
-    // Fonction pour récupérer les données de la communauté
-    const fetchCommunityData = async () => {
+    // Fonction optimisée pour récupérer les données de la communauté
+    const fetchCommunityData = useCallback(async (forceRefresh = false) => {
         try {
-            const response = await fetch(`/api/communities/${communityId}`);
-            const data = await response.json();
+            const cacheKey = `community-${memoizedCommunityId}`;
+            const now = Date.now();
+
+            // Vérifier si les données sont dans le cache et si elles sont encore valides
+            if (!forceRefresh && communityCache.has(cacheKey)) {
+                const cachedData = communityCache.get(cacheKey)!;
+                if (now - cachedData.timestamp < CACHE_DURATION) {
+                    setCommunity(cachedData.data);
+                    return;
+                }
+            }
+
+            const response = await fetch(`/api/communities/${memoizedCommunityId}`, {
+                headers: {
+                    'Cache-Control': 'max-age=120', // Cache de 2 minutes
+                }
+            });
+
             if (response.ok) {
+                const data = await response.json();
                 setCommunity(data);
+
+                // Mettre en cache les données avec un timestamp
+                communityCache.set(cacheKey, {
+                    data,
+                    timestamp: now
+                });
             }
         } catch (error) {
             console.error("Erreur lors de la récupération des données de la communauté:", error);
         }
-    };
+    }, [memoizedCommunityId]);
 
-    const fetchPendingPosts = async () => {
+    // Fonction optimisée pour récupérer les posts en attente
+    const fetchPendingPosts = useCallback(async (forceRefresh = false) => {
         try {
             setLoading(true);
-            const response = await fetch(`/api/communities/${communityId}/posts/pending`);
+
+            const cacheKey = `pending-posts-${memoizedCommunityId}`;
+            const now = Date.now();
+
+            // Vérifier si les données sont dans le cache et si elles sont encore valides
+            if (!forceRefresh && pendingPostsCache.has(cacheKey)) {
+                const cachedData = pendingPostsCache.get(cacheKey)!;
+                if (now - cachedData.timestamp < CACHE_DURATION) {
+                    setPendingPosts(cachedData.data);
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            const response = await fetch(`/api/communities/${memoizedCommunityId}/posts/pending`, {
+                headers: {
+                    'Cache-Control': 'max-age=120', // Cache de 2 minutes
+                }
+            });
+
             if (response.ok) {
                 const data = await response.json();
-                console.log("data", data);
                 setPendingPosts(data);
+
+                // Mettre en cache les données avec un timestamp
+                pendingPostsCache.set(cacheKey, {
+                    data,
+                    timestamp: now
+                });
             } else {
                 console.error("Erreur lors de la récupération des posts en attente");
             }
@@ -90,32 +143,84 @@ export default function CreationVotingSession({ communityId }: CreationVotingSes
         } finally {
             setLoading(false);
         }
-    };
+    }, [memoizedCommunityId]);
 
-    // Récupérer le nombre de contributeurs
-    const fetchContributorsCount = async () => {
+    // Fonction optimisée pour récupérer le nombre de contributeurs
+    const fetchContributorsCount = useCallback(async (forceRefresh = false) => {
         try {
-            const response = await fetch(`/api/communities/${communityId}/contributors/count`);
+            const cacheKey = `contributors-${memoizedCommunityId}`;
+            const now = Date.now();
+
+            // Vérifier si les données sont dans le cache et si elles sont encore valides
+            if (!forceRefresh && contributorsCache.has(cacheKey)) {
+                const cachedData = contributorsCache.get(cacheKey)!;
+                if (now - cachedData.timestamp < CACHE_DURATION) {
+                    setContributorsCount(cachedData.count);
+                    setIsContributorsCountEven(cachedData.isEven);
+                    return;
+                }
+            }
+
+            const response = await fetch(`/api/communities/${memoizedCommunityId}/contributors/count`, {
+                headers: {
+                    'Cache-Control': 'max-age=120', // Cache de 2 minutes
+                }
+            });
+
             if (response.ok) {
                 const { count, isEven } = await response.json();
                 setContributorsCount(count);
                 setIsContributorsCountEven(isEven);
+
+                // Mettre en cache les données avec un timestamp
+                contributorsCache.set(cacheKey, {
+                    count,
+                    isEven,
+                    timestamp: now
+                });
             }
         } catch (error) {
             console.error("Erreur:", error);
         }
-    };
+    }, [memoizedCommunityId]);
+
+    // Fonction pour charger toutes les données nécessaires
+    const loadAllData = useCallback(async () => {
+        setLoading(true);
+        await Promise.all([
+            fetchCommunityData(),
+            fetchPendingPosts(),
+            fetchContributorsCount()
+        ]);
+        setLoading(false);
+    }, [fetchCommunityData, fetchPendingPosts, fetchContributorsCount]);
+
+    // Effet pour charger les données initiales
+    useEffect(() => {
+        loadAllData();
+
+        // Mettre en place un intervalle pour rafraîchir les données toutes les 2 minutes
+        const intervalId = setInterval(() => {
+            loadAllData();
+        }, CACHE_DURATION);
+
+        // Nettoyer l'intervalle lors du démontage du composant
+        return () => clearInterval(intervalId);
+    }, [loadAllData]);
 
     const handlePublish = async (postId: number) => {
         try {
             setPublishError(null);
-            const response = await fetch(`/api/communities/${communityId}/posts/${postId}/publish`, {
+            const response = await fetch(`/api/communities/${memoizedCommunityId}/posts/${postId}/publish`, {
                 method: "POST",
             });
 
             if (response.ok) {
                 toast.success("Post publié avec succès");
-                fetchPendingPosts();
+                // Invalider le cache des posts en attente
+                const cacheKey = `pending-posts-${memoizedCommunityId}`;
+                pendingPostsCache.delete(cacheKey);
+                await fetchPendingPosts(true);
             } else {
                 const data = await response.json();
                 setPublishError(data.error || "Erreur lors de la publication du post");
@@ -143,12 +248,12 @@ export default function CreationVotingSession({ communityId }: CreationVotingSes
 
     // Vérifier si l'utilisateur est l'auteur du post
     const isPostAuthor = (post: PendingPost) => {
-        return post.user.id === parseInt(session?.data?.user?.id || "0");
+        return post.user.id === parseInt(sessionData?.user?.id || "0");
     };
 
     // Vérifier si l'utilisateur a déjà voté sur un post
     const hasUserVoted = (post: PendingPost) => {
-        return post.community_posts_reviews.some(r => r.user.id === parseInt(session?.data?.user?.id || "0"));
+        return post.community_posts_reviews.some(r => r.user.id === parseInt(sessionData?.user?.id || "0"));
     };
 
     // Vérifier si le post peut être publié
@@ -170,7 +275,7 @@ export default function CreationVotingSession({ communityId }: CreationVotingSes
 
     // Vérifier si l'utilisateur est un contributeur ou le créateur de la communauté
     const isContributor = community?.contributors?.some(
-        (contributor: any) => contributor.userId === session?.data?.user?.id
+        (contributor: any) => contributor.userId === sessionData?.user?.id
     ) || false;
 
     if (loading) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Disclosure } from "@/components/ui/disclosure";
 import {
@@ -16,6 +16,12 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+
+// Cache pour stocker les questions et réponses
+const questionsCache = new Map<string, { data: any[], timestamp: number }>();
+
+// Durée de validité du cache (5 minutes)
+const CACHE_DURATION = 5 * 60 * 1000;
 
 interface QAProps {
   communityId: string;
@@ -81,42 +87,94 @@ export default function QASection({
     questionId: null,
     answerId: null,
   });
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchQuestions();
-  }, [communityId, postId]);
+  // Mémoriser l'ID de la communauté et du post pour éviter les re-rendus inutiles
+  const memoizedCommunityId = useMemo(() => communityId, [communityId]);
+  const memoizedPostId = useMemo(() => postId, [postId]);
 
-  const fetchQuestions = async () => {
+  // Générer une clé de cache unique pour cette combinaison communauté/post
+  const getCacheKey = useCallback(() => {
+    return `qa-${memoizedCommunityId}${memoizedPostId ? `-${memoizedPostId}` : ''}`;
+  }, [memoizedCommunityId, memoizedPostId]);
+
+  // Fonction optimisée pour récupérer les questions
+  const fetchQuestions = useCallback(async (forceRefresh = false) => {
+    setIsLoading(true);
     try {
-      const url = postId
-        ? `/api/communities/${communityId}/qa?postId=${postId}`
-        : `/api/communities/${communityId}/qa`;
+      const cacheKey = getCacheKey();
+      const now = Date.now();
 
-      const response = await fetch(url);
+      // Vérifier si les données sont dans le cache et si elles sont encore valides
+      if (!forceRefresh && questionsCache.has(cacheKey)) {
+        const cachedData = questionsCache.get(cacheKey)!;
+        if (now - cachedData.timestamp < CACHE_DURATION) {
+          setQuestions(cachedData.data);
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      const url = memoizedPostId
+        ? `/api/communities/${memoizedCommunityId}/qa?postId=${memoizedPostId}`
+        : `/api/communities/${memoizedCommunityId}/qa`;
+
+      const response = await fetch(url, {
+        headers: {
+          'Cache-Control': 'max-age=300', // Cache de 5 minutes
+        }
+      });
+
       if (!response.ok)
         throw new Error("Erreur lors de la récupération des questions");
+
       const data = await response.json();
+
+      // Mettre en cache les données avec un timestamp
+      questionsCache.set(cacheKey, {
+        data,
+        timestamp: now
+      });
+
       setQuestions(data);
     } catch (error) {
       console.error("Erreur:", error);
       toast.error("Erreur lors de la récupération des questions");
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [memoizedCommunityId, memoizedPostId, getCacheKey]);
 
-  const handleCreateQuestion = async () => {
+  // Charger les questions au montage du composant
+  useEffect(() => {
+    fetchQuestions();
+  }, [fetchQuestions]);
+
+  // Fonction optimisée pour créer une question
+  const handleCreateQuestion = useCallback(async () => {
+    if (!newQuestionText.trim()) {
+      toast.error("Veuillez entrer une question");
+      return;
+    }
+
     try {
-      const response = await fetch(`/api/communities/${communityId}/qa`, {
+      const response = await fetch(`/api/communities/${memoizedCommunityId}/qa`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: newQuestionText,
-          postId: postId || null,
+          postId: memoizedPostId || null,
         }),
       });
 
       if (!response.ok)
         throw new Error("Erreur lors de la création de la question");
-      await fetchQuestions();
+
+      // Invalider le cache
+      const cacheKey = getCacheKey();
+      questionsCache.delete(cacheKey);
+
+      await fetchQuestions(true);
       setNewQuestionText("");
       setShowNewQuestionInput(false);
       toast.success("Question créée avec succès");
@@ -124,12 +182,18 @@ export default function QASection({
       console.error("Erreur:", error);
       toast.error("Erreur lors de la création de la question");
     }
-  };
+  }, [newQuestionText, memoizedCommunityId, memoizedPostId, fetchQuestions, getCacheKey]);
 
-  const handleCreateAnswer = async (questionId: number) => {
+  // Fonction optimisée pour créer une réponse
+  const handleCreateAnswer = useCallback(async (questionId: number) => {
+    if (!newAnswerText.trim()) {
+      toast.error("Veuillez entrer une réponse");
+      return;
+    }
+
     try {
       const response = await fetch(
-        `/api/communities/${communityId}/qa/${questionId}/answers`,
+        `/api/communities/${memoizedCommunityId}/qa/${questionId}/answers`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -139,7 +203,12 @@ export default function QASection({
 
       if (!response.ok)
         throw new Error("Erreur lors de la création de la réponse");
-      await fetchQuestions();
+
+      // Invalider le cache
+      const cacheKey = getCacheKey();
+      questionsCache.delete(cacheKey);
+
+      await fetchQuestions(true);
       setNewAnswerText("");
       setShowNewAnswerInput(null);
       toast.success("Réponse ajoutée avec succès");
@@ -147,15 +216,21 @@ export default function QASection({
       console.error("Erreur:", error);
       toast.error("Erreur lors de la création de la réponse");
     }
-  };
+  }, [newAnswerText, memoizedCommunityId, fetchQuestions, getCacheKey]);
 
-  const handleEditQuestion = async (
+  // Fonction optimisée pour modifier une question
+  const handleEditQuestion = useCallback(async (
     questionId: number,
     newQuestion: string
   ) => {
+    if (!newQuestion.trim()) {
+      toast.error("Veuillez entrer une question");
+      return;
+    }
+
     try {
       const response = await fetch(
-        `/api/communities/${communityId}/qa/${questionId}`,
+        `/api/communities/${memoizedCommunityId}/qa/${questionId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -165,23 +240,34 @@ export default function QASection({
 
       if (!response.ok)
         throw new Error("Erreur lors de la modification de la question");
-      await fetchQuestions();
+
+      // Invalider le cache
+      const cacheKey = getCacheKey();
+      questionsCache.delete(cacheKey);
+
+      await fetchQuestions(true);
       setEditingQuestionId(null);
       toast.success("Question modifiée avec succès");
     } catch (error) {
       console.error("Erreur:", error);
       toast.error("Erreur lors de la modification de la question");
     }
-  };
+  }, [memoizedCommunityId, fetchQuestions, getCacheKey]);
 
-  const handleEditAnswer = async (
+  // Fonction optimisée pour modifier une réponse
+  const handleEditAnswer = useCallback(async (
     questionId: number,
     answerId: number,
     newContent: string
   ) => {
+    if (!newContent.trim()) {
+      toast.error("Veuillez entrer une réponse");
+      return;
+    }
+
     try {
       const response = await fetch(
-        `/api/communities/${communityId}/qa/${questionId}/answers/${answerId}`,
+        `/api/communities/${memoizedCommunityId}/qa/${questionId}/answers/${answerId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -191,19 +277,25 @@ export default function QASection({
 
       if (!response.ok)
         throw new Error("Erreur lors de la modification de la réponse");
-      await fetchQuestions();
+
+      // Invalider le cache
+      const cacheKey = getCacheKey();
+      questionsCache.delete(cacheKey);
+
+      await fetchQuestions(true);
       setEditingAnswerId(null);
       toast.success("Réponse modifiée avec succès");
     } catch (error) {
       console.error("Erreur:", error);
       toast.error("Erreur lors de la modification de la réponse");
     }
-  };
+  }, [memoizedCommunityId, fetchQuestions, getCacheKey]);
 
-  const handleDeleteQuestion = async (questionId: number) => {
+  // Fonction optimisée pour supprimer une question
+  const handleDeleteQuestion = useCallback(async (questionId: number) => {
     try {
       const response = await fetch(
-        `/api/communities/${communityId}/qa/${questionId}`,
+        `/api/communities/${memoizedCommunityId}/qa/${questionId}`,
         {
           method: "DELETE",
         }
@@ -211,19 +303,25 @@ export default function QASection({
 
       if (!response.ok)
         throw new Error("Erreur lors de la suppression de la question");
-      await fetchQuestions();
+
+      // Invalider le cache
+      const cacheKey = getCacheKey();
+      questionsCache.delete(cacheKey);
+
+      await fetchQuestions(true);
       setDeleteQuestionDialog({ isOpen: false, questionId: null });
       toast.success("Question supprimée avec succès");
     } catch (error) {
       console.error("Erreur:", error);
       toast.error("Erreur lors de la suppression de la question");
     }
-  };
+  }, [memoizedCommunityId, fetchQuestions, getCacheKey]);
 
-  const handleDeleteAnswer = async (questionId: number, answerId: number) => {
+  // Fonction optimisée pour supprimer une réponse
+  const handleDeleteAnswer = useCallback(async (questionId: number, answerId: number) => {
     try {
       const response = await fetch(
-        `/api/communities/${communityId}/qa/${questionId}/answers/${answerId}`,
+        `/api/communities/${memoizedCommunityId}/qa/${questionId}/answers/${answerId}`,
         {
           method: "DELETE",
         }
@@ -231,7 +329,12 @@ export default function QASection({
 
       if (!response.ok)
         throw new Error("Erreur lors de la suppression de la réponse");
-      await fetchQuestions();
+
+      // Invalider le cache
+      const cacheKey = getCacheKey();
+      questionsCache.delete(cacheKey);
+
+      await fetchQuestions(true);
       setDeleteAnswerDialog({
         isOpen: false,
         questionId: null,
@@ -242,7 +345,32 @@ export default function QASection({
       console.error("Erreur:", error);
       toast.error("Erreur lors de la suppression de la réponse");
     }
-  };
+  }, [memoizedCommunityId, fetchQuestions, getCacheKey]);
+
+  // Fonction optimisée pour marquer une réponse comme acceptée
+  const handleAcceptAnswer = useCallback(async (questionId: number, answerId: number) => {
+    try {
+      const response = await fetch(
+        `/api/communities/${memoizedCommunityId}/qa/${questionId}/answers/${answerId}/accept`,
+        {
+          method: "PUT",
+        }
+      );
+
+      if (!response.ok)
+        throw new Error("Erreur lors de l'acceptation de la réponse");
+
+      // Invalider le cache
+      const cacheKey = getCacheKey();
+      questionsCache.delete(cacheKey);
+
+      await fetchQuestions(true);
+      toast.success("Réponse acceptée avec succès");
+    } catch (error) {
+      console.error("Erreur:", error);
+      toast.error("Erreur lors de l'acceptation de la réponse");
+    }
+  }, [memoizedCommunityId, fetchQuestions, getCacheKey]);
 
   return (
     <Card className="overflow-hidden mb-8">
@@ -368,23 +496,22 @@ export default function QASection({
                     {(item.author.id === parseInt(userId) ||
                       isContributor ||
                       isCreator) && (
-                      <span
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteQuestionDialog({
-                            isOpen: true,
-                            questionId: item.id,
-                          });
-                        }}
-                        className="p-1 hover:bg-gray-200 rounded-full cursor-pointer"
-                      >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </span>
-                    )}
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteQuestionDialog({
+                              isOpen: true,
+                              questionId: item.id,
+                            });
+                          }}
+                          className="p-1 hover:bg-gray-200 rounded-full cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </span>
+                      )}
                     <ChevronDown
-                      className={`w-5 h-5 text-gray-500 transition-transform ${
-                        open ? "transform rotate-180" : ""
-                      }`}
+                      className={`w-5 h-5 text-gray-500 transition-transform ${open ? "transform rotate-180" : ""
+                        }`}
                     />
                   </div>
                 </Disclosure.Button>
@@ -424,19 +551,19 @@ export default function QASection({
                               {(answer.author.id === parseInt(userId) ||
                                 isContributor ||
                                 isCreator) && (
-                                <button
-                                  onClick={() =>
-                                    setDeleteAnswerDialog({
-                                      isOpen: true,
-                                      questionId: item.id,
-                                      answerId: answer.id,
-                                    })
-                                  }
-                                  className="p-1 hover:bg-gray-200 rounded-full"
-                                >
-                                  <Trash2 className="w-4 h-4 text-red-500" />
-                                </button>
-                              )}
+                                  <button
+                                    onClick={() =>
+                                      setDeleteAnswerDialog({
+                                        isOpen: true,
+                                        questionId: item.id,
+                                        answerId: answer.id,
+                                      })
+                                    }
+                                    className="p-1 hover:bg-gray-200 rounded-full"
+                                  >
+                                    <Trash2 className="w-4 h-4 text-red-500" />
+                                  </button>
+                                )}
                               <span className="text-sm text-gray-500">
                                 {formatDistanceToNow(
                                   new Date(answer.created_at),

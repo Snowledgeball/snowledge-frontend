@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -38,6 +38,9 @@ interface CommunityPostsProps {
     userId?: string;
 }
 
+// Cache pour les contenus HTML rendus
+const contentCache = new Map<number, string>();
+
 export default function CommunityPosts({
     posts,
     communityId,
@@ -52,6 +55,7 @@ export default function CommunityPosts({
     const [expandedCategories, setExpandedCategories] = useState<string[]>(
         categoryFromUrl ? [categoryFromUrl] : []
     );
+    const [visiblePosts, setVisiblePosts] = useState<Record<string, number>>({});
 
     // Mémoriser les catégories qui ont des posts
     const categoriesWithPosts = useMemo(() => {
@@ -71,8 +75,17 @@ export default function CommunityPosts({
         return result;
     }, [posts, categoriesWithPosts]);
 
+    // Initialiser le nombre de posts visibles par catégorie
+    useEffect(() => {
+        const initialVisiblePosts: Record<string, number> = {};
+        categoriesWithPosts.forEach(category => {
+            initialVisiblePosts[category.id] = 5; // Afficher 5 posts par défaut
+        });
+        setVisiblePosts(initialVisiblePosts);
+    }, [categoriesWithPosts]);
+
     // Gérer le clic sur une catégorie (simple toggle local)
-    const handleCategoryClick = (categoryId: string) => {
+    const handleCategoryClick = useCallback((categoryId: string) => {
         setExpandedCategories(prev => {
             if (prev.includes(categoryId)) {
                 return prev.filter(id => id !== categoryId);
@@ -80,7 +93,15 @@ export default function CommunityPosts({
                 return [...prev, categoryId];
             }
         });
-    };
+    }, []);
+
+    // Charger plus de posts pour une catégorie
+    const loadMorePosts = useCallback((categoryId: string) => {
+        setVisiblePosts(prev => ({
+            ...prev,
+            [categoryId]: prev[categoryId] + 5
+        }));
+    }, []);
 
     // Mettre à jour les catégories dépliées si l'URL change
     useEffect(() => {
@@ -90,10 +111,25 @@ export default function CommunityPosts({
     }, [categoryFromUrl, expandedCategories]);
 
     // Fonction pour naviguer vers un post
-    const navigateToPost = (postId: number) => {
+    const navigateToPost = useCallback((postId: number) => {
         setIsLoading(true);
         router.push(`/community/${communityId}/posts/${postId}`);
-    };
+    }, [router, communityId]);
+
+    // Fonction pour obtenir le contenu HTML mis en cache ou le mettre en cache
+    const getCachedContent = useCallback((post: Post) => {
+        if (contentCache.has(post.id)) {
+            return contentCache.get(post.id) || '';
+        }
+
+        // Limiter le contenu à 500 caractères pour l'aperçu
+        const truncatedContent = post.content.length > 500
+            ? post.content.substring(0, 500) + '...'
+            : post.content;
+
+        contentCache.set(post.id, truncatedContent);
+        return truncatedContent;
+    }, []);
 
     // Réinitialiser l'état de chargement lorsque les posts changent
     useEffect(() => {
@@ -185,6 +221,9 @@ export default function CommunityPosts({
                 {categoriesWithPosts.map((category) => {
                     const categoryPosts = postsByCategory[category.id] || [];
                     const isExpanded = expandedCategories.includes(category.id);
+                    const visiblePostCount = visiblePosts[category.id] || 5;
+                    const displayedPosts = categoryPosts.slice(0, visiblePostCount);
+                    const hasMorePosts = visiblePostCount < categoryPosts.length;
 
                     return (
                         <div
@@ -234,7 +273,7 @@ export default function CommunityPosts({
                             >
                                 {isExpanded && (
                                     <div className="divide-y divide-gray-100">
-                                        {categoryPosts.map((post) => (
+                                        {displayedPosts.map((post) => (
                                             <div
                                                 key={post.id}
                                                 className="p-6 hover:bg-gray-50 transition-all duration-200 border-b border-gray-100 last:border-b-0"
@@ -250,6 +289,7 @@ export default function CommunityPosts({
                                                                 width={40}
                                                                 height={40}
                                                                 className="rounded-full ring-2 ring-white shadow-sm"
+                                                                loading="lazy"
                                                             />
                                                         </div>
                                                         <div>
@@ -301,7 +341,8 @@ export default function CommunityPosts({
                                                                 width={800}
                                                                 height={400}
                                                                 className="w-full h-[240px] object-cover transform hover:scale-105 transition-transform duration-300"
-                                                                priority={true}
+                                                                loading="lazy"
+                                                                sizes="(max-width: 768px) 100vw, 800px"
                                                             />
                                                         </div>
                                                     )}
@@ -350,7 +391,7 @@ export default function CommunityPosts({
                                                         `}</style>
                                                         <div
                                                             dangerouslySetInnerHTML={{
-                                                                __html: post.content,
+                                                                __html: getCachedContent(post),
                                                             }}
                                                             className="post-preview p-4 overflow-hidden"
                                                             style={{
@@ -389,6 +430,18 @@ export default function CommunityPosts({
                                                 </div>
                                             </div>
                                         ))}
+
+                                        {/* Bouton "Voir plus" si nécessaire */}
+                                        {hasMorePosts && (
+                                            <div className="p-4 text-center">
+                                                <button
+                                                    onClick={() => loadMorePosts(category.id)}
+                                                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                                                >
+                                                    Voir plus d'articles ({categoryPosts.length - visiblePostCount} restants)
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
