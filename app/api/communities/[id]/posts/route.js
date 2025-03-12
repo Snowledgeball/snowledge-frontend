@@ -145,11 +145,21 @@ export async function GET(request, { params }) {
       },
     });
 
-    return NextResponse.json(posts);
+    // Ajouter des en-têtes de cache
+    const headers = new Headers();
+    headers.append("Cache-Control", "max-age=300, s-maxage=300");
+
+    return NextResponse.json(
+      { posts: posts || [] },
+      {
+        status: 200,
+        headers
+      }
+    );
   } catch (error) {
     console.log("Erreur lors de la récupération des posts:", error.stack);
     return NextResponse.json(
-      { error: "Erreur lors de la récupération des posts" },
+      { error: "Erreur lors de la récupération des posts", posts: [] },
       { status: 500 }
     );
   } finally {

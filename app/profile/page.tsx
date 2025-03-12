@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { Users, MessageCircle, Activity, Award, Wallet, Plus, ArrowRight, Mail, Lock, HelpCircle, MessageSquare, FileText, Check, Trophy, DollarSign, X, User, AtSign } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Dialog } from '@headlessui/react';
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
@@ -12,6 +12,22 @@ import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 
+// Système de cache pour les données du profil
+const profileCache = {
+    userData: new Map<string, { data: any, timestamp: number }>(),
+    userCommunities: new Map<string, { data: any[], timestamp: number }>(),
+    joinedCommunities: new Map<string, { data: any[], timestamp: number }>(),
+    posts: new Map<string, { data: any[], timestamp: number }>(),
+    communityPosts: new Map<string, { data: any[], timestamp: number }>(),
+    enrichments: new Map<string, { data: any[], timestamp: number }>(),
+    // Durée de validité du cache (5 minutes)
+    expiresIn: 5 * 60 * 1000
+};
+
+// Fonction pour vérifier si le cache est valide
+const isCacheValid = (cache: { timestamp: number }) => {
+    return (Date.now() - cache.timestamp) < profileCache.expiresIn;
+};
 
 interface CommunityData {
     name: string;
@@ -54,6 +70,23 @@ interface Post {
     updated_at: string;
 }
 
+interface Enrichment {
+    id: number;
+    content: string;
+    description: string;
+    status: string;
+    created_at: string;
+    community_posts: {
+        id: number;
+        title: string;
+        community: {
+            id: number;
+            name: string;
+            image_url: string;
+        }
+    }
+}
+
 const ProfilePage = () => {
     const { data: session } = useSession();
     const router = useRouter();
@@ -74,6 +107,7 @@ const ProfilePage = () => {
     const [userId, setUserId] = useState<string | null>(null);
     const [posts, setPosts] = useState<Post[]>([]);
     const [selectedCommunityPosts, setSelectedCommunityPosts] = useState<Post[]>([]);
+    const [enrichments, setEnrichments] = useState<Enrichment[]>([]);
     const [userData, setUserData] = useState({
         fullName: '',
         userName: '',
@@ -114,32 +148,93 @@ const ProfilePage = () => {
     }, [session]);
 
 
-    // Fonction pour récupérer les données de l'utilisateur
-    const fetchUserData = async () => {
+    // Fonction pour récupérer les données de l'utilisateur avec cache
+    const fetchUserData = useCallback(async () => {
+        if (!userId) return;
+
         try {
-            const response = await fetch(`/api/users/${userId}`);
+            // Vérifier si les données sont dans le cache et si le cache est encore valide
+            const cacheKey = `user-${userId}`;
+            if (profileCache.userData.has(cacheKey)) {
+                const cachedData = profileCache.userData.get(cacheKey)!;
+                if (isCacheValid(cachedData)) {
+                    console.log("Utilisation des données utilisateur en cache");
+                    setUserData(cachedData.data);
+                    return;
+                }
+            }
+
+            console.log("Récupération des données utilisateur depuis l'API");
+            const response = await fetch(`/api/users/${userId}`, {
+                headers: {
+                    'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+                }
+            });
+
             if (!response.ok) throw new Error('Erreur lors de la récupération des données utilisateur');
+
             const data = await response.json();
+
+            // Mettre à jour le cache
+            profileCache.userData.set(cacheKey, {
+                data,
+                timestamp: Date.now()
+            });
+
             setUserData(data);
         } catch (error) {
             console.error('Erreur:', error);
         }
-    };
+    }, [userId]);
 
     useEffect(() => {
         if (userId) {
             fetchUserData();
         }
-    }, [userId]);
+    }, [userId, fetchUserData]);
 
 
-    // Nouvelle fonction pour récupérer les communautés rejointes
-    const fetchJoinedCommunities = async () => {
+    // Fonction pour récupérer les communautés rejointes par l'utilisateur avec cache
+    const fetchJoinedCommunities = useCallback(async () => {
+        if (!userId) return;
+
         try {
-            setIsLoadingJoined(true);
-            const response = await fetch(`/api/users/${userId}/joined-communities`);
+            // Ne pas définir isLoadingJoined à true ici si joinedCommunities contient déjà des données
+            // pour éviter une boucle infinie
+            if (joinedCommunities.length === 0) {
+                setIsLoadingJoined(true);
+            }
+
+            // Vérifier si les données sont dans le cache et si le cache est encore valide
+            const cacheKey = `joined-communities-${userId}`;
+            if (profileCache.joinedCommunities.has(cacheKey)) {
+                const cachedData = profileCache.joinedCommunities.get(cacheKey)!;
+                if (isCacheValid(cachedData)) {
+                    console.log("Utilisation des communautés rejointes en cache");
+                    setJoinedCommunities(cachedData.data);
+                    setSelectedCommunity(cachedData.data[0] as unknown as UserCommunity);
+                    setIsLoadingJoined(false);
+                    return;
+                }
+            }
+
+            console.log("Récupération des communautés rejointes depuis l'API");
+            const response = await fetch(`/api/users/${userId}/joined-communities`, {
+                headers: {
+                    'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+                }
+            });
+
             if (!response.ok) throw new Error('Erreur lors de la récupération des communautés rejointes');
+
             const data = await response.json();
+
+            // Mettre à jour le cache
+            profileCache.joinedCommunities.set(cacheKey, {
+                data: data.communities,
+                timestamp: Date.now()
+            });
+
             setJoinedCommunities(data.communities);
             setSelectedCommunity(data.communities[0] as unknown as UserCommunity);
         } catch (error) {
@@ -147,83 +242,246 @@ const ProfilePage = () => {
         } finally {
             setIsLoadingJoined(false);
         }
-    };
+    }, [userId, joinedCommunities.length]);
 
-    useEffect(() => {
-        if (userId) {
-            fetchJoinedCommunities();
-        }
-    }, [userId]);
+    // Fonction pour récupérer les communautés créées par l'utilisateur avec cache
+    const fetchUserCommunities = useCallback(async () => {
+        if (!userId) return;
 
-    // Fonction pour récupérer les communautés de l'utilisateur
-    const fetchUserCommunities = async () => {
         try {
-            setIsLoading(true);
-            const response = await fetch(`/api/users/${userId}/owned-communities`);
+            // Ne pas définir isLoading à true ici si userOwnedCommunities contient déjà des données
+            // pour éviter une boucle infinie
+            if (userOwnedCommunities.length === 0) {
+                setIsLoading(true);
+            }
+
+            // Vérifier si les données sont dans le cache et si le cache est encore valide
+            const cacheKey = `user-communities-${userId}`;
+            if (profileCache.userCommunities.has(cacheKey)) {
+                const cachedData = profileCache.userCommunities.get(cacheKey)!;
+                if (isCacheValid(cachedData)) {
+                    console.log("Utilisation des communautés de l'utilisateur en cache");
+                    setUserOwnedCommunities(cachedData.data);
+                    setIsLoading(false);
+                    return;
+                }
+            }
+
+            console.log("Récupération des communautés de l'utilisateur depuis l'API");
+            const response = await fetch(`/api/users/${userId}/owned-communities`, {
+                headers: {
+                    'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+                }
+            });
+
             if (!response.ok) throw new Error('Erreur lors de la récupération des communautés');
+
             const data = await response.json();
+
+            // Mettre à jour le cache
+            profileCache.userCommunities.set(cacheKey, {
+                data: data.communities,
+                timestamp: Date.now()
+            });
+
             setUserOwnedCommunities(data.communities);
         } catch (error) {
             console.error('Erreur:', error);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [userId, userOwnedCommunities.length]);
+
+    // Fonction pour récupérer les posts avec cache
+    const fetchPosts = useCallback(async () => {
+        if (!userId) return;
+
+        try {
+            // Vérifier si les données sont dans le cache et si le cache est encore valide
+            const cacheKey = `posts-${userId}`;
+            if (profileCache.posts.has(cacheKey)) {
+                const cachedData = profileCache.posts.get(cacheKey)!;
+                if (isCacheValid(cachedData)) {
+                    console.log("Utilisation des posts en cache");
+                    setPosts(cachedData.data || []);
+                    return;
+                }
+            }
+
+            console.log("Récupération des posts depuis l'API");
+            const response = await fetch(`/api/users/${userId}/posts`, {
+                headers: {
+                    'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+                }
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de la récupération des posts');
+
+            const data = await response.json();
+
+            // S'assurer que data.posts existe, sinon utiliser data directement si c'est un tableau
+            const postsData = Array.isArray(data.posts) ? data.posts :
+                Array.isArray(data) ? data : [];
+
+            // Mettre à jour le cache
+            profileCache.posts.set(cacheKey, {
+                data: postsData,
+                timestamp: Date.now()
+            });
+
+            setPosts(postsData);
+        } catch (error) {
+            console.error('Erreur:', error);
+            // En cas d'erreur, définir un tableau vide pour éviter les erreurs d'undefined
+            setPosts([]);
+        }
+    }, [userId]);
+
+    // Fonction pour récupérer les enrichissements avec cache
+    const fetchEnrichments = useCallback(async () => {
+        if (!userId) return;
+
+        try {
+            console.log("fetchEnrichments try");
+            // Vérifier si les données sont dans le cache et si le cache est encore valide
+            const cacheKey = `enrichments-${userId}`;
+            if (profileCache.enrichments.has(cacheKey)) {
+                console.log("fetchEnrichments has cacheKey");
+                const cachedData = profileCache.enrichments.get(cacheKey)!;
+                if (isCacheValid(cachedData)) {
+                    console.log("Utilisation des enrichissements en cache");
+                    setEnrichments(cachedData.data || []);
+                    return;
+                }
+            }
+
+            console.log("Récupération des enrichissements depuis l'API");
+            const response = await fetch(`/api/users/${userId}/enrichments`, {
+                headers: {
+                    'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+                }
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de la récupération des enrichissements');
+
+            const data = await response.json();
+
+            // S'assurer que data.enrichments existe, sinon utiliser data directement si c'est un tableau
+            const enrichmentsData = Array.isArray(data.enrichments) ? data.enrichments :
+                Array.isArray(data) ? data : [];
+
+
+            // Mettre à jour le cache
+            profileCache.enrichments.set(cacheKey, {
+                data: enrichmentsData,
+                timestamp: Date.now()
+            });
+            console.log("enrichmentsData", enrichmentsData);
+
+            setEnrichments(enrichmentsData);
+        } catch (error) {
+            console.error('Erreur:', error);
+            // En cas d'erreur, définir un tableau vide pour éviter les erreurs d'undefined
+            setEnrichments([]);
+        }
+    }, [userId]);
 
     useEffect(() => {
         if (userId) {
             fetchUserCommunities();
-        }
-    }, [userId]);
-
-
-    const fetchPosts = async () => {
-        if (!joinedCommunities.length || !userOwnedCommunities.length) {
-            return;
-        }
-
-        console.log("joinedCommunities :", joinedCommunities);
-        console.log("userOwnedCommunities :", userOwnedCommunities);
-
-        const listOfCommunityIds = [...joinedCommunities.map(community => community.id), ...userOwnedCommunities.map(community => community.id)];
-        try {
-            for (const communityId of listOfCommunityIds) {
-                const response = await fetch(`/api/communities/${communityId}/posts`);
-                const data = await response.json();
-                setPosts(prevPosts => [...prevPosts, ...data]);
-            }
-        } catch (error) {
-            console.error('Erreur:', error);
-        }
-    };
-
-    useEffect(() => {
-        if (userId) {
+            fetchJoinedCommunities();
             fetchPosts();
+            fetchEnrichments();
         }
-    }, [userId]);
+    }, [userId, fetchUserCommunities, fetchJoinedCommunities, fetchPosts, fetchEnrichments]);
 
     useEffect(() => {
         if (selectedCommunity) {
             const fetchSelectedCommunityPosts = async () => {
-                const response = await fetch(`/api/users/${userId}/posts/${selectedCommunity?.id}`);
-                const data = await response.json();
-                setSelectedCommunityPosts(data);
-                console.log("selectedCommunityPosts :", selectedCommunityPosts);
+                try {
+                    // Vérifier si les données sont dans le cache et si le cache est encore valide
+                    const cacheKey = `community-posts-${selectedCommunity.id}`;
+                    if (profileCache.communityPosts.has(cacheKey)) {
+                        const cachedData = profileCache.communityPosts.get(cacheKey)!;
+                        if (isCacheValid(cachedData)) {
+                            console.log("Utilisation des posts de la communauté en cache");
+                            setSelectedCommunityPosts(cachedData.data || []);
+                            return;
+                        }
+                    }
+
+                    console.log("Récupération des posts de la communauté depuis l'API");
+                    const response = await fetch(`/api/communities/${selectedCommunity.id}/posts`, {
+                        headers: {
+                            'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+                        }
+                    });
+
+                    if (!response.ok) throw new Error('Erreur lors de la récupération des posts de la communauté');
+
+                    const data = await response.json();
+
+                    // S'assurer que data.posts existe, sinon utiliser data directement si c'est un tableau
+                    const postsData = Array.isArray(data.posts) ? data.posts :
+                        Array.isArray(data) ? data : [];
+
+                    // Mettre à jour le cache
+                    profileCache.communityPosts.set(cacheKey, {
+                        data: postsData,
+                        timestamp: Date.now()
+                    });
+
+                    setSelectedCommunityPosts(postsData);
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    // En cas d'erreur, définir un tableau vide pour éviter les erreurs d'undefined
+                    setSelectedCommunityPosts([]);
+                }
             };
+
+            // Utiliser une référence pour éviter les appels multiples
+            const controller = new AbortController();
             fetchSelectedCommunityPosts();
+            return () => {
+                controller.abort();
+            };
+        } else {
+            // Si aucune communauté n'est sélectionnée, définir un tableau vide
+            setSelectedCommunityPosts([]);
         }
     }, [selectedCommunity]);
 
-    useEffect(() => {
-        console.log("selectedCommunityPosts :", selectedCommunityPosts);
-    }, [selectedCommunityPosts]);
-
-
-
-    useEffect(() => {
-        console.log("posts :", posts);
-    }, [posts]);
+    // Fonction pour invalider le cache après une modification
+    const invalidateCache = useCallback((cacheType: string, key: string) => {
+        switch (cacheType) {
+            case 'userData':
+                profileCache.userData.delete(key);
+                break;
+            case 'userCommunities':
+                profileCache.userCommunities.delete(key);
+                break;
+            case 'joinedCommunities':
+                profileCache.joinedCommunities.delete(key);
+                break;
+            case 'posts':
+                profileCache.posts.delete(key);
+                break;
+            case 'communityPosts':
+                profileCache.communityPosts.delete(key);
+                break;
+            case 'enrichments':
+                profileCache.enrichments.delete(key);
+                break;
+            default:
+                // Invalider tous les caches
+                profileCache.userData.clear();
+                profileCache.userCommunities.clear();
+                profileCache.joinedCommunities.clear();
+                profileCache.posts.clear();
+                profileCache.communityPosts.clear();
+                profileCache.enrichments.clear();
+        }
+    }, []);
 
     // Fonction pour soumettre la candidature
     const handleContributorRequest = async () => {
@@ -480,42 +738,59 @@ const ProfilePage = () => {
 
                             {/* Contenu de la communauté sélectionnée (colonne centrale) */}
                             <div className="col-span-2 space-y-6">
-                                {/* Mes contributions */}
+                                {/* Mes enrichissements */}
                                 <Card className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
-                                    <h3 className="text-xl font-semibold text-gray-900 mb-6">Mes contributions</h3>
-                                    {/* {selectedCommunityData && selectedCommunityData.recentActivity ? (
+                                    <h3 className="text-xl font-semibold text-gray-900 mb-6">Mes enrichissements</h3>
+                                    {enrichments && enrichments.length > 0 ? (
                                         <div className="space-y-4">
-                                            {selectedCommunityData.recentActivity.map((activity, idx) => (
+                                            {enrichments.map((enrichment, idx) => (
                                                 <div key={idx} className="bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                                                     <div className="flex items-center justify-between">
                                                         <div>
-                                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${activity.type === 'post'
-                                                                ? 'bg-blue-100 text-blue-700'
-                                                                : 'bg-purple-100 text-purple-700'
+                                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${enrichment.status === 'APPROVED'
+                                                                ? 'bg-green-100 text-green-700'
+                                                                : enrichment.status === 'PENDING'
+                                                                    ? 'bg-yellow-100 text-yellow-700'
+                                                                    : 'bg-red-100 text-red-700'
                                                                 }`}>
-                                                                {activity.type}
+                                                                {enrichment.status === 'APPROVED'
+                                                                    ? 'Approuvé'
+                                                                    : enrichment.status === 'PENDING'
+                                                                        ? 'En attente'
+                                                                        : 'Rejeté'}
                                                             </span>
-                                                            <h4 className="mt-2 font-medium text-gray-900">{activity.title}</h4>
+                                                            <h4 className="mt-2 font-medium text-gray-900">
+                                                                Enrichissement pour: {enrichment.community_posts.title}
+                                                            </h4>
+                                                            <p className="mt-1 text-sm text-gray-600">{enrichment.description}</p>
                                                             <div className="flex items-center mt-2 text-sm text-gray-500">
-                                                                <span>{activity.date}</span>
+                                                                <span>{formatDistanceToNow(new Date(enrichment.created_at), {
+                                                                    addSuffix: true,
+                                                                    locale: fr
+                                                                })}</span>
                                                                 <span className="mx-2">•</span>
-                                                                <span>{activity.engagement} interactions</span>
+                                                                <span>Communauté: {enrichment.community_posts.community.name}</span>
                                                             </div>
                                                         </div>
+                                                        <button
+                                                            onClick={() => router.push(`/community/${enrichment.community_posts.community.id}/posts/${enrichment.community_posts.id}`)}
+                                                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                                                        >
+                                                            Voir le post
+                                                        </button>
                                                     </div>
                                                 </div>
                                             ))}
-                                        </div> 
+                                        </div>
                                     ) : (
-                                    <p>Aucune activité récente disponible.</p>
-                                    )}*/}
-                                    <p>Aucune activité récente disponible.</p>
+                                        <p>Aucun enrichissement disponible.</p>
+                                    )}
                                 </Card>
 
                                 {/* Mes posts */}
                                 <Card className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
                                     <h3 className="text-xl font-semibold text-gray-900 mb-6">Mes posts</h3>
-                                    {selectedCommunityPosts.length > 0 ? (
+                                    {selectedCommunityPosts && selectedCommunityPosts.length > 0 ? (
                                         <div className="space-y-4">
                                             {selectedCommunityPosts
                                                 .map((post, idx) => (
@@ -930,9 +1205,6 @@ const ProfilePage = () => {
                                                 <div>
                                                     <h4 className="font-medium text-gray-900">{community.name}</h4>
                                                     <p className="text-sm text-gray-500">
-                                                        {/* {community.role === "Membre actif"
-                                                            ? "Abonnement Premium - Accès illimité"
-                                                            : "Abonnement Standard"} */}
                                                         {"Membre actif" === "Membre actif"
                                                             ? "Abonnement Premium - Accès illimité"
                                                             : "Abonnement Standard"}

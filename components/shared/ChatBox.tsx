@@ -127,6 +127,8 @@ export default function ChatBox({
   const [isLoading, setIsLoading] = useState(true);
   const [messageLimit, setMessageLimit] = useState(INITIAL_MESSAGE_LIMIT);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  // Référence pour suivre si c'est le premier rendu
+  const isInitialRender = useRef(true);
 
   // Mémoriser les valeurs qui ne changent pas souvent pour éviter les re-rendus inutiles
   const memoizedCommunityId = useMemo(() => communityId, [communityId]);
@@ -234,17 +236,25 @@ export default function ChatBox({
   // Fonction optimisée pour récupérer les canaux
   const fetchChannels = useCallback(async (forceRefresh = false) => {
     try {
-      setIsLoading(true);
+      // Ne pas définir isLoading à true ici si selectedChannel est déjà défini
+      // pour éviter une boucle infinie
+      if (!selectedChannel) {
+        setIsLoading(true);
+      }
 
       if (memoizedVariant === "post") {
         // Pour les posts, on crée un canal virtuel unique
-        setSelectedChannel({
-          id: memoizedPostId as number,
-          name: "Discussion",
-          type: "text",
-          description: "Discussion du post",
-          icon: "💬",
-        });
+        // Vérifier si le canal virtuel est déjà défini pour éviter une boucle infinie
+        if (isInitialRender.current || !selectedChannel || selectedChannel.id !== memoizedPostId) {
+          setSelectedChannel({
+            id: memoizedPostId as number,
+            name: "Discussion",
+            type: "text",
+            description: "Discussion du post",
+            icon: "💬",
+          });
+          isInitialRender.current = false;
+        }
         setChannels([]);
         setIsLoading(false);
         return;
@@ -258,8 +268,10 @@ export default function ChatBox({
         const cachedData = channelsCache.get(cacheKey)!;
         if (now - cachedData.timestamp < CACHE_DURATION) {
           setChannels(cachedData.data);
-          if (cachedData.data.length > 0 && !selectedChannel) {
+          // Seulement définir selectedChannel s'il n'est pas déjà défini ou si c'est le premier rendu
+          if (cachedData.data.length > 0 && (isInitialRender.current || !selectedChannel)) {
             setSelectedChannel(cachedData.data[0]);
+            isInitialRender.current = false;
           }
           setIsLoading(false);
           return;
@@ -281,20 +293,29 @@ export default function ChatBox({
       });
 
       setChannels(data);
-      if (data.length > 0 && !selectedChannel) {
+      // Seulement définir selectedChannel s'il n'est pas déjà défini ou si c'est le premier rendu
+      if (data.length > 0 && (isInitialRender.current || !selectedChannel)) {
         setSelectedChannel(data[0]);
+        isInitialRender.current = false;
       }
     } catch (error) {
       console.error("Erreur lors de la récupération des canaux:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [memoizedCommunityId, memoizedPostId, memoizedVariant, selectedChannel, getChannelsKey]);
+  }, [memoizedCommunityId, memoizedPostId, memoizedVariant, getChannelsKey]);
 
   // Effet pour charger les données initiales
   useEffect(() => {
+    // Utiliser une référence pour éviter les appels multiples
+    const controller = new AbortController();
+
     checkCreatorStatus();
     fetchChannels();
+
+    return () => {
+      controller.abort();
+    };
   }, [checkCreatorStatus, fetchChannels]);
 
   // Effet pour écouter les messages

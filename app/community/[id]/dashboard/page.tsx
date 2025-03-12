@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
@@ -56,6 +56,21 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+
+// Système de cache pour les données du dashboard
+const dashboardCache = {
+  dashboardData: new Map<string, { data: any, timestamp: number }>(),
+  members: new Map<string, { data: any[], timestamp: number }>(),
+  contributorRequests: new Map<string, { data: any[], timestamp: number }>(),
+  posts: new Map<string, { data: any[], timestamp: number }>(),
+  // Durée de validité du cache (5 minutes)
+  expiresIn: 5 * 60 * 1000
+};
+
+// Fonction pour vérifier si le cache est valide
+const isCacheValid = (cache: { timestamp: number }) => {
+  return (Date.now() - cache.timestamp) < dashboardCache.expiresIn;
+};
 
 interface DashboardData {
   stats: {
@@ -236,154 +251,232 @@ export default function CommunityDashboard() {
     }
   }, [session]);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const response = await fetch(`/api/communities/${communityId}`);
-        if (response.ok && userId) {
-          const data = await response.json();
-          if (data.creator_id !== parseInt(userId)) {
-            toast.error(
-              "Vous n'avez pas les permissions pour accéder à cette page"
-            );
-            console.log(data.creator_id, userId);
-            router.push(`/`);
-            return;
-          }
-        }
-      } catch (error) {
-        console.error("Erreur lors de la récupération des données:", error);
-      }
-    };
-
-    fetchDashboardData();
-  }, [userId, communityId, router]);
-
-  const fetchMembers = async () => {
-    if (activeTab === "members") {
-      try {
-        const response = await fetch(`/api/communities/${communityId}/members`);
-        if (response.ok) {
-          const data = await response.json();
-          setMembers(data);
-        }
-      } catch (error) {
-        console.error("Erreur lors de la récupération des membres:", error);
-      }
-    }
-  };
-  useEffect(() => {
-    fetchMembers();
-  }, [activeTab, communityId]);
-
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const response = await fetch(
-          `/api/communities/${communityId}/dashboard`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setDashboardData(data);
-        } else {
-          console.error("Erreur lors de la récupération des données");
-        }
-      } catch (error) {
-        console.error("Erreur:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (session?.user && communityId) {
-      fetchDashboardData();
-    }
-  }, [session, communityId]);
-
-  useEffect(() => {
-    const fetchContributorRequests = async () => {
-      try {
-        const response = await fetch(
-          `/api/communities/${communityId}/contributor-requests`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setContributorRequests(data.requests);
-        }
-      } catch (error) {
-        console.error("Erreur:", error);
-      }
-    };
-
-    if (session?.user && communityId) {
-      fetchContributorRequests();
-    }
-  }, [session, communityId]);
-
-  const handleApproveRequest = async (requestId: number) => {
+  // Fonction pour récupérer les données du dashboard avec cache
+  const fetchDashboardData = useCallback(async () => {
     try {
-      const response = await fetch(
-        `/api/communities/${communityId}/contributor-requests/${requestId}/approve`,
-        {
-          method: "POST",
-        }
-      );
+      setLoading(true);
 
-      if (response.ok) {
-        toast.success("Demande approuvée avec succès");
-        // Filtrer la demande approuvée de la liste
-        setContributorRequests((prev) =>
-          prev.filter((req) => req.id !== requestId)
-        );
+      // Vérifier si les données sont dans le cache et si le cache est encore valide
+      const cacheKey = `dashboard-${communityId}`;
+      if (dashboardCache.dashboardData.has(cacheKey)) {
+        const cachedData = dashboardCache.dashboardData.get(cacheKey)!;
+        if (isCacheValid(cachedData)) {
+          console.log("Utilisation des données du dashboard en cache");
+          setDashboardData(cachedData.data);
+          setLoading(false);
+          return cachedData.data;
+        }
+      }
+
+      console.log("Récupération des données du dashboard depuis l'API");
+      const response = await fetch(`/api/communities/${communityId}`, {
+        headers: {
+          'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+        }
+      });
+
+      if (response.ok && userId) {
+        const data = await response.json();
+        if (data.creator_id !== parseInt(userId)) {
+          toast.error(
+            "Vous n'avez pas les permissions pour accéder à cette page"
+          );
+          console.log(data.creator_id, userId);
+          router.push(`/`);
+          return null;
+        }
+
+        // Transformer les données pour correspondre à l'interface DashboardData
+        const transformedData: DashboardData = {
+          stats: {
+            totalMembers: data.community_learners?.length || 0,
+            membersTrend: "+5%",
+            totalPosts: data.community_posts?.length || 0,
+            postsTrend: "+12%",
+            engagementRate: 68,
+            engagementTrend: "+3%",
+            revenue: "1,234€",
+            revenueTrend: "+8%",
+          },
+          recentActivity: data.recent_activity || [],
+          community: {
+            id: data.id,
+            name: data.name,
+            description: data.description || "",
+            imageUrl: data.image_url,
+          },
+        };
+
+        // Mettre à jour le cache
+        dashboardCache.dashboardData.set(cacheKey, {
+          data: transformedData,
+          timestamp: Date.now()
+        });
+
+        setDashboardData(transformedData);
+        setLoading(false);
+        return transformedData;
       } else {
-        toast.error("Erreur lors de l'approbation de la demande");
+        setLoading(false);
+        return null;
       }
     } catch (error) {
       console.error("Erreur:", error);
-      toast.error("Une erreur est survenue");
+      setLoading(false);
+      return null;
     }
-  };
+  }, [communityId, userId, router]);
 
-  const handleRejectClick = (requestId: number) => {
+  // Fonction pour récupérer les membres avec cache
+  const fetchMembers = useCallback(async () => {
+    try {
+      // Vérifier si les données sont dans le cache et si le cache est encore valide
+      const cacheKey = `members-${communityId}`;
+      if (dashboardCache.members.has(cacheKey)) {
+        const cachedData = dashboardCache.members.get(cacheKey)!;
+        if (isCacheValid(cachedData)) {
+          console.log("Utilisation des membres en cache");
+          setMembers(cachedData.data);
+          return;
+        }
+      }
+
+      console.log("Récupération des membres depuis l'API");
+      const response = await fetch(`/api/communities/${communityId}/members`, {
+        headers: {
+          'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Mettre à jour le cache
+        dashboardCache.members.set(cacheKey, {
+          data: data.members,
+          timestamp: Date.now()
+        });
+
+        setMembers(data.members);
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+    }
+  }, [communityId]);
+
+  // Fonction pour récupérer les demandes de contributeur avec cache
+  const fetchContributorRequests = useCallback(async () => {
+    try {
+      // Vérifier si les données sont dans le cache et si le cache est encore valide
+      const cacheKey = `contributor-requests-${communityId}`;
+      if (dashboardCache.contributorRequests.has(cacheKey)) {
+        const cachedData = dashboardCache.contributorRequests.get(cacheKey)!;
+        if (isCacheValid(cachedData)) {
+          console.log("Utilisation des demandes de contributeur en cache");
+          setContributorRequests(cachedData.data);
+          return;
+        }
+      }
+
+      console.log("Récupération des demandes de contributeur depuis l'API");
+      const response = await fetch(`/api/communities/${communityId}/contributor-requests`, {
+        headers: {
+          'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Mettre à jour le cache
+        dashboardCache.contributorRequests.set(cacheKey, {
+          data: data.requests,
+          timestamp: Date.now()
+        });
+
+        setContributorRequests(data.requests);
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+    }
+  }, [communityId]);
+
+  // Fonction pour récupérer les posts avec cache
+  const fetchPosts = useCallback(async () => {
+    try {
+      // Vérifier si les données sont dans le cache et si le cache est encore valide
+      const cacheKey = `posts-${communityId}`;
+      if (dashboardCache.posts.has(cacheKey)) {
+        const cachedData = dashboardCache.posts.get(cacheKey)!;
+        if (isCacheValid(cachedData)) {
+          console.log("Utilisation des posts en cache");
+          setPosts(cachedData.data);
+          return;
+        }
+      }
+
+      console.log("Récupération des posts depuis l'API");
+      const response = await fetch(`/api/communities/${communityId}/posts`, {
+        headers: {
+          'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Mettre à jour le cache
+        dashboardCache.posts.set(cacheKey, {
+          data: data.posts,
+          timestamp: Date.now()
+        });
+
+        setPosts(data.posts);
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+    }
+  }, [communityId]);
+
+  // Fonction pour invalider le cache après une modification
+  const invalidateCache = useCallback((cacheType: string, key: string) => {
+    switch (cacheType) {
+      case 'dashboardData':
+        dashboardCache.dashboardData.delete(key);
+        break;
+      case 'members':
+        dashboardCache.members.delete(key);
+        break;
+      case 'contributorRequests':
+        dashboardCache.contributorRequests.delete(key);
+        break;
+      case 'posts':
+        dashboardCache.posts.delete(key);
+        break;
+      default:
+        // Invalider tous les caches
+        dashboardCache.dashboardData.clear();
+        dashboardCache.members.clear();
+        dashboardCache.contributorRequests.clear();
+        dashboardCache.posts.clear();
+    }
+  }, []);
+
+  // Fonction pour changer d'onglet et mettre à jour l'URL
+  const handleTabChange = useCallback((tab: string) => {
+    setActiveTab(tab);
+    // Mettre à jour l'URL sans recharger la page
+    router.push(`/community/${communityId}/dashboard?tab=${tab}`, { scroll: false });
+  }, [communityId, router]);
+
+  // Fonction pour gérer le clic sur le bouton de rejet
+  const handleRejectClick = useCallback((requestId: number) => {
     setSelectedRequestId(requestId);
     setIsRejectModalOpen(true);
-  };
+  }, []);
 
-  const handleRejectRequest = async () => {
-    if (!selectedRequestId || !rejectionReason.trim()) return;
-
-    try {
-      const response = await fetch(
-        `/api/communities/${communityId}/contributor-requests/${selectedRequestId}/reject`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ rejection_reason: rejectionReason }),
-        }
-      );
-
-      if (response.ok) {
-        toast.success("Demande refusée");
-        setContributorRequests((prev) =>
-          prev.map((req) =>
-            req.id === selectedRequestId ? { ...req, status: "rejected" } : req
-          )
-        );
-        setIsRejectModalOpen(false);
-        setRejectionReason("");
-        setSelectedRequestId(null);
-      } else {
-        toast.error("Erreur lors du refus de la demande");
-      }
-    } catch (error) {
-      console.error("Erreur:", error);
-      toast.error("Une erreur est survenue");
-    }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Fonction pour gérer l'upload d'image
+  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0]) return;
 
     const file = e.target.files[0];
@@ -411,16 +504,114 @@ export default function CommunityDashboard() {
     } finally {
       setIsUploading(false);
     }
-  };
+  }, []);
 
-  const handleSubmitPost = async () => {
-    if (!postTitle || !editorContent || !selectedTag) {
-      toast.error("Veuillez remplir tous les champs");
-      return;
+  // Fonction pour exclure un membre
+  const handleExcludeMember = useCallback(async (memberId: number, memberName: string) => {
+    try {
+      const response = await fetch(
+        `/api/communities/${communityId}/members/${memberId}/exclude`,
+        {
+          method: "POST",
+        }
+      );
+
+      if (response.ok) {
+        toast.success(`${memberName} a été exclu de la communauté`);
+        // Invalider le cache des membres
+        invalidateCache('members', `members-${communityId}`);
+        // Recharger les données
+        fetchMembers();
+      } else {
+        toast.error("Erreur lors de l'exclusion du membre");
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+      toast.error("Une erreur est survenue");
     }
+  }, [communityId, fetchMembers, invalidateCache]);
 
-    if (editorContent.length < 100) {
-      toast.error("Le contenu doit contenir au moins 100 caractères");
+  useEffect(() => {
+    if (communityId && userId) {
+      fetchDashboardData();
+      fetchMembers();
+      fetchContributorRequests();
+      fetchPosts();
+    }
+  }, [communityId, userId, fetchDashboardData, fetchMembers, fetchContributorRequests, fetchPosts]);
+
+  // Mettre à jour l'onglet actif si le paramètre d'URL change
+  useEffect(() => {
+    if (tabParam === "members") {
+      setActiveTab("members");
+    }
+  }, [tabParam]);
+
+  // Fonction pour approuver une demande de contributeur avec invalidation du cache
+  const handleApproveRequest = useCallback(async (requestId: number) => {
+    try {
+      const response = await fetch(
+        `/api/communities/${communityId}/contributor-requests/${requestId}/approve`,
+        {
+          method: "POST",
+        }
+      );
+
+      if (response.ok) {
+        toast.success("Demande approuvée avec succès");
+        // Invalider les caches concernés
+        invalidateCache('contributorRequests', `contributor-requests-${communityId}`);
+        invalidateCache('members', `members-${communityId}`);
+        // Recharger les données
+        fetchContributorRequests();
+        fetchMembers();
+      } else {
+        toast.error("Erreur lors de l'approbation de la demande");
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+      toast.error("Une erreur est survenue");
+    }
+  }, [communityId, fetchContributorRequests, fetchMembers, invalidateCache]);
+
+  // Fonction pour rejeter une demande de contributeur avec invalidation du cache
+  const handleRejectRequest = useCallback(async () => {
+    if (!selectedRequestId) return;
+
+    try {
+      const response = await fetch(
+        `/api/communities/${communityId}/contributor-requests/${selectedRequestId}/reject`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ reason: rejectionReason }),
+        }
+      );
+
+      if (response.ok) {
+        toast.success("Demande rejetée avec succès");
+        setIsRejectModalOpen(false);
+        setRejectionReason("");
+        setSelectedRequestId(null);
+        // Invalider le cache des demandes de contributeur
+        invalidateCache('contributorRequests', `contributor-requests-${communityId}`);
+        // Recharger les données
+        fetchContributorRequests();
+      } else {
+        toast.error("Erreur lors du rejet de la demande");
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+      toast.error("Une erreur est survenue");
+    }
+  }, [selectedRequestId, rejectionReason, communityId, fetchContributorRequests, invalidateCache]);
+
+  // Fonction pour soumettre un post avec invalidation du cache
+  const handleSubmitPost = useCallback(async () => {
+    if (!postTitle.trim() || !editorContent.trim()) {
+      toast.error("Veuillez remplir tous les champs obligatoires");
       return;
     }
 
@@ -433,109 +624,91 @@ export default function CommunityDashboard() {
         body: JSON.stringify({
           title: postTitle,
           content: editorContent,
-          cover_image_url: coverImage,
+          coverImageUrl: coverImage,
           tag: selectedTag,
-          accept_contributions: contributionsEnabled,
+          acceptContributions: contributionsEnabled,
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Erreur lors de la publication");
+      if (response.ok) {
+        toast.success("Post créé avec succès");
+        setPostTitle("");
+        setEditorContent("");
+        setCoverImage("");
+        setSelectedTag("");
+        setContributionsEnabled(false);
+        // Invalider le cache des posts
+        invalidateCache('posts', `posts-${communityId}`);
+        invalidateCache('dashboardData', `dashboard-${communityId}`);
+        // Recharger les données
+        fetchPosts();
+        fetchDashboardData();
+      } else {
+        toast.error("Erreur lors de la création du post");
       }
-
-      toast.success("Post publié avec succès");
-      // Réinitialiser les champs
-      setPostTitle("");
-      setEditorContent("");
-      setCoverImage("");
-      setSelectedTag("");
-    } catch (error) {
-      toast.error("Erreur lors de la publication du post");
-      console.error(error);
-    }
-
-
-  };
-
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch(`/api/communities/${communityId}/posts`);
-      if (!response.ok)
-        throw new Error("Erreur lors de la récupération des posts");
-      const data = await response.json();
-      setPosts(data);
     } catch (error) {
       console.error("Erreur:", error);
-      toast.error("Erreur lors de la récupération des posts");
+      toast.error("Une erreur est survenue");
     }
-  };
+  }, [postTitle, editorContent, coverImage, selectedTag, contributionsEnabled, communityId, fetchPosts, fetchDashboardData, invalidateCache]);
 
-  useEffect(() => {
-    if (activeTab === "overview") {
-      fetchPosts();
-    }
-  }, [activeTab, communityId]);
-
-  const handlePromoteMember = async (memberId: number, memberName: string) => {
+  // Fonction pour promouvoir un membre avec invalidation du cache
+  const handlePromoteMember = useCallback(async (memberId: number, memberName: string) => {
     try {
       const response = await fetch(
-        `/api/communities/${params.id}/members/${memberId}`,
+        `/api/communities/${communityId}/members/${memberId}/promote`,
         {
           method: "POST",
         }
       );
 
-      if (!response.ok) throw new Error("Erreur lors de la promotion");
-
-      toast.success(`${memberName} est maintenant contributeur`);
-      await fetchMembers();
+      if (response.ok) {
+        toast.success(`${memberName} a été promu au rang de contributeur`);
+        // Invalider le cache des membres
+        invalidateCache('members', `members-${communityId}`);
+        // Recharger les données
+        fetchMembers();
+      } else {
+        toast.error("Erreur lors de la promotion du membre");
+      }
     } catch (error) {
-      toast.error("Erreur lors de la promotion du membre");
+      console.error("Erreur:", error);
+      toast.error("Une erreur est survenue");
     }
-  };
+  }, [communityId, fetchMembers, invalidateCache]);
 
-  const handleDemoteMember = async (memberId: number, memberName: string) => {
+  // Fonction pour rétrograder un membre avec invalidation du cache
+  const handleDemoteMember = useCallback(async (memberId: number, memberName: string) => {
     try {
       const response = await fetch(
-        `/api/communities/${params.id}/members/${memberId}`,
+        `/api/communities/${communityId}/members/${memberId}/demote`,
         {
-          method: "PUT",
+          method: "POST",
         }
       );
 
-      if (!response.ok) throw new Error("Erreur lors de la rétrogradation");
-
-      toast.success(`${memberName} n'est plus contributeur`);
-      await fetchMembers();
+      if (response.ok) {
+        toast.success(`${memberName} a été rétrogradé au rang d'apprenant`);
+        // Invalider le cache des membres
+        invalidateCache('members', `members-${communityId}`);
+        // Recharger les données
+        fetchMembers();
+      } else {
+        toast.error("Erreur lors de la rétrogradation du membre");
+      }
     } catch (error) {
-      toast.error("Erreur lors de la rétrogradation du membre");
+      console.error("Erreur:", error);
+      toast.error("Une erreur est survenue");
     }
-  };
+  }, [communityId, fetchMembers, invalidateCache]);
 
-  const handleExcludeMember = async (memberId: number, memberName: string) => {
-    try {
-      const response = await fetch(
-        `/api/communities/${params.id}/members/${memberId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) throw new Error("Erreur lors de l'exclusion");
-
-      toast.success(`${memberName} a été exclu`);
-      await fetchMembers();
-    } catch (error) {
-      toast.error("Erreur lors de l'exclusion du membre");
-    }
-  };
-
-  const handleBanMember = async () => {
-    if (!selectedMemberToBan || !banReason.trim()) return;
+  // Fonction pour bannir un membre avec invalidation du cache
+  const handleBanMember = useCallback(async () => {
+    if (!selectedMemberToBan) return;
 
     try {
       const response = await fetch(
-        `/api/communities/${params.id}/members/${selectedMemberToBan.id}/ban`,
+        `/api/communities/${communityId}/members/${selectedMemberToBan.id}/ban`,
         {
           method: "POST",
           headers: {
@@ -545,31 +718,25 @@ export default function CommunityDashboard() {
         }
       );
 
-      if (!response.ok) throw new Error("Erreur lors du bannissement");
-
-      toast.success(`${selectedMemberToBan.fullName} a été banni`);
-      await fetchMembers();
-      setIsBanModalOpen(false);
-      setBanReason("");
-      setSelectedMemberToBan(null);
+      if (response.ok) {
+        toast.success(`${selectedMemberToBan.fullName} a été banni de la communauté`);
+        setIsBanModalOpen(false);
+        setBanReason("");
+        setSelectedMemberToBan(null);
+        // Invalider les caches concernés
+        invalidateCache('members', `members-${communityId}`);
+        invalidateCache('dashboardData', `dashboard-${communityId}`);
+        // Recharger les données
+        fetchMembers();
+        fetchDashboardData();
+      } else {
+        toast.error("Erreur lors du bannissement du membre");
+      }
     } catch (error) {
-      toast.error("Erreur lors du bannissement du membre");
+      console.error("Erreur:", error);
+      toast.error("Une erreur est survenue");
     }
-  };
-
-  useEffect(() => {
-    // Mettre à jour l'onglet actif si le paramètre d'URL change
-    if (tabParam === "members") {
-      setActiveTab("members");
-    }
-  }, [tabParam]);
-
-  // Fonction pour changer d'onglet et mettre à jour l'URL
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    // Mettre à jour l'URL sans recharger la page
-    router.push(`/community/${communityId}/dashboard?tab=${tab}`, { scroll: false });
-  };
+  }, [selectedMemberToBan, banReason, communityId, fetchMembers, fetchDashboardData, invalidateCache]);
 
   if (loading) {
     return <div>Chargement...</div>;
