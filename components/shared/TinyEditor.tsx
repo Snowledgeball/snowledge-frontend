@@ -44,6 +44,7 @@ interface TinyEditorProps {
   postId?: string;
   placeholder?: string;
   protectImages?: boolean;
+  className?: string;
 }
 
 interface BlobInfo {
@@ -87,6 +88,7 @@ const TinyEditor = ({
   postId,
   placeholder,
   protectImages,
+  className,
 }: TinyEditorProps) => {
   const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
@@ -698,7 +700,7 @@ const TinyEditor = ({
   };
 
   return (
-    <div className="tiny-editor">
+    <div className="tiny-editor w-full">
       {mounted && (
         <TinyMCEEditor
           id="my-tiny-editor"
@@ -709,7 +711,10 @@ const TinyEditor = ({
             editorRef.current = editor;
             // Ne pas utiliser mode.set("readonly") car cela désactive les commentaires
           }}
-          init={baseConfig}
+          init={{
+            ...baseConfig,
+            height: 600, // Définir une hauteur fixe plus grande
+          }}
         />
       )}
     </div>

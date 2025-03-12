@@ -145,7 +145,7 @@ export default function PostPage() {
                     <button
                       onClick={() =>
                         router.push(
-                          `/community/${params.id}/posts/${post.id}/edit`
+                          `/community/${params.id}/posts/${post.id}/edit?status=PUBLISHED`
                         )
                       }
                       className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
