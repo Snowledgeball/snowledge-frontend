@@ -45,7 +45,7 @@ export async function GET(request, { params }) {
                         },
                     },
                 },
-                community_posts_enrichment_review: {
+                community_posts_enrichment_reviews: {
                     include: {
                         user: {
                             select: {
@@ -131,7 +131,7 @@ export async function PUT(request, { params }) {
         });
 
         // Réinitialiser les votes car le contenu a changé
-        await prisma.community_posts_enrichment_review.deleteMany({
+        await prisma.community_posts_enrichment_reviews.deleteMany({
             where: {
                 community_posts_enrichments: {
                     id: parseInt(enrichmentId),

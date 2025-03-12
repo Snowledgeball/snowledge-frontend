@@ -48,7 +48,7 @@ export async function GET(request, { params }) {
                         profilePicture: true,
                     },
                 },
-                community_posts_enrichment_review: {
+                community_posts_enrichment_reviews: {
                     include: {
                         user: {
                             select: {

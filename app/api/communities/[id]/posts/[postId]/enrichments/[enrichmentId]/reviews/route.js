@@ -43,7 +43,7 @@ export async function POST(request, { params }) {
         }
 
         // Vérifier que la révision existe
-        const existingReview = await prisma.community_posts_enrichment_review.findFirst({
+        const existingReview = await prisma.community_posts_enrichment_reviews.findFirst({
             where: {
                 contribution_id: parseInt(enrichmentId),
                 user_id: parseInt(session.user.id),
@@ -58,7 +58,7 @@ export async function POST(request, { params }) {
         }
 
         // Créer la révision
-        const review = await prisma.community_posts_enrichment_review.create({
+        const review = await prisma.community_posts_enrichment_reviews.create({
             data: {
                 content,
                 status,

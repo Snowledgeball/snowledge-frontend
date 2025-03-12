@@ -29,7 +29,7 @@ interface Contribution {
             name: string;
         }
     };
-    community_posts_enrichment_review: {
+    community_posts_enrichment_reviews: {
         id: number;
         content: string;
         status: string;
@@ -208,13 +208,13 @@ export default function ContributionDetailPage() {
             </Card>
 
             <Card className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Feedbacks reçus ({contribution.community_posts_enrichment_review.length})</h2>
+                <h2 className="text-xl font-semibold mb-4">Feedbacks reçus ({contribution.community_posts_enrichment_reviews.length})</h2>
 
-                {contribution.community_posts_enrichment_review.length === 0 ? (
+                {contribution.community_posts_enrichment_reviews.length === 0 ? (
                     <p className="text-gray-500 italic">Aucun feedback reçu pour le moment</p>
                 ) : (
                     <div className="space-y-6">
-                        {contribution.community_posts_enrichment_review.map((review) => (
+                        {contribution.community_posts_enrichment_reviews.map((review) => (
                             <div key={review.id} className="bg-gray-50 p-4 rounded-md">
                                 <div className="flex items-center mb-3">
                                     <div className={`p-1.5 rounded-full mr-2 ${review.status === "APPROVED" ? "bg-green-100" : "bg-red-100"}`}>
