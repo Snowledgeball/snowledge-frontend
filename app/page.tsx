@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Users, MessageCircle, TrendingUp, Search, Clock, Globe, Activity, Shield, Bitcoin, PiggyBank, Wallet
@@ -8,6 +8,13 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+
+// Cache pour stocker les données des communautés
+const communitiesCache = {
+  data: null as Community[] | null,
+  timestamp: 0,
+  expiresIn: 5 * 60 * 1000 // 5 minutes en millisecondes
+};
 
 interface Community {
   id: number;
@@ -76,7 +83,6 @@ export default function Home() {
     trending,
     category,
     lastActive,
-
     trustScore,
     imageUrl,
     creator,
@@ -226,11 +232,30 @@ export default function Home() {
       { id: "defi", label: "DeFi", icon: Wallet },
     ];
 
+    // Fonction pour vérifier si le cache est valide
+    const isCacheValid = useMemo(() => {
+      return communitiesCache.data !== null &&
+        (Date.now() - communitiesCache.timestamp) < communitiesCache.expiresIn;
+    }, []);
+
     useEffect(() => {
       const fetchCommunities = async () => {
         try {
-          const response = await fetch('/api/communities');
+          // Vérifier si les données sont dans le cache et si le cache est encore valide
+          if (isCacheValid) {
+            setCommunities(communitiesCache.data!);
+            setLoading(false);
+            return;
+          }
+
+          const response = await fetch('/api/communities', {
+            headers: {
+              'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+            }
+          });
+
           if (!response.ok) throw new Error('Erreur lors de la récupération des communautés');
+
           const data = await response.json();
           const formattedCommunities = data.map((community: RawCommunity) => ({
             id: community.id,
@@ -251,6 +276,10 @@ export default function Home() {
             community_contributors_id: community.community_contributors.map(contributor => contributor.contributor_id),
           }));
 
+          // Mettre à jour le cache
+          communitiesCache.data = formattedCommunities;
+          communitiesCache.timestamp = Date.now();
+
           setCommunities(formattedCommunities);
         } catch (error) {
           console.error("Erreur:", error);
@@ -260,7 +289,7 @@ export default function Home() {
       };
 
       fetchCommunities();
-    }, []);
+    }, [isCacheValid]);
 
     const filters = [
       { id: "all", label: "Toutes" },
