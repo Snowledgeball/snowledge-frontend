@@ -45,7 +45,7 @@ export async function POST(request, { params }) {
         }
 
         // Récupérer la contribution
-        const enrichment = await prisma.community_posts_contributions.findUnique({
+        const enrichment = await prisma.community_posts_enrichments.findUnique({
             where: {
                 id: parseInt(enrichmentId),
                 post_id: parseInt(postId),
@@ -90,7 +90,7 @@ export async function POST(request, { params }) {
         });
 
         // Mettre à jour le statut de la contribution
-        await prisma.community_posts_contributions.update({
+        await prisma.community_posts_enrichments.update({
             where: {
                 id: parseInt(enrichmentId),
             },

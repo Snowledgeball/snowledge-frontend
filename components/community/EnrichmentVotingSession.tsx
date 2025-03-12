@@ -32,7 +32,7 @@ interface Contribution {
         fullName: string;
         profilePicture: string;
     };
-    community_posts_contribution_reviews: {
+    community_posts_enrichment_review: {
         id: number;
         content: string;
         status: string;
@@ -152,16 +152,16 @@ export default function EnrichmentVotingSession({
 
     // Calculer le taux de participation pour une contribution
     const getParticipationRate = (contribution: Contribution) => {
-        const totalReviews = contribution.community_posts_contribution_reviews.length;
+        const totalReviews = contribution.community_posts_enrichment_review.length;
         return contributorsCount === 0 ? 0 : Math.round((totalReviews / contributorsCount) * 100);
     };
 
     // Calculer le taux d'approbation pour une contribution
     const getApprovalRate = (contribution: Contribution) => {
-        const totalReviews = contribution.community_posts_contribution_reviews.length;
+        const totalReviews = contribution.community_posts_enrichment_review.length;
         if (totalReviews === 0) return 0;
 
-        const approvedReviews = contribution.community_posts_contribution_reviews.filter(r => r.status === "APPROVED").length;
+        const approvedReviews = contribution.community_posts_enrichment_review.filter(r => r.status === "APPROVED").length;
         return Math.round((approvedReviews / totalReviews) * 100);
     };
 
@@ -172,7 +172,7 @@ export default function EnrichmentVotingSession({
 
     // Vérifier si l'utilisateur a déjà voté sur une contribution
     const hasUserVoted = (contribution: Contribution) => {
-        return contribution.community_posts_contribution_reviews.some(r => r.user.id === parseInt(session?.user?.id || "0"));
+        return contribution.community_posts_enrichment_review.some(r => r.user.id === parseInt(session?.user?.id || "0"));
     };
 
     // Vérifier si la contribution peut être publiée
@@ -180,7 +180,7 @@ export default function EnrichmentVotingSession({
         const participationRate = getParticipationRate(contribution);
         if (participationRate < 50) return false;
 
-        const approvedReviews = contribution.community_posts_contribution_reviews.filter(r => r.status === "APPROVED").length;
+        const approvedReviews = contribution.community_posts_enrichment_review.filter(r => r.status === "APPROVED").length;
         const requiredApprovals = isContributorsCountEven
             ? (contributorsCount / 2) + 1
             : Math.ceil(contributorsCount / 2);
@@ -293,12 +293,12 @@ export default function EnrichmentVotingSession({
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <div className="text-sm text-gray-900 mb-1 cursor-help">
-                                                            {getParticipationRate(contribution)}% ({contribution.community_posts_contribution_reviews.length}/{contributorsCount})
+                                                            {getParticipationRate(contribution)}% ({contribution.community_posts_enrichment_review.length}/{contributorsCount})
                                                         </div>
                                                     </TooltipTrigger>
                                                     <TooltipContent>
-                                                        <p>Pour: {contribution.community_posts_contribution_reviews.filter(r => r.status === "APPROVED").length}</p>
-                                                        <p>Contre: {contribution.community_posts_contribution_reviews.filter(r => r.status === "REJECTED").length}</p>
+                                                        <p>Pour: {contribution.community_posts_enrichment_review.filter(r => r.status === "APPROVED").length}</p>
+                                                        <p>Contre: {contribution.community_posts_enrichment_review.filter(r => r.status === "REJECTED").length}</p>
                                                     </TooltipContent>
                                                 </Tooltip>
                                             </TooltipProvider>
@@ -338,7 +338,7 @@ export default function EnrichmentVotingSession({
                                                         <Tooltip>
                                                             <TooltipTrigger asChild>
                                                                 <span className="ml-1 cursor-help text-blue-500">
-                                                                    ({contribution.community_posts_contribution_reviews.filter(r => r.status === "APPROVED").length}/{(contributorsCount / 2) + 1} requis)
+                                                                    ({contribution.community_posts_enrichment_review.filter(r => r.status === "APPROVED").length}/{(contributorsCount / 2) + 1} requis)
                                                                 </span>
                                                             </TooltipTrigger>
                                                             <TooltipContent>
@@ -350,7 +350,7 @@ export default function EnrichmentVotingSession({
                                                 )}
                                                 {!isContributorsCountEven && (
                                                     <span className="ml-1">
-                                                        ({contribution.community_posts_contribution_reviews.filter(r => r.status === "APPROVED").length}/{Math.ceil(contributorsCount / 2)} requis)
+                                                        ({contribution.community_posts_enrichment_review.filter(r => r.status === "APPROVED").length}/{Math.ceil(contributorsCount / 2)} requis)
                                                     </span>
                                                 )}
                                             </div>

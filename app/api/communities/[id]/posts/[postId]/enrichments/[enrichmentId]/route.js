@@ -18,7 +18,7 @@ export async function GET(request, { params }) {
         const { id: communityId, postId, enrichmentId } = await params;
 
         // Récupérer la contribution
-        const enrichment = await prisma.community_posts_contributions.findUnique({
+        const enrichment = await prisma.community_posts_enrichments.findUnique({
             where: {
                 id: parseInt(enrichmentId),
                 community_posts: {
@@ -45,7 +45,7 @@ export async function GET(request, { params }) {
                         },
                     },
                 },
-                community_posts_contribution_reviews: {
+                community_posts_enrichment_review: {
                     include: {
                         user: {
                             select: {
@@ -90,7 +90,7 @@ export async function PUT(request, { params }) {
         const { content, description } = await request.json();
 
         // Récupérer la contribution pour vérifier que l'utilisateur est bien l'auteur
-        const enrichment = await prisma.community_posts_contributions.findUnique({
+        const enrichment = await prisma.community_posts_enrichments.findUnique({
             where: {
                 id: parseInt(enrichmentId),
                 community_posts: {
@@ -120,7 +120,7 @@ export async function PUT(request, { params }) {
         }
 
         // Mettre à jour la contribution
-        const updatedEnrichment = await prisma.community_posts_contributions.update({
+        const updatedEnrichment = await prisma.community_posts_enrichments.update({
             where: {
                 id: parseInt(enrichmentId),
             },
@@ -131,9 +131,9 @@ export async function PUT(request, { params }) {
         });
 
         // Réinitialiser les votes car le contenu a changé
-        await prisma.community_posts_contribution_reviews.deleteMany({
+        await prisma.community_posts_enrichment_review.deleteMany({
             where: {
-                community_posts_contributions: {
+                community_posts_enrichments: {
                     id: parseInt(enrichmentId),
                 },
             },

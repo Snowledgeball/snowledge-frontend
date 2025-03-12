@@ -43,7 +43,7 @@ export async function GET(request, { params }) {
             where: {
                 community_id: parseInt(communityId),
                 status: "PUBLISHED",
-                community_posts_contributions: {
+                community_posts_enrichments: {
                     some: {
                         status: "PENDING"
                     }
@@ -57,7 +57,7 @@ export async function GET(request, { params }) {
                         profilePicture: true,
                     },
                 },
-                community_posts_contributions: {
+                community_posts_enrichments: {
                     where: {
                         status: "PENDING"
                     },
@@ -69,7 +69,7 @@ export async function GET(request, { params }) {
                                 profilePicture: true,
                             },
                         },
-                        community_posts_contribution_reviews: {
+                        community_posts_enrichment_review: {
                             include: {
                                 user: {
                                     select: {

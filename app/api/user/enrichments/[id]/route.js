@@ -16,7 +16,7 @@ export async function GET(request, { params }) {
 
         console.log("la5");
         // Récupérer la contribution spécifique
-        const contribution = await prisma.community_posts_contributions.findUnique({
+        const contribution = await prisma.community_posts_enrichments.findUnique({
             where: {
                 id: parseInt(id),
                 user_id: parseInt(session.user.id), // S'assurer que l'utilisateur est bien l'auteur
@@ -34,7 +34,7 @@ export async function GET(request, { params }) {
                         },
                     },
                 },
-                community_posts_contribution_reviews: {
+                community_posts_enrichment_review: {
                     include: {
                         user: {
                             select: {

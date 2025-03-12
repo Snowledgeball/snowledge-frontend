@@ -63,36 +63,36 @@ model community_posts {
   user                                  user                                    @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "author_id_fkey")
   community                             community                               @relation(fields: [community_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   community_posts_comment_conversations community_posts_comment_conversations[]
-  community_posts_contributions         community_posts_contributions[]
+  community_posts_enrichments           community_posts_enrichments[]
   community_posts_reviews               community_posts_reviews[]
   community_qa_questions                community_qa_questions[]
 }
 
 model user {
-  id                                   Int                                    @id(map: "User_pkey") @default(autoincrement())
-  fullName                             String                                 @db.VarChar(255)
-  userName                             String                                 @unique(map: "username_unique") @db.VarChar(50)
-  profilePicture                       String
-  email                                String                                 @unique(map: "email_unique") @db.VarChar(255)
-  password                             String
-  accountAddress                       String                                 @db.VarChar(65)
-  publicKey                            String                                 @db.VarChar(65)
-  privateKey                           String                                 @db.VarChar(160)
-  salt                                 String                                 @db.VarChar(32)
-  iv                                   String                                 @db.VarChar(32)
-  created_at                           DateTime                               @default(now()) @db.Timestamp(6)
-  updated_at                           DateTime                               @default(now()) @db.Timestamp(6)
-  community                            community[]
-  community_bans                       community_bans[]
-  community_contributors               community_contributors[]
-  community_learners                   community_learners[]
-  community_posts                      community_posts[]
-  community_posts_comments             community_posts_comments[]
-  community_posts_contribution_reviews community_posts_contribution_reviews[]
-  community_posts_contributions        community_posts_contributions[]
-  community_posts_reviews              community_posts_reviews[]
-  community_qa_answers                 community_qa_answers[]
-  community_qa_questions               community_qa_questions[]
+  id                                 Int                                  @id(map: "User_pkey") @default(autoincrement())
+  fullName                           String                               @db.VarChar(255)
+  userName                           String                               @unique(map: "username_unique") @db.VarChar(50)
+  profilePicture                     String
+  email                              String                               @unique(map: "email_unique") @db.VarChar(255)
+  password                           String
+  accountAddress                     String                               @db.VarChar(65)
+  publicKey                          String                               @db.VarChar(65)
+  privateKey                         String                               @db.VarChar(160)
+  salt                               String                               @db.VarChar(32)
+  iv                                 String                               @db.VarChar(32)
+  created_at                         DateTime                             @default(now()) @db.Timestamp(6)
+  updated_at                         DateTime                             @default(now()) @db.Timestamp(6)
+  community                          community[]
+  community_bans                     community_bans[]
+  community_contributors             community_contributors[]
+  community_learners                 community_learners[]
+  community_posts                    community_posts[]
+  community_posts_comments           community_posts_comments[]
+  community_posts_enrichment_reviews community_posts_enrichment_reviews[]
+  community_posts_enrichments        community_posts_enrichments[]
+  community_posts_reviews            community_posts_reviews[]
+  community_qa_answers               community_qa_answers[]
+  community_qa_questions             community_qa_questions[]
 }
 
 model community_category {
@@ -230,17 +230,17 @@ model community_qa_questions {
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model community_posts_contribution_reviews {
-  id                            Int                           @id @default(autoincrement())
-  contribution_id               Int
-  user_id                       Int
-  content                       String
-  status                        String                        @db.VarChar(10)
-  is_validated                  Boolean?                      @default(false)
-  created_at                    DateTime?                     @default(now()) @db.Timestamp(6)
-  updated_at                    DateTime?                     @default(now()) @db.Timestamp(6)
-  community_posts_contributions community_posts_contributions @relation(fields: [contribution_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_review_contribution")
-  user                          user                          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_review_user")
+model community_posts_enrichment_reviews {
+  id                          Int                         @id(map: "community_posts_enrichment_review_pkey") @default(autoincrement())
+  contribution_id             Int
+  user_id                     Int
+  content                     String
+  status                      String                      @db.VarChar(10)
+  is_validated                Boolean?                    @default(false)
+  created_at                  DateTime?                   @default(now()) @db.Timestamp(6)
+  updated_at                  DateTime?                   @default(now()) @db.Timestamp(6)
+  community_posts_enrichments community_posts_enrichments @relation(fields: [contribution_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_review_contribution")
+  user                        user                        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_review_user")
 
   @@unique([contribution_id, user_id], map: "unique_contribution_user")
   @@index([contribution_id], map: "idx_review_contribution_id")
@@ -249,20 +249,20 @@ model community_posts_contribution_reviews {
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model community_posts_contributions {
-  id                                   Int                                    @id @default(autoincrement())
-  post_id                              Int
-  user_id                              Int
-  title                                String?                                @db.VarChar(255)
-  content                              String
-  original_content                     String
-  description                          String
-  status                               String                                 @default("PENDING") @db.VarChar(10)
-  created_at                           DateTime?                              @default(now()) @db.Timestamp(6)
-  updated_at                           DateTime?                              @default(now()) @db.Timestamp(6)
-  community_posts_contribution_reviews community_posts_contribution_reviews[]
-  community_posts                      community_posts                        @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_contribution_post")
-  user                                 user                                   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_contribution_user")
+model community_posts_enrichments {
+  id                                 Int                                  @id(map: "community_posts_enrichments_pkey") @default(autoincrement())
+  post_id                            Int
+  user_id                            Int
+  title                              String?                              @db.VarChar(255)
+  content                            String
+  original_content                   String
+  status                             String                               @default("PENDING") @db.VarChar(10)
+  created_at                         DateTime?                            @default(now()) @db.Timestamp(6)
+  updated_at                         DateTime?                            @default(now()) @db.Timestamp(6)
+  description                        String
+  community_posts_enrichment_reviews community_posts_enrichment_reviews[]
+  community_posts                    community_posts                      @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_contribution_post")
+  user                               user                                 @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_contribution_user")
 
   @@index([post_id], map: "idx_contribution_post_id")
   @@index([status], map: "idx_contribution_status")

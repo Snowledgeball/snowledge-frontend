@@ -62,7 +62,7 @@ export async function POST(request, { params }) {
 
 
         // Créer la contribution
-        const contribution = await prisma.community_posts_contributions.create({
+        const contribution = await prisma.community_posts_enrichments.create({
             data: {
                 title,
                 description,

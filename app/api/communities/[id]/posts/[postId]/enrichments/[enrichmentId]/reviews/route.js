@@ -43,7 +43,7 @@ export async function POST(request, { params }) {
         }
 
         // Vérifier que la révision existe
-        const existingReview = await prisma.community_posts_contribution_reviews.findFirst({
+        const existingReview = await prisma.community_posts_enrichment_review.findFirst({
             where: {
                 contribution_id: parseInt(enrichmentId),
                 user_id: parseInt(session.user.id),
@@ -58,7 +58,7 @@ export async function POST(request, { params }) {
         }
 
         // Créer la révision
-        const review = await prisma.community_posts_contribution_reviews.create({
+        const review = await prisma.community_posts_enrichment_review.create({
             data: {
                 content,
                 status,
@@ -83,7 +83,7 @@ export async function POST(request, { params }) {
         console.log("la3");
 
         // Mettre à jour le statut de la contribution si nécessaire
-        const enrichment = await prisma.community_posts_contributions.findUnique({
+        const enrichment = await prisma.community_posts_enrichments.findUnique({
             where: {
                 id: parseInt(enrichmentId),
             },
@@ -99,7 +99,7 @@ export async function POST(request, { params }) {
 
         if (shouldUpdate) {
 
-            await prisma.community_posts_contributions.update({
+            await prisma.community_posts_enrichments.update({
                 where: {
                     id: parseInt(enrichmentId),
                 },

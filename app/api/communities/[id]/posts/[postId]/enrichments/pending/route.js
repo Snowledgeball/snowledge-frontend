@@ -35,7 +35,7 @@ export async function GET(request, { params }) {
         }
 
         // Récupérer les enrichissements en attente
-        const pendingContributions = await prisma.community_posts_contributions.findMany({
+        const pendingContributions = await prisma.community_posts_enrichments.findMany({
             where: {
                 post_id: parseInt(postId),
                 status: "PENDING",
@@ -48,7 +48,7 @@ export async function GET(request, { params }) {
                         profilePicture: true,
                     },
                 },
-                community_posts_contribution_reviews: {
+                community_posts_enrichment_review: {
                     include: {
                         user: {
                             select: {

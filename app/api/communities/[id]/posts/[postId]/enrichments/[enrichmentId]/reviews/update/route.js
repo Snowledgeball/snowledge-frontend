@@ -43,7 +43,7 @@ export async function PUT(request, { params }) {
         }
 
         // Vérifier que la révision existe
-        const existingReview = await prisma.community_posts_contribution_reviews.findFirst({
+        const existingReview = await prisma.community_posts_enrichment_review.findFirst({
             where: {
                 contribution_id: parseInt(enrichmentId),
                 user_id: parseInt(session.user.id),
@@ -58,7 +58,7 @@ export async function PUT(request, { params }) {
         }
 
         // Mettre à jour la révision
-        const updatedReview = await prisma.community_posts_contribution_reviews.update({
+        const updatedReview = await prisma.community_posts_enrichment_review.update({
             where: {
                 id: existingReview.id,
             },
@@ -69,7 +69,7 @@ export async function PUT(request, { params }) {
         });
 
         // Récupérer les informations sur l'enrichissement et son auteur
-        const enrichment = await prisma.community_posts_contributions.findUnique({
+        const enrichment = await prisma.community_posts_enrichments.findUnique({
             where: {
                 id: parseInt(enrichmentId),
             },
@@ -98,7 +98,7 @@ export async function PUT(request, { params }) {
 
         // Mettre à jour le statut de la contribution si nécessaire
         if (shouldUpdate) {
-            await prisma.community_posts_contributions.update({
+            await prisma.community_posts_enrichments.update({
                 where: {
                     id: parseInt(enrichmentId),
                 },

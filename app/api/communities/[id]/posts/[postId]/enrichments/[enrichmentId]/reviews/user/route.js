@@ -39,7 +39,7 @@ export async function GET(request, { params }) {
         }
 
         // Récupérer la révision de l'utilisateur
-        const review = await prisma.community_posts_contribution_reviews.findFirst({
+        const review = await prisma.community_posts_enrichment_review.findFirst({
             where: {
                 contribution_id: parseInt(enrichmentId),
                 user_id: parseInt(session.user.id),
