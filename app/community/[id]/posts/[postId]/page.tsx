@@ -141,6 +141,17 @@ export default function PostPage() {
                   <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">
                     {post.tag}
                   </span>
+
+                  {post.accept_contributions && session && !isAuthor && isContributorOrCreator && (
+                    <Link
+                      href={`/community/${params.id}/posts/${params.postId}/enrich`}
+                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Contribuer
+                    </Link>
+                  )}
+
                   {Number(session?.user?.id) === post.user.id && (
                     <button
                       onClick={() =>
@@ -162,6 +173,13 @@ export default function PostPage() {
 
                 <div id="post-content" className="mb-6">
                   <style jsx global>{`
+                    #post-content h1 {
+                      font-size: 2rem;
+                      font-weight: 700;
+                      margin-top: 1.5rem;
+                      margin-bottom: 1rem;
+                      color: #1f2937;
+                    }
                     #post-content h2 {
                       font-size: 1.75rem;
                       font-weight: 700;
@@ -253,16 +271,6 @@ export default function PostPage() {
                     <Users className="w-4 h-4 mr-1" />
                     Contributions désactivées
                   </span>
-                )}
-
-                {post.accept_contributions && session && !isAuthor && isContributorOrCreator && (
-                  <Link
-                    href={`/community/${params.id}/posts/${params.postId}/enrich`}
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Contribuer
-                  </Link>
                 )}
               </div>
             </Card>
