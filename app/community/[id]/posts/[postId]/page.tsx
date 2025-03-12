@@ -160,10 +160,87 @@ export default function PostPage() {
                   {post.title}
                 </h1>
 
-                <div
-                  className="prose max-w-none"
-                  dangerouslySetInnerHTML={{ __html: post.content }}
-                />
+                <div id="post-content" className="mb-6">
+                  <style jsx global>{`
+                    #post-content h2 {
+                      font-size: 1.75rem;
+                      font-weight: 700;
+                      margin-top: 1.5rem;
+                      margin-bottom: 1rem;
+                      color: #1f2937;
+                      line-height: 1.3;
+                    }
+                    #post-content h3 {
+                      font-size: 1.5rem;
+                      font-weight: 600;
+                      margin-top: 1.25rem;
+                      margin-bottom: 0.75rem;
+                      color: #1f2937;
+                    }
+                    #post-content p {
+                      margin-bottom: 1rem;
+                      line-height: 1.7;
+                      color: #4b5563;
+                    }
+                    #post-content ul, #post-content ol {
+                      margin-left: 1.5rem;
+                      margin-bottom: 1rem;
+                    }
+                    #post-content ul {
+                      list-style-type: disc;
+                    }
+                    #post-content ol {
+                      list-style-type: decimal;
+                    }
+                    #post-content a {
+                      color: #2563eb;
+                      text-decoration: underline;
+                    }
+                    #post-content blockquote {
+                      border-left: 4px solid #e5e7eb;
+                      padding-left: 1rem;
+                      font-style: italic;
+                      color: #6b7280;
+                      margin: 1.5rem 0;
+                    }
+                    #post-content img {
+                      max-width: 100%;
+                      height: auto;
+                      border-radius: 0.5rem;
+                      margin: 1.5rem 0;
+                    }
+                    #post-content pre {
+                      background-color: #f3f4f6;
+                      padding: 1rem;
+                      border-radius: 0.5rem;
+                      overflow-x: auto;
+                      margin: 1.5rem 0;
+                    }
+                    #post-content code {
+                      background-color: #f3f4f6;
+                      padding: 0.2rem 0.4rem;
+                      border-radius: 0.25rem;
+                      font-family: monospace;
+                    }
+                    #post-content table {
+                      width: 100%;
+                      border-collapse: collapse;
+                      margin: 1.5rem 0;
+                    }
+                    #post-content th, #post-content td {
+                      border: 1px solid #e5e7eb;
+                      padding: 0.5rem;
+                    }
+                    #post-content th {
+                      background-color: #f9fafb;
+                      font-weight: 600;
+                    }
+                  `}</style>
+                  <div
+                    className="prose prose-lg max-w-none"
+                    dangerouslySetInnerHTML={{ __html: post.content }}
+                  />
+                </div>
 
                 {/* Si le post accepte les contributions on l'indique */}
                 {post.accept_contributions ? (

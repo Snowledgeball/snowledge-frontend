@@ -307,12 +307,57 @@ export default function CommunityPosts({
                                                     )}
 
                                                     {/* Contenu du post */}
-                                                    <div className="prose prose-sm max-w-none text-gray-600 mb-3 max-h-[200px] overflow-hidden relative rounded-lg bg-gray-50 p-1">
+                                                    <div className="mb-3 max-h-[200px] overflow-hidden relative rounded-lg bg-gray-50">
+                                                        <style jsx global>{`
+                                                            .post-preview h2 {
+                                                                font-size: 1.25rem;
+                                                                font-weight: 700;
+                                                                margin-top: 0.75rem;
+                                                                margin-bottom: 0.5rem;
+                                                                color: #1f2937;
+                                                            }
+                                                            .post-preview h3 {
+                                                                font-size: 1.125rem;
+                                                                font-weight: 600;
+                                                                margin-top: 0.75rem;
+                                                                margin-bottom: 0.5rem;
+                                                                color: #1f2937;
+                                                            }
+                                                            .post-preview p {
+                                                                margin-bottom: 0.75rem;
+                                                                color: #4b5563;
+                                                            }
+                                                            .post-preview ul, .post-preview ol {
+                                                                margin-left: 1.5rem;
+                                                                margin-bottom: 0.75rem;
+                                                            }
+                                                            .post-preview ul {
+                                                                list-style-type: disc;
+                                                            }
+                                                            .post-preview ol {
+                                                                list-style-type: decimal;
+                                                            }
+                                                            .post-preview a {
+                                                                color: #2563eb;
+                                                                text-decoration: underline;
+                                                            }
+                                                            .post-preview img {
+                                                                max-width: 100%;
+                                                                height: auto;
+                                                                border-radius: 0.25rem;
+                                                                margin: 0.75rem 0;
+                                                            }
+                                                        `}</style>
                                                         <div
                                                             dangerouslySetInnerHTML={{
                                                                 __html: post.content,
                                                             }}
-                                                            className="line-clamp-[8] p-4"
+                                                            className="post-preview p-4 overflow-hidden"
+                                                            style={{
+                                                                display: '-webkit-box',
+                                                                WebkitLineClamp: 8,
+                                                                WebkitBoxOrient: 'vertical',
+                                                            }}
                                                         />
                                                         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent" />
                                                     </div>

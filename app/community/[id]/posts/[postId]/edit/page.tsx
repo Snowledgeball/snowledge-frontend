@@ -51,7 +51,6 @@ export default function EditPost() {
     const [isUploading, setIsUploading] = useState(false);
 
     const status = searchParams.get("status");
-    console.log(status);
     useEffect(() => {
         const fetchPost = async () => {
             try {
