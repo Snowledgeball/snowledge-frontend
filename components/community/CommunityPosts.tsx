@@ -123,10 +123,10 @@ export default function CommunityPosts({
     }
 
     return (
-        <div className="space-y-8" id="posts-container">
+        <div className="space-y-8 bg-gray-50 p-6 rounded-xl" id="posts-container">
             {isLoading && (
                 <div className="fixed inset-0 bg-white bg-opacity-70 z-50 flex items-center justify-center">
-                    <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center bg-white p-6 rounded-xl shadow-lg">
                         <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                         <p className="mt-4 text-blue-600 font-medium">Chargement...</p>
                     </div>
@@ -134,25 +134,25 @@ export default function CommunityPosts({
             )}
 
             {/* Bouton Nouveau Post pour les contributeurs */}
-            <div className="flex justify-end">
+            <div className="flex justify-end mb-8">
                 {isContributor && (
                     <button
                         onClick={() => {
                             setIsLoading(true);
                             router.push(`/community/${communityId}/posts/create`);
                         }}
-                        className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="flex items-center space-x-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                         id="create-post-button"
                         disabled={isLoading}
                     >
-                        <PlusCircle className="w-4 h-4" />
-                        <span>Proposer un post</span>
+                        <PlusCircle className="w-5 h-5" />
+                        <span className="font-medium">Proposer un post</span>
                     </button>
                 )}
             </div>
 
             {/* Liste des catégories */}
-            <div className="flex flex-wrap gap-2 mb-4" id="category-list">
+            <div className="flex flex-wrap gap-3 mb-6" id="category-list">
                 {categoriesWithPosts.map((category) => {
                     const categoryPostsCount = postsByCategory[category.id]?.length || 0;
                     const isExpanded = expandedCategories.includes(category.id);
@@ -161,13 +161,20 @@ export default function CommunityPosts({
                         <button
                             key={`category-button-${category.id}`}
                             onClick={() => handleCategoryClick(category.id)}
-                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${isExpanded
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center shadow-sm ${isExpanded
+                                ? "bg-blue-100 text-blue-700 border border-blue-200"
+                                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
                                 }`}
                             disabled={isLoading}
                         >
-                            {category.label} ({categoryPostsCount})
+                            <FileText className={`w-4 h-4 mr-2 ${isExpanded ? 'text-blue-600' : 'text-gray-500'}`} />
+                            {category.label}
+                            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${isExpanded
+                                ? "bg-blue-200 text-blue-800"
+                                : "bg-gray-100 text-gray-600"
+                                }`}>
+                                {categoryPostsCount}
+                            </span>
                         </button>
                     );
                 })}
@@ -189,131 +196,157 @@ export default function CommunityPosts({
                             <div className="border-b border-gray-100">
                                 <button
                                     onClick={() => handleCategoryClick(category.id)}
-                                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                                    className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
                                     aria-expanded={isExpanded}
                                     aria-controls={`posts-${category.id}`}
                                     disabled={isLoading}
                                 >
                                     <div className="flex items-center space-x-3">
-                                        <FileText className="w-5 h-5 text-blue-600" />
-                                        <h3 className="font-medium text-gray-900">
-                                            {category.label}
-                                        </h3>
-                                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
-                                            {categoryPosts.length}
-                                        </span>
+                                        <div className="bg-blue-50 p-2 rounded-lg">
+                                            <FileText className="w-5 h-5 text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900">
+                                                {category.label}
+                                            </h3>
+                                            <p className="text-xs text-gray-500 mt-0.5">
+                                                {categoryPosts.length} {categoryPosts.length > 1 ? 'articles' : 'article'}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <ChevronDown
-                                        className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}
-                                    />
+                                    <div className="flex items-center">
+                                        <span className={`mr-3 text-sm font-medium ${isExpanded ? 'text-blue-600' : 'text-gray-500'}`}>
+                                            {isExpanded ? 'Masquer' : 'Afficher'}
+                                        </span>
+                                        <div className={`p-1 rounded-full transition-colors ${isExpanded ? 'bg-blue-50' : 'bg-gray-100'}`}>
+                                            <ChevronDown
+                                                className={`w-5 h-5 ${isExpanded ? 'text-blue-600' : 'text-gray-400'} transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}
+                                            />
+                                        </div>
+                                    </div>
                                 </button>
                             </div>
 
                             {/* Liste des posts de la catégorie */}
-                            {isExpanded && (
-                                <div
-                                    id={`posts-${category.id}`}
-                                    className="divide-y divide-gray-100"
-                                >
-                                    {categoryPosts.map((post) => (
-                                        <div
-                                            key={post.id}
-                                            className="p-4 hover:bg-gray-50 transition-colors"
-                                            id={`post-${post.id}`}
-                                        >
-                                            <div className="flex items-center justify-between mb-2">
-                                                <div className="flex items-center space-x-3">
-                                                    <Image
-                                                        src={post.user.profilePicture}
-                                                        alt={post.user.fullName}
-                                                        width={32}
-                                                        height={32}
-                                                        className="rounded-full"
-                                                    />
-                                                    <div>
-                                                        <p className="font-medium text-gray-900">
-                                                            {post.user.fullName}
-                                                        </p>
-                                                        <p className="text-sm text-gray-500">
-                                                            {formatDistanceToNow(
-                                                                new Date(post.created_at),
-                                                                {
-                                                                    addSuffix: true,
-                                                                    locale: fr,
-                                                                }
-                                                            )}
-                                                        </p>
+                            <div
+                                id={`posts-${category.id}`}
+                                className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0'}`}
+                            >
+                                {isExpanded && (
+                                    <div className="divide-y divide-gray-100">
+                                        {categoryPosts.map((post) => (
+                                            <div
+                                                key={post.id}
+                                                className="p-6 hover:bg-gray-50 transition-all duration-200 border-b border-gray-100 last:border-b-0"
+                                                id={`post-${post.id}`}
+                                            >
+                                                {/* En-tête du post avec l'auteur et la date */}
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className="relative">
+                                                            <Image
+                                                                src={post.user.profilePicture}
+                                                                alt={post.user.fullName}
+                                                                width={40}
+                                                                height={40}
+                                                                className="rounded-full ring-2 ring-white shadow-sm"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-semibold text-gray-900">
+                                                                {post.user.fullName}
+                                                            </p>
+                                                            <p className="text-xs text-gray-500">
+                                                                {formatDistanceToNow(
+                                                                    new Date(post.created_at),
+                                                                    {
+                                                                        addSuffix: true,
+                                                                        locale: fr,
+                                                                    }
+                                                                )}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    {userId && Number(userId) === post.user.id && (
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setIsLoading(true);
+                                                                router.push(
+                                                                    `/community/${communityId}/posts/${post.id}/edit?status=PUBLISHED`
+                                                                );
+                                                            }}
+                                                            className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
+                                                            aria-label="Modifier le post"
+                                                            disabled={isLoading}
+                                                        >
+                                                            <Edit className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                {/* Contenu principal du post */}
+                                                <div className="space-y-4">
+                                                    {/* Titre du post */}
+                                                    <h4 className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors">
+                                                        {post.title}
+                                                    </h4>
+
+                                                    {/* Image de couverture */}
+                                                    {post.cover_image_url && (
+                                                        <div className="rounded-xl overflow-hidden shadow-sm">
+                                                            <Image
+                                                                src={`https://${post.cover_image_url}`}
+                                                                alt={post.title}
+                                                                width={800}
+                                                                height={400}
+                                                                className="w-full h-[240px] object-cover transform hover:scale-105 transition-transform duration-300"
+                                                                priority={true}
+                                                            />
+                                                        </div>
+                                                    )}
+
+                                                    {/* Contenu du post */}
+                                                    <div className="prose prose-sm max-w-none text-gray-600 mb-3 max-h-[200px] overflow-hidden relative rounded-lg bg-gray-50 p-1">
+                                                        <div
+                                                            dangerouslySetInnerHTML={{
+                                                                __html: post.content,
+                                                            }}
+                                                            className="line-clamp-[8] p-4"
+                                                        />
+                                                        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent" />
                                                     </div>
                                                 </div>
-                                                {userId && Number(userId) === post.user.id && (
+
+                                                {/* Pied de carte avec statut et bouton */}
+                                                <div className="flex items-center justify-between mt-5 pt-3 border-t border-gray-100">
+                                                    {post.accept_contributions ? (
+                                                        <span className="text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full flex items-center">
+                                                            <Users className="w-4 h-4 mr-1" />
+                                                            Contributions activées
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-sm text-red-600 bg-red-50 px-3 py-1 rounded-full flex items-center">
+                                                            <Users className="w-4 h-4 mr-1" />
+                                                            Contributions désactivées
+                                                        </span>
+                                                    )}
                                                     <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setIsLoading(true);
-                                                            router.push(
-                                                                `/community/${communityId}/posts/${post.id}/edit?status=PUBLISHED`
-                                                            );
-                                                        }}
-                                                        className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                                                        aria-label="Modifier le post"
+                                                        onClick={() => navigateToPost(post.id)}
+                                                        className="text-blue-600 hover:text-blue-800 text-sm font-medium bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg transition-colors flex items-center"
                                                         disabled={isLoading}
                                                     >
-                                                        <Edit className="w-4 h-4" />
+                                                        Lire la suite
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                                        </svg>
                                                     </button>
-                                                )}
-                                            </div>
-
-                                            <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                                                {post.title}
-                                            </h4>
-
-                                            {/* Image de couverture */}
-                                            {post.cover_image_url && (
-                                                <div className="mb-3 rounded-lg overflow-hidden">
-                                                    <Image
-                                                        src={`https://${post.cover_image_url}`}
-                                                        alt={post.title}
-                                                        width={800}
-                                                        height={400}
-                                                        className="w-full h-[200px] object-cover"
-                                                        priority={true}
-                                                    />
                                                 </div>
-                                            )}
-
-                                            <div className="prose prose-sm max-w-none text-gray-600 mb-3 max-h-[300px] overflow-hidden relative">
-                                                <div
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: post.content,
-                                                    }}
-                                                    className="line-clamp-[12] p-6"
-                                                />
-                                                <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent" />
                                             </div>
-                                            <div className="flex items-center justify-between">
-                                                {post.accept_contributions ? (
-                                                    <span className="text-sm text-green-600 flex items-center">
-                                                        <Users className="w-4 h-4 mr-1" />
-                                                        Contributions activées
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-sm text-red-600 flex items-center">
-                                                        <Users className="w-4 h-4 mr-1" />
-                                                        Contributions désactivées
-                                                    </span>
-                                                )}
-                                                <button
-                                                    onClick={() => navigateToPost(post.id)}
-                                                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                                                    disabled={isLoading}
-                                                >
-                                                    Lire la suite →
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     );
                 })}
