@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Community } from "@/types/community";
+import { CheckCircle } from "lucide-react";
 
 type Presentation = {
     video_url?: string;
@@ -29,6 +30,8 @@ export default function CommunityPresentationModal({
 }: CommunityPresentationModalProps) {
     const router = useRouter();
     const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
+    const [isJoining, setIsJoining] = useState(false);
+    const [joinSuccess, setJoinSuccess] = useState(false);
 
     if (!showModal || !communityData || !presentation || !userId) return null;
 
@@ -42,6 +45,7 @@ export default function CommunityPresentationModal({
 
     const handleJoinCommunity = async () => {
         try {
+            setIsJoining(true);
             const response = await fetch(`/api/communities/${communityData.id}/join`, {
                 method: "POST",
                 headers: {
@@ -52,27 +56,87 @@ export default function CommunityPresentationModal({
             if (!response.ok) {
                 throw new Error("Erreur lors de l'adhésion à la communauté");
             }
-            setShowModal(false);
+
+            // Indiquer que l'utilisateur a rejoint avec succès
+            setJoinSuccess(true);
+
+            // Attendre un court instant pour montrer le message de succès
+            setTimeout(() => {
+                // Fermer la modale
+                setShowModal(false);
+
+                // Recharger la page pour mettre à jour les données
+                window.location.reload();
+            }, 1500);
+
         } catch (error) {
             console.error("Erreur:", error);
-            // Gérer l'erreur (afficher un message à l'utilisateur)
+            setIsJoining(false);
         }
     };
 
+    // Si l'utilisateur a rejoint avec succès, afficher un message de confirmation
+    if (joinSuccess) {
+        return (
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl text-center">
+                    <div className="flex flex-col items-center justify-center space-y-4">
+                        <CheckCircle className="w-16 h-16 text-green-500" />
+                        <h2 className="text-2xl font-bold text-gray-900">Bienvenue !</h2>
+                        <p className="text-gray-600">
+                            Vous avez rejoint la communauté avec succès.
+                        </p>
+                        <p className="text-gray-500 text-sm">
+                            Chargement du contenu...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-8 max-w-2xl w-full shadow-2xl">
-                {/* En-tête avec gradient */}
-                <div className="bg-gradient-radial from-[#003E8A] to-[#16215B] -m-8 mb-6 p-6 rounded-t-xl">
-                    <h2 className="text-2xl font-bold text-white text-center">
-                        {communityData.name}
-                    </h2>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full my-8 max-h-[90vh] flex flex-col">
+                {/* En-tête avec gradient et image de la communauté */}
+                <div className="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-t-xl p-8 relative flex-shrink-0">
+                    <div className="flex items-center space-x-4">
+                        {communityData.image_url && (
+                            <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                                <img
+                                    src={`https://${communityData.image_url}`}
+                                    alt={communityData.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                        )}
+                        <div>
+                            <h2 className="text-2xl font-bold text-white">
+                                {communityData.name}
+                            </h2>
+                            <p className="text-blue-100 text-sm">
+                                Créée par {communityData.creator.fullName}
+                            </p>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={() => setShowModal(false)}
+                        className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
-                    {/* Colonne de gauche avec la vidéo */}
-                    <div className="space-y-4">
-                        {presentation.video_url && (
+                <div className="p-8 overflow-y-auto flex-grow">
+                    {/* Vidéo de présentation */}
+                    {presentation.video_url && (
+                        <div className="mb-8">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                                Présentation vidéo
+                            </h3>
                             <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-lg">
                                 <iframe
                                     className="w-full h-full"
@@ -84,60 +148,65 @@ export default function CommunityPresentationModal({
                                     allowFullScreen
                                 />
                             </div>
-                        )}
+                        </div>
+                    )}
+
+                    {/* Informations sur la communauté */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 shadow-sm">
+                            <h3 className="font-semibold mb-3 text-blue-900 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                </svg>
+                                Vocation de la communauté
+                            </h3>
+                            <div className="text-blue-800 max-h-[150px] overflow-y-auto pr-2 custom-scrollbar">
+                                {presentation.topic_details}
+                            </div>
+                        </div>
+
+                        <div className="bg-green-50 p-6 rounded-xl border border-green-100 shadow-sm">
+                            <h3 className="font-semibold mb-3 text-green-900 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                Code de conduite
+                            </h3>
+                            <div className="text-green-800 max-h-[150px] overflow-y-auto pr-2 custom-scrollbar">
+                                {presentation.code_of_conduct}
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Colonne de droite avec les détails */}
-                    <div
-                        className={`space-y-4 ${presentation.video_url ? "col-span-1" : "col-span-2"
-                            }`}
-                    >
-                        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm h-[200px] overflow-y-auto">
-                            <h3 className="font-semibold mb-2 text-gray-900">
-                                Vocation de la communauté & détails de la thématique
-                            </h3>
-                            <p className="text-sm text-gray-600">
-                                {presentation.topic_details}
-                            </p>
+                    {/* Disclaimer */}
+                    <div className="bg-amber-50 p-6 rounded-xl border border-amber-100 shadow-sm mb-8">
+                        <h3 className="font-semibold mb-3 text-amber-900 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                            Disclaimer
+                        </h3>
+                        <div className="text-amber-800 max-h-[120px] overflow-y-auto pr-2 custom-scrollbar">
+                            {presentation.disclaimers}
                         </div>
                     </div>
                 </div>
 
-                {/* Section du bas */}
-                <div className="grid grid-cols-2 gap-6 mt-6">
-                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm h-[200px] overflow-y-auto">
-                        <h3 className="font-semibold mb-2 text-gray-900">
-                            Code de conduite
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                            {presentation.code_of_conduct}
-                        </p>
-                    </div>
-                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm h-[200px] overflow-y-auto">
-                        <h3 className="font-semibold mb-2 text-gray-900">
-                            Disclaimer
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                            {presentation.disclaimers}
-                        </p>
-                    </div>
-                </div>
-
                 {/* Footer avec checkbox et bouton */}
-                <div className="mt-6 space-y-4 border-t border-gray-200 pt-6">
-                    <label className="flex items-center space-x-2">
+                <div className="border-t border-gray-200 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 flex-shrink-0 bg-gray-50 rounded-b-xl">
+                    <label className="flex items-center space-x-3 cursor-pointer">
                         <input
                             type="checkbox"
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5"
                             checked={hasAcceptedTerms}
                             onChange={(e) => setHasAcceptedTerms(e.target.checked)}
                         />
-                        <span className="text-sm text-gray-600">
+                        <span className="text-gray-700">
                             J&apos;ai compris et j&apos;accepte le code de conduite
                         </span>
                     </label>
 
-                    <div className="flex justify-end space-x-4">
+                    <div className="flex space-x-4">
                         <button
                             onClick={() => router.push("/")}
                             className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
@@ -146,13 +215,28 @@ export default function CommunityPresentationModal({
                         </button>
                         <button
                             onClick={handleJoinCommunity}
-                            disabled={!hasAcceptedTerms}
-                            className={`px-6 py-2 rounded-lg transition-colors ${hasAcceptedTerms
-                                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-md"
+                            disabled={!hasAcceptedTerms || isJoining}
+                            className={`px-6 py-2 rounded-lg transition-colors flex items-center ${hasAcceptedTerms && !isJoining
+                                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-md"
                                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
                                 }`}
                         >
-                            Rejoindre la communauté →
+                            {isJoining ? (
+                                <>
+                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Traitement...
+                                </>
+                            ) : (
+                                <>
+                                    Rejoindre la communauté
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>

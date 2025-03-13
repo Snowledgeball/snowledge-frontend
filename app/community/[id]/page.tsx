@@ -74,6 +74,7 @@ const CommunityHub = () => {
   );
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [isLoadingCommunity, setIsLoadingCommunity] = useState(true);
+  const [isMember, setIsMember] = useState(false);
 
   // Mémoriser l'ID de la communauté pour éviter les re-rendus inutiles
   const communityId = useMemo(() => params.id as string, [params.id]);
@@ -297,6 +298,9 @@ const CommunityHub = () => {
 
       const membershipData = await membershipResponse.json();
 
+      // Mettre à jour l'état d'adhésion
+      setIsMember(membershipData.isMember || membershipData.isCreator || membershipData.isContributor);
+
       // Récupérer les Membres bannis
       const bansResponse = await fetch(`/api/communities/${communityId}/members/${session?.user?.id}/ban`);
       const bansData = await bansResponse.json();
@@ -482,7 +486,7 @@ const CommunityHub = () => {
               )}
 
               {/* Contenu basé sur l'onglet actif */}
-              {!isLoadingCommunity && (
+              {!isLoadingCommunity && isMember && (
                 <>
                   {activeTab === "general" ? (
                     <Card className="bg-white shadow-sm" id="general-section">
@@ -524,7 +528,7 @@ const CommunityHub = () => {
 
           {/* Section Q&A avec Disclosure */}
           <div className="mt-8" id="qa-section">
-            {activeTab === "general" && session && !isLoadingCommunity && (
+            {activeTab === "general" && session && !isLoadingCommunity && isMember && (
               <QASection
                 communityId={communityId}
                 isContributor={isContributor}
@@ -532,6 +536,27 @@ const CommunityHub = () => {
                 userId={session?.user?.id}
               />
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Message si l'utilisateur n'est pas membre */}
+      {!isLoadingCommunity && !isMember && (
+        <div className="max-w-7xl mx-auto px-4 py-12 text-center">
+          <div className="bg-white rounded-lg shadow-md p-8 max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Accès limité</h2>
+            <p className="text-gray-600 mb-6">
+              Vous devez rejoindre cette communauté pour accéder à son contenu.
+            </p>
+            <p className="text-gray-600 mb-6">
+              Consultez la présentation de la communauté et rejoignez-la pour découvrir tous les posts, discussions et activités.
+            </p>
+            <button
+              onClick={() => setShowJoinModal(true)}
+              className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+            >
+              Voir la présentation
+            </button>
           </div>
         </div>
       )}
