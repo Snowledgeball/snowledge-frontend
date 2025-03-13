@@ -53,9 +53,6 @@ export default function Header() {
             {/* Navigation desktop */}
             <nav className="hidden lg:flex items-center space-x-6">
               <Link
-                onClick={() =>
-                  toast.info("Cette fonctionnalité n'est pas encore définie")
-                }
                 href="/"
                 className="text-[#000333] hover:text-gray-900 font-bold text-sm"
               >
@@ -120,7 +117,7 @@ export default function Header() {
             </button>
             {session && user ? (
               <>
-                <div className="flex items-center rounded-xl border border-gray-200">
+                {/* <div className="flex items-center rounded-xl border border-gray-200">
                   <StatIndicator
                     type="points"
                     value={10458}
@@ -133,7 +130,7 @@ export default function Header() {
                     valueClassName="text-emerald-500"
                     noBorder
                   />
-                </div>
+                </div> */}
                 <div className="flex items-center gap-3 sm:gap-4">
                   <NotificationBell />
                   <Link
@@ -168,7 +165,7 @@ export default function Header() {
                 </button>
                 <button
                   onClick={() => setIsSignupModalOpen(true)}
-                  className="border border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700"
+                  className="border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 hover:border-blue-700 hover:text-blue-700 transition-all duration-200 ease-in-out"
                 >
                   S'inscrire
                 </button>
