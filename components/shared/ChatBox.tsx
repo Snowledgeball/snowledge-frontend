@@ -543,7 +543,7 @@ export default function ChatBox({
       return (
         <div
           key={msg.id}
-          className={`group hover:bg-gray-600/20 rounded-lg transition-colors duration-200 ${isConsecutive ? "mt-0" : "mt-6"
+          className={`group hover:bg-gray-100 rounded-lg transition-colors duration-200 ${isConsecutive ? "mt-0" : "mt-4"
             }`}
         >
           {/* Message répondu */}
@@ -553,7 +553,7 @@ export default function ChatBox({
                 className={`relative ${variant === "post" ? "ml-6 mb-1" : "ml-12 mb-2"
                   }`}
               >
-                <div className="absolute left-[5px] top-0 w-[2px] h-[calc(100%+3px)] bg-gray-500"></div>
+                <div className="absolute left-[5px] top-0 w-[2px] h-[calc(100%+3px)] bg-blue-300"></div>
                 <div className="flex items-center space-x-2 pl-4">
                   <Image
                     src={
@@ -571,13 +571,13 @@ export default function ChatBox({
                     height={16}
                     className="rounded-full"
                   />
-                  <span className="text-sm font-medium text-gray-400">
+                  <span className="text-sm font-medium text-gray-600">
                     {
                       messages.find((m) => m.id === msg.replyTo)
                         ?.username
                     }
                   </span>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-gray-500 text-sm">
                     {(() => {
                       const replyMessage = messages.find(
                         (m) => m.id === msg.replyTo
@@ -602,8 +602,8 @@ export default function ChatBox({
                     `https://ui-avatars.com/api/?name=${msg.username}`
                   }
                   alt={msg.username}
-                  width={variant === "post" ? 20 : 50}
-                  height={variant === "post" ? 20 : 50}
+                  width={variant === "post" ? 20 : 40}
+                  height={variant === "post" ? 20 : 40}
                   className="rounded-full"
                 />
               )}
@@ -611,16 +611,16 @@ export default function ChatBox({
                 className={`flex-1 ${isConsecutive
                   ? variant === "post"
                     ? "ml-[32px]"
-                    : "ml-[62px]"
+                    : "ml-[52px]"
                   : ""
                   }`}
               >
                 {!isConsecutive && (
                   <div className="flex items-center space-x-2">
-                    <span className="text-white font-medium">
+                    <span className="text-gray-800 font-medium">
                       {msg.username}
                     </span>
-                    <span className="text-gray-400 text-xs">
+                    <span className="text-gray-500 text-xs">
                       {msg.timestamp &&
                         (msg.timestamp as FirestoreTimestamp)
                           .seconds !== undefined
@@ -646,7 +646,7 @@ export default function ChatBox({
                           adjustTextareaHeight(e.target);
                         }
                       }}
-                      className="flex-1 bg-gray-600 text-white px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      className="flex-1 bg-white border border-gray-300 text-gray-800 px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
@@ -662,7 +662,7 @@ export default function ChatBox({
                     <div className="flex items-center space-x-1">
                       <button
                         onClick={() => handleEditMessage(msg.id)}
-                        className="p-1 hover:bg-gray-600 rounded-md text-green-500 hover:text-green-400"
+                        className="p-1 hover:bg-green-100 rounded-md text-green-600 hover:text-green-700"
                       >
                         <Check className="w-4 h-4" />
                       </button>
@@ -671,7 +671,7 @@ export default function ChatBox({
                           setEditingMessageId(null);
                           setEditedMessageText("");
                         }}
-                        className="p-1 hover:bg-gray-600 rounded-md text-gray-400 hover:text-gray-300"
+                        className="p-1 hover:bg-gray-100 rounded-md text-gray-500 hover:text-gray-700"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -679,21 +679,44 @@ export default function ChatBox({
                   </div>
                 ) : (
                   <p
-                    className={`text-gray-300 break-words whitespace-pre-wrap ${isConsecutive ? "" : "mt-1"
+                    className={`text-gray-700 break-words whitespace-pre-wrap ${isConsecutive ? "" : "mt-1"
                       } py-[1px] ${variant === "post"
                         ? "max-w-[65%]"
-                        : "max-w-[750px]"
+                        : "max-w-[650px]"
                       } overflow-x-hidden`}
                   >
                     {msg.text}
                   </p>
                 )}
+
+                {/* Réactions existantes - déplacées à l'intérieur du conteneur de message */}
+                {Object.entries(msg.reactions || {}).some(
+                  ([_, users]) => users.length > 0
+                ) && (
+                    <div className="mt-1 flex items-center flex-wrap gap-1">
+                      {Object.entries(msg.reactions || {}).map(
+                        ([emoji, users]) =>
+                          users.length > 0 && (
+                            <button
+                              key={emoji}
+                              onClick={() => addReaction(msg.id, emoji)}
+                              className={`px-2 py-0.5 rounded-md text-sm ${users.includes(user.id)
+                                ? "bg-blue-100 text-blue-700 border border-blue-200"
+                                : "bg-gray-100 text-gray-700 border border-gray-200"
+                                }`}
+                            >
+                              {emoji} {users.length}
+                            </button>
+                          )
+                      )}
+                    </div>
+                  )}
               </div>
             </div>
 
-            {/* Actions du message et réactions */}
-            <div className="absolute right-0 top-0 -translate-y-1/4 z-10">
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1 bg-gray-700 rounded-md shadow-lg">
+            {/* Actions du message */}
+            <div className="absolute right-2 top-0 z-20">
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1 bg-white border border-gray-200 rounded-md shadow-sm">
                 <div className="relative group/emoji">
                   <button
                     onClick={() =>
@@ -701,16 +724,16 @@ export default function ChatBox({
                         showEmojiPicker === msg.id ? null : msg.id
                       )
                     }
-                    className="text-gray-400 hover:text-white p-0.5 hover:bg-gray-600 rounded-md text-lg"
+                    className="text-gray-500 hover:text-gray-700 p-0.5 hover:bg-gray-100 rounded-md text-lg"
                   >
                     😊
                   </button>
-                  <span className="absolute bottom-full right-0 mb-2 hidden group-hover/emoji:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                  <span className="absolute bottom-full right-0 mb-2 hidden group-hover/emoji:block pointer-events-none px-2 py-1 text-xs text-gray-700 bg-white border border-gray-200 rounded whitespace-nowrap shadow-sm z-30">
                     Ajouter une réaction
                   </span>
                   {showEmojiPicker === msg.id && (
                     <div
-                      className={`absolute right-0 bottom-full mb-2 bg-gray-800 rounded-lg shadow-lg p-2 flex items-center space-x-2 z-20 ${variant === "post" ? "translate-x-1/4" : ""
+                      className={`absolute right-0 bottom-full mb-2 bg-white border border-gray-200 rounded-lg shadow-md p-2 flex items-center space-x-2 z-40 ${variant === "post" ? "translate-x-1/4" : ""
                         }`}
                     >
                       {DEFAULT_REACTIONS.map((emoji) => (
@@ -721,7 +744,7 @@ export default function ChatBox({
                             addReaction(msg.id, emoji);
                             setShowEmojiPicker(null);
                           }}
-                          className="p-1.5 hover:bg-gray-700 rounded-md transition-colors text-lg"
+                          className="p-1.5 hover:bg-gray-100 rounded-md transition-colors text-lg"
                         >
                           {emoji}
                         </button>
@@ -732,11 +755,11 @@ export default function ChatBox({
                 <div className="relative group/reply">
                   <button
                     onClick={() => setReplyingTo(msg)}
-                    className="text-gray-400 hover:text-white p-0.5 hover:bg-gray-600 rounded-md text-lg"
+                    className="text-gray-500 hover:text-gray-700 p-0.5 hover:bg-gray-100 rounded-md text-lg"
                   >
                     ↩️
                   </button>
-                  <span className="absolute bottom-full right-0 mb-2 hidden group-hover/reply:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                  <span className="absolute bottom-full right-0 mb-2 hidden group-hover/reply:block pointer-events-none px-2 py-1 text-xs text-gray-700 bg-white border border-gray-200 rounded whitespace-nowrap shadow-sm z-30">
                     Répondre
                   </span>
                 </div>
@@ -747,11 +770,11 @@ export default function ChatBox({
                         setEditingMessageId(msg.id);
                         setEditedMessageText(msg.text);
                       }}
-                      className="text-gray-400 hover:text-blue-500 p-0.5 hover:bg-gray-600 rounded-md"
+                      className="text-gray-500 hover:text-blue-600 p-0.5 hover:bg-gray-100 rounded-md"
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
-                    <span className="absolute bottom-full right-0 mb-2 hidden group-hover/edit:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                    <span className="absolute bottom-full right-0 mb-2 hidden group-hover/edit:block pointer-events-none px-2 py-1 text-xs text-gray-700 bg-white border border-gray-200 rounded whitespace-nowrap shadow-sm z-30">
                       Modifier le message
                     </span>
                   </div>
@@ -763,40 +786,17 @@ export default function ChatBox({
                         setMessageToDelete(msg);
                         setIsDeleteMessageModalOpen(true);
                       }}
-                      className="text-gray-400 hover:text-red-500 p-0.5 hover:bg-gray-600 rounded-md"
+                      className="text-gray-500 hover:text-red-600 p-0.5 hover:bg-gray-100 rounded-md"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                    <span className="absolute bottom-full right-0 mb-2 hidden group-hover/delete:block pointer-events-none px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                    <span className="absolute bottom-full right-0 mb-2 hidden group-hover/delete:block pointer-events-none px-2 py-1 text-xs text-gray-700 bg-white border border-gray-200 rounded whitespace-nowrap shadow-sm z-30">
                       Supprimer le message
                     </span>
                   </div>
                 )}
               </div>
             </div>
-
-            {/* Réactions existantes */}
-            {Object.entries(msg.reactions || {}).some(
-              ([_, users]) => users.length > 0
-            ) && (
-                <div className="mt-1 flex items-center space-x-1">
-                  {Object.entries(msg.reactions || {}).map(
-                    ([emoji, users]) =>
-                      users.length > 0 && (
-                        <button
-                          key={emoji}
-                          onClick={() => addReaction(msg.id, emoji)}
-                          className={`px-2 py-0.5 rounded-md text-sm ${users.includes(user.id)
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-600 text-gray-300"
-                            }`}
-                        >
-                          {emoji} {users.length}
-                        </button>
-                      )
-                  )}
-                </div>
-              )}
           </div>
         </div>
       );
@@ -804,16 +804,16 @@ export default function ChatBox({
   }, [messages, user.id, editingMessageId, editedMessageText, showEmojiPicker, handleEditMessage, addReaction, variant, adjustTextareaHeight, isCreator]);
 
   return (
-    <div className={`flex bg-gray-900 ${className} overflow-x-hidden`}>
+    <div className={`flex bg-white rounded-lg shadow-sm ${className} overflow-x-hidden`}>
       {/* Afficher la sidebar uniquement pour la variante community */}
       {variant === "community" && (
-        <div className="w-64 bg-gray-800 flex flex-col">
-          <div className="p-4 border-b border-gray-700 flex justify-between items-center">
-            <h2 className="text-white font-semibold">Canaux</h2>
+        <div className="w-64 bg-gray-100 border-r border-gray-200 flex flex-col">
+          <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 className="text-gray-800 font-semibold">Canaux</h2>
             {isCreator && (
               <button
                 onClick={() => setIsCreateChannelModalOpen(true)}
-                className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
+                className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50 transition-colors"
               >
                 <span className="text-xl">+</span>
               </button>
@@ -825,8 +825,7 @@ export default function ChatBox({
                 <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
               </div>
             ) : channels.length === 0 ? (
-              <div className="p-4 text-gray-400 text-center">
-
+              <div className="p-4 text-gray-500 text-center">
                 Aucun canal disponible
               </div>
             ) : (
@@ -834,8 +833,8 @@ export default function ChatBox({
                 <div
                   key={channel.id}
                   onClick={() => setSelectedChannel(channel)}
-                  className={`flex items-center justify-between px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white cursor-pointer group ${selectedChannel?.id === channel.id
-                    ? "bg-gray-700 text-white"
+                  className={`flex items-center justify-between px-4 py-3 text-gray-600 hover:bg-gray-200 cursor-pointer group transition-colors ${selectedChannel?.id === channel.id
+                    ? "bg-blue-50 text-blue-700 font-medium"
                     : ""
                     }`}
                 >
@@ -850,10 +849,10 @@ export default function ChatBox({
                         setChannelToDelete(channel.id);
                         setIsDeleteModalOpen(true);
                       }}
-                      className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500 p-1"
+                      className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1 transition-opacity"
                     >
                       <svg
-                        className="w-5 h-5"
+                        className="w-4 h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -875,14 +874,14 @@ export default function ChatBox({
           {/* Modal de création de canal */}
           {isCreateChannelModalOpen && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-              <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-                <h3 className="text-white text-lg font-semibold mb-4">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
+                <h3 className="text-gray-800 text-lg font-semibold mb-4">
                   Créer un nouveau canal
                 </h3>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-gray-400 mb-1">
+                    <label className="block text-gray-600 mb-1 text-sm font-medium">
                       Nom du canal
                     </label>
                     <input
@@ -891,18 +890,18 @@ export default function ChatBox({
                       onChange={(e) =>
                         setNewChannel({ ...newChannel, name: e.target.value })
                       }
-                      className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-400 mb-1">Type</label>
+                    <label className="block text-gray-600 mb-1 text-sm font-medium">Type</label>
                     <select
                       value={newChannel.type}
                       onChange={(e) =>
                         setNewChannel({ ...newChannel, type: e.target.value })
                       }
-                      className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="text">Texte</option>
                       <option value="resources">Ressources</option>
@@ -911,7 +910,7 @@ export default function ChatBox({
                   </div>
 
                   <div>
-                    <label className="block text-gray-400 mb-1">
+                    <label className="block text-gray-600 mb-1 text-sm font-medium">
                       Description
                     </label>
                     <textarea
@@ -922,13 +921,13 @@ export default function ChatBox({
                           description: e.target.value,
                         })
                       }
-                      className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       rows={3}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-400 mb-1">
+                    <label className="block text-gray-600 mb-1 text-sm font-medium">
                       Icône (emoji)
                     </label>
                     <input
@@ -937,7 +936,7 @@ export default function ChatBox({
                       onChange={(e) =>
                         setNewChannel({ ...newChannel, icon: e.target.value })
                       }
-                      className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="💬"
                     />
                   </div>
@@ -946,13 +945,13 @@ export default function ChatBox({
                 <div className="flex justify-end space-x-3 mt-6">
                   <button
                     onClick={() => setIsCreateChannelModalOpen(false)}
-                    className="px-4 py-2 text-gray-400 hover:text-white"
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
                   >
                     Annuler
                   </button>
                   <button
                     onClick={createChannel}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                   >
                     Créer
                   </button>
@@ -964,15 +963,15 @@ export default function ChatBox({
           {/* Ajouter la modale de confirmation */}
           {isDeleteModalOpen && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-              <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-                <h3 className="text-white text-lg font-semibold mb-4">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
+                <h3 className="text-gray-800 text-lg font-semibold mb-4">
                   Supprimer le canal
                 </h3>
-                <p className="text-gray-300 mb-6">
+                <p className="text-gray-600 mb-6">
                   Êtes-vous sûr de vouloir supprimer ce canal ? Cette action est
                   irréversible.
                 </p>
-                {error && <p className="text-red-500 mb-4">{error}</p>}
+                {error && <p className="text-red-500 mb-4 text-sm">{error}</p>}
                 <div className="flex justify-end space-x-3">
                   <button
                     onClick={() => {
@@ -980,13 +979,13 @@ export default function ChatBox({
                       setChannelToDelete(null);
                       setError(null);
                     }}
-                    className="px-4 py-2 text-gray-400 hover:text-white"
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
                   >
                     Annuler
                   </button>
                   <button
                     onClick={handleDeleteChannel}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
                   >
                     Supprimer
                   </button>
@@ -999,21 +998,21 @@ export default function ChatBox({
 
       {/* Zone principale de chat */}
       <div
-        className={`flex-1 flex flex-col bg-gray-700 ${variant === "post" ? "max-w-full" : ""
+        className={`flex-1 flex flex-col bg-white ${variant === "post" ? "max-w-full" : ""
           }`}
       >
         {selectedChannel ? (
           <>
             {/* En-tête du canal uniquement pour la variante community */}
             {variant === "community" && (
-              <div className="p-4 border-b border-gray-600">
+              <div className="p-4 border-b border-gray-200 bg-white">
                 <div className="flex items-center">
-                  <span className="mr-2">{selectedChannel.icon}</span>
-                  <h2 className="text-white font-semibold">
+                  <span className="mr-2 text-xl">{selectedChannel.icon}</span>
+                  <h2 className="text-gray-800 font-semibold">
                     {selectedChannel.name}
                   </h2>
                 </div>
-                <p className="text-gray-400 text-sm">
+                <p className="text-gray-500 text-sm mt-1">
                   {selectedChannel.description}
                 </p>
               </div>
@@ -1024,14 +1023,14 @@ export default function ChatBox({
               ref={messagesContainerRef}
               onScroll={handleScroll}
               className={`flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar ${variant === "post" ? "p-4" : "p-6"
-                }`}
+                } bg-gray-50`}
             >
               {isLoading ? (
                 <div className="flex justify-center items-center h-full">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                 </div>
               ) : messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                <div className="flex flex-col items-center justify-center h-full text-gray-500">
                   <p>Aucun message pour le moment</p>
                   <p className="text-sm mt-2">Soyez le premier à écrire !</p>
                 </div>
@@ -1041,7 +1040,7 @@ export default function ChatBox({
                     <div className="flex justify-center mb-4">
                       <button
                         onClick={() => setMessageLimit(prev => prev + 50)}
-                        className="px-4 py-2 text-sm bg-gray-600 hover:bg-gray-500 rounded-md text-white"
+                        className="px-4 py-2 text-sm bg-blue-100 hover:bg-blue-200 rounded-md text-blue-700 font-medium transition-colors"
                       >
                         Charger plus de messages
                       </button>
@@ -1054,21 +1053,21 @@ export default function ChatBox({
             </div>
 
             {/* Zone de saisie */}
-            <div className="p-4 border-t border-gray-600">
+            <div className="p-4 border-t border-gray-200 bg-white">
               {replyingTo && (
-                <div className="mb-2 flex flex-col bg-gray-600/50 p-2 rounded">
+                <div className="mb-2 flex flex-col bg-blue-50 p-2 rounded-lg border-l-4 border-blue-400">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-gray-300 text-sm">
+                    <span className="text-gray-700 text-sm font-medium">
                       Réponse à {replyingTo.username}
                     </span>
                     <button
                       onClick={() => setReplyingTo(null)}
-                      className="text-gray-400 hover:text-white"
+                      className="text-gray-500 hover:text-gray-700"
                     >
                       ✕
                     </button>
                   </div>
-                  <div className="text-gray-400 text-sm pl-2 border-l-2 border-gray-500">
+                  <div className="text-gray-600 text-sm pl-2 border-l-2 border-blue-300">
                     {replyingTo.text.length > 100
                       ? `${replyingTo.text.substring(0, 100)}...`
                       : replyingTo.text}
@@ -1089,7 +1088,7 @@ export default function ChatBox({
                     maxLength={MAX_MESSAGE_LENGTH}
                     placeholder={`Message dans ${selectedChannel.name}`}
                     rows={1}
-                    className="w-full bg-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-hidden"
+                    className="w-full bg-gray-50 text-gray-800 px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
                     style={{ minHeight: "44px", height: "auto" }}
                     ref={(textarea) => {
                       if (textarea) {
@@ -1097,13 +1096,13 @@ export default function ChatBox({
                       }
                     }}
                   />
-                  <span className="absolute right-2 bottom-2 text-xs text-gray-400">
+                  <span className="absolute right-3 bottom-2 text-xs text-gray-400">
                     {newMessage.length}/{MAX_MESSAGE_LENGTH}
                   </span>
                 </div>
                 <button
                   onClick={sendMessage}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors self-end"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors self-end font-medium"
                 >
                   Envoyer
                 </button>
@@ -1111,7 +1110,7 @@ export default function ChatBox({
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-400">
+          <div className="flex-1 flex items-center justify-center text-gray-500">
             Sélectionnez un canal pour commencer à discuter
           </div>
         )}
@@ -1120,11 +1119,11 @@ export default function ChatBox({
       {/* Ajouter la modale de confirmation de suppression */}
       {isDeleteMessageModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-white text-lg font-semibold mb-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
+            <h3 className="text-gray-800 text-lg font-semibold mb-4">
               Supprimer le message
             </h3>
-            <p className="text-gray-300 mb-6">
+            <p className="text-gray-600 mb-6">
               Êtes-vous sûr de vouloir supprimer ce message ? Cette action est
               irréversible.
             </p>
@@ -1134,13 +1133,13 @@ export default function ChatBox({
                   setIsDeleteMessageModalOpen(false);
                   setMessageToDelete(null);
                 }}
-                className="px-4 py-2 text-gray-400 hover:text-white"
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
               >
                 Annuler
               </button>
               <button
                 onClick={handleDeleteMessage}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
               >
                 Supprimer
               </button>
