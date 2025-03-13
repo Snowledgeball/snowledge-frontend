@@ -59,6 +59,12 @@ export default function CommunityPosts({
 
     // Mémoriser les catégories qui ont des posts
     const categoriesWithPosts = useMemo(() => {
+        // Vérifier que posts est bien un tableau
+        if (!Array.isArray(posts)) {
+            console.error("posts n'est pas un tableau:", posts);
+            return POST_CATEGORIES; // Retourner toutes les catégories par défaut
+        }
+
         return POST_CATEGORIES.filter(category =>
             posts.some(post => post.tag === category.id)
         );
@@ -67,6 +73,11 @@ export default function CommunityPosts({
     // Mémoriser les posts par catégorie
     const postsByCategory = useMemo(() => {
         const result: Record<string, Post[]> = {};
+
+        // Vérifier que posts est bien un tableau
+        if (!Array.isArray(posts)) {
+            return result;
+        }
 
         categoriesWithPosts.forEach(category => {
             result[category.id] = posts.filter(post => post.tag === category.id);
@@ -136,7 +147,7 @@ export default function CommunityPosts({
         setIsLoading(false);
     }, [posts]);
 
-    if (posts.length === 0) {
+    if (!Array.isArray(posts) || posts.length === 0) {
         return (
             <div className="space-y-8" id="posts-container">
                 <div className="flex justify-end">
@@ -244,7 +255,7 @@ export default function CommunityPosts({
                                         <div className="bg-blue-50 p-2 rounded-lg">
                                             <FileText className="w-5 h-5 text-blue-600" />
                                         </div>
-                                        <div>
+                                        <div className="flex flex-col items-start">
                                             <h3 className="font-semibold text-gray-900">
                                                 {category.label}
                                             </h3>

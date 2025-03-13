@@ -146,12 +146,16 @@ const CommunityHub = () => {
 
       const data = await communityPostsResponse.json();
 
-      // Mettre en cache les données
-      postsCache.set(cacheKey, data);
+      // Vérifier que les données sont bien un tableau
+      const postsData = Array.isArray(data.posts) ? data.posts : [];
 
-      setPosts(data);
+      // Mettre en cache les données
+      postsCache.set(cacheKey, postsData);
+
+      setPosts(postsData);
     } catch (error) {
       console.error("Erreur lors de la récupération des posts:", error);
+      setPosts([]);
     } finally {
       setIsLoadingPosts(false);
     }
@@ -513,7 +517,7 @@ const CommunityHub = () => {
                         </div>
                       ) : (
                         <CommunityPosts
-                          posts={posts}
+                          posts={Array.isArray(posts) ? posts : []}
                           communityId={communityId}
                           isContributor={isContributor}
                           userId={session?.user?.id}

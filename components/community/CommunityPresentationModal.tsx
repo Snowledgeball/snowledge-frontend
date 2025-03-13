@@ -104,7 +104,7 @@ export default function CommunityPresentationModal({
                         {communityData.image_url && (
                             <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-lg">
                                 <img
-                                    src={`https://${communityData.image_url}`}
+                                    src={communityData.image_url.startsWith('http') ? communityData.image_url : `https://${communityData.image_url}`}
                                     alt={communityData.name}
                                     className="w-full h-full object-cover"
                                 />
