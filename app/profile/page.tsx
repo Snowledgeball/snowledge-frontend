@@ -683,13 +683,14 @@ const ProfilePage = () => {
                         const cachedData = profileCache.communityPosts.get(cacheKey)!;
                         if (isCacheValid(cachedData)) {
                             console.log("Utilisation des posts de la communauté en cache");
+                            console.log("cachedData", cachedData);
                             setSelectedCommunityPosts(cachedData.data || []);
                             return;
                         }
                     }
 
-                    console.log("Récupération des posts de la communauté depuis l'API");
-                    const response = await fetch(`/api/communities/${selectedCommunity.id}/posts`, {
+                    console.log("Récupération des posts de l'utilisateur dans la communauté depuis l'API");
+                    const response = await fetch(`/api/users/${userId}/posts/${selectedCommunity.id}`, {
                         headers: {
                             'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
                         }
@@ -698,7 +699,6 @@ const ProfilePage = () => {
                     if (!response.ok) throw new Error('Erreur lors de la récupération des posts de la communauté');
 
                     const data = await response.json();
-
                     // S'assurer que data.posts existe, sinon utiliser data directement si c'est un tableau
                     const postsData = Array.isArray(data.posts) ? data.posts :
                         Array.isArray(data) ? data : [];
@@ -871,6 +871,45 @@ const ProfilePage = () => {
         }
     };
 
+    // Ajout des styles pour la scrollbar personnalisée dans le style global
+    useEffect(() => {
+        // Ajouter des styles CSS pour la scrollbar personnalisée
+        const style = document.createElement('style');
+        style.textContent = `
+            .custom-scrollbar::-webkit-scrollbar {
+                width: 6px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: #c5c5c5;
+                border-radius: 10px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                background: #a0a0a0;
+            }
+            .line-clamp-2 {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            .line-clamp-3 {
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+        `;
+        document.head.appendChild(style);
+
+        return () => {
+            document.head.removeChild(style);
+        };
+    }, []);
+
     if (isLoadingAuth) {
         return <LoadingComponent />;
     }
@@ -991,7 +1030,7 @@ const ProfilePage = () => {
                                                 >
                                                     <div className="font-medium text-gray-900">{community.name}</div>
                                                     <div className="text-sm text-gray-500 mt-1">
-                                                        {community.role} • Depuis {community.createdAt}
+                                                        {community.role === 'contributor' ? 'Contributeur' : 'Apprennant'} • Depuis {community.createdAt}
                                                     </div>
                                                 </div>
                                             </div>
@@ -1028,11 +1067,12 @@ const ProfilePage = () => {
 
                             {/* Contenu de la communauté sélectionnée (colonne centrale) */}
                             <div className="col-span-2 space-y-6">
+                                <h1 className="text-2xl font-bold text-gray-900">Mon activité dans {selectedCommunity?.name}</h1>
                                 {/* Mes enrichissements */}
                                 <Card className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
                                     <h3 className="text-xl font-semibold text-gray-900 mb-6">Mes enrichissements</h3>
                                     {enrichments && enrichments.length > 0 ? (
-                                        <div className="space-y-4">
+                                        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                                             {enrichments.map((enrichment, idx) => (
                                                 <div key={idx} className="bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                                                     <div className="flex items-center justify-between">
@@ -1052,7 +1092,7 @@ const ProfilePage = () => {
                                                             <h4 className="mt-2 font-medium text-gray-900">
                                                                 Enrichissement pour: {enrichment.community_posts.title}
                                                             </h4>
-                                                            <p className="mt-1 text-sm text-gray-600">{enrichment.description}</p>
+                                                            <p className="mt-1 text-sm text-gray-600 line-clamp-2">{enrichment.description}</p>
                                                             <div className="flex items-center mt-2 text-sm text-gray-500">
                                                                 <span>{formatDistanceToNow(new Date(enrichment.created_at), {
                                                                     addSuffix: true,
@@ -1073,7 +1113,7 @@ const ProfilePage = () => {
                                             ))}
                                         </div>
                                     ) : (
-                                        <p>Aucun enrichissement disponible.</p>
+                                        <p className="text-gray-500 italic">Aucun enrichissement réalisé.</p>
                                     )}
                                 </Card>
 
@@ -1081,23 +1121,33 @@ const ProfilePage = () => {
                                 <Card className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
                                     <h3 className="text-xl font-semibold text-gray-900 mb-6">Mes posts</h3>
                                     {selectedCommunityPosts && selectedCommunityPosts.length > 0 ? (
-                                        <div className="space-y-4">
+                                        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                                             {selectedCommunityPosts
                                                 .map((post, idx) => (
                                                     <div key={idx} className="bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                                                         <h4 className="font-medium text-gray-900">{post.title}</h4>
-                                                        <div className="flex items-center mt-2 text-sm text-gray-500">
-                                                            <div dangerouslySetInnerHTML={{ __html: post.content.slice(0, 300) + '...' }} />
-                                                            {formatDistanceToNow(new Date(post.created_at), {
-                                                                addSuffix: true,
-                                                                locale: fr
-                                                            })}
+                                                        <div className="mt-2 text-sm text-gray-600 line-clamp-3">
+                                                            <div dangerouslySetInnerHTML={{ __html: post.content.slice(0, 200) + '...' }} />
+                                                        </div>
+                                                        <div className="flex items-center justify-between mt-3">
+                                                            <span className="text-xs text-gray-500">
+                                                                {formatDistanceToNow(new Date(post.created_at), {
+                                                                    addSuffix: true,
+                                                                    locale: fr
+                                                                })}
+                                                            </span>
+                                                            <button
+                                                                onClick={() => router.push(`/community/${selectedCommunity?.id}/posts/${post.id}`)}
+                                                                className="text-blue-600 hover:text-blue-700 text-xs font-medium"
+                                                            >
+                                                                Voir le post
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 ))}
                                         </div>
                                     ) : (
-                                        <p>Aucun post disponible.</p>
+                                        <p className="text-gray-500 italic">Aucun post réalisé.</p>
                                     )}
                                 </Card>
 
@@ -1173,9 +1223,9 @@ const ProfilePage = () => {
                                                         <p className="text-sm text-gray-600">Posts</p>
                                                     </div>
                                                     <div className="bg-gray-50 p-4 rounded-lg">
-                                                        <Wallet className="w-6 h-6 text-purple-500 mb-2" />
-                                                        <p className="text-2xl font-bold text-gray-900">{community.stats.revenue}€</p>
-                                                        <p className="text-sm text-gray-600">Revenus générés</p>
+                                                        <Activity className="w-6 h-6 text-purple-500 mb-2" />
+                                                        <p className="text-2xl font-bold text-gray-900">{community.stats.postsCount * 2}</p>
+                                                        <p className="text-sm text-gray-600">Contributions</p>
                                                     </div>
                                                 </div>
                                             </div>
