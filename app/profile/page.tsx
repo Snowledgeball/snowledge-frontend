@@ -21,6 +21,9 @@ const profileCache = {
     posts: new Map<string, { data: any[], timestamp: number }>(),
     communityPosts: new Map<string, { data: any[], timestamp: number }>(),
     enrichments: new Map<string, { data: any[], timestamp: number }>(),
+    messages: new Map<string, { data: any[], timestamp: number }>(),
+    reviews: new Map<string, { data: any[], timestamp: number }>(),
+    contentProposals: new Map<string, { data: any[], timestamp: number }>(),
     // Durée de validité du cache (5 minutes)
     expiresIn: 5 * 60 * 1000
 };
@@ -88,6 +91,38 @@ interface Enrichment {
     }
 }
 
+// Interface pour les reviews
+interface Review {
+    id: number;
+    content: string;
+    rating: number;
+    status: string;
+    created_at: string;
+    post_id: number;
+    post_title?: string;
+    community_id?: number;
+    community_name?: string;
+}
+
+// Interface pour les propositions de création
+interface ContentProposal {
+    id: number;
+    title: string;
+    description: string;
+    status: string;
+    created_at: string;
+    community_id: number;
+    community_name?: string;
+}
+
+// Ajout d'une interface pour les messages
+interface Message {
+    id: string;
+    content: string;
+    created_at: string;
+    user_id: string;
+}
+
 const ProfilePage = () => {
     const { data: session } = useSession();
     const router = useRouter();
@@ -109,6 +144,8 @@ const ProfilePage = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [selectedCommunityPosts, setSelectedCommunityPosts] = useState<Post[]>([]);
     const [enrichments, setEnrichments] = useState<Enrichment[]>([]);
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [contentProposals, setContentProposals] = useState<ContentProposal[]>([]);
     const [userData, setUserData] = useState({
         fullName: '',
         userName: '',
@@ -120,7 +157,7 @@ const ProfilePage = () => {
             communitiesCount: 0,
             postsCount: 0,
             contributionsCount: 0,
-            totalEarnings: 0
+            messagesCount: 0
         }
     });
     const [justification, setJustification] = useState('');
@@ -140,6 +177,9 @@ const ProfilePage = () => {
     });
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+    // Ajout d'un état pour les messages
+    const [messages, setMessages] = useState<Message[]>([]);
 
     useEffect(() => {
         const userId = session?.user?.id;
@@ -387,14 +427,251 @@ const ProfilePage = () => {
         }
     }, [userId]);
 
+    // Fonction pour récupérer les reviews avec cache
+    const fetchReviews = useCallback(async () => {
+        if (!userId) return;
+
+        try {
+            // Vérifier si les données sont dans le cache
+            const cacheKey = `reviews-${userId}`;
+            if (profileCache.reviews && profileCache.reviews.has(cacheKey)) {
+                const cachedData = profileCache.reviews.get(cacheKey)!;
+                if (isCacheValid(cachedData)) {
+                    console.log("Utilisation des reviews en cache");
+                    setReviews(cachedData.data || []);
+                    return;
+                }
+            }
+
+            console.log("Récupération des reviews depuis l'API");
+            const response = await fetch(`/api/users/${userId}/reviews`, {
+                headers: {
+                    'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+                }
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de la récupération des reviews');
+
+            const data = await response.json();
+            console.log("Données de reviews reçues:", data);
+
+            // S'assurer que data.reviews existe, sinon utiliser data directement si c'est un tableau
+            const reviewsData = Array.isArray(data.reviews) ? data.reviews :
+                Array.isArray(data) ? data : [];
+
+            console.log("Reviews formatées:", reviewsData, "Longueur:", reviewsData.length);
+
+            // Mettre à jour le cache
+            if (!profileCache.reviews) {
+                profileCache.reviews = new Map<string, { data: any[], timestamp: number }>();
+            }
+            profileCache.reviews.set(cacheKey, {
+                data: reviewsData,
+                timestamp: Date.now()
+            });
+
+            setReviews(reviewsData);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des reviews:', error);
+            setReviews([]);
+        }
+    }, [userId]);
+
+    // Fonction pour récupérer les propositions de création avec cache
+    const fetchContentProposals = useCallback(async () => {
+        if (!userId) return;
+
+        try {
+            // Vérifier si les données sont dans le cache
+            const cacheKey = `contentProposals-${userId}`;
+            if (profileCache.contentProposals && profileCache.contentProposals.has(cacheKey)) {
+                const cachedData = profileCache.contentProposals.get(cacheKey)!;
+                if (isCacheValid(cachedData)) {
+                    console.log("Utilisation des propositions de création en cache");
+                    setContentProposals(cachedData.data || []);
+                    return;
+                }
+            }
+
+            console.log("Récupération des propositions de création depuis l'API");
+            const response = await fetch(`/api/users/${userId}/content-proposals`, {
+                headers: {
+                    'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+                }
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de la récupération des propositions de création');
+
+            const data = await response.json();
+            console.log("Données de propositions reçues:", data);
+
+            // S'assurer que data.contentProposals existe, sinon utiliser data directement si c'est un tableau
+            const proposalsData = Array.isArray(data.contentProposals) ? data.contentProposals :
+                Array.isArray(data) ? data : [];
+
+            console.log("Propositions formatées:", proposalsData, "Longueur:", proposalsData.length);
+
+            // Mettre à jour le cache
+            if (!profileCache.contentProposals) {
+                profileCache.contentProposals = new Map<string, { data: any[], timestamp: number }>();
+            }
+            profileCache.contentProposals.set(cacheKey, {
+                data: proposalsData,
+                timestamp: Date.now()
+            });
+
+            setContentProposals(proposalsData);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des propositions de création:', error);
+            setContentProposals([]);
+        }
+    }, [userId]);
+
+    // Fonction pour récupérer les messages avec cache
+    const fetchMessages = useCallback(async () => {
+        if (!userId) return;
+
+        try {
+            // Vérifier si les données sont dans le cache
+            const cacheKey = `messages-${userId}`;
+            if (profileCache.messages && profileCache.messages.has(cacheKey)) {
+                const cachedData = profileCache.messages.get(cacheKey)!;
+                if (isCacheValid(cachedData)) {
+                    console.log("Utilisation des messages en cache");
+                    setMessages(cachedData.data || []);
+
+                    // Mettre à jour le compteur de messages dans les statistiques
+                    setUserData(prevData => ({
+                        ...prevData,
+                        stats: {
+                            ...prevData.stats,
+                            messagesCount: cachedData.data.length || 0
+                        }
+                    }));
+
+                    return;
+                }
+            }
+
+            console.log("Récupération des messages depuis Firebase");
+            const response = await fetch(`/api/users/${userId}/messages`, {
+                headers: {
+                    'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+                }
+            });
+
+            if (!response.ok) throw new Error('Erreur lors de la récupération des messages');
+
+            const data = await response.json();
+            console.log("Données de messages reçues:", data);
+
+            // S'assurer que data.messages existe, sinon utiliser data directement si c'est un tableau
+            const messagesData = Array.isArray(data.messages) ? data.messages :
+                Array.isArray(data) ? data : [];
+
+            console.log("Messages formatés:", messagesData, "Longueur:", messagesData.length);
+
+            // Mettre à jour le cache
+            if (!profileCache.messages) {
+                profileCache.messages = new Map<string, { data: any[], timestamp: number }>();
+            }
+            profileCache.messages.set(cacheKey, {
+                data: messagesData,
+                timestamp: Date.now()
+            });
+
+            setMessages(messagesData);
+
+            // Mettre à jour le compteur de messages dans les statistiques
+            // Utiliser une fonction pour éviter les problèmes de fermeture (closure)
+            setUserData(prevData => {
+                console.log("Mise à jour des stats utilisateur avec", messagesData.length, "messages");
+                return {
+                    ...prevData,
+                    stats: {
+                        ...prevData.stats,
+                        messagesCount: messagesData.length
+                    }
+                };
+            });
+        } catch (error) {
+            console.error('Erreur:', error);
+            setMessages([]);
+        }
+    }, [userId]);
+
+    // Fonction pour calculer le nombre total de contributions
+    const calculateTotalContributions = useCallback(() => {
+        // Ne compter que les enrichissements, les reviews et les demandes de contribution
+        const enrichmentsCount = enrichments.length;
+
+        // Pour les reviews, compter à la fois les reviews de posts et les reviews d'enrichissements
+        const reviewsCount = reviews.length;
+
+        // Pour les propositions, compter les demandes de contribution
+        const contributorRequestsCount = contentProposals.length;
+
+        const totalContributions = enrichmentsCount + reviewsCount + contributorRequestsCount;
+
+        console.log(`Calcul des contributions: ${enrichmentsCount} enrichissements + ${reviewsCount} reviews + ${contributorRequestsCount} propositions de posts = ${totalContributions} total`);
+
+        // Mettre à jour le compteur de contributions dans les statistiques
+        setUserData(prevData => {
+            // Éviter de mettre à jour si les valeurs sont identiques
+            if (prevData.stats.contributionsCount === totalContributions) {
+                return prevData;
+            }
+
+            return {
+                ...prevData,
+                stats: {
+                    ...prevData.stats,
+                    contributionsCount: totalContributions
+                }
+            };
+        });
+    }, [enrichments, reviews, contentProposals]);
+
     useEffect(() => {
         if (userId) {
             fetchUserCommunities();
             fetchJoinedCommunities();
             fetchPosts();
             fetchEnrichments();
+            fetchReviews();
+            fetchContentProposals();
+            fetchMessages();
         }
-    }, [userId, fetchUserCommunities, fetchJoinedCommunities, fetchPosts, fetchEnrichments]);
+    }, [userId, fetchUserCommunities, fetchJoinedCommunities, fetchPosts, fetchEnrichments, fetchReviews, fetchContentProposals, fetchMessages]);
+
+    // Effet pour calculer le nombre total de contributions
+    useEffect(() => {
+        calculateTotalContributions();
+    }, [enrichments, reviews, contentProposals, calculateTotalContributions]);
+
+    // Effet pour s'assurer que les statistiques sont à jour
+    useEffect(() => {
+        // Vérifier si nous avons des données et mettre à jour les statistiques
+        if (messages.length > 0 || posts.length > 0 || enrichments.length > 0 || reviews.length > 0 || contentProposals.length > 0) {
+            console.log("Mise à jour des statistiques avec les données chargées");
+
+            setUserData(prevData => {
+                // Calculer le nombre total de contributions (enrichissements, reviews et demandes de contribution)
+                const totalContributions = enrichments.length + reviews.length + contentProposals.length;
+
+                return {
+                    ...prevData,
+                    stats: {
+                        ...prevData.stats,
+                        messagesCount: messages.length,
+                        postsCount: posts.length,
+                        contributionsCount: totalContributions,
+                        communitiesCount: joinedCommunities.length
+                    }
+                };
+            });
+        }
+    }, [messages, posts, enrichments, reviews, contentProposals, joinedCommunities]);
 
     useEffect(() => {
         if (selectedCommunity) {
@@ -473,6 +750,15 @@ const ProfilePage = () => {
             case 'enrichments':
                 profileCache.enrichments.delete(key);
                 break;
+            case 'messages':
+                profileCache.messages.delete(key);
+                break;
+            case 'reviews':
+                profileCache.reviews.delete(key);
+                break;
+            case 'contentProposals':
+                profileCache.contentProposals.delete(key);
+                break;
             default:
                 // Invalider tous les caches
                 profileCache.userData.clear();
@@ -481,6 +767,9 @@ const ProfilePage = () => {
                 profileCache.posts.clear();
                 profileCache.communityPosts.clear();
                 profileCache.enrichments.clear();
+                profileCache.messages.clear();
+                profileCache.reviews.clear();
+                profileCache.contentProposals.clear();
         }
     }, []);
 
@@ -626,7 +915,7 @@ const ProfilePage = () => {
                         { label: "Communautés rejointes", value: userData.stats.communitiesCount, icon: Users, color: "text-blue-500" },
                         { label: "Posts", value: userData.stats.postsCount, icon: MessageCircle, color: "text-green-500" },
                         { label: "Contributions", value: userData.stats.contributionsCount, icon: Activity, color: "text-purple-500" },
-                        { label: "Gains totaux", value: `${userData.stats.totalEarnings}€`, icon: Wallet, color: "text-amber-500" },
+                        { label: "Messages envoyés", value: userData.stats.messagesCount, icon: MessageSquare, color: "text-amber-500" },
                     ].map((stat, index) => (
                         <Card key={index} className="p-6 bg-white hover:bg-gray-50 transition-colors duration-200">
                             <div className="flex items-center justify-between">
@@ -1198,87 +1487,87 @@ const ProfilePage = () => {
                             </Card>
                             {/* Abonnements */}
                             {/* <Card className="p-6 mt-6 bg-white rounded-xl shadow-md">
-                                <h3 className="text-xl font-semibold text-gray-900 mb-6">Mes abonnements</h3>
-                                <div className="space-y-4">
-                                    {userOwnedCommunities.map((community, index) => (
-                                        <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div>
-                                                    <h4 className="font-medium text-gray-900">{community.name}</h4>
-                                                    <p className="text-sm text-gray-500">
-                                                        {"Membre actif" === "Membre actif"
-                                                            ? "Abonnement Premium - Accès illimité"
-                                                            : "Abonnement Standard"}
-                                                    </p>
-                                                </div>
-                                                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                                                    Actif
-                                                </span>
-                                            </div>
-                                            <div className="mt-4 space-y-3">
-                                                <div className="flex justify-between items-center text-sm text-gray-500">
-                                                    <span>Prix mensuel</span>
-                                                    <span className="font-medium text-gray-900">29,99€</span>
-                                                </div>
-                                                <div className="flex justify-between items-center text-sm text-gray-500">
-                                                    <span>Prochain paiement</span>
-                                                    <span>15 avril 2024</span>
-                                                </div>
-                                                <div className="flex justify-between items-center text-sm text-gray-500">
-                                                    <span>Statut</span>
-                                                    <span className="text-green-600">Actif</span>
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
-                                                <div className="flex space-x-2">
-                                                    <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="text-blue-600 text-sm hover:text-blue-700 font-medium">
-                                                        Changer de formule
-                                                    </button>
-                                                    <span className="text-gray-300">|</span>
-                                                    <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="text-red-600 text-sm hover:text-red-700 font-medium">
-                                                        Résilier
-                                                    </button>
-                                                </div>
-                                                <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="text-gray-600 text-sm hover:text-gray-700 font-medium">
-                                                    Voir les détails
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-
-                                    
-                                    <div className="mt-8">
-                                        <h4 className="text-lg font-medium text-gray-900 mb-4">Offres disponibles</h4>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-100">
-                                                <div className="flex justify-between items-start mb-4">
+                                    <h3 className="text-xl font-semibold text-gray-900 mb-6">Mes abonnements</h3>
+                                    <div className="space-y-4">
+                                        {userOwnedCommunities.map((community, index) => (
+                                            <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                                <div className="flex justify-between items-start mb-2">
                                                     <div>
-                                                        <h5 className="font-medium text-blue-900">Pack Découverte</h5>
-                                                        <p className="text-sm text-blue-700">Accès à 3 communautés</p>
+                                                        <h4 className="font-medium text-gray-900">{community.name}</h4>
+                                                        <p className="text-sm text-gray-500">
+                                                            {"Membre actif" === "Membre actif"
+                                                                ? "Abonnement Premium - Accès illimité"
+                                                                : "Abonnement Standard"}
+                                                        </p>
                                                     </div>
-                                                    <span className="text-lg font-bold text-blue-900">49,99€/mois</span>
+                                                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                                                        Actif
+                                                    </span>
                                                 </div>
-                                                <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                                    Choisir cette offre
-                                                </button>
+                                                <div className="mt-4 space-y-3">
+                                                    <div className="flex justify-between items-center text-sm text-gray-500">
+                                                        <span>Prix mensuel</span>
+                                                        <span className="font-medium text-gray-900">29,99€</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center text-sm text-gray-500">
+                                                        <span>Prochain paiement</span>
+                                                        <span>15 avril 2024</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center text-sm text-gray-500">
+                                                        <span>Statut</span>
+                                                        <span className="text-green-600">Actif</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
+                                                    <div className="flex space-x-2">
+                                                        <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="text-blue-600 text-sm hover:text-blue-700 font-medium">
+                                                            Changer de formule
+                                                        </button>
+                                                        <span className="text-gray-300">|</span>
+                                                        <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="text-red-600 text-sm hover:text-red-700 font-medium">
+                                                            Résilier
+                                                        </button>
+                                                    </div>
+                                                    <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="text-gray-600 text-sm hover:text-gray-700 font-medium">
+                                                        Voir les détails
+                                                    </button>
+                                                </div>
                                             </div>
+                                        ))}
 
-                                            <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-100">
-                                                <div className="flex justify-between items-start mb-4">
-                                                    <div>
-                                                        <h5 className="font-medium text-purple-900">Pack Expert</h5>
-                                                        <p className="text-sm text-purple-700">Accès illimité</p>
+                                        
+                                        <div className="mt-8">
+                                            <h4 className="text-lg font-medium text-gray-900 mb-4">Offres disponibles</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-100">
+                                                    <div className="flex justify-between items-start mb-4">
+                                                        <div>
+                                                            <h5 className="font-medium text-blue-900">Pack Découverte</h5>
+                                                            <p className="text-sm text-blue-700">Accès à 3 communautés</p>
+                                                        </div>
+                                                        <span className="text-lg font-bold text-blue-900">49,99€/mois</span>
                                                     </div>
-                                                    <span className="text-lg font-bold text-purple-900">89,99€/mois</span>
+                                                    <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                                        Choisir cette offre
+                                                    </button>
                                                 </div>
-                                                <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                                                    Choisir cette offre
-                                                </button>
+
+                                                <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-100">
+                                                    <div className="flex justify-between items-start mb-4">
+                                                        <div>
+                                                            <h5 className="font-medium text-purple-900">Pack Expert</h5>
+                                                            <p className="text-sm text-purple-700">Accès illimité</p>
+                                                        </div>
+                                                        <span className="text-lg font-bold text-purple-900">89,99€/mois</span>
+                                                    </div>
+                                                    <button onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")} className="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                                        Choisir cette offre
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </Card> */}
+                                </Card> */}
                         </div>
                     )}
 
@@ -1313,6 +1602,7 @@ const ProfilePage = () => {
                         </div>
                     )} */}
                 </div>
+
 
                 {/* Modal de candidature */}
                 <Dialog

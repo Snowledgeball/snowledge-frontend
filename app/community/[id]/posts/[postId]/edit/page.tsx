@@ -16,12 +16,12 @@ import { useMemo } from "react";
 import { Loader } from "@/components/ui/loader";
 
 const POST_TAGS = [
-    { value: 'analyse-technique', label: 'Analyse Technique' },
-    { value: 'analyse-macro', label: 'Analyse Macro' },
-    { value: 'defi', label: 'DeFi' },
-    { value: 'news', label: 'News' },
-    { value: 'education', label: 'Éducation' },
-    { value: 'trading', label: 'Trading' }
+    { value: "analyse-technique", label: "Analyse Technique" },
+    { value: "analyse-macro", label: "Analyse Macro" },
+    { value: "defi", label: "DeFi" },
+    { value: "news", label: "News" },
+    { value: "education", label: "Éducation" },
+    { value: "trading", label: "Trading" },
 ];
 
 interface Post {

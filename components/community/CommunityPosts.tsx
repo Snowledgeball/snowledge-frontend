@@ -10,10 +10,12 @@ import { Loader } from "@/components/ui/loader";
 
 // Catégories de posts
 const POST_CATEGORIES = [
-    { id: "general", label: "Général" },
-    { id: "analyse-technique", label: "Analyse technique" },
+    { id: "analyse-technique", label: "Analyse Technique" },
+    { id: "analyse-macro", label: "Analyse Macro" },
+    { id: "defi", label: "DeFi" },
     { id: "news", label: "News" },
-    { id: "reports", label: "Rapports" },
+    { id: "education", label: "Éducation" },
+    { id: "trading", label: "Trading" },
 ];
 
 interface Post {
