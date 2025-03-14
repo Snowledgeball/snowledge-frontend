@@ -250,7 +250,7 @@ const TinyEditor = ({
                         list-style-type: decimal;
                     }
             `,
-    placeholder: placeholder ? placeholder : "<p>Écrivez ici...</p><p></p><p></p><p></p><p></p>",
+    placeholder: placeholder ? placeholder : "Écrivez ici...",
 
     // Callbacks pour les commentaires
     tinycomments_create: async (

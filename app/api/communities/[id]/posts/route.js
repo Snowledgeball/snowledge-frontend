@@ -14,7 +14,7 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    const { title, content, cover_image_url, tag, accept_contributions } =
+    const { title, content, coverImageUrl, tag, acceptContributions } =
       await request.json();
     const { id } = await params;
     const communityId = parseInt(id);
@@ -52,11 +52,11 @@ export async function POST(request, { params }) {
       data: {
         title,
         content,
-        cover_image_url,
+        cover_image_url: coverImageUrl,
         tag,
         community_id: communityId,
         author_id: userId,
-        accept_contributions,
+        accept_contributions: acceptContributions,
         status: "PUBLISHED",
       },
     });

@@ -358,7 +358,11 @@ export default function CommunityDashboard() {
           timestamp: Date.now()
         });
 
-        setMembers(data.members);
+        console.log("data", data);
+
+        console.log("data.members", data.members);
+
+        setMembers(data);
       }
     } catch (error) {
       console.error("Erreur:", error);
@@ -617,6 +621,11 @@ export default function CommunityDashboard() {
     }
 
     try {
+      console.log("postTitle", postTitle);
+      console.log("editorContent", editorContent);
+      console.log("coverImage", coverImage);
+      console.log("selectedTag", selectedTag);
+      console.log("contributionsEnabled", contributionsEnabled);
       const response = await fetch(`/api/communities/${communityId}/posts`, {
         method: "POST",
         headers: {
@@ -1237,7 +1246,7 @@ export default function CommunityDashboard() {
 
               {/* Liste des membres */}
               <Card className="p-4 lg:p-6 bg-white shadow-sm rounded-3xl overflow-x-auto">
-                {members.length === 0 ? (
+                {members && members.length === 0 ? (
                   <div className="text-center text-gray-500">
                     Aucun membre trouvé
                   </div>
@@ -1274,7 +1283,7 @@ export default function CommunityDashboard() {
                           </tr>
                         </thead>
                         <tbody>
-                          {members.map((member) => (
+                          {members && members.map((member) => (
                             <tr key={member.id} className="hover:bg-gray-50">
                               <td className="p-4">
                                 <div className="flex items-center space-x-3">

@@ -650,14 +650,14 @@ const ProfilePage = () => {
                                 ${activeTab === 'communities' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'}`}
                             onClick={() => setActiveTab('communities')}
                         >
-                            Communautés
+                            Communautés rejointes
                         </button>
                         <button
                             className={`border-b-2 py-4 px-1 text-sm font-medium transition-all duration-200 
                                 ${activeTab === 'my-community' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'}`}
                             onClick={() => setActiveTab('my-community')}
                         >
-                            Ma Communauté
+                            Communautés créées
                         </button>
                         <button
                             className={`border-b-2 py-4 px-1 text-sm font-medium transition-all duration-200 
@@ -666,13 +666,13 @@ const ProfilePage = () => {
                         >
                             Paramètres
                         </button>
-                        <button
+                        {/* <button
                             className={`border-b-2 py-4 px-1 text-sm font-medium transition-all duration-200 
                                 ${activeTab === 'support' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'}`}
                             onClick={() => setActiveTab('support')}
                         >
                             Support
-                        </button>
+                        </button> */}
                     </nav>
                 </div>
 
@@ -813,13 +813,13 @@ const ProfilePage = () => {
                                 </Card>
 
                                 {/* Revenus générés */}
-                                <Card className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
+                                {/* <Card className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
                                     <h3 className="text-xl font-semibold text-gray-900 mb-6">Revenus générés</h3>
                                     <div className="bg-gray-50 p-6 rounded-lg">
                                         <p className="text-3xl font-bold text-gray-900">{"0€"}</p>
                                         <p className="text-sm text-gray-500 mt-1">Revenus totaux de la communauté</p>
                                     </div>
-                                </Card>
+                                </Card> */}
                             </div>
                         </>
                     )}
@@ -1282,7 +1282,7 @@ const ProfilePage = () => {
                         </div>
                     )}
 
-                    {activeTab === 'support' && (
+                    {/* {activeTab === 'support' && (
                         <div className="col-span-3">
                             <Card className="p-6 bg-white rounded-xl shadow-md">
                                 <h3 className="text-xl font-semibold text-gray-900 mb-6">Support et Aide</h3>
@@ -1311,7 +1311,7 @@ const ProfilePage = () => {
                                 </div>
                             </Card>
                         </div>
-                    )}
+                    )} */}
                 </div>
 
                 {/* Modal de candidature */}

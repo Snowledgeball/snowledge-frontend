@@ -8,6 +8,8 @@ export async function GET(request, { params }) {
     const { id } = await params;
     const communityId = parseInt(id);
 
+    console.log("communityId", communityId);
+
     // Récupérer les contributeurs
     const contributors = await prisma.community_contributors.findMany({
       where: {
@@ -27,7 +29,6 @@ export async function GET(request, { params }) {
         community: true,
       },
     });
-
     // Récupérer les informations des utilisateurs
     const contributorIds = contributors.map((c) => c.contributor_id);
     const learnerIds = learners.map((l) => l.learner_id);
@@ -69,6 +70,8 @@ export async function GET(request, { params }) {
         gains: contributorData?.earnings || 0,
       };
     });
+
+    console.log("members", members);
 
     return NextResponse.json(members);
   } catch (error) {
