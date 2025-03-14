@@ -176,7 +176,7 @@ export default function CommunityPosts({
         <div className="space-y-8 bg-gray-50 p-6 rounded-xl" id="posts-container">
             {isLoading && (
                 <div className="fixed inset-0 bg-white bg-opacity-70 z-50 flex items-center justify-center">
-                    <Loader size="lg" color="gradient" text="Chargement..." variant="pulse" fullScreen />
+                    <Loader size="lg" color="gradient" text="Chargement..." fullScreen />
                 </div>
             )}
 

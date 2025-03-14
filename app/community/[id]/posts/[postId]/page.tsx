@@ -17,6 +17,7 @@ import { useSession } from "next-auth/react";
 import QASection from "@/components/shared/QASection";
 import ChatBox from "@/components/shared/ChatBox";
 import Link from "next/link";
+import { Loader } from "@/components/ui/loader";
 
 interface Post {
   id: number;
@@ -84,7 +85,7 @@ export default function PostPage() {
     }
   }, [post, session, params.id]);
 
-  if (!post) return <div>Chargement...</div>;
+  if (!post) return <Loader fullScreen text="Chargement du post..." />;
 
   return (
     <div className="min-h-screen bg-gray-50" id="post-page">
