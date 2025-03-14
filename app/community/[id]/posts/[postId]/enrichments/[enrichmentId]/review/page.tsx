@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { redirect } from "next/navigation";
 import EnrichmentReview from "@/components/community/EnrichmentReview";
+import { Loader } from "@/components/ui/loader";
 
 interface Enrichment {
     id: number;
@@ -29,6 +30,7 @@ export default function ReviewContribution() {
     const [hasAlreadyVoted, setHasAlreadyVoted] = useState(false);
     const [existingReview, setExistingReview] = useState<any>(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         // Rediriger si l'utilisateur n'est pas connecté
@@ -126,6 +128,7 @@ export default function ReviewContribution() {
                 router.push(`/community/${params.id}/posts/${params.postId}`);
             } finally {
                 setLoading(false);
+                setIsLoading(false);
             }
         };
 
@@ -134,13 +137,10 @@ export default function ReviewContribution() {
         }
     }, [params.id, params.postId, params.enrichmentId, router, searchParams, session, status]);
 
-    if (loading) {
+    if (isLoading) {
         return (
-            <div className="min-h-screen bg-gray-50 py-8">
-                <div className="max-w-5xl mx-auto px-4 flex justify-center items-center h-64">
-                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-                    <p className="ml-2">Chargement...</p>
-                </div>
+            <div className="flex justify-center items-center py-12">
+                <Loader size="lg" color="gradient" text="Chargement..." variant="spinner" />
             </div>
         );
     }

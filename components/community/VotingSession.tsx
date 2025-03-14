@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { AlertCircle, Info } from "lucide-react";
 import EnrichmentVotingSession from "./EnrichmentVotingSession";
 import CreationVotingSession from "./CreationVotingSession";
+import { Loader } from "@/components/ui/loader";
 
 // Cache pour stocker les données
 const contributorsCache = new Map<string, { count: number, timestamp: number }>();
@@ -56,6 +57,7 @@ export default function VotingSession({ communityId }: VotingSessionProps) {
     const [contributorsCount, setContributorsCount] = useState(0);
     const [postsWithPendingEnrichments, setPostsWithPendingEnrichments] = useState<PendingPost[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
     // Mémoriser l'ID de la communauté pour éviter les re-rendus inutiles
     const memoizedCommunityId = useMemo(() => communityId, [communityId]);
@@ -152,12 +154,12 @@ export default function VotingSession({ communityId }: VotingSessionProps) {
 
     // Fonction pour charger toutes les données nécessaires
     const loadAllData = useCallback(async () => {
-        setLoading(true);
+        setIsLoading(true);
         await Promise.all([
             fetchContributorsCount(),
             fetchPostsWithPendingEnrichments()
         ]);
-        setLoading(false);
+        setIsLoading(false);
     }, [fetchContributorsCount, fetchPostsWithPendingEnrichments]);
 
     // Effet pour charger les données initiales
@@ -222,10 +224,9 @@ export default function VotingSession({ communityId }: VotingSessionProps) {
                 </div>
             </div>
 
-            {loading ? (
-                <div className="text-center py-8">
-                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-                    <p className="mt-2 text-gray-600">Chargement des données...</p>
+            {isLoading ? (
+                <div className="flex justify-center items-center py-8">
+                    <Loader size="md" color="gradient" text="Chargement..." variant="spinner" />
                 </div>
             ) : (
                 <>

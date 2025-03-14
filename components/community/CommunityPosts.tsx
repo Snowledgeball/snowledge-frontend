@@ -6,6 +6,7 @@ import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronDown, Edit, FileText, PlusCircle, Users } from "lucide-react";
+import { Loader } from "@/components/ui/loader";
 
 // Catégories de posts
 const POST_CATEGORIES = [
@@ -173,10 +174,7 @@ export default function CommunityPosts({
         <div className="space-y-8 bg-gray-50 p-6 rounded-xl" id="posts-container">
             {isLoading && (
                 <div className="fixed inset-0 bg-white bg-opacity-70 z-50 flex items-center justify-center">
-                    <div className="flex flex-col items-center bg-white p-6 rounded-xl shadow-lg">
-                        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                        <p className="mt-4 text-blue-600 font-medium">Chargement...</p>
-                    </div>
+                    <Loader size="lg" color="gradient" text="Chargement..." variant="pulse" fullScreen />
                 </div>
             )}
 

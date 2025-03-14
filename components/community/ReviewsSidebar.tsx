@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ThumbsUp, ThumbsDown, MessageCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Loader } from "@/components/ui/loader";
 
 interface Review {
     id: number;
@@ -67,7 +68,7 @@ export default function ReviewsSidebar({ communityId, postId }: ReviewsSidebarPr
     if (loading) {
         return (
             <div className="h-full flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <Loader size="md" color="gradient" variant="spinner" />
             </div>
         );
     }

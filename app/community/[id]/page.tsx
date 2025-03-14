@@ -15,6 +15,7 @@ import CommunityTabs from "@/components/community/CommunityTabs";
 import CommunityPosts from "@/components/community/CommunityPosts";
 import CommunityPresentationModal from "@/components/community/CommunityPresentationModal";
 import BanModal from "@/components/community/BanModal";
+import { Loader } from "@/components/ui/loader";
 
 // Cache pour stocker les données
 const communityCache = new Map<string, any>();
@@ -484,8 +485,7 @@ const CommunityHub = () => {
               {/* Indicateur de chargement */}
               {isLoadingCommunity && (
                 <div className="flex justify-center items-center py-8">
-                  <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                  <p className="ml-3 text-blue-600 font-medium">Chargement des données...</p>
+                  <Loader size="lg" color="gradient" text="Chargement des données..." variant="spinner" />
                 </div>
               )}
 
@@ -512,8 +512,7 @@ const CommunityHub = () => {
                     <div id="posts-section">
                       {isLoadingPosts ? (
                         <div className="flex justify-center items-center py-12">
-                          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                          <p className="ml-3 text-blue-600 font-medium">Chargement des posts...</p>
+                          <Loader size="md" color="gradient" text="Chargement des posts..." variant="pulse" textPosition="right" />
                         </div>
                       ) : (
                         <CommunityPosts

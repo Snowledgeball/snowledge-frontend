@@ -13,6 +13,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Link from "next/link";
+import { Loader } from "@/components/ui/loader";
 
 // Cache pour stocker les données
 const pendingPostsCache = new Map<string, { data: any[], timestamp: number }>();
@@ -280,9 +281,8 @@ export default function CreationVotingSession({ communityId }: CreationVotingSes
 
     if (loading) {
         return (
-            <div className="text-center py-8" id="creation-loading">
-                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-                <p className="mt-2 text-gray-600">Chargement des posts en attente...</p>
+            <div className="flex justify-center items-center py-8">
+                <Loader size="md" color="gradient" text="Chargement..." variant="spinner" />
             </div>
         );
     }

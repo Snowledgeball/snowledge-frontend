@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Community } from "@/types/community";
 import { CheckCircle } from "lucide-react";
+import { Loader } from "@/components/ui/loader";
 
 type Presentation = {
     video_url?: string;
@@ -197,7 +198,7 @@ export default function CommunityPresentationModal({
                     <label className="flex items-center space-x-3 cursor-pointer">
                         <input
                             type="checkbox"
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5"
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5 cursor-pointer"
                             checked={hasAcceptedTerms}
                             onChange={(e) => setHasAcceptedTerms(e.target.checked)}
                         />
@@ -216,26 +217,15 @@ export default function CommunityPresentationModal({
                         <button
                             onClick={handleJoinCommunity}
                             disabled={!hasAcceptedTerms || isJoining}
-                            className={`px-6 py-2 rounded-lg transition-colors flex items-center ${hasAcceptedTerms && !isJoining
-                                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-md"
-                                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                }`}
+                            className={`px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-md flex items-center justify-center ${!hasAcceptedTerms ? "cursor-not-allowed" : "cursor-pointer"}`}
                         >
                             {isJoining ? (
                                 <>
-                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
+                                    <Loader size="sm" color="white" variant="spinner" className="mr-2" />
                                     Traitement...
                                 </>
                             ) : (
-                                <>
-                                    Rejoindre la communauté
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                                    </svg>
-                                </>
+                                "Rejoindre la communauté"
                             )}
                         </button>
                     </div>

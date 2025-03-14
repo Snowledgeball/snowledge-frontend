@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Loader } from "@/components/ui/loader";
 
 // Cache pour stocker les données des communautés
 const communitiesCache = {
@@ -399,7 +400,7 @@ export default function Home() {
             {/* Grille des communautés */}
             {loading ? (
               <div className="text-center py-12">
-                <p className="text-gray-600">Chargement des communautés...</p>
+                <Loader size="lg" color="gradient" text="Chargement des communautés..." variant="spinner" />
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">

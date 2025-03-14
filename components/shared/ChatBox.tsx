@@ -20,6 +20,7 @@ import {
 } from "firebase/firestore";
 import Image from "next/image";
 import { Trash2, Pencil, Check, X } from "lucide-react";
+import { Loader } from "@/components/ui/loader";
 
 interface Channel {
   id: number;
@@ -822,7 +823,7 @@ export default function ChatBox({
           <div className="flex-1 overflow-y-auto custom-scrollbar">
             {isLoading ? (
               <div className="flex justify-center items-center h-24">
-                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+                <Loader size="sm" color="gradient" variant="spinner" />
               </div>
             ) : channels.length === 0 ? (
               <div className="p-4 text-gray-500 text-center">
@@ -1027,7 +1028,7 @@ export default function ChatBox({
             >
               {isLoading ? (
                 <div className="flex justify-center items-center h-full">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                  <Loader size="md" color="gradient" variant="pulse" />
                 </div>
               ) : messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-500">

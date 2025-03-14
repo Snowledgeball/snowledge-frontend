@@ -33,6 +33,7 @@ import {
   UserPlus,
   UserX,
 } from "lucide-react";
+import { Loader } from "@/components/ui/loader";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
 import {
@@ -739,7 +740,7 @@ export default function CommunityDashboard() {
   }, [selectedMemberToBan, banReason, communityId, fetchMembers, fetchDashboardData, invalidateCache]);
 
   if (loading) {
-    return <div>Chargement...</div>;
+    return <Loader text="Chargement des données..." fullScreen />;
   }
 
   if (!dashboardData) {

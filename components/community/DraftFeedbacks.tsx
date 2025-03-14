@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ThumbsDown, MessageCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Loader } from "@/components/ui/loader";
 
 interface DraftFeedbacksProps {
     communityId: string;
@@ -15,6 +16,7 @@ export default function DraftFeedbacks({ communityId, postId, expanded = false, 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isExpanded, setIsExpanded] = useState(expanded);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchReviews = async () => {
@@ -37,6 +39,7 @@ export default function DraftFeedbacks({ communityId, postId, expanded = false, 
                 setError("Impossible de charger les feedbacks");
             } finally {
                 setLoading(false);
+                setIsLoading(false);
             }
         };
 
@@ -50,12 +53,12 @@ export default function DraftFeedbacks({ communityId, postId, expanded = false, 
         ? "bg-white rounded-lg shadow-sm p-4 h-full overflow-y-auto"
         : "mt-4 bg-red-50 p-4 rounded-lg";
 
-    if (loading && isExpanded) {
+    if (isLoading && isExpanded) {
         return (
             <div className={containerClassName}>
                 <h3 className="text-lg font-semibold mb-4">Feedbacks des contributeurs</h3>
-                <div className="flex justify-center py-6">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="flex justify-center items-center py-8">
+                    <Loader size="md" color="gradient" variant="pulse" />
                 </div>
             </div>
         );

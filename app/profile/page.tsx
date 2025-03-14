@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Loader } from "@/components/ui/loader";
 
 // Système de cache pour les données du profil
 const profileCache = {
@@ -683,7 +684,7 @@ const ProfilePage = () => {
                             <div className="space-y-4">
                                 {isLoadingJoined ? (
                                     <div className="text-center py-4">
-                                        <p>Chargement des communautés...</p>
+                                        <Loader size="lg" color="gradient" text="Chargement des communautés..." variant="spinner" />
                                     </div>
                                 ) : joinedCommunities.map((community, index) => (
                                     <div
@@ -827,7 +828,7 @@ const ProfilePage = () => {
                         <div className="col-span-3">
                             {isLoading ? (
                                 <div className="text-center py-12">
-                                    <p>Chargement...</p>
+                                    <Loader size="lg" color="gradient" text="Chargement..." variant="spinner" />
                                 </div>
                             ) : userOwnedCommunities.length > 0 ? (
                                 <div className="space-y-8">
@@ -1196,7 +1197,7 @@ const ProfilePage = () => {
                                 </div>
                             </Card>
                             {/* Abonnements */}
-                            <Card className="p-6 mt-6 bg-white rounded-xl shadow-md">
+                            {/* <Card className="p-6 mt-6 bg-white rounded-xl shadow-md">
                                 <h3 className="text-xl font-semibold text-gray-900 mb-6">Mes abonnements</h3>
                                 <div className="space-y-4">
                                     {userOwnedCommunities.map((community, index) => (
@@ -1245,7 +1246,7 @@ const ProfilePage = () => {
                                         </div>
                                     ))}
 
-                                    {/* Section pour les offres disponibles */}
+                                    
                                     <div className="mt-8">
                                         <h4 className="text-lg font-medium text-gray-900 mb-4">Offres disponibles</h4>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1277,7 +1278,7 @@ const ProfilePage = () => {
                                         </div>
                                     </div>
                                 </div>
-                            </Card>
+                            </Card> */}
                         </div>
                     )}
 

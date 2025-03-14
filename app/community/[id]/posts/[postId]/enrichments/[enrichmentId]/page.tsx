@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ThumbsUp, ThumbsDown, Clock, Check, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import GoogleDocsStyleDiff from "@/components/shared/GoogleDocsStyleDiff";
+import { Loader } from "@/components/ui/loader";
 
 interface Contribution {
     id: number;
@@ -119,8 +120,7 @@ export default function ContributionDetailPage() {
         return (
             <div className="container mx-auto py-8 px-4">
                 <div className="flex justify-center items-center h-64">
-                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-                    <p className="ml-2">Chargement de la contribution...</p>
+                    <Loader size="md" color="gradient" text="Chargement de la contribution..." variant="pulse" />
                 </div>
             </div>
         );

@@ -15,6 +15,7 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
+import { Loader } from "@/components/ui/loader";
 
 // Cache pour stocker les données
 const pendingContributionsCache = new Map<string, { data: any[], timestamp: number }>();
@@ -65,6 +66,7 @@ export default function EnrichmentVotingSession({
     const [isContributorsCountEven, setIsContributorsCountEven] = useState(false);
     const [loading, setLoading] = useState(true);
     const [community, setCommunity] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     // Mémoriser les IDs pour éviter les re-rendus inutiles
     const memoizedCommunityId = useMemo(() => communityId, [communityId]);
@@ -109,7 +111,7 @@ export default function EnrichmentVotingSession({
     // Fonction optimisée pour récupérer les contributions en attente
     const fetchPendingContributions = useCallback(async (forceRefresh = false) => {
         try {
-            setLoading(true);
+            setIsLoading(true);
 
             const cacheKey = `pending-contributions-${memoizedCommunityId}-${memoizedPostId}`;
             const now = Date.now();
@@ -119,7 +121,7 @@ export default function EnrichmentVotingSession({
                 const cachedData = pendingContributionsCache.get(cacheKey)!;
                 if (now - cachedData.timestamp < CACHE_DURATION) {
                     setPendingContributions(cachedData.data);
-                    setLoading(false);
+                    setIsLoading(false);
                     return;
                 }
             }
@@ -145,7 +147,7 @@ export default function EnrichmentVotingSession({
         } catch (error) {
             console.error("Erreur:", error);
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     }, [memoizedCommunityId, memoizedPostId]);
 
@@ -190,13 +192,13 @@ export default function EnrichmentVotingSession({
 
     // Fonction pour charger toutes les données nécessaires
     const loadAllData = useCallback(async () => {
-        setLoading(true);
+        setIsLoading(true);
         await Promise.all([
             fetchCommunityData(),
             fetchPendingContributions(),
             fetchContributorsCount()
         ]);
-        setLoading(false);
+        setIsLoading(false);
     }, [fetchCommunityData, fetchPendingContributions, fetchContributorsCount]);
 
     // Effet pour charger les données initiales
@@ -303,11 +305,10 @@ export default function EnrichmentVotingSession({
 
     const isCreator = community?.createdBy === sessionData?.user?.id || false;
 
-    if (loading) {
+    if (isLoading) {
         return (
-            <div className="mt-4 text-center" id="enrichment-loading">
-                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-                <p className="mt-2 text-gray-600">Chargement des contributions...</p>
+            <div className="flex justify-center items-center py-8">
+                <Loader size="md" color="gradient" text="Chargement..." variant="pulse" />
             </div>
         );
     }

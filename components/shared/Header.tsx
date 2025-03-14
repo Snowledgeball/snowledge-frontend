@@ -59,10 +59,10 @@ export default function Header() {
                 EXPLORER
               </Link>
               <Link
-                onClick={() =>
-                  toast.info("Cette fonctionnalité n'est pas encore définie")
-                }
-                href="/"
+                // onClick={() =>
+                //   toast.info("Cette fonctionnalité n'est pas encore définie")
+                // }
+                href="/communaute"
                 className="text-[#000333] hover:text-gray-900 font-bold text-sm "
               >
                 COMMUNAUTÉS
