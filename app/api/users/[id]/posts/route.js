@@ -5,12 +5,6 @@ import { authOptions } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
-/**
- * Récupère tous les posts créés par un utilisateur spécifique
- * @param {Request} request - La requête HTTP
- * @param {Object} params - Les paramètres de la route, contenant l'ID de l'utilisateur
- * @returns {Promise<NextResponse>} - Réponse contenant les posts de l'utilisateur
- */
 export async function GET(request, { params }) {
     try {
         const { id } = await params;
