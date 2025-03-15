@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Upload, ArrowLeft, Youtube, Globe, Shield } from "lucide-react";
+import { Upload, ArrowLeft, Youtube, Globe, Shield, Loader } from "lucide-react";
 import { defaultCode, defaultDisclaimers } from "@/utils/defaultPres";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import Image from "next/image";
@@ -37,6 +37,7 @@ export default function CommunitySettings() {
     const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
 
     const [userId, setUserId] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         const userId = session?.user?.id;
@@ -128,6 +129,9 @@ export default function CommunitySettings() {
             return;
         }
 
+        // Activer l'indicateur de chargement
+        setIsSaving(true);
+
         try {
             let finalImageUrl = settings.image_url;
 
@@ -157,6 +161,7 @@ export default function CommunitySettings() {
             });
 
             if (response.ok) {
+                toast.success("Modifications enregistrées avec succès");
                 router.push(`/community/${communityId}/dashboard`);
             } else {
                 throw new Error("Erreur lors de la mise à jour");
@@ -165,6 +170,9 @@ export default function CommunitySettings() {
         } catch (error) {
             console.error('Erreur lors de la mise à jour:', error);
             toast.error("Erreur lors de la mise à jour des paramètres");
+        } finally {
+            // Désactiver l'indicateur de chargement, que la requête réussisse ou échoue
+            setIsSaving(false);
         }
     };
 
@@ -440,9 +448,17 @@ export default function CommunitySettings() {
                     </button>
                     <button
                         onClick={handleSubmit}
-                        className="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+                        disabled={isSaving}
+                        className="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center min-w-[200px]"
                     >
-                        Enregistrer les modifications
+                        {isSaving ? (
+                            <>
+                                <Loader size="sm" className="w-4 h-4 mr-2 animate-spin" />
+                                <span>Enregistrement...</span>
+                            </>
+                        ) : (
+                            "Enregistrer les modifications"
+                        )}
                     </button>
                 </div>
             </div>
