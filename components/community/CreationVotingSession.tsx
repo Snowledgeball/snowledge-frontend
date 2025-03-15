@@ -378,13 +378,23 @@ export default function CreationVotingSession({ communityId }: CreationVotingSes
                                     <td className="px-4 py-4">
                                         <div className="flex items-center">
                                             <div className="flex-shrink-0 h-8 w-8 relative overflow-hidden rounded-full">
-                                                <Image
-                                                    src={post.user.profilePicture}
-                                                    alt={post.user.fullName}
-                                                    width={32}
-                                                    height={32}
-                                                    className="rounded-full blur-[5px]"
-                                                />
+                                                {isAuthor ? (
+                                                    <Image
+                                                        src={post.user.profilePicture}
+                                                        alt={post.user.fullName}
+                                                        width={32}
+                                                        height={32}
+                                                        className="rounded-full"
+                                                    />
+                                                ) : (
+                                                    <Image
+                                                        src={post.user.profilePicture}
+                                                        alt={post.user.fullName}
+                                                        width={32}
+                                                        height={32}
+                                                        className="rounded-full blur-[5px]"
+                                                    />
+                                                )}
                                             </div>
                                             <div className="ml-3">
                                                 {isAuthor ? (

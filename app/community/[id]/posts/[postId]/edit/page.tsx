@@ -153,47 +153,47 @@ export default function EditPost() {
         }
     };
 
-    // Fonction debounce pour sauvegarder automatiquement
-    const debouncedSave = useCallback(async () => {
-        if (!hasUnsavedChanges || isSaving) return;
+    // Fonction debounce pour sauvegarder automatiquement desactivé pour le moment
+    // const debouncedSave = useCallback(async () => {
+    //     if (!hasUnsavedChanges || isSaving) return;
 
-        setIsSaving(true);
-        try {
-            const response = await fetch(`/api/communities/${params.id}/posts/pending/${params.postId}/autosave`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    title: postTitle,
-                    content: editorContent,
-                    cover_image_url: coverImage,
-                    tag: selectedTag,
-                    accept_contributions: contributionsEnabled
-                }),
-            });
+    //     setIsSaving(true);
+    //     try {
+    //         const response = await fetch(`/api/communities/${params.id}/posts/pending/${params.postId}/autosave`, {
+    //             method: 'PUT',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 title: postTitle,
+    //                 content: editorContent,
+    //                 cover_image_url: coverImage,
+    //                 tag: selectedTag,
+    //                 accept_contributions: contributionsEnabled
+    //             }),
+    //         });
 
-            if (response.ok) {
-                setLastSavedAt(new Date());
-                setHasUnsavedChanges(false);
-            }
-        } catch (error) {
-            console.error("Erreur lors de la sauvegarde automatique", error);
-        } finally {
-            setIsSaving(false);
-        }
-    }, [postTitle, editorContent, coverImage, selectedTag, contributionsEnabled, hasUnsavedChanges, isSaving, params.id, params.postId]);
+    //         if (response.ok) {
+    //             setLastSavedAt(new Date());
+    //             setHasUnsavedChanges(false);
+    //         }
+    //     } catch (error) {
+    //         console.error("Erreur lors de la sauvegarde automatique", error);
+    //     } finally {
+    //         setIsSaving(false);
+    //     }
+    // }, [postTitle, editorContent, coverImage, selectedTag, contributionsEnabled, hasUnsavedChanges, isSaving, params.id, params.postId]);
 
-    // Effet pour la sauvegarde automatique
-    useEffect(() => {
-        if (hasUnsavedChanges) {
-            const timer = setTimeout(() => {
-                debouncedSave();
-            }, 5000); // Sauvegarde après 5 secondes d'inactivité
+    // Effet pour la sauvegarde automatique desactivé pour le moment
+    // useEffect(() => {
+    //     if (hasUnsavedChanges) {
+    //         const timer = setTimeout(() => {
+    //             debouncedSave();
+    //         }, 5000); // Sauvegarde après 5 secondes d'inactivité
 
-            return () => clearTimeout(timer);
-        }
-    }, [hasUnsavedChanges, debouncedSave]);
+    //         return () => clearTimeout(timer);
+    //     }
+    // }, [hasUnsavedChanges, debouncedSave]);
 
     // Marquer les changements non sauvegardés
     useEffect(() => {
@@ -390,7 +390,7 @@ export default function EditPost() {
 
     if (isLoading) return <LoadingComponent />;
     if (!isAuthenticated) return null;
-    if (!post) return <div>Chargement...</div>;
+    if (!post) return <Loader fullScreen text="Chargement du post..." variant="spinner" />;
 
     return (
         <div>

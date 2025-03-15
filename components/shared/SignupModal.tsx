@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Dialog, DialogPanel, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment } from "react";
 import { deployAccountContract, generateStarkNetAddress } from "../../utils/starknetUtils";
 import { mintSBT } from "../../utils/mintSBT";
-import { Camera, User, Mail, Lock, Upload } from "lucide-react";
+import { Camera, User, Mail, Lock, Upload, CheckCircle2, Circle, Loader2 } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
 
 interface SignUpModalProps {
@@ -24,6 +24,15 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [currentStep, setCurrentStep] = useState(0);
+    const [progressSteps, setProgressSteps] = useState([
+        { name: "Création du wallet", completed: false, current: true },
+        { name: "Approvisionnement du wallet", completed: false, current: false },
+        { name: "Déploiement du wallet", completed: false, current: false },
+        { name: "Enregistrement des données", completed: false, current: false },
+        { name: "Création du SBT", completed: false, current: false },
+        { name: "Finalisation", completed: false, current: false }
+    ]);
     const router = useRouter();
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,6 +50,18 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
         }
     };
 
+    // Fonction pour mettre à jour l'étape actuelle
+    const updateProgress = (step: number) => {
+        setCurrentStep(step);
+        setProgressSteps(prevSteps =>
+            prevSteps.map((s, index) => ({
+                ...s,
+                completed: index < step,
+                current: index === step
+            }))
+        );
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -53,9 +74,21 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
         }
 
         try {
-            const addressDetails = generateStarkNetAddress();
+            // Étape 1: Création du compte (déjà en cours)
+            updateProgress(0);
+
+            // Étape 2: Approvisionnement des fonds
+            updateProgress(1);
+            // Simuler l'approvisionnement des fonds (attente de 1.5 secondes)
+            await new Promise(resolve => setTimeout(resolve, 5000));
+
+            // Étape 3: Déploiement du wallet
+            updateProgress(2);
+            const addressDetails = await generateStarkNetAddress();
             await deployAccountContract(addressDetails.privateKey, addressDetails.publicKey);
 
+            // Étape 4: Enregistrement des données
+            updateProgress(3);
             const formData = new FormData();
             formData.append("fullName", fullName);
             formData.append("userName", userName);
@@ -96,22 +129,28 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                     console.log("Error uploading file");
                 }
 
-                closeModal();
-                await signIn("credentials", { email, password });
 
                 const dataUploaded = await responseUpload.json();
 
+                // Étape 5: Création du SBT
+                updateProgress(4);
                 // Wait for 1 second before minting the SBT
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 await mintSBT(addressDetails.accountAddress, dataUploaded.metadataUrl);
+
+                // Étape 6: Finalisation
+                updateProgress(5);
+                await signIn("credentials", { email, password });
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                closeModal();
             } else {
                 const data = await response.json();
                 setError(data.error || "Une erreur est survenue lors de l'inscription.");
+                setIsLoading(false);
             }
         } catch (err) {
             setError("Une erreur est survenue lors de l'inscription. Veuillez réessayer.");
             console.error(err);
-        } finally {
             setIsLoading(false);
         }
     };
@@ -124,6 +163,37 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
             {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                     {error}
+                </div>
+            )}
+
+            {isLoading && (
+                <div className="mb-6 bg-blue-50 rounded-lg p-4">
+                    <div className="mb-4">
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div
+                                className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-in-out"
+                                style={{ width: `${(currentStep + 1) * 100 / progressSteps.length}%` }}
+                            ></div>
+                        </div>
+                    </div>
+                    <ul className="space-y-3">
+                        {progressSteps.map((step, index) => (
+                            <li key={index} className="flex items-center">
+                                {step.completed ? (
+                                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
+                                ) : step.current ? (
+                                    <div className="h-5 w-5 mr-2 text-blue-500">
+                                        <Loader2 className="h-5 w-5 animate-spin" />
+                                    </div>
+                                ) : (
+                                    <Circle className="h-5 w-5 text-gray-300 mr-2" />
+                                )}
+                                <span className={`text-sm ${step.completed ? 'text-green-700' : step.current ? 'text-blue-700 font-medium' : 'text-gray-500'}`}>
+                                    {step.name}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             )}
 
@@ -170,6 +240,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                             onChange={(e) => setFullName(e.target.value)}
                             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
                             required
+                            disabled={isLoading}
                         />
                     </div>
 
@@ -185,6 +256,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
                             autoComplete="off"
                             required
+                            disabled={isLoading}
                         />
                     </div>
 
@@ -200,6 +272,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
                             autoComplete="username"
                             required
+                            disabled={isLoading}
                         />
                     </div>
 
@@ -215,6 +288,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
                             autoComplete="new-password"
                             required
+                            disabled={isLoading}
                         />
                     </div>
                 </div>
@@ -222,13 +296,10 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                    className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                     {isLoading ? (
-                        <>
-                            <Loader size="sm" color="white" variant="spinner" className="mr-2" />
-                            Inscription en cours...
-                        </>
+                        "Inscription en cours..."
                     ) : (
                         "S'inscrire"
                     )}

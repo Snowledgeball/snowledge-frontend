@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createBulkNotifications } from "@/lib/notifications";
 import { NotificationType } from "@/types/notification";
-import { checkPostPublishability, checkPostStatus } from "@/lib/postUtils";
+import { checkPostStatus } from "@/lib/postUtils";
 
 const prisma = new PrismaClient();
 

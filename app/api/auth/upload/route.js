@@ -60,13 +60,19 @@ export async function PUT(request) {
     try {
         // TODO: change to the user address
         const userAddress = data.get("userAddress");
+        console.log("userAddress :", userAddress);
         const txResponse = await contract.call("get_token_uri_by_address", [userAddress]);
+
+        console.log("txResponse :", txResponse);
 
         const parts = txResponse.split('/ipfs/');
         const MetadataHash = parts[1];
         console.log("MetadataHash :", MetadataHash);
         const file = (await pinata.gateways.get(MetadataHash)).data;
         const newValue = JSON.parse(data.get("newValue"));
+
+        console.log("file :", file);
+        console.log("newValue :", newValue);
 
         // TODO: A refaire, c'est pas propre (peut etre créer une liste a u premier ajout et la modifier a chaque fois)
         //Si file.community existe (au moins 1 communauté deja ajoutée)

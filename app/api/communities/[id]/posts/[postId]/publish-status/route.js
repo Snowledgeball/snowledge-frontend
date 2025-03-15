@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { checkPostPublishability } from "@/lib/postUtils";
+import { checkPostStatus } from "@/lib/postUtils";
 
 const prisma = new PrismaClient();
 
@@ -48,7 +48,7 @@ export async function GET(request, { params }) {
         const isContributorsCountEven = contributorsCount % 2 === 0;
 
         // Vérifier si le post peut être publié
-        const publishStatus = checkPostPublishability(
+        const publishStatus = checkPostStatus(
             post,
             contributorsCount,
             isContributorsCountEven

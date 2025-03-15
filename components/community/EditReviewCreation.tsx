@@ -113,7 +113,7 @@ export default function EditReviewCreation({
             }
 
             toast.success("Vote modifié avec succès");
-            router.push(`/community/${communityId}`);
+            router.push(`/community/${communityId}?tab=voting`);
         } catch (error) {
             console.error("Erreur:", error);
             toast.error("Erreur lors de la modification du vote");
