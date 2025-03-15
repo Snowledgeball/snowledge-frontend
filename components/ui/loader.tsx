@@ -121,16 +121,6 @@ export function Loader({
                     }} />
                 )}
             </div>
-
-            {/* Effet de brillance */}
-            <div
-                className={cn(
-                    "absolute rounded-full bg-white/30 blur-[1px]",
-                    size === "sm" ? "h-1 w-1 top-0.5 left-0.5" :
-                        size === "md" ? "h-1.5 w-1.5 top-1 left-1" :
-                            "h-2 w-2 top-1.5 left-1.5"
-                )}
-            />
         </div>
     );
 

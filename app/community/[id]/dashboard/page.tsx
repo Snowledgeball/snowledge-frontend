@@ -244,6 +244,8 @@ export default function CommunityDashboard() {
     id: number;
     fullName: string;
   } | null>(null);
+  const [loadingApproval, setLoadingApproval] = useState<number | null>(null);
+  const [loadingRejection, setLoadingRejection] = useState(false);
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -554,6 +556,9 @@ export default function CommunityDashboard() {
 
   // Fonction pour approuver une demande de contributeur avec invalidation du cache
   const handleApproveRequest = useCallback(async (requestId: number) => {
+    // Ajouter l'ID de la requête en cours d'approbation
+    setLoadingApproval(requestId);
+
     try {
       const response = await fetch(
         `/api/communities/${communityId}/contributor-requests/${requestId}/approve`,
@@ -576,12 +581,18 @@ export default function CommunityDashboard() {
     } catch (error) {
       console.error("Erreur:", error);
       toast.error("Une erreur est survenue");
+    } finally {
+      // Réinitialiser l'état de chargement
+      setLoadingApproval(null);
     }
   }, [communityId, fetchContributorRequests, fetchMembers, invalidateCache]);
 
   // Fonction pour rejeter une demande de contributeur avec invalidation du cache
   const handleRejectRequest = useCallback(async () => {
     if (!selectedRequestId) return;
+
+    // Indiquer que le rejet est en cours
+    setLoadingRejection(true);
 
     try {
       const response = await fetch(
@@ -598,8 +609,8 @@ export default function CommunityDashboard() {
       if (response.ok) {
         toast.success("Demande rejetée avec succès");
         setIsRejectModalOpen(false);
+        // Réinitialiser la raison du rejet
         setRejectionReason("");
-        setSelectedRequestId(null);
         // Invalider le cache des demandes de contributeur
         invalidateCache('contributorRequests', `contributor-requests-${communityId}`);
         // Recharger les données
@@ -610,8 +621,11 @@ export default function CommunityDashboard() {
     } catch (error) {
       console.error("Erreur:", error);
       toast.error("Une erreur est survenue");
+    } finally {
+      // Réinitialiser l'état de chargement
+      setLoadingRejection(false);
     }
-  }, [selectedRequestId, rejectionReason, communityId, fetchContributorRequests, invalidateCache]);
+  }, [communityId, fetchContributorRequests, invalidateCache, rejectionReason, selectedRequestId]);
 
   // Fonction pour soumettre un post avec invalidation du cache
   const handleSubmitPost = useCallback(async () => {
@@ -1227,15 +1241,31 @@ export default function CommunityDashboard() {
                         <div className="flex items-center space-x-2 self-end lg:self-auto">
                           <button
                             onClick={() => handleApproveRequest(request.id)}
-                            className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                            className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center min-w-[90px]"
+                            disabled={loadingApproval === request.id || loadingRejection}
                           >
-                            Approuver
+                            {loadingApproval === request.id ? (
+                              <>
+                                <Loader size="sm" className="w-4 h-4 mr-2 animate-spin" />
+                                <span>En cours...</span>
+                              </>
+                            ) : (
+                              "Approuver"
+                            )}
                           </button>
                           <button
                             onClick={() => handleRejectClick(request.id)}
-                            className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                            className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center min-w-[90px]"
+                            disabled={loadingApproval === request.id || loadingRejection}
                           >
-                            Refuser
+                            {loadingRejection && selectedRequestId === request.id ? (
+                              <>
+                                <Loader size="sm" className="w-4 h-4 mr-2 animate-spin" />
+                                <span>En cours...</span>
+                              </>
+                            ) : (
+                              "Refuser"
+                            )}
                           </button>
                         </div>
                       </div>
@@ -1640,19 +1670,27 @@ export default function CommunityDashboard() {
               className="min-h-[100px]"
             />
           </div>
-          <DialogFooter className="flex space-x-2">
+          <DialogFooter>
             <button
               onClick={() => setIsRejectModalOpen(false)}
-              className="px-4 py-2 text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+              disabled={loadingRejection}
             >
               Annuler
             </button>
             <button
               onClick={handleRejectRequest}
-              disabled={!rejectionReason.trim()}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center min-w-[90px]"
+              disabled={loadingRejection}
             >
-              Confirmer le refus
+              {loadingRejection ? (
+                <>
+                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                  <span>En cours...</span>
+                </>
+              ) : (
+                "Confirmer le rejet"
+              )}
             </button>
           </DialogFooter>
         </DialogContent>

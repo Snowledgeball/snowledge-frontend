@@ -93,7 +93,8 @@ export async function POST(
         formData.append("userAddress", userRequesting.accountAddress);
         formData.append("newValue", JSON.stringify(newData));
 
-        await fetch(`${process.env.API_URL}/api/auth/upload`, {
+        // On mais pas de await car on ne veut pas attendre la réponse de l'API
+        fetch(`${process.env.API_URL}/api/auth/upload`, {
             method: "PUT",
             body: formData,
         });
