@@ -6,7 +6,6 @@ import { pinata } from "../../../../utils/config";
 const prisma = new PrismaClient();
 
 export async function POST(req) {
-  console.log("POSTTTTT");
   try {
     // Extraire les données du corps de la requête
 
