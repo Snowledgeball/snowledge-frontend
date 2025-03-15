@@ -71,9 +71,7 @@ export default function ContributionDetailPage() {
                 throw new Error("Erreur lors de la récupération de la contribution");
             }
 
-
             const data = await response.json();
-            console.log(data);
             setContribution(data);
         } catch (error) {
             console.error("Erreur:", error);

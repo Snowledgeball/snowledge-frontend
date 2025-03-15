@@ -30,15 +30,11 @@ export default function NotificationBell() {
   useEffect(() => {
     if (!session?.user?.id) return;
 
-    console.log(session.user.id);
-
     const q = query(
       collection(db, "notifications"),
       where("userId", "==", parseInt(session.user.id)),
       orderBy("createdAt", "desc")
     );
-
-    console.log(q);
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const notifs = snapshot.docs.map((doc) => ({
@@ -47,7 +43,6 @@ export default function NotificationBell() {
       })) as Notification[];
 
       setNotifications(notifs);
-      console.log(notifs);
       setUnreadCount(notifs.filter((n) => !n.read).length);
     });
 

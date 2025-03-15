@@ -417,15 +417,12 @@ const TinyEditor = ({
       done: (data: tinycomments_fetch) => void,
       fail: TinyCommentsFetchFailCallback
     ) => {
-      console.log("tinycomments_fetch", conversationUids);
-
       const isAfterAddOrDeleteOrResolveComment =
         sessionStorage.getItem("isAfterAddOrDeleteOrResolveComment") === "true";
       if (isAfterAddOrDeleteOrResolveComment) {
         const editor = (window as any).tinymce.get("my-tiny-editor");
         if (editor) {
           await saveContent(editor.getContent());
-          console.log("saveContent");
           sessionStorage.removeItem("isAfterAddOrDeleteOrResolveComment"); // Nettoyer après utilisation
         }
       }
@@ -436,7 +433,6 @@ const TinyEditor = ({
       })
         .then((response) => response.json())
         .then((data: tinycomments_fetch) => {
-          console.log("Toutes les conversations:", data);
           done(data);
         })
         .catch((err) => {

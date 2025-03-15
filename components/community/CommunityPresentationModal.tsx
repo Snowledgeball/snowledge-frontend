@@ -67,7 +67,6 @@ export default function CommunityPresentationModal({
                 // Supprimer spécifiquement le cache des communautés de l'utilisateur
                 const userCommunitiesCacheKey = `user-communities-${userId}`;
                 sessionStorage.removeItem(userCommunitiesCacheKey);
-                console.log(`Cache invalidé: ${userCommunitiesCacheKey}`);
 
                 // Supprimer également les autres caches liés
                 sessionStorage.removeItem(`joined-communities-${userId}`);

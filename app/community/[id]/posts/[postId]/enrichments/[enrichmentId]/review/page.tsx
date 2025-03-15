@@ -123,7 +123,7 @@ export default function ReviewContribution() {
                     }
                 }
             } catch (error) {
-                console.log("Erreur:", error);
+                console.error("Erreur:", error);
                 toast.error("Une erreur est survenue");
                 router.push(`/community/${params.id}/posts/${params.postId}`);
             } finally {

@@ -46,7 +46,6 @@ export default function ReviewPost() {
           `/api/communities/${params.id}/posts/pending/${params.postId}`
         );
 
-        console.log("postResponse", postResponse);
         if (!postResponse.ok) {
           toast.error("Erreur lors de la récupération du post");
           router.push(`/community/${params.id}`);
@@ -55,23 +54,15 @@ export default function ReviewPost() {
 
         const postData = await postResponse.json();
         setPost(postData);
-        console.log("postData", postData);
 
         // Récupérer les données de la communauté
         const communityResponse = await fetch(`/api/communities/${params.id}`);
         const communityData = await communityResponse.json();
 
-        console.log("communityData", communityData);
 
         // Vérifier si l'utilisateur est un contributeur ou le créateur de la communauté
         const isContributor = membershipData.isContributor;
         const isCreator = communityData.creator_id == session?.user?.id;
-
-        console.log("communityData.creator_id", communityData.creator_id);
-        console.log("session?.user.id", session?.user.id);
-
-        console.log("isContributor", isContributor);
-        console.log("isCreator", isCreator);
 
         // Permettre l'accès à la page de revue si l'utilisateur est contributeur OU créateur
         if (!isContributor && !isCreator) {
@@ -112,9 +103,9 @@ export default function ReviewPost() {
         }
       } catch (error) {
         if (error instanceof Error) {
-          console.log("Erreur:", error.stack);
+          console.error("Erreur:", error.stack);
         } else {
-          console.log("Une erreur inattendue s'est produite");
+          console.error("Une erreur inattendue s'est produite");
         }
         toast.error("Une erreur est survenue");
         router.push(`/community/${params.id}`);

@@ -53,7 +53,7 @@ export default function CommunitySettings() {
                     const data = await response.json();
                     if (data.creator_id !== parseInt(userId)) {
                         toast.error("Vous n'avez pas les permissions pour accéder à cette page");
-                        console.log(data.creator_id, userId);
+                        console.error(data.creator_id, userId);
                         router.push(`/`);
                         return;
                     }

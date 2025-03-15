@@ -126,7 +126,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                 });
 
                 if (!responseUpload.ok) {
-                    console.log("Error uploading file");
+                    console.error("Error uploading file");
                 }
 
 

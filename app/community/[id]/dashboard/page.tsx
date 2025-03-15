@@ -264,14 +264,12 @@ export default function CommunityDashboard() {
       if (dashboardCache.dashboardData.has(cacheKey)) {
         const cachedData = dashboardCache.dashboardData.get(cacheKey)!;
         if (isCacheValid(cachedData)) {
-          console.log("Utilisation des données du dashboard en cache");
           setDashboardData(cachedData.data);
           setLoading(false);
           return cachedData.data;
         }
       }
 
-      console.log("Récupération des données du dashboard depuis l'API");
       const response = await fetch(`/api/communities/${communityId}`, {
         headers: {
           'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
@@ -284,7 +282,6 @@ export default function CommunityDashboard() {
           toast.error(
             "Vous n'avez pas les permissions pour accéder à cette page"
           );
-          console.log(data.creator_id, userId);
           router.push(`/`);
           return null;
         }
@@ -338,13 +335,11 @@ export default function CommunityDashboard() {
       if (dashboardCache.members.has(cacheKey)) {
         const cachedData = dashboardCache.members.get(cacheKey)!;
         if (isCacheValid(cachedData)) {
-          console.log("Utilisation des membres en cache");
           setMembers(cachedData.data);
           return;
         }
       }
 
-      console.log("Récupération des membres depuis l'API");
       const response = await fetch(`/api/communities/${communityId}/members`, {
         headers: {
           'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
@@ -359,10 +354,6 @@ export default function CommunityDashboard() {
           data: data.members,
           timestamp: Date.now()
         });
-
-        console.log("data", data);
-
-        console.log("data.members", data.members);
 
         setMembers(data);
       }
@@ -379,13 +370,11 @@ export default function CommunityDashboard() {
       if (dashboardCache.contributorRequests.has(cacheKey)) {
         const cachedData = dashboardCache.contributorRequests.get(cacheKey)!;
         if (isCacheValid(cachedData)) {
-          console.log("Utilisation des demandes de contributeur en cache");
           setContributorRequests(cachedData.data);
           return;
         }
       }
 
-      console.log("Récupération des demandes de contributeur depuis l'API");
       const response = await fetch(`/api/communities/${communityId}/contributor-requests`, {
         headers: {
           'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
@@ -416,13 +405,11 @@ export default function CommunityDashboard() {
       if (dashboardCache.posts.has(cacheKey)) {
         const cachedData = dashboardCache.posts.get(cacheKey)!;
         if (isCacheValid(cachedData)) {
-          console.log("Utilisation des posts en cache");
           setPosts(cachedData.data);
           return;
         }
       }
 
-      console.log("Récupération des posts depuis l'API");
       const response = await fetch(`/api/communities/${communityId}/posts`, {
         headers: {
           'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
@@ -635,11 +622,6 @@ export default function CommunityDashboard() {
     }
 
     try {
-      console.log("postTitle", postTitle);
-      console.log("editorContent", editorContent);
-      console.log("coverImage", coverImage);
-      console.log("selectedTag", selectedTag);
-      console.log("contributionsEnabled", contributionsEnabled);
       const response = await fetch(`/api/communities/${communityId}/posts`, {
         method: "POST",
         headers: {

@@ -199,13 +199,11 @@ const ProfilePage = () => {
             if (profileCache.userData.has(cacheKey)) {
                 const cachedData = profileCache.userData.get(cacheKey)!;
                 if (isCacheValid(cachedData)) {
-                    console.log("Utilisation des données utilisateur en cache");
                     setUserData(cachedData.data);
                     return;
                 }
             }
 
-            console.log("Récupération des données utilisateur depuis l'API");
             const response = await fetch(`/api/users/${userId}`, {
                 headers: {
                     'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
@@ -251,7 +249,6 @@ const ProfilePage = () => {
             if (profileCache.joinedCommunities.has(cacheKey)) {
                 const cachedData = profileCache.joinedCommunities.get(cacheKey)!;
                 if (isCacheValid(cachedData)) {
-                    console.log("Utilisation des communautés rejointes en cache");
                     setJoinedCommunities(cachedData.data);
                     setSelectedCommunity(cachedData.data[0] as unknown as UserCommunity);
                     setIsLoadingJoined(false);
@@ -259,7 +256,6 @@ const ProfilePage = () => {
                 }
             }
 
-            console.log("Récupération des communautés rejointes depuis l'API");
             const response = await fetch(`/api/users/${userId}/joined-communities`, {
                 headers: {
                     'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
@@ -301,14 +297,12 @@ const ProfilePage = () => {
             if (profileCache.userCommunities.has(cacheKey)) {
                 const cachedData = profileCache.userCommunities.get(cacheKey)!;
                 if (isCacheValid(cachedData)) {
-                    console.log("Utilisation des communautés de l'utilisateur en cache");
                     setUserOwnedCommunities(cachedData.data);
                     setIsLoading(false);
                     return;
                 }
             }
 
-            console.log("Récupération des communautés de l'utilisateur depuis l'API");
             const response = await fetch(`/api/users/${userId}/owned-communities`, {
                 headers: {
                     'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
@@ -343,13 +337,11 @@ const ProfilePage = () => {
             if (profileCache.posts.has(cacheKey)) {
                 const cachedData = profileCache.posts.get(cacheKey)!;
                 if (isCacheValid(cachedData)) {
-                    console.log("Utilisation des posts en cache");
                     setPosts(cachedData.data || []);
                     return;
                 }
             }
 
-            console.log("Récupération des posts depuis l'API");
             const response = await fetch(`/api/users/${userId}/posts`, {
                 headers: {
                     'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
@@ -383,20 +375,16 @@ const ProfilePage = () => {
         if (!userId) return;
 
         try {
-            console.log("fetchEnrichments try");
             // Vérifier si les données sont dans le cache et si le cache est encore valide
             const cacheKey = `enrichments-${userId}`;
             if (profileCache.enrichments.has(cacheKey)) {
-                console.log("fetchEnrichments has cacheKey");
                 const cachedData = profileCache.enrichments.get(cacheKey)!;
                 if (isCacheValid(cachedData)) {
-                    console.log("Utilisation des enrichissements en cache");
                     setEnrichments(cachedData.data || []);
                     return;
                 }
             }
 
-            console.log("Récupération des enrichissements depuis l'API");
             const response = await fetch(`/api/users/${userId}/enrichments`, {
                 headers: {
                     'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
@@ -417,7 +405,6 @@ const ProfilePage = () => {
                 data: enrichmentsData,
                 timestamp: Date.now()
             });
-            console.log("enrichmentsData", enrichmentsData);
 
             setEnrichments(enrichmentsData);
         } catch (error) {
@@ -437,13 +424,11 @@ const ProfilePage = () => {
             if (profileCache.reviews && profileCache.reviews.has(cacheKey)) {
                 const cachedData = profileCache.reviews.get(cacheKey)!;
                 if (isCacheValid(cachedData)) {
-                    console.log("Utilisation des reviews en cache");
                     setReviews(cachedData.data || []);
                     return;
                 }
             }
 
-            console.log("Récupération des reviews depuis l'API");
             const response = await fetch(`/api/users/${userId}/reviews`, {
                 headers: {
                     'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
@@ -453,13 +438,9 @@ const ProfilePage = () => {
             if (!response.ok) throw new Error('Erreur lors de la récupération des reviews');
 
             const data = await response.json();
-            console.log("Données de reviews reçues:", data);
 
             // S'assurer que data.reviews existe, sinon utiliser data directement si c'est un tableau
-            const reviewsData = Array.isArray(data.reviews) ? data.reviews :
-                Array.isArray(data) ? data : [];
-
-            console.log("Reviews formatées:", reviewsData, "Longueur:", reviewsData.length);
+            const reviewsData = Array.isArray(data.reviews) ? data.reviews : Array.isArray(data) ? data : [];
 
             // Mettre à jour le cache
             if (!profileCache.reviews) {
@@ -487,13 +468,11 @@ const ProfilePage = () => {
             if (profileCache.contentProposals && profileCache.contentProposals.has(cacheKey)) {
                 const cachedData = profileCache.contentProposals.get(cacheKey)!;
                 if (isCacheValid(cachedData)) {
-                    console.log("Utilisation des propositions de création en cache");
                     setContentProposals(cachedData.data || []);
                     return;
                 }
             }
 
-            console.log("Récupération des propositions de création depuis l'API");
             const response = await fetch(`/api/users/${userId}/content-proposals`, {
                 headers: {
                     'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
@@ -503,13 +482,9 @@ const ProfilePage = () => {
             if (!response.ok) throw new Error('Erreur lors de la récupération des propositions de création');
 
             const data = await response.json();
-            console.log("Données de propositions reçues:", data);
 
             // S'assurer que data.contentProposals existe, sinon utiliser data directement si c'est un tableau
-            const proposalsData = Array.isArray(data.contentProposals) ? data.contentProposals :
-                Array.isArray(data) ? data : [];
-
-            console.log("Propositions formatées:", proposalsData, "Longueur:", proposalsData.length);
+            const proposalsData = Array.isArray(data.contentProposals) ? data.contentProposals : Array.isArray(data) ? data : [];
 
             // Mettre à jour le cache
             if (!profileCache.contentProposals) {
@@ -537,7 +512,6 @@ const ProfilePage = () => {
             if (profileCache.messages && profileCache.messages.has(cacheKey)) {
                 const cachedData = profileCache.messages.get(cacheKey)!;
                 if (isCacheValid(cachedData)) {
-                    console.log("Utilisation des messages en cache");
                     setMessages(cachedData.data || []);
 
                     // Mettre à jour le compteur de messages dans les statistiques
@@ -553,7 +527,6 @@ const ProfilePage = () => {
                 }
             }
 
-            console.log("Récupération des messages depuis Firebase");
             const response = await fetch(`/api/users/${userId}/messages`, {
                 headers: {
                     'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
@@ -563,13 +536,10 @@ const ProfilePage = () => {
             if (!response.ok) throw new Error('Erreur lors de la récupération des messages');
 
             const data = await response.json();
-            console.log("Données de messages reçues:", data);
 
             // S'assurer que data.messages existe, sinon utiliser data directement si c'est un tableau
             const messagesData = Array.isArray(data.messages) ? data.messages :
                 Array.isArray(data) ? data : [];
-
-            console.log("Messages formatés:", messagesData, "Longueur:", messagesData.length);
 
             // Mettre à jour le cache
             if (!profileCache.messages) {
@@ -585,7 +555,6 @@ const ProfilePage = () => {
             // Mettre à jour le compteur de messages dans les statistiques
             // Utiliser une fonction pour éviter les problèmes de fermeture (closure)
             setUserData(prevData => {
-                console.log("Mise à jour des stats utilisateur avec", messagesData.length, "messages");
                 return {
                     ...prevData,
                     stats: {
@@ -612,8 +581,6 @@ const ProfilePage = () => {
         const contributorRequestsCount = contentProposals.length;
 
         const totalContributions = enrichmentsCount + reviewsCount + contributorRequestsCount;
-
-        console.log(`Calcul des contributions: ${enrichmentsCount} enrichissements + ${reviewsCount} reviews + ${contributorRequestsCount} propositions de posts = ${totalContributions} total`);
 
         // Mettre à jour le compteur de contributions dans les statistiques
         setUserData(prevData => {
@@ -653,7 +620,6 @@ const ProfilePage = () => {
     useEffect(() => {
         // Vérifier si nous avons des données et mettre à jour les statistiques
         if (messages.length > 0 || posts.length > 0 || enrichments.length > 0 || reviews.length > 0 || contentProposals.length > 0) {
-            console.log("Mise à jour des statistiques avec les données chargées");
 
             setUserData(prevData => {
                 // Calculer le nombre total de contributions (enrichissements, reviews et demandes de contribution)
@@ -682,14 +648,11 @@ const ProfilePage = () => {
                     if (profileCache.communityPosts.has(cacheKey)) {
                         const cachedData = profileCache.communityPosts.get(cacheKey)!;
                         if (isCacheValid(cachedData)) {
-                            console.log("Utilisation des posts de la communauté en cache");
-                            console.log("cachedData", cachedData);
                             setSelectedCommunityPosts(cachedData.data || []);
                             return;
                         }
                     }
 
-                    console.log("Récupération des posts de l'utilisateur dans la communauté depuis l'API");
                     const response = await fetch(`/api/users/${userId}/posts/${selectedCommunity.id}`, {
                         headers: {
                             'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
@@ -850,8 +813,6 @@ const ProfilePage = () => {
             } else {
                 formDataToSend.append(field, formData[field as keyof typeof formData]);
             }
-
-            console.log("formDataToSend :", formDataToSend);
 
             const response = await fetch(`/api/users/${userId}`, {
                 method: 'PUT',

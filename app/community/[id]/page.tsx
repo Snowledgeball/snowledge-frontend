@@ -146,7 +146,6 @@ const CommunityHub = () => {
   // Fonction pour invalider le cache
   const invalidateCache = useCallback((cacheKey: string) => {
     cacheUtils.remove(cacheKey);
-    console.log(`Cache invalidé: ${cacheKey}`);
   }, []);
 
   // Fonction optimisée pour récupérer les posts
@@ -280,22 +279,14 @@ const CommunityHub = () => {
       const communityCacheKey = `community-${communityId}`;
       let communityData;
 
-      console.log("communityCacheKey :", communityCacheKey);
-      console.log("cacheUtils.has(communityCacheKey) :", cacheUtils.has(communityCacheKey));
-
       if (cacheUtils.has(communityCacheKey)) {
-        console.log("Les données sont dans le cache");
         const cachedData = cacheUtils.get(communityCacheKey);
-
-        console.log("cachedData :", cachedData);
 
         if (cachedData) {
           communityData = cachedData.data;
           setCommunityData(cachedData.data);
-          console.log("communityData :", communityData);
         } else {
           // Les données sont trop anciennes ou invalides, on les rafraîchit
-          console.log("Les données sont trop anciennes ou invalides, on les rafraîchit");
           const communityResponse = await fetch(`/api/communities/${communityId}`, {
             headers: {
               'Cache-Control': 'max-age=300', // Cache de 5 minutes
@@ -308,13 +299,11 @@ const CommunityHub = () => {
           }
 
           communityData = await communityResponse.json();
-          console.log("communityData :", communityData);
           cacheUtils.set(communityCacheKey, communityData);
           setCommunityData(communityData);
         }
       } else {
         // Pas de données en cache, on les récupère
-        console.log("Pas de données en cache, on les récupère");
         const communityResponse = await fetch(`/api/communities/${communityId}`, {
           headers: {
             'Cache-Control': 'max-age=300', // Cache de 5 minutes
@@ -356,16 +345,14 @@ const CommunityHub = () => {
         setShowJoinModal(true);
       }
 
-      console.log("AAAAAAAAAAAAAAAAAAAAAAAAAA");
 
       // Récupérer les communautés de l'utilisateur (avec mise en cache côté client)
       const userCommunitiesCacheKey = `user-communities-${session?.user?.id}`;
-      console.log("userCommunitiesCacheKey :", userCommunitiesCacheKey);
+
 
       try {
         // Fonction pour récupérer les communautés depuis l'API
         const fetchFromAPI = async () => {
-          console.log("Récupération des communautés depuis l'API...");
           const response = await fetch(`/api/users/${session?.user?.id}/joined-communities`);
 
           if (!response.ok) {
@@ -373,7 +360,6 @@ const CommunityHub = () => {
           }
 
           const data = await response.json();
-          console.log("Données reçues de l'API:", data);
 
           if (data && data.communities && Array.isArray(data.communities)) {
             setUserCommunities(data.communities);
@@ -381,12 +367,10 @@ const CommunityHub = () => {
             // Sauvegarder dans sessionStorage
             if (typeof window !== 'undefined') {
               sessionStorage.setItem(userCommunitiesCacheKey, JSON.stringify(data.communities));
-              console.log("Données sauvegardées dans sessionStorage");
             }
 
             return data.communities;
           } else {
-            console.error("Format de données inattendu:", data);
             setUserCommunities([]);
             return [];
           }
@@ -396,20 +380,16 @@ const CommunityHub = () => {
         if (typeof window !== 'undefined' && sessionStorage.getItem(userCommunitiesCacheKey)) {
           try {
             const cachedDataStr = sessionStorage.getItem(userCommunitiesCacheKey);
-            console.log("Données trouvées en cache:", cachedDataStr);
 
             if (cachedDataStr) {
               const cachedData = JSON.parse(cachedDataStr);
 
               if (Array.isArray(cachedData) && cachedData.length > 0) {
-                console.log("Utilisation des données en cache:", cachedData);
                 setUserCommunities(cachedData);
               } else {
-                console.log("Données en cache invalides, récupération depuis l'API");
                 await fetchFromAPI();
               }
             } else {
-              console.log("Données en cache nulles, récupération depuis l'API");
               await fetchFromAPI();
             }
           } catch (error) {
@@ -417,7 +397,6 @@ const CommunityHub = () => {
             await fetchFromAPI();
           }
         } else {
-          console.log("Pas de données en cache, récupération depuis l'API");
           await fetchFromAPI();
         }
       } catch (error) {
@@ -462,8 +441,6 @@ const CommunityHub = () => {
     const justJoined = searchParams.get('joined') === 'true';
 
     if (justJoined && communityId) {
-      console.log("Invalidation du cache après avoir rejoint la communauté");
-
       // Invalider les caches pertinents
       invalidateCache(`community-${communityId}`);
 
