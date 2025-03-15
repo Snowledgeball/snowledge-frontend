@@ -45,7 +45,13 @@ export async function POST(
         formData.append("userAddress", session.user.address);
         formData.append("newValue", JSON.stringify(newData));
 
-        await fetch(`${process.env.API_URL}/api/auth/upload`, {
+        // await fetch(`${process.env.API_URL}/api/auth/upload`, {
+        //     method: "PUT",
+        //     body: formData,
+        // });
+
+        // On lance le process de modification du SBT sans que ça bloque le processus et on prie pour que ça marche
+        fetch(`${process.env.API_URL}/api/auth/upload`, {
             method: "PUT",
             body: formData,
         });
