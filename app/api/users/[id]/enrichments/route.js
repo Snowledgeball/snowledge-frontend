@@ -5,17 +5,8 @@ import { authOptions } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
-// /**
-//  * Récupère tous les enrichissements créés par un utilisateur spécifique
-//  * @param {Request} request - La requête HTTP
-//  * @param {Object} params - Les paramètres de la route, contenant l'ID de l'utilisateur
-//  * @returns {Promise<NextResponse>} - Réponse contenant les enrichissements de l'utilisateur
-//  */
 export async function GET(request, { params }) {
-    console.log("GET request received");
     try {
-
-        console.log("GET request received 2");
         const { id } = await params;
         const userId = parseInt(id);
 

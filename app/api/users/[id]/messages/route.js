@@ -10,12 +10,6 @@ import {
     orderBy,
 } from "firebase/firestore";
 
-/**
- * Récupère tous les messages envoyés par un utilisateur spécifique depuis Firebase
- * @param {Request} request - La requête HTTP
- * @param {Object} params - Les paramètres de la route, contenant l'ID de l'utilisateur
- * @returns {Promise<NextResponse>} - Réponse contenant les messages de l'utilisateur
- */
 export async function GET(request, { params }) {
     try {
         const { id } = await params;
