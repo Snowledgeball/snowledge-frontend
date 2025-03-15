@@ -56,7 +56,22 @@ export async function POST(
             body: formData,
         });
 
-        return NextResponse.json({ success: true, membership });
+        // Invalider les caches concernés
+        // Note: Nous ne pouvons pas appeler directement invalidateCache ici car c'est une fonction côté client
+        // Nous allons donc définir des en-têtes de cache pour indiquer que les données sont obsolètes
+        const headers = new Headers();
+        headers.append('Cache-Control', 'no-cache, no-store, must-revalidate');
+        headers.append('Pragma', 'no-cache');
+        headers.append('Expires', '0');
+
+        // Nous retournons une réponse avec les en-têtes qui indiquent que le cache doit être invalidé
+        return NextResponse.json(
+            { success: true, membership, cacheInvalidation: true },
+            {
+                status: 200,
+                headers: headers
+            }
+        );
     } catch (error) {
         console.log('Erreur lors de l\'adhésion:', error.stack);
         return NextResponse.json(

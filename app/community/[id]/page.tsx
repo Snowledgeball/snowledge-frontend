@@ -18,10 +18,73 @@ import BanModal from "@/components/community/BanModal";
 import { Loader } from "@/components/ui/loader";
 
 // Cache pour stocker les données
-const communityCache = new Map<string, any>();
-const postsCache = new Map<string, any>();
-const pendingPostsCache = new Map<string, any>();
-const pendingEnrichmentsCache = new Map<string, any>();
+// Nous n'utilisons plus ces Maps car elles sont réinitialisées à chaque rechargement
+// const communityCache = new Map<string, { data: any, timestamp: number }>();
+// const postsCache = new Map<string, any>();
+// const pendingPostsCache = new Map<string, any>();
+// const pendingEnrichmentsCache = new Map<string, any>();
+
+// Fonctions utilitaires pour le cache avec localStorage
+const cacheUtils = {
+  // Récupérer des données du cache
+  get: (key: string) => {
+    if (typeof window === 'undefined') return null;
+
+    try {
+      const item = localStorage.getItem(key);
+      if (!item) return null;
+
+      const parsedItem = JSON.parse(item);
+      return parsedItem;
+    } catch (error) {
+      console.error('Erreur lors de la récupération du cache:', error);
+      return null;
+    }
+  },
+
+  // Stocker des données dans le cache
+  set: (key: string, data: any, expirationInMinutes = 5) => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const item = {
+        data,
+        timestamp: Date.now(),
+        expiration: Date.now() + (expirationInMinutes * 60 * 1000)
+      };
+      localStorage.setItem(key, JSON.stringify(item));
+    } catch (error) {
+      console.error('Erreur lors du stockage dans le cache:', error);
+    }
+  },
+
+  // Vérifier si une clé existe dans le cache et n'est pas expirée
+  has: (key: string) => {
+    if (typeof window === 'undefined') return false;
+
+    try {
+      const item = localStorage.getItem(key);
+      if (!item) return false;
+
+      const parsedItem = JSON.parse(item);
+      return parsedItem && parsedItem.expiration > Date.now();
+    } catch (error) {
+      console.error('Erreur lors de la vérification du cache:', error);
+      return false;
+    }
+  },
+
+  // Supprimer une entrée du cache
+  remove: (key: string) => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.error('Erreur lors de la suppression du cache:', error);
+    }
+  }
+};
 
 // Ajouter ce type avant le composant CommunityHub
 type Presentation = {
@@ -80,43 +143,11 @@ const CommunityHub = () => {
   // Mémoriser l'ID de la communauté pour éviter les re-rendus inutiles
   const communityId = useMemo(() => params.id as string, [params.id]);
 
-  // Mettre à jour l'URL lorsque l'onglet actif change
-  const handleTabChange = useCallback((tab: string) => {
-    // Éviter de recharger si on clique sur l'onglet déjà actif
-    if (tab === activeTab) return;
-
-    setActiveTab(tab);
-
-    // Construire la nouvelle URL avec uniquement le paramètre tab
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set('tab', tab);
-
-    // Si on change pour un onglet autre que "voting", supprimer le paramètre "voting"
-    if (tab !== "voting") {
-      newParams.delete('voting');
-    }
-
-    // Mettre à jour l'URL sans recharger la page
-    const newUrl = `/community/${communityId}?${newParams.toString()}`;
-    window.history.pushState({}, '', newUrl);
-  }, [activeTab, communityId, searchParams]);
-
-  // Mettre à jour l'URL lorsque le sous-onglet de vote change
-  const handleVotingSubTabChange = useCallback((tab: "creation" | "enrichissement") => {
-    // Éviter de recharger si on clique sur le sous-onglet déjà actif
-    if (tab === votingSubTab) return;
-
-    setVotingSubTab(tab);
-
-    // Construire la nouvelle URL avec les paramètres
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set('tab', 'voting');
-    newParams.set('voting', tab);
-
-    // Mettre à jour l'URL sans recharger la page
-    const newUrl = `/community/${communityId}?${newParams.toString()}`;
-    window.history.pushState({}, '', newUrl);
-  }, [votingSubTab, communityId, searchParams]);
+  // Fonction pour invalider le cache
+  const invalidateCache = useCallback((cacheKey: string) => {
+    cacheUtils.remove(cacheKey);
+    console.log(`Cache invalidé: ${cacheKey}`);
+  }, []);
 
   // Fonction optimisée pour récupérer les posts
   const fetchCommunityPosts = useCallback(async (forceRefresh = false) => {
@@ -125,9 +156,9 @@ const CommunityHub = () => {
     const cacheKey = `posts-${communityId}`;
 
     // Vérifier si les données sont dans le cache et si on ne force pas le rafraîchissement
-    if (!forceRefresh && postsCache.has(cacheKey)) {
-      const cachedData = postsCache.get(cacheKey);
-      setPosts(cachedData);
+    if (!forceRefresh && cacheUtils.has(cacheKey)) {
+      const cachedData = cacheUtils.get(cacheKey);
+      setPosts(cachedData.data);
       return;
     }
 
@@ -151,7 +182,7 @@ const CommunityHub = () => {
       const postsData = Array.isArray(data.posts) ? data.posts : [];
 
       // Mettre en cache les données
-      postsCache.set(cacheKey, postsData);
+      cacheUtils.set(cacheKey, postsData);
 
       setPosts(postsData);
     } catch (error) {
@@ -168,14 +199,11 @@ const CommunityHub = () => {
 
     const cacheKey = `pending-posts-${communityId}`;
 
-    // Vérifier si les données sont dans le cache et si elles sont récentes (moins de 2 minutes)
-    if (pendingPostsCache.has(cacheKey)) {
-      const { data, timestamp } = pendingPostsCache.get(cacheKey);
-      const now = Date.now();
-      if (now - timestamp < 2 * 60 * 1000) { // 2 minutes
-        setPendingPostsCount(data.length);
-        return;
-      }
+    // Vérifier si les données sont dans le cache et si elles sont récentes
+    if (cacheUtils.has(cacheKey)) {
+      const cachedData = cacheUtils.get(cacheKey);
+      setPendingPostsCount(cachedData.data.length);
+      return;
     }
 
     try {
@@ -191,8 +219,8 @@ const CommunityHub = () => {
       if (response.ok) {
         const data = await response.json();
 
-        // Mettre en cache les données avec un timestamp
-        pendingPostsCache.set(cacheKey, { data, timestamp: Date.now() });
+        // Mettre en cache les données
+        cacheUtils.set(cacheKey, data, 2); // 2 minutes d'expiration
 
         setPendingPostsCount(data.length);
       }
@@ -207,14 +235,11 @@ const CommunityHub = () => {
 
     const cacheKey = `pending-enrichments-${communityId}`;
 
-    // Vérifier si les données sont dans le cache et si elles sont récentes (moins de 2 minutes)
-    if (pendingEnrichmentsCache.has(cacheKey)) {
-      const { data, timestamp } = pendingEnrichmentsCache.get(cacheKey);
-      const now = Date.now();
-      if (now - timestamp < 2 * 60 * 1000) { // 2 minutes
-        setPendingEnrichmentsCount(data.length);
-        return;
-      }
+    // Vérifier si les données sont dans le cache
+    if (cacheUtils.has(cacheKey)) {
+      const cachedData = cacheUtils.get(cacheKey);
+      setPendingEnrichmentsCount(cachedData.data.length);
+      return;
     }
 
     try {
@@ -230,8 +255,8 @@ const CommunityHub = () => {
       if (response.ok) {
         const data = await response.json();
 
-        // Mettre en cache les données avec un timestamp
-        pendingEnrichmentsCache.set(cacheKey, { data, timestamp: Date.now() });
+        // Mettre en cache les données
+        cacheUtils.set(cacheKey, data, 2); // 2 minutes d'expiration
 
         setPendingEnrichmentsCount(data.length);
       }
@@ -255,14 +280,22 @@ const CommunityHub = () => {
       const communityCacheKey = `community-${communityId}`;
       let communityData;
 
-      if (communityCache.has(communityCacheKey)) {
-        const { data, timestamp } = communityCache.get(communityCacheKey);
-        const now = Date.now();
-        if (now - timestamp < 5 * 60 * 1000) { // 5 minutes
-          communityData = data;
-          setCommunityData(data);
+      console.log("communityCacheKey :", communityCacheKey);
+      console.log("cacheUtils.has(communityCacheKey) :", cacheUtils.has(communityCacheKey));
+
+      if (cacheUtils.has(communityCacheKey)) {
+        console.log("Les données sont dans le cache");
+        const cachedData = cacheUtils.get(communityCacheKey);
+
+        console.log("cachedData :", cachedData);
+
+        if (cachedData) {
+          communityData = cachedData.data;
+          setCommunityData(cachedData.data);
+          console.log("communityData :", communityData);
         } else {
-          // Les données sont trop anciennes, on les rafraîchit
+          // Les données sont trop anciennes ou invalides, on les rafraîchit
+          console.log("Les données sont trop anciennes ou invalides, on les rafraîchit");
           const communityResponse = await fetch(`/api/communities/${communityId}`, {
             headers: {
               'Cache-Control': 'max-age=300', // Cache de 5 minutes
@@ -275,11 +308,13 @@ const CommunityHub = () => {
           }
 
           communityData = await communityResponse.json();
-          communityCache.set(communityCacheKey, { data: communityData, timestamp: Date.now() });
+          console.log("communityData :", communityData);
+          cacheUtils.set(communityCacheKey, communityData);
           setCommunityData(communityData);
         }
       } else {
         // Pas de données en cache, on les récupère
+        console.log("Pas de données en cache, on les récupère");
         const communityResponse = await fetch(`/api/communities/${communityId}`, {
           headers: {
             'Cache-Control': 'max-age=300', // Cache de 5 minutes
@@ -292,7 +327,7 @@ const CommunityHub = () => {
         }
 
         communityData = await communityResponse.json();
-        communityCache.set(communityCacheKey, { data: communityData, timestamp: Date.now() });
+        cacheUtils.set(communityCacheKey, communityData);
         setCommunityData(communityData);
       }
 
@@ -321,19 +356,73 @@ const CommunityHub = () => {
         setShowJoinModal(true);
       }
 
+      console.log("AAAAAAAAAAAAAAAAAAAAAAAAAA");
+
       // Récupérer les communautés de l'utilisateur (avec mise en cache côté client)
       const userCommunitiesCacheKey = `user-communities-${session?.user?.id}`;
-      if (sessionStorage.getItem(userCommunitiesCacheKey)) {
-        setUserCommunities(JSON.parse(sessionStorage.getItem(userCommunitiesCacheKey)!));
-      } else {
-        const userCommunitiesResponse = await fetch(
-          `/api/users/${session?.user?.id}/joined-communities`
-        );
-        if (userCommunitiesResponse.ok) {
-          const userCommunitiesData = await userCommunitiesResponse.json();
-          setUserCommunities(userCommunitiesData.communities);
-          sessionStorage.setItem(userCommunitiesCacheKey, JSON.stringify(userCommunitiesData.communities));
+      console.log("userCommunitiesCacheKey :", userCommunitiesCacheKey);
+
+      try {
+        // Fonction pour récupérer les communautés depuis l'API
+        const fetchFromAPI = async () => {
+          console.log("Récupération des communautés depuis l'API...");
+          const response = await fetch(`/api/users/${session?.user?.id}/joined-communities`);
+
+          if (!response.ok) {
+            throw new Error(`Erreur HTTP: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log("Données reçues de l'API:", data);
+
+          if (data && data.communities && Array.isArray(data.communities)) {
+            setUserCommunities(data.communities);
+
+            // Sauvegarder dans sessionStorage
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem(userCommunitiesCacheKey, JSON.stringify(data.communities));
+              console.log("Données sauvegardées dans sessionStorage");
+            }
+
+            return data.communities;
+          } else {
+            console.error("Format de données inattendu:", data);
+            setUserCommunities([]);
+            return [];
+          }
+        };
+
+        // Vérifier si des données sont en cache
+        if (typeof window !== 'undefined' && sessionStorage.getItem(userCommunitiesCacheKey)) {
+          try {
+            const cachedDataStr = sessionStorage.getItem(userCommunitiesCacheKey);
+            console.log("Données trouvées en cache:", cachedDataStr);
+
+            if (cachedDataStr) {
+              const cachedData = JSON.parse(cachedDataStr);
+
+              if (Array.isArray(cachedData) && cachedData.length > 0) {
+                console.log("Utilisation des données en cache:", cachedData);
+                setUserCommunities(cachedData);
+              } else {
+                console.log("Données en cache invalides, récupération depuis l'API");
+                await fetchFromAPI();
+              }
+            } else {
+              console.log("Données en cache nulles, récupération depuis l'API");
+              await fetchFromAPI();
+            }
+          } catch (error) {
+            console.error("Erreur lors de la lecture du cache:", error);
+            await fetchFromAPI();
+          }
+        } else {
+          console.log("Pas de données en cache, récupération depuis l'API");
+          await fetchFromAPI();
         }
+      } catch (error) {
+        console.error("Erreur lors de la récupération des communautés:", error);
+        setUserCommunities([]);
       }
 
       // Vérifier si l'utilisateur est contributeur
@@ -342,26 +431,56 @@ const CommunityHub = () => {
 
       // Si l'utilisateur est contributeur, récupérer le nombre de posts en attente
       if (membershipData.isContributor || membershipData.isCreator) {
-        await Promise.all([
-          fetchPendingPosts(),
-          fetchPendingEnrichments()
-        ]);
+        try {
+          await Promise.all([
+            fetchPendingPosts(),
+            fetchPendingEnrichments()
+          ]);
+        } catch (error) {
+          console.error("Erreur lors de la récupération des posts en attente:", error);
+        }
       }
 
       // Récupérer les posts de la communauté indépendamment de l'onglet actif
-      // pour éviter le rechargement lors du changement d'onglet
-      await fetchCommunityPosts();
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log("Erreur:", error.stack);
-      } else {
-        console.log("Une erreur inattendue s'est produite");
+      try {
+        await fetchCommunityPosts();
+      } catch (error) {
+        console.error("Erreur lors de la récupération des posts:", error);
       }
-      setUserCommunities([]);
-    } finally {
+
+      // Marquer le chargement comme terminé
+      setIsLoadingCommunity(false);
+    } catch (error) {
+      console.error("Erreur lors du chargement des données:", error);
       setIsLoadingCommunity(false);
     }
-  }, [communityId, router, session, userId, fetchCommunityPosts, fetchPendingPosts, fetchPendingEnrichments]);
+  }, [communityId, session, userId, router, fetchPendingPosts, fetchPendingEnrichments, fetchCommunityPosts]);
+
+  // Vérifier si le cache doit être invalidé après une action (comme rejoindre une communauté)
+  useEffect(() => {
+    // Vérifier si nous venons de rejoindre une communauté (via un paramètre d'URL ou un état local)
+    const justJoined = searchParams.get('joined') === 'true';
+
+    if (justJoined && communityId) {
+      console.log("Invalidation du cache après avoir rejoint la communauté");
+
+      // Invalider les caches pertinents
+      invalidateCache(`community-${communityId}`);
+
+      if (session?.user?.id) {
+        invalidateCache(`user-communities-${session.user.id}`);
+        invalidateCache(`joined-communities-${session.user.id}`);
+      }
+
+      // Recharger les données de la communauté
+      loadCommunityData();
+
+      // Nettoyer l'URL pour éviter de réinvalider le cache lors des rechargements
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('joined');
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+  }, [searchParams, communityId, session, invalidateCache, loadCommunityData]);
 
   // Effet pour charger les données initiales
   useEffect(() => {
@@ -419,10 +538,7 @@ const CommunityHub = () => {
       await fetchCommunityPosts();
     }
 
-    // Précharger d'autres données si nécessaire pour d'autres onglets
-    // ...
-
-  }, [communityId, session, posts.length, fetchCommunityPosts]);
+  }, [communityId, session, posts.length]);
 
   // Ajouter un effet pour précharger les données lors du changement d'onglet
   useEffect(() => {
@@ -475,7 +591,7 @@ const CommunityHub = () => {
               {/* Tabs */}
               <CommunityTabs
                 activeTab={activeTab}
-                setActiveTab={handleTabChange}
+                setActiveTab={setActiveTab}
                 isContributor={isContributor}
                 isCreator={isCreator}
                 pendingPostsCount={pendingPostsCount}

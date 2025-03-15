@@ -61,13 +61,30 @@ export default function CommunityPresentationModal({
             // Indiquer que l'utilisateur a rejoint avec succès
             setJoinSuccess(true);
 
+            // Invalider les caches côté client
+            // Supprimer les données en cache dans sessionStorage
+            if (typeof window !== 'undefined') {
+                // Supprimer spécifiquement le cache des communautés de l'utilisateur
+                const userCommunitiesCacheKey = `user-communities-${userId}`;
+                sessionStorage.removeItem(userCommunitiesCacheKey);
+                console.log(`Cache invalidé: ${userCommunitiesCacheKey}`);
+
+                // Supprimer également les autres caches liés
+                sessionStorage.removeItem(`joined-communities-${userId}`);
+                localStorage.removeItem(`community-${communityData.id}`);
+            }
+
             // Attendre un court instant pour montrer le message de succès
             setTimeout(() => {
                 // Fermer la modale
                 setShowModal(false);
 
-                // Recharger la page pour mettre à jour les données
-                window.location.reload();
+                // Construire l'URL avec le paramètre 'joined=true' pour indiquer que l'utilisateur vient de rejoindre
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('joined', 'true');
+
+                // Rediriger vers la page de la communauté avec le paramètre
+                window.location.href = currentUrl.toString();
             }, 1500);
 
         } catch (error) {
