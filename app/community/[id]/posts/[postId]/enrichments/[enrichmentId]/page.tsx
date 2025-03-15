@@ -12,6 +12,7 @@ import { ThumbsUp, ThumbsDown, Clock, Check, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import GoogleDocsStyleDiff from "@/components/shared/GoogleDocsStyleDiff";
 import { Loader } from "@/components/ui/loader";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 interface Contribution {
     id: number;
@@ -50,6 +51,7 @@ export default function ContributionDetailPage() {
     const [contribution, setContribution] = useState<Contribution | null>(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<"diff" | "original" | "modified">("diff");
+    const [showEditConfirmation, setShowEditConfirmation] = useState(false);
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -145,11 +147,11 @@ export default function ContributionDetailPage() {
         <div className="container mx-auto py-8 px-4">
             <div className="mb-6">
                 <Link
-                    href={`/community/${params.id}/posts/${params.postId}`}
+                    href={`/community/${params.id}?tab=voting`}
                     className="inline-flex items-center text-blue-600 hover:underline"
                 >
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Retour à mes contributions
+                    Retour aux votes
                 </Link>
             </div>
 
@@ -170,12 +172,46 @@ export default function ContributionDetailPage() {
                         </div>
                         <div className="flex space-x-3">
                             {contribution.user_id === parseInt(session?.user?.id || "0") && contribution.status === "PENDING" && (
-                                <Link
-                                    href={`/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}/edit`}
-                                    className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
-                                >
-                                    Modifier mon enrichissement
-                                </Link>
+                                <>
+                                    <button
+                                        onClick={() => setShowEditConfirmation(true)}
+                                        className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                                    >
+                                        Modifier mon enrichissement
+                                    </button>
+                                    <Dialog open={showEditConfirmation} onOpenChange={setShowEditConfirmation}>
+                                        <DialogContent className="max-w-md bg-white">
+                                            <DialogHeader>
+                                                <DialogTitle>Confirmation de modification</DialogTitle>
+                                            </DialogHeader>
+                                            <div className="py-4">
+                                                <p className="text-gray-700">
+                                                    Attention : Modifier cet enrichissement réinitialisera tous les votes précédents.
+                                                </p>
+                                                <p className="text-gray-700 mt-2">
+                                                    Les contributeurs devront voter à nouveau sur votre enrichissement modifié.
+                                                </p>
+                                            </div>
+                                            <DialogFooter>
+                                                <button
+                                                    onClick={() => setShowEditConfirmation(false)}
+                                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                                                >
+                                                    Annuler
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setShowEditConfirmation(false);
+                                                        router.push(`/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}/edit`);
+                                                    }}
+                                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                                >
+                                                    Continuer la modification
+                                                </button>
+                                            </DialogFooter>
+                                        </DialogContent>
+                                    </Dialog>
+                                </>
                             )}
                             <Link
                                 href={`/community/${contribution.community_posts.community.id}/posts/${contribution.community_posts.id}`}

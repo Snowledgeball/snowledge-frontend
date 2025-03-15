@@ -246,6 +246,9 @@ export default function CommunityDashboard() {
   } | null>(null);
   const [loadingApproval, setLoadingApproval] = useState<number | null>(null);
   const [loadingRejection, setLoadingRejection] = useState(false);
+  const [loadingBan, setLoadingBan] = useState(false);
+  const [loadingPromote, setLoadingPromote] = useState<number | null>(null);
+  const [loadingDemote, setLoadingDemote] = useState<number | null>(null);
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -330,12 +333,15 @@ export default function CommunityDashboard() {
   // Fonction pour récupérer les membres avec cache
   const fetchMembers = useCallback(async () => {
     try {
+      setLoading(true);
+
       // Vérifier si les données sont dans le cache et si le cache est encore valide
       const cacheKey = `members-${communityId}`;
       if (dashboardCache.members.has(cacheKey)) {
         const cachedData = dashboardCache.members.get(cacheKey)!;
         if (isCacheValid(cachedData)) {
           setMembers(cachedData.data);
+          setLoading(false);
           return;
         }
       }
@@ -356,6 +362,7 @@ export default function CommunityDashboard() {
         });
 
         setMembers(data);
+        setLoading(false);
       }
     } catch (error) {
       console.error("Erreur:", error);
@@ -500,47 +507,6 @@ export default function CommunityDashboard() {
     }
   }, []);
 
-  // Fonction pour exclure un membre
-  const handleExcludeMember = useCallback(async (memberId: number, memberName: string) => {
-    try {
-      const response = await fetch(
-        `/api/communities/${communityId}/members/${memberId}/exclude`,
-        {
-          method: "POST",
-        }
-      );
-
-      if (response.ok) {
-        toast.success(`${memberName} a été exclu de la communauté`);
-        // Invalider le cache des membres
-        invalidateCache('members', `members-${communityId}`);
-        // Recharger les données
-        fetchMembers();
-      } else {
-        toast.error("Erreur lors de l'exclusion du membre");
-      }
-    } catch (error) {
-      console.error("Erreur:", error);
-      toast.error("Une erreur est survenue");
-    }
-  }, [communityId, fetchMembers, invalidateCache]);
-
-  useEffect(() => {
-    if (communityId && userId) {
-      fetchDashboardData();
-      fetchMembers();
-      fetchContributorRequests();
-      fetchPosts();
-    }
-  }, [communityId, userId, fetchDashboardData, fetchMembers, fetchContributorRequests, fetchPosts]);
-
-  // Mettre à jour l'onglet actif si le paramètre d'URL change
-  useEffect(() => {
-    if (tabParam === "members") {
-      setActiveTab("members");
-    }
-  }, [tabParam]);
-
   // Fonction pour approuver une demande de contributeur avec invalidation du cache
   const handleApproveRequest = useCallback(async (requestId: number) => {
     // Ajouter l'ID de la requête en cours d'approbation
@@ -660,6 +626,9 @@ export default function CommunityDashboard() {
 
   // Fonction pour promouvoir un membre avec invalidation du cache
   const handlePromoteMember = useCallback(async (memberId: number, memberName: string) => {
+    // Activer l'indicateur de chargement
+    setLoadingPromote(memberId);
+
     try {
       const response = await fetch(
         `/api/communities/${communityId}/members/${memberId}/promote`,
@@ -680,11 +649,17 @@ export default function CommunityDashboard() {
     } catch (error) {
       console.error("Erreur:", error);
       toast.error("Une erreur est survenue");
+    } finally {
+      // Désactiver l'indicateur de chargement
+      setLoadingPromote(null);
     }
   }, [communityId, fetchMembers, invalidateCache]);
 
   // Fonction pour rétrograder un membre avec invalidation du cache
   const handleDemoteMember = useCallback(async (memberId: number, memberName: string) => {
+    // Activer l'indicateur de chargement
+    setLoadingDemote(memberId);
+
     try {
       const response = await fetch(
         `/api/communities/${communityId}/members/${memberId}/demote`,
@@ -705,12 +680,18 @@ export default function CommunityDashboard() {
     } catch (error) {
       console.error("Erreur:", error);
       toast.error("Une erreur est survenue");
+    } finally {
+      // Désactiver l'indicateur de chargement
+      setLoadingDemote(null);
     }
   }, [communityId, fetchMembers, invalidateCache]);
 
   // Fonction pour bannir un membre avec invalidation du cache
   const handleBanMember = useCallback(async () => {
     if (!selectedMemberToBan) return;
+
+    // Activer l'indicateur de chargement
+    setLoadingBan(true);
 
     try {
       const response = await fetch(
@@ -741,8 +722,27 @@ export default function CommunityDashboard() {
     } catch (error) {
       console.error("Erreur:", error);
       toast.error("Une erreur est survenue");
+    } finally {
+      // Désactiver l'indicateur de chargement
+      setLoadingBan(false);
     }
   }, [selectedMemberToBan, banReason, communityId, fetchMembers, fetchDashboardData, invalidateCache]);
+
+  useEffect(() => {
+    if (communityId && userId) {
+      fetchDashboardData();
+      fetchMembers();
+      fetchContributorRequests();
+      fetchPosts();
+    }
+  }, [communityId, userId, fetchDashboardData, fetchMembers, fetchContributorRequests, fetchPosts]);
+
+  // Mettre à jour l'onglet actif si le paramètre d'URL change
+  useEffect(() => {
+    if (tabParam === "members") {
+      setActiveTab("members");
+    }
+  }, [tabParam]);
 
   if (loading) {
     return <Loader text="Chargement des données..." fullScreen />;
@@ -1352,29 +1352,39 @@ export default function CommunityDashboard() {
                                   <PopoverContent className="w-48" align="end">
                                     {member.status === "Apprenant" ? (
                                       <button
-                                        onClick={() =>
-                                          handlePromoteMember(
-                                            member.id,
-                                            member.fullName
-                                          )
-                                        }
-                                        className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                        onClick={() => handlePromoteMember(member.id, member.fullName)}
+                                        className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                                        disabled={loadingPromote === member.id || loadingDemote === member.id}
                                       >
-                                        <UserPlus className="w-4 h-4" />
-                                        <span>Promouvoir contributeur</span>
+                                        {loadingPromote === member.id ? (
+                                          <>
+                                            <Loader size="sm" className="w-4 h-4 animate-spin" />
+                                            <span>Promotion...</span>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <UserPlus className="w-4 h-4" />
+                                            <span>Promouvoir contributeur</span>
+                                          </>
+                                        )}
                                       </button>
                                     ) : (
                                       <button
-                                        onClick={() =>
-                                          handleDemoteMember(
-                                            member.id,
-                                            member.fullName
-                                          )
-                                        }
-                                        className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                        onClick={() => handleDemoteMember(member.id, member.fullName)}
+                                        className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                                        disabled={loadingPromote === member.id || loadingDemote === member.id}
                                       >
-                                        <UserMinus className="w-4 h-4" />
-                                        <span>Retirer contributeur</span>
+                                        {loadingDemote === member.id ? (
+                                          <>
+                                            <Loader size="sm" className="w-4 h-4 animate-spin" />
+                                            <span>Rétrogradation...</span>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <UserMinus className="w-4 h-4" />
+                                            <span>Retirer contributeur</span>
+                                          </>
+                                        )}
                                       </button>
                                     )}
                                     <button
@@ -1385,7 +1395,8 @@ export default function CommunityDashboard() {
                                         });
                                         setIsBanModalOpen(true);
                                       }}
-                                      className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                      className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                                      disabled={loadingPromote === member.id || loadingDemote === member.id}
                                     >
                                       <UserX className="w-4 h-4" />
                                       <span>Bannir</span>
@@ -1846,15 +1857,23 @@ export default function CommunityDashboard() {
                 setSelectedMemberToBan(null);
               }}
               className="px-4 py-2 text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              disabled={loadingBan}
             >
               Annuler
             </button>
             <button
               onClick={handleBanMember}
-              disabled={!banReason.trim()}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!banReason.trim() || loadingBan}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[150px]"
             >
-              Confirmer le bannissement
+              {loadingBan ? (
+                <>
+                  <Loader size="sm" className="w-4 h-4 mr-2 animate-spin" />
+                  <span>Bannissement...</span>
+                </>
+              ) : (
+                "Confirmer le bannissement"
+              )}
             </button>
           </DialogFooter>
         </DialogContent>

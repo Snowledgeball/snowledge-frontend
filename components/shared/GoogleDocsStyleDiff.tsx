@@ -27,60 +27,16 @@ export default function GoogleDocsStyleDiff({
     readOnly = false,
     description = "Modification du contenu"
 }: GoogleDocsStyleDiffProps) {
-    const [viewMode, setViewMode] = useState<'suggestions' | 'original' | 'preview'>('suggestions');
+    // Nous gardons uniquement le mode 'suggestions' et supprimons les autres modes
     const [processedHtml, setProcessedHtml] = useState<string>('');
     const [feedback, setFeedback] = useState<string>('');
     const [showFeedbackForm, setShowFeedbackForm] = useState<boolean>(false);
 
     useEffect(() => {
         // Traiter le HTML pour afficher les différences dans le style Google Docs
-        if (viewMode === 'suggestions') {
-            // Version qui montre les suggestions
-            const html = createSuggestionsView(oldHtml, newHtml);
-            // Ne pas convertir en string, utiliser directement setProcessedHtml avec le HTML généré
-            setProcessedHtml(advancedDiffHtml(oldHtml, newHtml));
-        } else if (viewMode === 'preview') {
-            // Version qui montre le résultat final
-            setProcessedHtml(newHtml);
-        } else {
-            // Version qui montre le contenu original
-            setProcessedHtml(oldHtml);
-        }
-    }, [oldHtml, newHtml, viewMode]);
-
-    // Fonction pour créer une vue avec suggestions
-    const createSuggestionsView = (oldHtml: string, newHtml: string): React.ReactElement => {
-        if (oldHtml === newHtml) {
-            return <div>{parse(oldHtml)}</div>;
-        }
-
-        const styles = `
-            <style>
-                ins {
-                    background-color: rgba(204, 255, 204, 0.5);
-                    text-decoration: none !important;
-                    border-bottom: 1px solid #4caf50;
-                    padding: 0 2px;
-                    font-weight: normal;
-                }
-                del {
-                    background-color: rgba(255, 204, 204, 0.5);
-                    text-decoration: none !important;
-                    border-bottom: 1px solid #f44336;
-                    padding: 0 2px;
-                    font-weight: normal;
-                    text-decoration: line-through;
-                }
-                .highlight {
-                    background-color: rgba(255, 255, 153, 0.5);
-                    border-bottom: 1px solid #ffd700;
-                    padding: 0 2px;
-                }
-            </style>
-        `;
-
-        return <div>{parse(styles + advancedDiffHtml(oldHtml, newHtml))}</div>;
-    };
+        const html = advancedDiffHtml(oldHtml, newHtml);
+        setProcessedHtml(html);
+    }, [oldHtml, newHtml]);
 
     // Nouvelle fonction avancée pour générer le HTML des différences
     const advancedDiffHtml = (oldHtml: string, newHtml: string): string => {
@@ -331,11 +287,6 @@ export default function GoogleDocsStyleDiff({
         }
     };
 
-    // Fonction simplifiée pour compter les différences
-    const countDifferences = (oldHtml: string, newHtml: string): number => {
-        return oldHtml !== newHtml ? 1 : 0;
-    };
-
     // Fonction pour approuver les modifications
     const handleApprove = () => {
         if (onApprove) {
@@ -362,131 +313,100 @@ export default function GoogleDocsStyleDiff({
                     <div className="mb-4">
                         <div className="flex justify-between items-center mb-2">
                             <h3 className="text-lg font-semibold">{description}</h3>
-                            <div className="flex space-x-2">
-                                <button
-                                    onClick={() => setViewMode('suggestions')}
-                                    className={`text-xs px-3 py-1.5 rounded ${viewMode === 'suggestions'
-                                        ? 'bg-blue-100 text-blue-700'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                        }`}
-                                >
-                                    Suggestions
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('original')}
-                                    className={`text-xs px-3 py-1.5 rounded ${viewMode === 'original'
-                                        ? 'bg-blue-100 text-blue-700'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                        }`}
-                                >
-                                    Original
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('preview')}
-                                    className={`text-xs px-3 py-1.5 rounded ${viewMode === 'preview'
-                                        ? 'bg-blue-100 text-blue-700'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                        }`}
-                                >
-                                    Aperçu
-                                </button>
-                            </div>
                         </div>
 
-                        <div className="border rounded-lg p-4">
+                        <div className="border rounded-lg p-4 bg-white">
                             <div dangerouslySetInnerHTML={{ __html: processedHtml }} />
                         </div>
                     </div>
                 </div>
 
-                {/* Sidebar pour les enrichissements */}
-                <div className="enrichment-sidebar w-80 ml-4 border-l pl-4">
-                    <div className="sticky top-4">
-                        <h3 className="text-lg font-semibold mb-3">Enrichissement</h3>
+                {/* Sidebar pour les enrichissements - uniquement si showControls est true */}
+                {showControls && (
+                    <div className="enrichment-sidebar w-80 ml-4 border-l pl-4">
+                        <div className="sticky top-4">
+                            <h3 className="text-lg font-semibold mb-3">Enrichissement</h3>
 
-                        <div className="enrichment-item bg-white rounded-lg border border-gray-200 p-4 mb-4">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium text-blue-700">Enrichissement</span>
-                            </div>
+                            <div className="enrichment-item bg-white rounded-lg border border-gray-200 p-4 mb-4">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-medium text-blue-700">Enrichissement</span>
+                                </div>
 
-                            <div className="text-sm text-gray-700 mb-3">
-                                {description}
-                            </div>
+                                <div className="text-sm text-gray-700 mb-3">
+                                    {description}
+                                </div>
 
-                            {!readOnly && (
-                                <div>
-                                    {!showFeedbackForm ? (
-                                        <div className="flex space-x-2">
-                                            <button
-                                                onClick={() => setShowFeedbackForm(true)}
-                                                className="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 flex-grow"
-                                            >
-                                                Voter
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="feedback-form">
-                                            <textarea
-                                                value={feedback}
-                                                onChange={(e) => setFeedback(e.target.value)}
-                                                placeholder="Votre feedback sur cet enrichissement..."
-                                                className="w-full p-2 text-sm border rounded mb-2"
-                                                rows={3}
-                                            />
+                                {!readOnly && (
+                                    <div>
+                                        {!showFeedbackForm ? (
                                             <div className="flex space-x-2">
                                                 <button
-                                                    onClick={handleApprove}
-                                                    className="text-xs px-3 py-1.5 bg-green-50 text-green-700 rounded hover:bg-green-100 flex-grow"
+                                                    onClick={() => setShowFeedbackForm(true)}
+                                                    className="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 flex-grow"
                                                 >
-                                                    Approuver
-                                                </button>
-                                                <button
-                                                    onClick={handleReject}
-                                                    className="text-xs px-3 py-1.5 bg-red-50 text-red-700 rounded hover:bg-red-100 flex-grow"
-                                                >
-                                                    Rejeter
-                                                </button>
-                                                <button
-                                                    onClick={() => setShowFeedbackForm(false)}
-                                                    className="text-xs px-3 py-1.5 bg-gray-50 text-gray-700 rounded hover:bg-gray-100"
-                                                >
-                                                    Annuler
+                                                    Voter
                                                 </button>
                                             </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                                        ) : (
+                                            <div className="feedback-form">
+                                                <textarea
+                                                    value={feedback}
+                                                    onChange={(e) => setFeedback(e.target.value)}
+                                                    placeholder="Votre feedback sur cet enrichissement..."
+                                                    className="w-full p-2 text-sm border rounded mb-2"
+                                                    rows={3}
+                                                />
+                                                <div className="flex space-x-2">
+                                                    <button
+                                                        onClick={handleApprove}
+                                                        className="text-xs px-3 py-1.5 bg-green-50 text-green-700 rounded hover:bg-green-100 flex-grow"
+                                                    >
+                                                        Approuver
+                                                    </button>
+                                                    <button
+                                                        onClick={handleReject}
+                                                        className="text-xs px-3 py-1.5 bg-red-50 text-red-700 rounded hover:bg-red-100 flex-grow"
+                                                    >
+                                                        Rejeter
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setShowFeedbackForm(false)}
+                                                        className="text-xs px-3 py-1.5 bg-gray-50 text-gray-700 rounded hover:bg-gray-100"
+                                                    >
+                                                        Annuler
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
 
-                        {/* Légende des modifications */}
-                        <div className="bg-white rounded-lg border border-gray-200 p-4">
-                            <h4 className="text-sm font-medium mb-2">Légende</h4>
-                            <div className="space-y-2 text-xs">
-                                <div className="flex items-center">
-                                    <span className="inline-block w-3 h-3 bg-[rgba(204,255,204,0.5)] border-b border-green-500 mr-2"></span>
-                                    <span>Texte ajouté <span style={{ backgroundColor: 'rgba(204,255,204,0.5)', borderBottom: '1px solid #4caf50', padding: '0 2px' }}>exemple</span></span>
-                                </div>
-                                <div className="flex items-center">
-                                    <span className="inline-block w-3 h-3 bg-[rgba(255,204,204,0.5)] border-b border-red-500 mr-2"></span>
-                                    <span>Texte supprimé <span style={{ backgroundColor: 'rgba(255,204,204,0.5)', borderBottom: '1px solid #f44336', padding: '0 2px', textDecoration: 'line-through' }}>exemple</span></span>
-                                </div>
-                                <div className="flex items-center">
-                                    <span style={{ display: 'inline-block', backgroundColor: 'rgba(204,255,204,0.8)', border: '1px solid #4caf50', borderRadius: '3px', padding: '0 3px', margin: '0 2px', fontSize: '0.8em', verticalAlign: 'middle' }}>↵</span>
-                                    <span>Saut de ligne ajouté </span>
-                                </div>
-                                <div className="flex items-center">
-                                    <span style={{ display: 'inline-block', backgroundColor: 'rgba(255,204,204,0.8)', border: '1px solid #f44336', borderRadius: '3px', padding: '0 3px', margin: '0 2px', fontSize: '0.8em', verticalAlign: 'middle' }}>↵</span>
-                                    <span>Saut de ligne supprimé </span>
-                                </div>
-                                <div className="flex items-center">
-                                    <span className="inline-block w-3 h-3 bg-[rgba(204,255,204,0.5)] border-l-[3px] border-green-500 mr-2"></span>
-                                    <span>Texte ajouté après un saut de ligne <span style={{ display: 'inline-block', backgroundColor: 'rgba(204,255,204,0.5)', borderLeft: '3px solid #4caf50', paddingLeft: '5px', fontWeight: 'bold' }}>exemple</span></span>
+                            {/* Légende des modifications */}
+                            <div className="bg-white rounded-lg border border-gray-200 p-4">
+                                <h4 className="text-sm font-medium mb-2">Légende</h4>
+                                <div className="space-y-2 text-xs">
+                                    <div className="flex items-center">
+                                        <span className="inline-block w-3 h-3 bg-[rgba(204,255,204,0.5)] border-b border-green-500 mr-2"></span>
+                                        <span>Texte ajouté <span style={{ backgroundColor: 'rgba(204,255,204,0.5)', borderBottom: '1px solid #4caf50', padding: '0 2px' }}>exemple</span></span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <span className="inline-block w-3 h-3 bg-[rgba(255,204,204,0.5)] border-b border-red-500 mr-2"></span>
+                                        <span>Texte supprimé <span style={{ backgroundColor: 'rgba(255,204,204,0.5)', borderBottom: '1px solid #f44336', padding: '0 2px', textDecoration: 'line-through' }}>exemple</span></span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <span style={{ display: 'inline-block', backgroundColor: 'rgba(204,255,204,0.8)', border: '1px solid #4caf50', borderRadius: '3px', padding: '0 3px', margin: '0 2px', fontSize: '0.8em', verticalAlign: 'middle' }}>↵</span>
+                                        <span>Saut de ligne ajouté </span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <span style={{ display: 'inline-block', backgroundColor: 'rgba(255,204,204,0.8)', border: '1px solid #f44336', borderRadius: '3px', padding: '0 3px', margin: '0 2px', fontSize: '0.8em', verticalAlign: 'middle' }}>↵</span>
+                                        <span>Saut de ligne supprimé </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );

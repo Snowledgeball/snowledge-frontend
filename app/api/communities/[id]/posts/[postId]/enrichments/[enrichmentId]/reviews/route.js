@@ -150,7 +150,7 @@ export async function POST(request, { params }) {
 
         return NextResponse.json({ success: true, review });
     } catch (error) {
-        console.error("Erreur:", error);
+        console.log("Erreur:", error.stack);
         return NextResponse.json(
             { error: "Erreur lors de la soumission de la révision" },
             { status: 500 }

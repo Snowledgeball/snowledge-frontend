@@ -143,6 +143,27 @@ const CommunityHub = () => {
   // Mémoriser l'ID de la communauté pour éviter les re-rendus inutiles
   const communityId = useMemo(() => params.id as string, [params.id]);
 
+  // Mettre à jour l'URL lorsque l'onglet actif change
+  const handleTabChange = useCallback((tab: string) => {
+    // Éviter de recharger si on clique sur l'onglet déjà actif
+    if (tab === activeTab) return;
+
+    setActiveTab(tab);
+
+    // Construire la nouvelle URL avec uniquement le paramètre tab
+    const newParams = new URLSearchParams(searchParams.toString());
+    newParams.set('tab', tab);
+
+    // Si on change pour un onglet autre que "voting", supprimer le paramètre "voting"
+    if (tab !== "voting") {
+      newParams.delete('voting');
+    }
+
+    // Mettre à jour l'URL sans recharger la page
+    const newUrl = `/community/${communityId}?${newParams.toString()}`;
+    window.history.pushState({}, '', newUrl);
+  }, [activeTab, communityId, searchParams]);
+
   // Fonction pour invalider le cache
   const invalidateCache = useCallback((cacheKey: string) => {
     cacheUtils.remove(cacheKey);
@@ -568,7 +589,7 @@ const CommunityHub = () => {
               {/* Tabs */}
               <CommunityTabs
                 activeTab={activeTab}
-                setActiveTab={setActiveTab}
+                setActiveTab={handleTabChange}
                 isContributor={isContributor}
                 isCreator={isCreator}
                 pendingPostsCount={pendingPostsCount}
