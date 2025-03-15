@@ -76,8 +76,6 @@ export async function POST(request, { params }) {
       },
     });
 
-    console.log("learners", learners);
-
     const contributors = await prisma.community_contributors.findMany({
       where: {
         community_id: communityId,

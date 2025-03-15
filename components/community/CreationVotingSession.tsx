@@ -64,6 +64,8 @@ export default function CreationVotingSession({ communityId }: CreationVotingSes
     const [community, setCommunity] = useState<any>(null);
     const [publishError, setPublishError] = useState<string | null>(null);
 
+    const router = useRouter();
+
     // Mémoriser l'ID de la communauté pour éviter les re-rendus inutiles
     const memoizedCommunityId = useMemo(() => communityId, [communityId]);
 
@@ -212,8 +214,16 @@ export default function CreationVotingSession({ communityId }: CreationVotingSes
     const handlePublish = async (postId: number) => {
         try {
             setPublishError(null);
-            const response = await fetch(`/api/communities/${memoizedCommunityId}/posts/${postId}/publish`, {
-                method: "POST",
+            const response = await fetch(`/api/communities/${memoizedCommunityId}/posts/${postId}`, {
+                method: "PUT",
+                body: JSON.stringify({
+                    title: pendingPosts.find(post => post.id === postId)?.title,
+                    content: pendingPosts.find(post => post.id === postId)?.content,
+                    coverImageUrl: pendingPosts.find(post => post.id === postId)?.cover_image_url,
+                    tag: pendingPosts.find(post => post.id === postId)?.tag,
+                    acceptContributions: pendingPosts.find(post => post.id === postId)?.accept_contributions,
+                    status: "PUBLISHED",
+                }),
             });
 
             if (response.ok) {
@@ -222,6 +232,7 @@ export default function CreationVotingSession({ communityId }: CreationVotingSes
                 const cacheKey = `pending-posts-${memoizedCommunityId}`;
                 pendingPostsCache.delete(cacheKey);
                 await fetchPendingPosts(true);
+                router.push(`/community/${communityId}/posts/${postId}`);
             } else {
                 const data = await response.json();
                 setPublishError(data.error || "Erreur lors de la publication du post");

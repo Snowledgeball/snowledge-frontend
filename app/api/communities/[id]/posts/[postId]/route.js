@@ -103,6 +103,7 @@ export async function PUT(request, { params }) {
       tag,
       accept_contributions,
       is_comment,
+      status,
     } = await request.json();
     const postIdInt = parseInt(postId);
     const userId = parseInt(session.user.id);
@@ -140,7 +141,14 @@ export async function PUT(request, { params }) {
       },
     });
 
-    if (!post || (!isContributor && !isCreator)) {
+    const isCreatorOfThePost = await prisma.community_posts.findFirst({
+      where: {
+        id: postIdInt,
+        community_id: post.community_id,
+      },
+    });
+
+    if (!post || (!isContributor && !isCreator && !isCreatorOfThePost)) {
       console.log("isContributor", isContributor);
       return NextResponse.json(
         { error: "Non autorisé à modifier ce post" },
@@ -161,6 +169,7 @@ export async function PUT(request, { params }) {
           cover_image_url,
           tag,
           accept_contributions,
+          status,
         },
       });
     } else {

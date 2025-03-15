@@ -73,9 +73,15 @@ export default function PendingPosts() {
   const handlePublish = async (postId: number) => {
     try {
       const response = await fetch(
-        `/api/communities/${params.id}/posts/pending/${postId}/publish`,
+        `/api/communities/${params.id}/posts/pending`,
         {
           method: "POST",
+          body: JSON.stringify({
+            title: pendingPosts.find(post => post.id === postId)?.title,
+            content: pendingPosts.find(post => post.id === postId)?.content,
+            cover_image_url: pendingPosts.find(post => post.id === postId)?.cover_image_url,
+            tag: pendingPosts.find(post => post.id === postId)?.tag,
+          }),
         }
       );
 
@@ -185,11 +191,10 @@ export default function PendingPosts() {
                             </span>
                           </div>
                           <span
-                            className={`px-2 py-1 rounded-full text-sm ${
-                              review.status === "APPROVED"
+                            className={`px-2 py-1 rounded-full text-sm ${review.status === "APPROVED"
                                 ? "bg-green-100 text-green-700"
                                 : "bg-red-100 text-red-700"
-                            }`}
+                              }`}
                           >
                             {review.status === "APPROVED"
                               ? "Approuvé"
@@ -231,10 +236,10 @@ export default function PendingPosts() {
                               post.community_posts_reviews.filter(
                                 (r) => r.status === "APPROVED"
                               ).length <
-                                post.community_posts_reviews.filter(
-                                  (r) => r.status === "REJECTED"
-                                ).length *
-                                  2 || post.community_posts_reviews.length < 2 // Au moins 2 reviews nécessaires
+                              post.community_posts_reviews.filter(
+                                (r) => r.status === "REJECTED"
+                              ).length *
+                              2 || post.community_posts_reviews.length < 2 // Au moins 2 reviews nécessaires
                             }
                           >
                             {post.community_posts_reviews.length < 2
