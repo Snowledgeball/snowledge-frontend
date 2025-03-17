@@ -33,4 +33,50 @@ export async function DELETE(request, { params }) {
         console.error('Erreur lors de la suppression du canal:', error);
         return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
     }
+}
+
+export async function PUT(request, { params }) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session) {
+            return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+        }
+
+        const { id, channelId } = await params;
+        const { name, description, icon } = await request.json();
+
+        // Vérifier si l'utilisateur est le créateur de la communauté
+        const community = await prisma.community.findUnique({
+            where: { id: parseInt(id) },
+            select: { creator_id: true }
+        });
+
+        if (!community || community.creator_id !== parseInt(session.user.id)) {
+            return NextResponse.json(
+                { error: "Non autorisé à modifier ce canal" },
+                { status: 403 }
+            );
+        }
+
+        // Mettre à jour le canal
+        const updatedChannel = await prisma.community_channels.update({
+            where: {
+                id: parseInt(channelId),
+                community_id: parseInt(id)
+            },
+            data: {
+                name,
+                description,
+                icon
+            }
+        });
+
+        return NextResponse.json(updatedChannel);
+    } catch (error) {
+        console.error("Erreur lors de la modification du canal:", error);
+        return NextResponse.json(
+            { error: "Erreur lors de la modification du canal" },
+            { status: 500 }
+        );
+    }
 } 

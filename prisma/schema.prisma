@@ -186,7 +186,6 @@ model community_channels {
   id           Int       @id @default(autoincrement())
   community_id Int
   name         String    @db.VarChar(255)
-  type         String    @db.VarChar(50)
   description  String
   icon         String?   @db.VarChar(50)
   created_at   DateTime? @default(now()) @db.Timestamp(6)

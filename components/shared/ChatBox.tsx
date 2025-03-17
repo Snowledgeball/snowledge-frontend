@@ -520,6 +520,39 @@ export default function ChatBox({
     }
   }, [editedMessageText]);
 
+  // Ajouter un nouvel état pour la modification du canal
+  const [isEditChannelModalOpen, setIsEditChannelModalOpen] = useState(false);
+  const [editingChannel, setEditingChannel] = useState<Channel | null>(null);
+
+  // Ajouter la fonction pour modifier le canal
+  const handleEditChannel = async () => {
+    if (!editingChannel) return;
+
+    try {
+      const response = await fetch(`/api/communities/${memoizedCommunityId}/channels/${editingChannel.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editingChannel.name,
+          description: editingChannel.description,
+          icon: editingChannel.icon
+        })
+      });
+
+      if (response.ok) {
+        // Invalider le cache des canaux
+        const cacheKey = getChannelsKey();
+        channelsCache.delete(cacheKey);
+
+        setIsEditChannelModalOpen(false);
+        setEditingChannel(null);
+        await fetchChannels(true);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la modification du canal:", error);
+    }
+  };
+
   // Mémoriser le rendu des messages pour éviter les re-rendus inutiles
   const renderMessages = useMemo(() => {
     return messages.map((msg, index) => {
@@ -831,9 +864,7 @@ export default function ChatBox({
                 <div
                   key={channel.id}
                   onClick={() => setSelectedChannel(channel)}
-                  className={`flex items-center justify-between px-4 py-3 text-gray-600 hover:bg-gray-200 cursor-pointer group transition-colors ${selectedChannel?.id === channel.id
-                    ? "bg-blue-50 text-blue-700 font-medium"
-                    : ""
+                  className={`flex items-center justify-between px-4 py-3 text-gray-600 hover:bg-gray-200 cursor-pointer group transition-colors ${selectedChannel?.id === channel.id ? "bg-blue-50 text-blue-700 font-medium" : ""
                     }`}
                 >
                   <div className="flex items-center space-x-2">
@@ -841,28 +872,28 @@ export default function ChatBox({
                     <span>{channel.name}</span>
                   </div>
                   {isCreator && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setChannelToDelete(channel.id);
-                        setIsDeleteModalOpen(true);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1 transition-opacity"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                    <div className="opacity-0 group-hover:opacity-100 flex items-center space-x-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingChannel(channel);
+                          setIsEditChannelModalOpen(true);
+                        }}
+                        className="text-gray-400 hover:text-blue-500 p-1 transition-colors"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setChannelToDelete(channel.id);
+                          setIsDeleteModalOpen(true);
+                        }}
+                        className="text-gray-400 hover:text-red-500 p-1 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   )}
                 </div>
               ))
@@ -1125,6 +1156,82 @@ export default function ChatBox({
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
               >
                 Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ajouter la modale de modification */}
+      {isEditChannelModalOpen && editingChannel && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
+            <h3 className="text-gray-800 text-lg font-semibold mb-4">
+              Modifier le canal
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-600 mb-1 text-sm font-medium">
+                  Nom du canal
+                </label>
+                <input
+                  type="text"
+                  value={editingChannel.name}
+                  onChange={(e) =>
+                    setEditingChannel({ ...editingChannel, name: e.target.value })
+                  }
+                  className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-600 mb-1 text-sm font-medium">
+                  Description
+                </label>
+                <textarea
+                  value={editingChannel.description}
+                  onChange={(e) =>
+                    setEditingChannel({
+                      ...editingChannel,
+                      description: e.target.value,
+                    })
+                  }
+                  className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-600 mb-1 text-sm font-medium">
+                  Icône (emoji)
+                </label>
+                <input
+                  type="text"
+                  value={editingChannel.icon || ""}
+                  onChange={(e) =>
+                    setEditingChannel({ ...editingChannel, icon: e.target.value })
+                  }
+                  className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => {
+                  setIsEditChannelModalOpen(false);
+                  setEditingChannel(null);
+                }}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleEditChannel}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                Enregistrer
               </button>
             </div>
           </div>
