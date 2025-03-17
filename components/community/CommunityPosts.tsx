@@ -38,6 +38,7 @@ interface CommunityPostsProps {
     posts: Post[];
     communityId: string;
     isContributor: boolean;
+    isCreator: boolean;
     userId?: string;
 }
 
@@ -48,6 +49,7 @@ export default function CommunityPosts({
     posts,
     communityId,
     isContributor,
+    isCreator,
     userId
 }: CommunityPostsProps) {
     const router = useRouter();
@@ -154,16 +156,28 @@ export default function CommunityPosts({
         return (
             <div className="space-y-8" id="posts-container">
                 <div className="flex justify-end">
-                    {isContributor && (
-                        <button
-                            onClick={() => router.push(`/community/${communityId}/posts/create`)}
-                            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                            id="create-post-button"
-                        >
-                            <PlusCircle className="w-4 h-4" />
-                            <span>Proposer un post</span>
-                        </button>
-                    )}
+                    <>
+                        {isContributor && (
+                            <button
+                                onClick={() => router.push(`/community/${communityId}/posts/create`)}
+                                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                id="create-post-button"
+                            >
+                                <PlusCircle className="w-4 h-4" />
+                                <span>Proposer un post</span>
+                            </button>
+                        )}
+                        {isCreator && (
+                            <button
+                                onClick={() => router.push(`/community/${communityId}/dashboard?tab=creation`)}
+                                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                id="create-post-button"
+                            >
+                                <PlusCircle className="w-4 h-4" />
+                                <span>Créer un post</span>
+                            </button>
+                        )}
+                    </>
                 </div>
                 <div className="bg-white rounded-lg shadow-sm p-8 text-center">
                     <p className="text-gray-500">Aucun post disponible dans cette communauté.</p>
@@ -194,6 +208,16 @@ export default function CommunityPosts({
                     >
                         <PlusCircle className="w-5 h-5" />
                         <span className="font-medium">Proposer un post</span>
+                    </button>
+                )}
+                {isCreator && (
+                    <button
+                        onClick={() => router.push(`/community/${communityId}/dashboard?tab=creation`)}
+                        className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        id="create-post-button"
+                    >
+                        <PlusCircle className="w-4 h-4" />
+                        <span>Créer un post</span>
                     </button>
                 )}
             </div>

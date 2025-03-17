@@ -170,7 +170,7 @@ export default function CommunityDashboard() {
   const tabParam = searchParams.get('tab');
 
   // Initialiser l'onglet actif en fonction du paramètre d'URL
-  const [activeTab, setActiveTab] = useState(tabParam === "members" ? "members" : "overview");
+  const [activeTab, setActiveTab] = useState(tabParam ? tabParam : "overview");
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
   );
@@ -823,7 +823,7 @@ export default function CommunityDashboard() {
               Création
             </h3>
             <div className="space-y-1">
-              <button
+              {/* <button
                 className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "veille" ? "bg-gray-800" : "hover:bg-gray-800"}`}
                 onClick={() => {
                   setActiveTab("veille");
@@ -832,15 +832,15 @@ export default function CommunityDashboard() {
               >
                 📡 Collecte et veille
                 <ChevronRight className="ml-auto w-4 h-4" />
-              </button>
+              </button> */}
               <button
                 className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "creation" ? "bg-gray-800" : "hover:bg-gray-800"}`}
-                onClick={() => setActiveTab("creation")}
+                onClick={() => handleTabChange("creation")}
               >
-                ✍️ Création & édition
+                ✍️ Création de posts
                 <ChevronRight className="ml-auto w-4 h-4" />
               </button>
-              <button
+              {/* <button
                 className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "pending" ? "bg-gray-800" : "hover:bg-gray-800"}`}
                 onClick={() =>
                   router.push(`/community/${params.id}/posts/pending`)
@@ -848,11 +848,11 @@ export default function CommunityDashboard() {
               >
                 📝 Posts en attente
                 <ChevronRight className="ml-auto w-4 h-4" />
-              </button>
+              </button> */}
             </div>
           </div>
 
-          <div>
+          {/* <div>
             <h3 className="text-purple-400 text-xs font-medium mb-2">
               Communication
             </h3>
@@ -867,7 +867,7 @@ export default function CommunityDashboard() {
                 <ChevronRight className="ml-auto w-4 h-4" />
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     );

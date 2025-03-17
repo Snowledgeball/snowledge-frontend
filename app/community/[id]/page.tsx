@@ -634,6 +634,7 @@ const CommunityHub = () => {
                           communityId={communityId}
                           isContributor={isContributor}
                           userId={session?.user?.id}
+                          isCreator={isCreator}
                         />
                       )}
                     </div>
