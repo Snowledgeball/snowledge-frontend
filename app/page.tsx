@@ -267,7 +267,7 @@ export default function Home() {
             category: community.category.label,
             lastActive: "il y a 2h",
             trustScore: Math.floor(Math.random() * 30) + 65,
-            imageUrl: community.image_url || "https://images.unsplash.com/photo-1621761191319-c6fb62004040",
+            imageUrl: community.image_url || "images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000&auto=format&fit=crop",
             creator: {
               id: community.creator.id,
               name: community.creator.fullName,
