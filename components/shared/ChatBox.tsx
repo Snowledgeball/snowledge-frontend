@@ -25,7 +25,6 @@ import { Loader } from "@/components/ui/loader";
 interface Channel {
   id: number;
   name: string;
-  type: string;
   description: string;
   icon: string | null;
 }
@@ -112,7 +111,6 @@ export default function ChatBox({
     useState(false);
   const [newChannel, setNewChannel] = useState({
     name: "",
-    type: "text",
     description: "",
     icon: "💬",
   });
@@ -250,7 +248,6 @@ export default function ChatBox({
           setSelectedChannel({
             id: memoizedPostId as number,
             name: "Discussion",
-            type: "text",
             description: "Discussion du post",
             icon: "💬",
           });
@@ -445,7 +442,7 @@ export default function ChatBox({
         channelsCache.delete(cacheKey);
 
         setIsCreateChannelModalOpen(false);
-        setNewChannel({ name: "", type: "text", description: "", icon: "💬" });
+        setNewChannel({ name: "", description: "", icon: "💬" });
         await fetchChannels(true);
       }
     } catch (error) {
@@ -893,21 +890,6 @@ export default function ChatBox({
                       }
                       className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-600 mb-1 text-sm font-medium">Type</label>
-                    <select
-                      value={newChannel.type}
-                      onChange={(e) =>
-                        setNewChannel({ ...newChannel, type: e.target.value })
-                      }
-                      className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="text">Texte</option>
-                      <option value="resources">Ressources</option>
-                      <option value="questions">Questions</option>
-                    </select>
                   </div>
 
                   <div>
