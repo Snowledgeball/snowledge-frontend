@@ -33,6 +33,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
         { name: "Création du SBT", completed: false, current: false },
         { name: "Finalisation", completed: false, current: false }
     ]);
+    const [profilePictureError, setProfilePictureError] = useState(false);
     const router = useRouter();
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,10 +66,11 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+        setProfilePictureError(false);
         setIsLoading(true);
 
         if (!profilePicture) {
-            setError("Veuillez sélectionner une photo de profil");
+            setProfilePictureError(true);
             setIsLoading(false);
             return;
         }
@@ -209,8 +211,8 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                                 />
                             </div>
                         ) : (
-                            <div className="w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center border-4 border-blue-100 shadow-md">
-                                <Camera className="w-10 h-10 text-blue-400" />
+                            <div className={`w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center border-4 ${profilePictureError ? 'border-red-200' : 'border-blue-100'} shadow-md`}>
+                                <Camera className={`w-10 h-10 ${profilePictureError ? 'text-red-400' : 'text-blue-400'}`} />
                             </div>
                         )}
                         <label htmlFor="profile-picture" className="absolute -bottom-1 -right-1 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full cursor-pointer shadow-md transition-colors">
@@ -219,13 +221,21 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                     </div>
                     <input
                         id="profile-picture"
+                        name="profile-picture"
                         type="file"
                         accept="image/*"
-                        onChange={handleFileChange}
+                        onChange={(e) => {
+                            setProfilePictureError(false);
+                            handleFileChange(e);
+                        }}
                         className="hidden"
-                        required
                     />
                     <span className="text-sm text-gray-600">Photo de profil</span>
+                    <span className="text-xs text-gray-500 mt-1 text-center">
+                        {previewUrl
+                            ? "Cliquez sur l'icône pour modifier votre photo"
+                            : "Vous pourrez modifier votre photo plus tard"}
+                    </span>
                 </div>
 
                 <div className="space-y-4">
@@ -292,6 +302,12 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                         />
                     </div>
                 </div>
+
+                {profilePictureError && (
+                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm text-center">
+                        Veuillez ajouter une photo de profil pour continuer
+                    </div>
+                )}
 
                 <button
                     type="submit"
