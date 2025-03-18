@@ -22,10 +22,10 @@ interface Community {
   name: string;
   members: number;
   activity: number;
-  trending: boolean;
+  // trending: boolean;
   category: string;
-  lastActive: string;
-  trustScore: number;
+  // lastActive: string;
+  // trustScore: number;
   imageUrl: string;
   creator: {
     id: number;
@@ -34,6 +34,7 @@ interface Community {
   };
   community_learners_id: number[];
   community_contributors_id: number[];
+  createdAt: string; // Format ISO date string
 }
 
 // Ajout de l'interface pour les données brutes de l'API
@@ -61,6 +62,7 @@ interface RawCommunity {
     fullName: string;
     profilePicture: string;
   };
+  createdAt: string;
 }
 
 export default function Home() {
@@ -80,11 +82,11 @@ export default function Home() {
     id,
     name,
     members,
-    activity,
-    trending,
+    // activity,
+    // trending,
     category,
-    lastActive,
-    trustScore,
+    // lastActive,
+    // trustScore,
     imageUrl,
     creator,
     community_learners_id,
@@ -94,10 +96,10 @@ export default function Home() {
     name: string;
     members: number;
     activity: number;
-    trending: boolean;
+    // trending: boolean;
     category: string;
-    lastActive: string;
-    trustScore: number;
+    // lastActive: string;
+    // trustScore: number;
     imageUrl: string;
     creator: {
       id: number;
@@ -107,19 +109,19 @@ export default function Home() {
     community_learners_id: number[];
     community_contributors_id: number[];
   }) => {
-    const getTrustScoreColor = (score: number) => {
-      if (score >= 90) return "text-emerald-500";
-      if (score >= 75) return "text-blue-500";
-      if (score >= 60) return "text-yellow-500";
-      return "text-orange-500";
-    };
+    // const getTrustScoreColor = (score: number) => {
+    //   if (score >= 90) return "text-emerald-500";
+    //   if (score >= 75) return "text-blue-500";
+    //   if (score >= 60) return "text-yellow-500";
+    //   return "text-orange-500";
+    // };
 
-    const getTrustScoreLabel = (score: number) => {
-      if (score >= 90) return "Excellent";
-      if (score >= 75) return "Très bon";
-      if (score >= 60) return "Bon";
-      return "Moyen";
-    };
+    // const getTrustScoreLabel = (score: number) => {
+    //   if (score >= 90) return "Excellent";
+    //   if (score >= 75) return "Très bon";
+    //   if (score >= 60) return "Bon";
+    //   return "Moyen";
+    // };
     return (
       <Card
         onClick={() => router.push(`/community/${id}`)}
@@ -141,12 +143,12 @@ export default function Home() {
             className="object-cover rounded-t-2xl"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50" />
-          {trending && (
+          {/* {trending && (
             <div className="absolute top-4 right-4 bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-medium flex items-center">
               <TrendingUp className="w-3 h-3 mr-1" />
               Tendance
             </div>
-          )}
+          )} */}
         </div>
 
         <CardContent className="p-6 relative">
@@ -184,11 +186,11 @@ export default function Home() {
               <Users className="w-5 h-5 text-blue-500 mr-3" />
               <span className="font-medium">{new Intl.NumberFormat("fr-FR").format(members)} membres</span>
             </div>
-            <div className="flex items-center text-gray-600">
+            {/* <div className="flex items-center text-gray-600">
               <MessageCircle className="w-5 h-5 text-green-500 mr-3" />
               <span className="font-medium">{activity} messages/jour</span>
-            </div>
-            <div className="flex items-center text-gray-600">
+            </div> */}
+            {/* <div className="flex items-center text-gray-600">
               <Clock className="w-5 h-5 text-orange-500 mr-3" />
               <span className="font-medium">Actif {lastActive}</span>
             </div>
@@ -203,7 +205,7 @@ export default function Home() {
                   {getTrustScoreLabel(trustScore)}
                 </span>
               </div>
-            </div>
+            </div> */}
           </div>
           <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
             {userId ? (
@@ -276,6 +278,7 @@ export default function Home() {
             },
             community_learners_id: community.community_learners.map(learner => learner.learner_id),
             community_contributors_id: community.community_contributors.map(contributor => contributor.contributor_id),
+            createdAt: "2024-04-01T12:00:00.000Z", // Assuming a fixed createdAt date
           }));
 
           // Mettre à jour le cache
@@ -295,37 +298,64 @@ export default function Home() {
 
     const filters = [
       { id: "all", label: "Toutes" },
-      { id: "popular", label: "Populaires" },
       { id: "largest", label: "Plus grandes" },
       { id: "new", label: "Nouveautés" },
-      { id: "active", label: "Plus actives" },
+      // { id: "active", label: "Plus actives" },
     ];
 
-    // Modifier la fonction de recherche
-    const handleSearch = useCallback((searchValue: string) => {
-      setSearchTerm(searchValue);
+    // Modifier la fonction de filtrage pour prendre en compte les catégories et les filtres
+    const filterCommunities = useCallback(() => {
+      let filtered = [...communities];
 
-      if (!searchValue.trim()) {
-        setFilteredCommunities(communities);
-        return;
+      // Filtrage par terme de recherche
+      if (searchTerm.trim()) {
+        const searchTermLower = searchTerm.toLowerCase();
+        filtered = filtered.filter((community) => {
+          return (
+            community.name.toLowerCase().includes(searchTermLower) ||
+            community.category.toLowerCase().includes(searchTermLower) ||
+            community.creator.name.toLowerCase().includes(searchTermLower)
+          );
+        });
       }
 
-      const searchTermLower = searchValue.toLowerCase();
-      const filtered = communities.filter((community) => {
-        return (
-          community.name.toLowerCase().includes(searchTermLower) ||
-          community.category.toLowerCase().includes(searchTermLower) ||
-          community.creator.name.toLowerCase().includes(searchTermLower)
-        );
-      });
+      // Filtrage par catégorie
+      if (selectedCategory !== 'all') {
+        filtered = filtered.filter((community) => {
+          const categoryMap: { [key: string]: string } = {
+            'crypto': 'Crypto & Web3',
+            'trading': 'Trading',
+            'invest': 'Investissement',
+            'defi': 'DeFi'
+          };
+          return community.category === categoryMap[selectedCategory];
+        });
+      }
+
+      // Filtrage par type
+      switch (selectedFilter) {
+        case 'largest':
+          filtered.sort((a, b) => b.members - a.members);
+          break;
+        case 'new':
+          // Supposons que nous avons un champ createdAt dans notre interface Community
+          filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          break;
+        case 'active':
+          filtered.sort((a, b) => b.activity - a.activity);
+          break;
+        default:
+          // 'all' - pas de tri spécial
+          break;
+      }
 
       setFilteredCommunities(filtered);
-    }, [communities]);
+    }, [communities, searchTerm, selectedCategory, selectedFilter]);
 
-    // Initialiser les communautés filtrées
+    // Utiliser useEffect pour appliquer les filtres quand les dépendances changent
     useEffect(() => {
-      setFilteredCommunities(communities);
-    }, [communities]);
+      filterCommunities();
+    }, [filterCommunities, searchTerm, selectedCategory, selectedFilter]);
 
     return (
       <div className="min-h-screen">
@@ -379,7 +409,7 @@ export default function Home() {
                   placeholder="Rechercher une communauté..."
                   className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={searchTerm}
-                  onChange={(e) => handleSearch(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
@@ -389,10 +419,7 @@ export default function Home() {
               {categories.map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
-                  onClick={() => {
-                    setSelectedCategory(id);
-                    toast.info("Cette fonctionnalité n'est pas encore définie");
-                  }}
+                  onClick={() => setSelectedCategory(id)}
                   className={`flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-colors ${selectedCategory === id
                     ? "bg-blue-600 text-white"
                     : "bg-white text-gray-600 hover:bg-gray-50"
@@ -409,10 +436,7 @@ export default function Home() {
               {filters.map((filter) => (
                 <button
                   key={filter.id}
-                  onClick={() => {
-                    setSelectedFilter(filter.id);
-                    toast.info("Cette fonctionnalité n'est pas encore définie");
-                  }}
+                  onClick={() => setSelectedFilter(filter.id)}
                   className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${selectedFilter === filter.id
                     ? "bg-blue-600 text-white"
                     : "bg-white text-gray-600 hover:bg-gray-50"
@@ -422,6 +446,58 @@ export default function Home() {
                 </button>
               ))}
             </div>
+
+            {/* Ajouter un indicateur de filtres actifs */}
+            {(selectedCategory !== 'all' || selectedFilter !== 'all' || searchTerm) && (
+              <div className="mb-4 flex items-center gap-2">
+                <span className="text-sm text-gray-500">Filtres actifs:</span>
+                <div className="flex gap-2">
+                  {selectedCategory !== 'all' && (
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
+                      {categories.find(c => c.id === selectedCategory)?.label}
+                      <button
+                        onClick={() => setSelectedCategory('all')}
+                        className="ml-2 text-blue-500 hover:text-blue-700"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {selectedFilter !== 'all' && (
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
+                      {filters.find(f => f.id === selectedFilter)?.label}
+                      <button
+                        onClick={() => setSelectedFilter('all')}
+                        className="ml-2 text-blue-500 hover:text-blue-700"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {searchTerm && (
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
+                      Recherche: {searchTerm}
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="ml-2 text-blue-500 hover:text-blue-700"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  <button
+                    onClick={() => {
+                      setSelectedCategory('all');
+                      setSelectedFilter('all');
+                      setSearchTerm('');
+                    }}
+                    className="text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    Réinitialiser tous les filtres
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Grille des communautés */}
             {loading ? (

@@ -14,6 +14,8 @@ model community {
   description                     String                            @default("")
   image_url                       String?                           @db.VarChar(255)
   category_id                     Int
+  created_at                      DateTime?                         @default(now()) @db.Timestamptz(6)
+  updated_at                      DateTime?                         @default(now()) @db.Timestamptz(6)
   category                        community_category                @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_community_category")
   user                            user                              @relation(fields: [creator_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_community_creator")
   community_bans                  community_bans[]
