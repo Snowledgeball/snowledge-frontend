@@ -17,9 +17,6 @@ interface Community {
 }
 
 export default function CommunautePage() {
-    const { data: session } = useSession();
-    const [communities, setCommunities] = useState<Community[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const { isLoading: isLoadingAuth, isAuthenticated: isAuthenticatedAuth, LoadingComponent } = useAuthGuard();
 
     if (isLoadingAuth) {

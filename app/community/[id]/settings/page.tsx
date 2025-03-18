@@ -198,7 +198,7 @@ export default function CommunitySettings() {
         toast.success("Avertissements générés");
     };
 
-    if (loading) return <div>Chargement...</div>;
+    if (loading) return <LoadingComponent />;
     if (!settings) return <div>Erreur lors du chargement des paramètres</div>;
 
     if (isLoading) {

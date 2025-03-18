@@ -35,6 +35,7 @@ interface Community {
   community_learners_id: number[];
   community_contributors_id: number[];
   createdAt: string; // Format ISO date string
+  updatedAt: string; // Format ISO date string
 }
 
 // Ajout de l'interface pour les données brutes de l'API
@@ -62,7 +63,8 @@ interface RawCommunity {
     fullName: string;
     profilePicture: string;
   };
-  createdAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export default function Home() {
@@ -278,7 +280,8 @@ export default function Home() {
             },
             community_learners_id: community.community_learners.map(learner => learner.learner_id),
             community_contributors_id: community.community_contributors.map(contributor => contributor.contributor_id),
-            createdAt: "2024-04-01T12:00:00.000Z", // Assuming a fixed createdAt date
+            createdAt: community.created_at,
+            updatedAt: community.updated_at,
           }));
 
           // Mettre à jour le cache
@@ -338,6 +341,7 @@ export default function Home() {
           filtered.sort((a, b) => b.members - a.members);
           break;
         case 'new':
+          console.log("filtered", filtered)
           // Supposons que nous avons un champ createdAt dans notre interface Community
           filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           break;
