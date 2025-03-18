@@ -72,6 +72,7 @@ export default function Home() {
   const router = useRouter();
   const { data: session } = useSession();
   const [userId, setUserId] = useState<string | null>(null);
+  const [communities, setCommunities] = useState<Community[]>([]);
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -226,7 +227,6 @@ export default function Home() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedFilter, setSelectedFilter] = useState("all");
     const [selectedCategory, setSelectedCategory] = useState("all");
-    const [communities, setCommunities] = useState<Community[]>([]);
     const [loading, setLoading] = useState(true);
     const [filteredCommunities, setFilteredCommunities] = useState<Community[]>([]);
 
@@ -244,60 +244,72 @@ export default function Home() {
         (Date.now() - communitiesCache.timestamp) < communitiesCache.expiresIn;
     }, []);
 
-    useEffect(() => {
-      const fetchCommunities = async () => {
-        try {
-          // Vérifier si les données sont dans le cache et si le cache est encore valide
-          if (isCacheValid) {
-            setCommunities(communitiesCache.data!);
-            setLoading(false);
-            return;
-          }
-
-          const response = await fetch('/api/communities', {
-            headers: {
-              'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
-            }
-          });
-
-          if (!response.ok) throw new Error('Erreur lors de la récupération des communautés');
-
-          const data = await response.json();
-          const formattedCommunities = data.map((community: RawCommunity) => ({
-            id: community.id,
-            name: community.name,
-            members: community.community_learners.length,
-            activity: Math.floor(Math.random() * 300) + 50,
-            trending: Math.random() > 0.7,
-            category: community.category.label,
-            lastActive: "il y a 2h",
-            trustScore: Math.floor(Math.random() * 30) + 65,
-            imageUrl: community.image_url || "images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000&auto=format&fit=crop",
-            creator: {
-              id: community.creator.id,
-              name: community.creator.fullName,
-              avatar: community.creator.profilePicture,
-            },
-            community_learners_id: community.community_learners.map(learner => learner.learner_id),
-            community_contributors_id: community.community_contributors.map(contributor => contributor.contributor_id),
-            createdAt: community.created_at,
-            updatedAt: community.updated_at,
-          }));
-
-          // Mettre à jour le cache
-          communitiesCache.data = formattedCommunities;
-          communitiesCache.timestamp = Date.now();
-
-          setCommunities(formattedCommunities);
-        } catch (error) {
-          console.error("Erreur:", error);
-        } finally {
+    const fetchCommunities = async () => {
+      try {
+        // Vérifier si les données sont dans le cache et si le cache est encore valide
+        if (isCacheValid) {
+          setCommunities(communitiesCache.data!);
           setLoading(false);
+          return;
         }
-      };
 
-      fetchCommunities();
-    }, [isCacheValid]);
+        const response = await fetch('/api/communities', {
+          headers: {
+            'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+          }
+        });
+
+        if (!response.ok) throw new Error('Erreur lors de la récupération des communautés');
+
+        const data = await response.json();
+        const formattedCommunities = data.map((community: RawCommunity) => ({
+          id: community.id,
+          name: community.name,
+          members: community.community_learners.length,
+          activity: Math.floor(Math.random() * 300) + 50,
+          trending: Math.random() > 0.7,
+          category: community.category.label,
+          lastActive: "il y a 2h",
+          trustScore: Math.floor(Math.random() * 30) + 65,
+          imageUrl: community.image_url || "images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000&auto=format&fit=crop",
+          creator: {
+            id: community.creator.id,
+            name: community.creator.fullName,
+            avatar: community.creator.profilePicture,
+          },
+          community_learners_id: community.community_learners.map(learner => learner.learner_id),
+          community_contributors_id: community.community_contributors.map(contributor => contributor.contributor_id),
+          createdAt: community.created_at,
+          updatedAt: community.updated_at,
+        }));
+
+        // Mettre à jour le cache
+        communitiesCache.data = formattedCommunities;
+        communitiesCache.timestamp = Date.now();
+
+        setCommunities(formattedCommunities);
+      } catch (error) {
+        console.error("Erreur:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    useEffect(() => {
+      // Vérifier si on vient de créer une communauté
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.get('update')) {
+        fetchCommunities();
+      } else {
+        // Vérifier le cache
+        const cachedData = sessionStorage.getItem('communities');
+        if (cachedData) {
+          setCommunities(JSON.parse(cachedData));
+        } else {
+          fetchCommunities();
+        }
+      }
+    }, []);
 
     const filters = [
       { id: "all", label: "Toutes" },
@@ -392,14 +404,14 @@ export default function Home() {
           </div>
 
           {/* Section En vedette */}
-          <section className="mb-16">
+          {/* <section className="mb-16">
             <h2 className="text-2xl font-bold text-gray-900 mb-8">Communautés en vedette</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {communities.map((community, index) => (
                 <CommunityCard key={index} {...community} />
               ))}
             </div>
-          </section>
+          </section> */}
 
           {/* Section Explorer */}
           <section>
