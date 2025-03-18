@@ -64,7 +64,7 @@ export default function CommunityHeader({
                                                     router.push(`/community/${community.id}`)
                                                 }
                                                 className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left hover:bg-gray-50 transition-colors
-                          ${String(community.id) === String(communityData.id)
+                                                ${String(community.id) === String(communityData.id)
                                                         ? "bg-blue-50 text-blue-600"
                                                         : "text-gray-700"
                                                     }`}
@@ -76,7 +76,9 @@ export default function CommunityHeader({
                                                     <div className="text-xs text-gray-500">
                                                         {community.role === "learner"
                                                             ? "Apprenant"
-                                                            : "Contributeur"}
+                                                            : community.role === "creator"
+                                                                ? "Créateur"
+                                                                : "Contributeur"}
                                                     </div>
                                                 </div>
                                             </button>

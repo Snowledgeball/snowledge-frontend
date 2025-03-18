@@ -374,23 +374,35 @@ const CommunityHub = () => {
       try {
         // Fonction pour récupérer les communautés depuis l'API
         const fetchFromAPI = async () => {
-          const response = await fetch(`/api/users/${session?.user?.id}/joined-communities`);
+          const joinedCommunitiesResponse = await fetch(`/api/users/${session?.user?.id}/joined-communities`);
+          const ownedCommunitiesResponse = await fetch(`/api/users/${session?.user?.id}/owned-communities`);
 
-          if (!response.ok) {
-            throw new Error(`Erreur HTTP: ${response.status}`);
+
+          if (!joinedCommunitiesResponse.ok || !ownedCommunitiesResponse.ok) {
+            throw new Error(`Erreur HTTP: ${joinedCommunitiesResponse.status} ${ownedCommunitiesResponse.status}`);
           }
 
-          const data = await response.json();
+          const joinedCommunities = await joinedCommunitiesResponse.json();
+          const ownedCommunities = await ownedCommunitiesResponse.json();
 
-          if (data && data.communities && Array.isArray(data.communities)) {
-            setUserCommunities(data.communities);
+          const formattedOwnedCommunities = ownedCommunities.communities.map((community: any) => ({
+            id: community.id,
+            name: community.name,
+            createdAt: community.created_at,
+            role: "creator"
+          }));
+          console.log("formattedOwnedCommunities", formattedOwnedCommunities);
+
+          if (joinedCommunities && joinedCommunities.communities && Array.isArray(joinedCommunities.communities) && formattedOwnedCommunities && Array.isArray(formattedOwnedCommunities)) {
+            const allCommunities = joinedCommunities.communities.concat(formattedOwnedCommunities);
+            setUserCommunities(allCommunities);
 
             // Sauvegarder dans sessionStorage
             if (typeof window !== 'undefined') {
-              sessionStorage.setItem(userCommunitiesCacheKey, JSON.stringify(data.communities));
+              sessionStorage.setItem(userCommunitiesCacheKey, JSON.stringify(allCommunities));
             }
 
-            return data.communities;
+            return allCommunities;
           } else {
             setUserCommunities([]);
             return [];
@@ -404,7 +416,6 @@ const CommunityHub = () => {
 
             if (cachedDataStr) {
               const cachedData = JSON.parse(cachedDataStr);
-
               if (Array.isArray(cachedData) && cachedData.length > 0) {
                 setUserCommunities(cachedData);
               } else {
