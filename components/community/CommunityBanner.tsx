@@ -12,9 +12,10 @@ export default function CommunityBanner({ communityData }: CommunityBannerProps)
 
     return (
         <>
+
             <div className="w-full h-[255px] relative overflow-hidden">
                 <Image
-                    src={`https://${communityData.image_url}`}
+                    src={`https://${communityData.image_url ? communityData.image_url : "images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000&auto=format&fit=crop"}`}
                     alt="Banner pattern"
                     layout="fill"
                     objectFit="cover"
