@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Users, MessageCircle, TrendingUp, Search, Clock, Globe, Activity, Shield, Bitcoin, PiggyBank, Wallet
@@ -224,6 +224,7 @@ export default function Home() {
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [communities, setCommunities] = useState<Community[]>([]);
     const [loading, setLoading] = useState(true);
+    const [filteredCommunities, setFilteredCommunities] = useState<Community[]>([]);
 
     const categories = [
       { id: "all", label: "Toutes les catégories", icon: Globe },
@@ -300,6 +301,32 @@ export default function Home() {
       { id: "active", label: "Plus actives" },
     ];
 
+    // Modifier la fonction de recherche
+    const handleSearch = useCallback((searchValue: string) => {
+      setSearchTerm(searchValue);
+
+      if (!searchValue.trim()) {
+        setFilteredCommunities(communities);
+        return;
+      }
+
+      const searchTermLower = searchValue.toLowerCase();
+      const filtered = communities.filter((community) => {
+        return (
+          community.name.toLowerCase().includes(searchTermLower) ||
+          community.category.toLowerCase().includes(searchTermLower) ||
+          community.creator.name.toLowerCase().includes(searchTermLower)
+        );
+      });
+
+      setFilteredCommunities(filtered);
+    }, [communities]);
+
+    // Initialiser les communautés filtrées
+    useEffect(() => {
+      setFilteredCommunities(communities);
+    }, [communities]);
+
     return (
       <div className="min-h-screen">
         <header className="bg-white border-b border-gray-200">
@@ -348,12 +375,11 @@ export default function Home() {
               <div className="relative w-full sm:w-72">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
-                  onClick={() => toast.info("Cette fonctionnalité n'est pas encore définie")}
                   type="text"
                   placeholder="Rechercher une communauté..."
                   className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => handleSearch(e.target.value)}
                 />
               </div>
             </div>
@@ -404,9 +430,15 @@ export default function Home() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {communities.map((community, index) => (
-                  <CommunityCard key={index} {...community} />
-                ))}
+                {filteredCommunities.length === 0 ? (
+                  <div className="col-span-full text-center py-8 text-gray-500">
+                    Aucune communauté ne correspond à votre recherche
+                  </div>
+                ) : (
+                  filteredCommunities.map((community, index) => (
+                    <CommunityCard key={index} {...community} />
+                  ))
+                )}
               </div>
             )}
           </section>
