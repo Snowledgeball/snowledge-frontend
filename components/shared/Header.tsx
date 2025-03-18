@@ -179,7 +179,7 @@ export default function Header() {
           <div className="lg:hidden">
             <div className="py-4 space-y-4">
               <Link
-                href="/explore"
+                href="/"
                 className="block px-4 py-2 text-gray-600 font-bold hover:bg-gray-100 rounded-lg"
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -223,11 +223,11 @@ export default function Header() {
                         </clipPath>
                       </defs>
                     </svg>
-                    <span className="xs:inline">Créer</span>
+                    <span className="xs:inline">Devenir créateur</span>
                   </button>
                   {session && user ? (
                     <>
-                      <div className="flex items-center rounded-xl border border-gray-200 mx-2">
+                      {/* <div className="flex items-center rounded-xl border border-gray-200 mx-2">
                         <StatIndicator
                           type="points"
                           value={10458}
@@ -240,7 +240,7 @@ export default function Header() {
                           valueClassName="text-emerald-500"
                           noBorder
                         />
-                      </div>
+                      </div> */}
 
                       <div className="flex items-center gap-2 sm:gap-4">
                         <button
