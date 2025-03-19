@@ -1,9 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { encryptPrivateKey, decryptPrivateKey } from "../../../../utils/crypt";
 import { pinata } from "../../../../utils/config";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req) {
   try {

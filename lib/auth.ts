@@ -1,12 +1,9 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from '@/lib/prisma'
 import bcrypt from "bcrypt";
 import { Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
-
-// Initialisation du client Prisma
-const prisma = new PrismaClient();
 
 // Types personnalisés pour étendre les types de base de NextAuth
 interface CustomSession extends Session {

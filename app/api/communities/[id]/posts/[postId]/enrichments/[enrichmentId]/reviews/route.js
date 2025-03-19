@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from '@/lib/prisma'
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { checkContributionStatus } from "@/lib/contributionUtils";
 import { NotificationType } from "@/types/notification";
 import { createBulkNotifications } from "@/lib/notifications";
-
-const prisma = new PrismaClient();
 
 export async function POST(request, { params }) {
     try {

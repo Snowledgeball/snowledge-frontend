@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from '@/lib/prisma'
 import { pinata } from "@/utils/config";
 import bcrypt from "bcrypt";
-
-const prismaClient = new PrismaClient();
 
 export async function GET(
     request,
@@ -16,7 +14,7 @@ export async function GET(
 
         const { id } = await params;
 
-        const user = await prismaClient.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: {
                 id: parseInt(id)
             }
@@ -30,14 +28,14 @@ export async function GET(
         }
 
         // Récupérer le nombre de communautés où l'utilisateur est membre
-        const communitiesCount = await prismaClient.community_learners.count({
+        const communitiesCount = await prisma.community_learners.count({
             where: {
                 learner_id: parseInt(id)
             }
         });
 
         // Récupérer le nombre de posts de l'utilisateur
-        const postsCount = await prismaClient.community_posts.count({
+        const postsCount = await prisma.community_posts.count({
             where: {
                 author_id: parseInt(id)
             }
@@ -139,7 +137,7 @@ export async function PUT(
             }
 
             // Vérifier le mot de passe actuel
-            const user = await prismaClient.user.findUnique({
+            const user = await prisma.user.findUnique({
                 where: { id: parseInt(id) },
                 select: { password: true }
             });
@@ -175,7 +173,7 @@ export async function PUT(
             }
         }
 
-        const updatedUser = await prismaClient.user.update({
+        const updatedUser = await prisma.user.update({
             where: { id: parseInt(id) },
             data: updates.image ? { profilePicture: updates.image } : updates
         });

@@ -1,11 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from '@/lib/prisma'
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createBulkNotifications } from "@/lib/notifications";
 import { NotificationType } from "@/types/notification";
-
-const prisma = new PrismaClient();
 
 // Récupérer tous les posts en attente d'une communauté
 export async function GET(request, { params }) {
