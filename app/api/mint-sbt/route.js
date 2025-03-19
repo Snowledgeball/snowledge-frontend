@@ -1,6 +1,6 @@
 import { mintSBT } from '@/utils/mintSBT';
 
-export async function POST(request: Request) {
+export async function POST(request) {
     const { recipient, uri } = await request.json();
 
     try {

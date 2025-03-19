@@ -1,7 +1,7 @@
 import { deployAccountContract } from '@/utils/starknetUtils';
 import { NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
+export async function POST(request) {
     try {
         const { privateKey, publicKey } = await request.json();
 

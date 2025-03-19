@@ -55,7 +55,9 @@
     "app/api/communities/[id]/posts/pending/route.js",
     "app/api/notifications/[id]/route.js",
     "app/api/communities/[id]/learners/route.js",
-    "app/api/stats/route.js"
+    "app/api/stats/route.js",
+    "app/api/starknet/deploy-account/route.js",
+    "app/api/mint-sbt/route.js"
   ],
   "exclude": [
     "node_modules"
