@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Users, MessageCircle, TrendingUp, Search, Clock, Globe, Activity, Shield, Bitcoin, PiggyBank, Wallet, BookOpen, Sparkles
@@ -69,7 +69,6 @@ interface RawCommunity {
 
 // Fonction pour récupérer les stats
 const fetchStats = async () => {
-  console.log("fetchStats")
   try {
     const response = await fetch('/api/stats', {
       next: { revalidate: 3600 } // Revalider toutes les heures
@@ -103,7 +102,6 @@ export default function Home() {
   }, [session]);
 
   useEffect(() => {
-    console.log("useEffect fetchStats")
     const fetchStatsData = async () => {
       const data = await fetchStats();
       setStats(data.stats);
@@ -116,7 +114,6 @@ export default function Home() {
     return <Loader size="lg" color="gradient" text="Chargement des statistiques..." variant="spinner" />
   }
 
-  console.log("stats", stats)
   const statsItems = [
     {
       ...stats.communities,
@@ -347,13 +344,17 @@ export default function Home() {
       }
     };
 
+    const hasFetched = useRef(false);
+
     useEffect(() => {
-      // Vérifier si on vient de créer une communauté
+      if (hasFetched.current) return;
+
+      console.log("useEffect fetchCommunities");
       const searchParams = new URLSearchParams(window.location.search);
+
       if (searchParams.get('update')) {
         fetchCommunities();
       } else {
-        // Vérifier le cache
         const cachedData = sessionStorage.getItem('communities');
         if (cachedData) {
           setCommunities(JSON.parse(cachedData));
@@ -361,7 +362,9 @@ export default function Home() {
           fetchCommunities();
         }
       }
-    }, []);
+
+      hasFetched.current = true;
+    }, []); // Pas besoin de dépendances
 
     const filters = [
       { id: "all", label: "Toutes" },
@@ -405,7 +408,6 @@ export default function Home() {
           filtered.sort((a, b) => b.members - a.members);
           break;
         case 'new':
-          console.log("filtered", filtered)
           // Supposons que nous avons un champ createdAt dans notre interface Community
           filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           break;
