@@ -6,7 +6,6 @@ import { signIn } from "next-auth/react";
 import { Dialog, DialogPanel, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment } from "react";
 import { deployAccountContract, generateStarkNetAddress } from "../../utils/starknetUtils";
-import { mintSBT } from "../../utils/mintSBT";
 import { Camera, User, Mail, Lock, Upload, CheckCircle2, Circle, Loader2 } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
 
@@ -63,6 +62,37 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
         );
     };
 
+    const handleDeployAccount = async (addressDetails: { privateKey: string, publicKey: string }) => {
+        try {
+            const response = await fetch('/api/starknet/deploy-account', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    privateKey: addressDetails.privateKey,
+                    publicKey: addressDetails.publicKey
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors du déploiement du compte');
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Gérer le succès
+                console.log('Compte déployé:', data.accountAddress);
+                console.log('Transaction:', data.transactionHash);
+            }
+
+        } catch (error) {
+            console.error('Erreur:', error);
+            // Gérer l'erreur
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -86,8 +116,8 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
 
             // Étape 3: Déploiement du wallet
             updateProgress(2);
-            const addressDetails = await generateStarkNetAddress();
-            await deployAccountContract(addressDetails.privateKey, addressDetails.publicKey);
+            const addressDetails = generateStarkNetAddress();
+            await handleDeployAccount(addressDetails);
 
             // Étape 4: Enregistrement des données
             updateProgress(3);
@@ -138,7 +168,14 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                 updateProgress(4);
                 // Wait for 1 second before minting the SBT
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                await mintSBT(addressDetails.accountAddress, dataUploaded.metadataUrl);
+                await fetch("/api/mint-sbt", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        recipient: addressDetails.accountAddress,
+                        uri: dataUploaded.metadataUrl
+                    })
+                });
+
 
                 // Étape 6: Finalisation
                 updateProgress(5);

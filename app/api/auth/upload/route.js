@@ -47,8 +47,8 @@ export async function PUT(request) {
     const data = await request.formData();
 
     const NODE_URL = process.env.NEXT_PUBLIC_STARKNET_NODE_URL;
-    const FUNDER_PRIVATE_KEY = process.env.NEXT_PUBLIC_FUNDER_PRIVATE_KEY;
-    const FUNDER_ADDRESS = process.env.NEXT_PUBLIC_FUNDER_ADDRESS;
+    const FUNDER_PRIVATE_KEY = process.env.FUNDER_PRIVATE_KEY;
+    const FUNDER_ADDRESS = process.env.FUNDER_ADDRESS;
     const provider = new Provider({ nodeUrl: NODE_URL });
     const funderAccount = new Account(provider, FUNDER_ADDRESS, FUNDER_PRIVATE_KEY);
     const contract = new Contract(

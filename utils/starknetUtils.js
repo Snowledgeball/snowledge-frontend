@@ -1,14 +1,18 @@
 import { ec, stark, hash, Account, Provider, Contract } from "starknet";
 
 /**
- * Charge les variables d'environnement pour le réseau StarkNet
+ * Ces variables sont utilisées côté serveur uniquement
+ */
+const FUNDER_PRIVATE_KEY = process.env.FUNDER_PRIVATE_KEY;
+const FUNDER_ADDRESS = process.env.FUNDER_ADDRESS;
+
+/**
+ * Ces variables peuvent rester publiques car utilisées côté client
  */
 const NETWORK = process.env.NEXT_PUBLIC_STARKNET_NETWORK;
 const NODE_URL = process.env.NEXT_PUBLIC_STARKNET_NODE_URL;
 const ETH_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_ETH_TOKEN_ADDRESS;
 const ACCOUNT_CLASS_HASH = process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH;
-const FUNDER_PRIVATE_KEY = process.env.NEXT_PUBLIC_FUNDER_PRIVATE_KEY;
-const FUNDER_ADDRESS = process.env.NEXT_PUBLIC_FUNDER_ADDRESS;
 
 /**
  * Convertit un montant en Uint256 (format StarkNet)
