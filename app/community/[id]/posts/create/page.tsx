@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import DraftFeedbacks from "@/components/community/DraftFeedbacks";
 import { ThumbsDown } from "lucide-react";
 
+
+
 export default function CreatePost() {
   const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
   const params = useParams();
@@ -19,6 +21,7 @@ export default function CreatePost() {
   const [drafts, setDrafts] = useState<PostData[]>([]);
   const [activeTab, setActiveTab] = useState("new");
   const [selectedDraft, setSelectedDraft] = useState<PostData | null>(null);
+  const [postData, setPostData] = useState<PostData | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -39,6 +42,27 @@ export default function CreatePost() {
       }
     }
   }, [searchParams, drafts]);
+
+  useEffect(() => {
+    // Récupérer les données du post original
+    const originalTitle = searchParams.get('title');
+    const originalContent = searchParams.get('content');
+    const originalCoverImage = searchParams.get('coverImageUrl');
+    const originalTag = searchParams.get('tag');
+
+    if (originalTitle && originalContent) {
+      // Pré-remplir le formulaire
+      const postData: PostData = {
+        title: originalTitle,
+        content: originalContent,
+        cover_image_url: originalCoverImage || '',
+        tag: originalTag || '',
+      };
+
+      setPostData(postData);
+
+    }
+  }, [searchParams]);
 
   const checkContributorStatus = async () => {
     try {
@@ -163,7 +187,7 @@ export default function CreatePost() {
       <div className="max-w-[85rem] mx-auto px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
-            <TabsTrigger value="new">Nouveau post</TabsTrigger>
+            <TabsTrigger value="new" onClick={() => router.push(`/community/${params.id}/posts/create`)}>Nouveau post</TabsTrigger>
             <TabsTrigger value="drafts">
               Brouillons ({drafts.length})
             </TabsTrigger>
@@ -176,6 +200,7 @@ export default function CreatePost() {
 
           <TabsContent value="new">
             <PostEditor
+              initialData={postData ? postData : undefined}
               communityId={params.id as string}
               onSubmit={handleSubmitPost}
               onSaveDraft={handleSaveDraft}
@@ -201,7 +226,7 @@ export default function CreatePost() {
                         <div>
                           <h3 className="font-semibold text-lg">{draft.title}</h3>
                           <p className="text-sm text-gray-500 mt-1">
-                            Dernière modification: {new Date(draft.updated_at || draft.created_at).toLocaleDateString()}
+                            Dernière modification: {new Date(draft.updated_at || draft.created_at || '').toLocaleDateString()}
                           </p>
                         </div>
                         <div className="flex space-x-2">

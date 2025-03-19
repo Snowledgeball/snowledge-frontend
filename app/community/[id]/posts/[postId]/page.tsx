@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   MessageCircle,
   Edit,
+  Copy
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -150,6 +151,25 @@ export default function PostPage() {
                     >
                       <Edit className="h-4 w-4 mr-2" />
                       Contribuer
+                    </Link>
+                  )}
+
+                  {session && !isAuthor && isContributorOrCreator && (
+                    <Link
+                      href={{
+                        pathname: `/community/${params.id}/posts/create`,
+                        query: {
+                          title: post.title,
+                          content: post.content,
+                          coverImageUrl: post.cover_image_url,
+                          tag: post.tag,
+                          fromPost: post.id
+                        }
+                      }}
+                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Reprendre le post
                     </Link>
                   )}
 
