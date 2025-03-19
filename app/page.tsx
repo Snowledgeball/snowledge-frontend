@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Users, MessageCircle, TrendingUp, Search, Clock, Globe, Activity, Shield, Bitcoin, PiggyBank, Wallet
+  Users, MessageCircle, TrendingUp, Search, Clock, Globe, Activity, Shield, Bitcoin, PiggyBank, Wallet, BookOpen, Sparkles
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -67,12 +67,33 @@ interface RawCommunity {
   updated_at: string;
 }
 
+// Fonction pour récupérer les stats
+const fetchStats = async () => {
+  console.log("fetchStats")
+  try {
+    const response = await fetch('/api/stats', {
+      next: { revalidate: 3600 } // Revalider toutes les heures
+    });
+
+    if (!response.ok) throw new Error('Erreur réseau');
+
+    return response.json();
+  } catch (error) {
+    console.error('Erreur lors du chargement des statistiques:', error);
+    return null;
+  }
+};
+
 export default function Home() {
+
 
   const router = useRouter();
   const { data: session } = useSession();
   const [userId, setUserId] = useState<string | null>(null);
   const [communities, setCommunities] = useState<Community[]>([]);
+  const [stats, setStats] = useState<any>(null);
+
+
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -80,6 +101,37 @@ export default function Home() {
       setUserId(userId);
     }
   }, [session]);
+
+  useEffect(() => {
+    console.log("useEffect fetchStats")
+    const fetchStatsData = async () => {
+      const data = await fetchStats();
+      setStats(data.stats);
+    };
+
+    fetchStatsData();
+  }, [session]);
+
+  if (!stats) {
+    return <Loader size="lg" color="gradient" text="Chargement des statistiques..." variant="spinner" />
+  }
+
+  console.log("stats", stats)
+  const statsItems = [
+    {
+      ...stats.communities,
+      icon: Globe,
+    },
+    {
+      ...stats.members,
+      icon: Users,
+    },
+    {
+      ...stats.enrichments,
+      icon: Sparkles,
+    }
+  ];
+
 
   const CommunityCard = ({
     id,
@@ -384,20 +436,23 @@ export default function Home() {
 
         <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
           {/* Statistiques globales */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            {[
-              { label: "Communautés actives", value: "1,234", icon: Globe },
-              { label: "Membres totaux", value: "45,678", icon: Users },
-              { label: "Messages aujourd'hui", value: "12,345", icon: MessageCircle },
-              { label: "Communautés créées ce mois", value: "123", icon: Activity },
-            ].map((stat, index) => (
-              <div key={index} className="bg-white p-6 rounded-xl shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            {statsItems.map((item, index) => (
+              <div
+                key={`${item.label}-${index}`}
+                className="bg-white rounded-lg p-6 shadow-sm"
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500">{stat.label}</p>
-                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                    <p className="text-sm text-gray-600">{item.label}</p>
+                    <h3 className="text-2xl font-semibold mt-1">
+                      {typeof item.total === 'number'
+                        ? item.total.toLocaleString('fr-FR')
+                        : item.total}
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1">{item.description}</p>
                   </div>
-                  <stat.icon className="w-8 h-8 text-blue-500" />
+                  {item.icon && <item.icon className="h-8 w-8 text-blue-500" />}
                 </div>
               </div>
             ))}
