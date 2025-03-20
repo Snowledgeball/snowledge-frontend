@@ -83,16 +83,13 @@ const fetchStats = async () => {
   }
 };
 
-export default function Home() {
-
-
+const HomePage = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const [userId, setUserId] = useState<string | null>(null);
   const [communities, setCommunities] = useState<Community[]>([]);
   const [stats, setStats] = useState<any>(null);
-
-
+  const hasFetched = useRef(false);
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -110,11 +107,11 @@ export default function Home() {
     fetchStatsData();
   }, [session]);
 
-  if (!stats) {
-    return <Loader size="lg" color="gradient" text="Chargement des statistiques..." variant="spinner" />
-  }
+  // if (!stats) {
+  //   return <Loader size="lg" color="gradient" text="Chargement des statistiques..." variant="spinner" />
+  // }
 
-  const statsItems = [
+  const statsItems = stats ? [
     {
       ...stats.communities,
       icon: Globe,
@@ -127,8 +124,7 @@ export default function Home() {
       ...stats.enrichments,
       icon: Sparkles,
     }
-  ];
-
+  ] : [];
 
   const CommunityCard = ({
     id,
@@ -179,7 +175,6 @@ export default function Home() {
         onClick={() => router.push(`/community/${id}`)}
         className="group relative overflow-hidden bg-white rounded-2xl transition-all duration-300 hover:shadow-xl cursor-pointer"
       >
-
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
         {/* Image de la communauté */}
@@ -231,7 +226,6 @@ export default function Home() {
               {/* <p className="text-xs text-gray-500">Créateur</p> */}
             </div>
           </div>
-
 
           <div className="space-y-3">
             <div className="flex items-center text-gray-600">
@@ -299,6 +293,7 @@ export default function Home() {
         if (isCacheValid) {
           setCommunities(communitiesCache.data!);
           setLoading(false);
+          console.log("loading false");
           return;
         }
 
@@ -332,6 +327,8 @@ export default function Home() {
           updatedAt: community.updated_at,
         }));
 
+        console.log("formattedCommunities", formattedCommunities);
+
         // Mettre à jour le cache
         communitiesCache.data = formattedCommunities;
         communitiesCache.timestamp = Date.now();
@@ -340,30 +337,37 @@ export default function Home() {
       } catch (error) {
         console.error("Erreur:", error);
       } finally {
+        console.log("loading false2");
         setLoading(false);
       }
     };
 
-    const hasFetched = useRef(false);
-
     useEffect(() => {
-      if (hasFetched.current) return;
+      if (typeof window === 'undefined' || hasFetched.current) return;
 
-      console.log("useEffect fetchCommunities");
+      console.log("hasFetched.current111", hasFetched.current);
+      console.log("1");
+
       const searchParams = new URLSearchParams(window.location.search);
 
       if (searchParams.get('update')) {
+        console.log("2");
         fetchCommunities();
       } else {
+        console.log("3");
         const cachedData = sessionStorage.getItem('communities');
         if (cachedData) {
+          console.log("4");
           setCommunities(JSON.parse(cachedData));
         } else {
+          console.log("5");
           fetchCommunities();
         }
       }
+      console.log("6");
 
       hasFetched.current = true;
+      console.log("hasFetched.current", hasFetched.current);
     }, []); // Pas besoin de dépendances
 
     const filters = [
@@ -597,4 +601,6 @@ export default function Home() {
   };
 
   return <MarketplaceLayout />;
-}
+};
+
+export default HomePage;
