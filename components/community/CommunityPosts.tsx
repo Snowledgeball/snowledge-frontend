@@ -39,7 +39,8 @@ interface Category {
   description: string;
 }
 
-// Cache pour les contenus HTML rendus
+// Déplacer les deux caches en dehors du composant pour les rendre persistants
+const categoriesCache = new Map<string, Category[]>();
 const contentCache = new Map<number, string>();
 
 export default function CommunityPosts({
@@ -57,55 +58,50 @@ export default function CommunityPosts({
   const [expandedCategories, setExpandedCategories] = useState<string[]>(
     categoryFromUrl ? [categoryFromUrl] : []
   );
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>(
+    categoriesCache.get(communityId) || []
+  );
 
+  // Modifier la logique de fetch des catégories
   useEffect(() => {
     const fetchCategories = async () => {
-      const response = await fetch(
-        `/api/communities/${communityId}/categories`
-      );
-      const data = await response.json();
-      setCategories(data);
+      // Si on a déjà les catégories en cache, ne pas recharger
+      if (categoriesCache.has(communityId)) {
+        setCategories(categoriesCache.get(communityId) || []);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/api/communities/${communityId}/categories`
+        );
+        const data = await response.json();
+        categoriesCache.set(communityId, data);
+        setCategories(data);
+      } catch (error) {
+        console.error("Erreur lors du chargement des catégories:", error);
+      }
     };
+
     fetchCategories();
   }, [communityId]);
 
-  // Mémoriser les catégories qui ont des posts
+  // Simplifier categoriesWithPosts pour éviter les recalculs inutiles
   const categoriesWithPosts = useMemo(() => {
-    // Vérifier que posts est bien un tableau
-    if (!Array.isArray(posts)) {
-      console.error("posts n'est pas un tableau:", posts);
-      return categories; // Retourner toutes les catégories par défaut
-    }
-    console.log("posts", posts);
-    console.log("categories", categories);
-    // console.log(
-    //   "categoriesWithPosts",
-    //   categories.filter((category) =>
-    //     posts.some((post) => post.tag === category.name)
-    //   )
-    // );
-    return categories.filter((category) =>
-      posts.some((post) => post.tag === category.name)
-    );
-  }, [posts, categories]);
+    return categories;
+  }, [categories]);
 
-  // Mémoriser les posts par catégorie
+  // Simplifier postsByCategory
   const postsByCategory = useMemo(() => {
     const result: Record<string, Post[]> = {};
+    if (!Array.isArray(posts)) return result;
 
-    // Vérifier que posts est bien un tableau
-    if (!Array.isArray(posts)) {
-      return result;
-    }
-
-    console.log("categoriesWithPosts", categoriesWithPosts);
-    categoriesWithPosts.forEach((category) => {
-      result[category.id] = posts.filter((post) => post.tag == category.name);
+    categories.forEach((category) => {
+      result[category.id] = posts.filter((post) => post.tag === category.name);
     });
 
     return result;
-  }, [posts, categoriesWithPosts]);
+  }, [posts, categories]);
 
   // Gérer le clic sur une catégorie (simple toggle local)
   const handleCategoryClick = useCallback((categoryId: string) => {
@@ -125,14 +121,18 @@ export default function CommunityPosts({
     }
   }, [categoryFromUrl, expandedCategories]);
 
-  // Fonction pour naviguer vers un post
+  // Simplifier la navigation
   const navigateToPost = useCallback(
     (postId: number) => {
-      setIsLoading(true);
       router.push(`/community/${communityId}/posts/${postId}`);
     },
     [router, communityId]
   );
+
+  // Simplifier la création de post
+  const handleCreatePost = useCallback(() => {
+    router.push(`/community/${communityId}/posts/create`);
+  }, [router, communityId]);
 
   // Fonction pour obtenir le contenu HTML mis en cache ou le mettre en cache
   const getCachedContent = useCallback((post: Post) => {
@@ -199,23 +199,13 @@ export default function CommunityPosts({
 
   return (
     <div className="space-y-8 bg-gray-50 p-6 rounded-xl" id="posts-container">
-      {isLoading && (
-        <div className="fixed inset-0 bg-white bg-opacity-70 z-50 flex items-center justify-center">
-          <Loader size="lg" color="gradient" text="Chargement..." fullScreen />
-        </div>
-      )}
-
-      {/* Bouton Nouveau Post pour les contributeurs */}
+      {/* Modifier les boutons pour ne plus utiliser setIsLoading */}
       <div className="flex justify-end mb-8">
         {isContributor && (
           <button
-            onClick={() => {
-              setIsLoading(true);
-              router.push(`/community/${communityId}/posts/create`);
-            }}
+            onClick={handleCreatePost}
             className="flex items-center space-x-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             id="create-post-button"
-            disabled={isLoading}
           >
             <PlusCircle className="w-5 h-5" />
             <span className="font-medium">Proposer un post</span>
