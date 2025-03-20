@@ -28,7 +28,7 @@ import { Loader } from "@/components/ui/loader";
 const cacheUtils = {
   // Récupérer des données du cache
   get: (key: string) => {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === "undefined") return null;
 
     try {
       const item = localStorage.getItem(key);
@@ -37,30 +37,30 @@ const cacheUtils = {
       const parsedItem = JSON.parse(item);
       return parsedItem;
     } catch (error) {
-      console.error('Erreur lors de la récupération du cache:', error);
+      console.error("Erreur lors de la récupération du cache:", error);
       return null;
     }
   },
 
   // Stocker des données dans le cache
   set: (key: string, data: any, expirationInMinutes = 5) => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     try {
       const item = {
         data,
         timestamp: Date.now(),
-        expiration: Date.now() + (expirationInMinutes * 60 * 1000)
+        expiration: Date.now() + expirationInMinutes * 60 * 1000,
       };
       localStorage.setItem(key, JSON.stringify(item));
     } catch (error) {
-      console.error('Erreur lors du stockage dans le cache:', error);
+      console.error("Erreur lors du stockage dans le cache:", error);
     }
   },
 
   // Vérifier si une clé existe dans le cache et n'est pas expirée
   has: (key: string) => {
-    if (typeof window === 'undefined') return false;
+    if (typeof window === "undefined") return false;
 
     try {
       const item = localStorage.getItem(key);
@@ -69,21 +69,21 @@ const cacheUtils = {
       const parsedItem = JSON.parse(item);
       return parsedItem && parsedItem.expiration > Date.now();
     } catch (error) {
-      console.error('Erreur lors de la vérification du cache:', error);
+      console.error("Erreur lors de la vérification du cache:", error);
       return false;
     }
   },
 
   // Supprimer une entrée du cache
   remove: (key: string) => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     try {
       localStorage.removeItem(key);
     } catch (error) {
-      console.error('Erreur lors de la suppression du cache:', error);
+      console.error("Erreur lors de la suppression du cache:", error);
     }
-  }
+  },
 };
 
 // Ajouter ce type avant le composant CommunityHub
@@ -119,7 +119,7 @@ const CommunityHub = () => {
   const searchParams = useSearchParams();
 
   // Récupérer l'onglet actif depuis l'URL ou utiliser "general" par défaut
-  const tabFromUrl = searchParams.get('tab');
+  const tabFromUrl = searchParams.get("tab");
 
   const [communityData, setCommunityData] = useState<Community | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -133,8 +133,10 @@ const CommunityHub = () => {
   const [pendingPostsCount, setPendingPostsCount] = useState(0);
   const [pendingEnrichmentsCount, setPendingEnrichmentsCount] = useState(0);
   const [bans, setBans] = useState<any[]>([]);
-  const [votingSubTab, setVotingSubTab] = useState<"creation" | "enrichissement">(
-    searchParams.get('voting') as "creation" | "enrichissement" || "creation"
+  const [votingSubTab, setVotingSubTab] = useState<
+    "creation" | "enrichissement"
+  >(
+    (searchParams.get("voting") as "creation" | "enrichissement") || "creation"
   );
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [isLoadingCommunity, setIsLoadingCommunity] = useState(true);
@@ -144,25 +146,28 @@ const CommunityHub = () => {
   const communityId = useMemo(() => params.id as string, [params.id]);
 
   // Mettre à jour l'URL lorsque l'onglet actif change
-  const handleTabChange = useCallback((tab: string) => {
-    // Éviter de recharger si on clique sur l'onglet déjà actif
-    if (tab === activeTab) return;
+  const handleTabChange = useCallback(
+    (tab: string) => {
+      // Éviter de recharger si on clique sur l'onglet déjà actif
+      if (tab === activeTab) return;
 
-    setActiveTab(tab);
+      setActiveTab(tab);
 
-    // Construire la nouvelle URL avec uniquement le paramètre tab
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set('tab', tab);
+      // Construire la nouvelle URL avec uniquement le paramètre tab
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.set("tab", tab);
 
-    // Si on change pour un onglet autre que "voting", supprimer le paramètre "voting"
-    if (tab !== "voting") {
-      newParams.delete('voting');
-    }
+      // Si on change pour un onglet autre que "voting", supprimer le paramètre "voting"
+      if (tab !== "voting") {
+        newParams.delete("voting");
+      }
 
-    // Mettre à jour l'URL sans recharger la page
-    const newUrl = `/community/${communityId}?${newParams.toString()}`;
-    window.history.pushState({}, '', newUrl);
-  }, [activeTab, communityId, searchParams]);
+      // Mettre à jour l'URL sans recharger la page
+      const newUrl = `/community/${communityId}?${newParams.toString()}`;
+      window.history.pushState({}, "", newUrl);
+    },
+    [activeTab, communityId, searchParams]
+  );
 
   // Fonction pour invalider le cache
   const invalidateCache = useCallback((cacheKey: string) => {
@@ -170,48 +175,51 @@ const CommunityHub = () => {
   }, []);
 
   // Fonction optimisée pour récupérer les posts
-  const fetchCommunityPosts = useCallback(async (forceRefresh = false) => {
-    if (!communityId || !session) return;
+  const fetchCommunityPosts = useCallback(
+    async (forceRefresh = false) => {
+      if (!communityId || !session) return;
 
-    const cacheKey = `posts-${communityId}`;
+      const cacheKey = `posts-${communityId}`;
 
-    // Vérifier si les données sont dans le cache et si on ne force pas le rafraîchissement
-    if (!forceRefresh && cacheUtils.has(cacheKey)) {
-      const cachedData = cacheUtils.get(cacheKey);
-      setPosts(cachedData.data);
-      return;
-    }
+      // Vérifier si les données sont dans le cache et si on ne force pas le rafraîchissement
+      if (!forceRefresh && cacheUtils.has(cacheKey)) {
+        const cachedData = cacheUtils.get(cacheKey);
+        setPosts(cachedData.data);
+        return;
+      }
 
-    setIsLoadingPosts(true);
-    try {
-      const communityPostsResponse = await fetch(
-        `/api/communities/${communityId}/posts?status=PUBLISHED`,
-        {
-          headers: {
-            'Cache-Control': 'max-age=300', // Cache de 5 minutes
+      setIsLoadingPosts(true);
+      try {
+        const communityPostsResponse = await fetch(
+          `/api/communities/${communityId}/posts?status=PUBLISHED`,
+          {
+            headers: {
+              "Cache-Control": "max-age=300", // Cache de 5 minutes
+            },
           }
-        }
-      );
+        );
 
-      if (!communityPostsResponse.ok)
-        throw new Error("Erreur lors de la récupération des posts");
+        if (!communityPostsResponse.ok)
+          throw new Error("Erreur lors de la récupération des posts");
 
-      const data = await communityPostsResponse.json();
+        const data = await communityPostsResponse.json();
 
-      // Vérifier que les données sont bien un tableau
-      const postsData = Array.isArray(data.posts) ? data.posts : [];
+        // Vérifier que les données sont bien un tableau
+        const postsData = Array.isArray(data.posts) ? data.posts : [];
 
-      // Mettre en cache les données
-      cacheUtils.set(cacheKey, postsData);
+        // Mettre en cache les données
+        cacheUtils.set(cacheKey, postsData);
 
-      setPosts(postsData);
-    } catch (error) {
-      console.error("Erreur lors de la récupération des posts:", error);
-      setPosts([]);
-    } finally {
-      setIsLoadingPosts(false);
-    }
-  }, [communityId, session]);
+        setPosts(postsData);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des posts:", error);
+        setPosts([]);
+      } finally {
+        setIsLoadingPosts(false);
+      }
+    },
+    [communityId, session]
+  );
 
   // Fonction optimisée pour récupérer les posts en attente
   const fetchPendingPosts = useCallback(async () => {
@@ -231,8 +239,8 @@ const CommunityHub = () => {
         `/api/communities/${communityId}/posts/pending`,
         {
           headers: {
-            'Cache-Control': 'max-age=120', // Cache de 2 minutes
-          }
+            "Cache-Control": "max-age=120", // Cache de 2 minutes
+          },
         }
       );
 
@@ -267,8 +275,8 @@ const CommunityHub = () => {
         `/api/communities/${communityId}/posts/with-pending-enrichments`,
         {
           headers: {
-            'Cache-Control': 'max-age=120', // Cache de 2 minutes
-          }
+            "Cache-Control": "max-age=120", // Cache de 2 minutes
+          },
         }
       );
 
@@ -308,11 +316,14 @@ const CommunityHub = () => {
           setCommunityData(cachedData.data);
         } else {
           // Les données sont trop anciennes ou invalides, on les rafraîchit
-          const communityResponse = await fetch(`/api/communities/${communityId}`, {
-            headers: {
-              'Cache-Control': 'max-age=300', // Cache de 5 minutes
+          const communityResponse = await fetch(
+            `/api/communities/${communityId}`,
+            {
+              headers: {
+                "Cache-Control": "max-age=300", // Cache de 5 minutes
+              },
             }
-          });
+          );
 
           if (!communityResponse.ok) {
             router.push("/404");
@@ -325,11 +336,14 @@ const CommunityHub = () => {
         }
       } else {
         // Pas de données en cache, on les récupère
-        const communityResponse = await fetch(`/api/communities/${communityId}`, {
-          headers: {
-            'Cache-Control': 'max-age=300', // Cache de 5 minutes
+        const communityResponse = await fetch(
+          `/api/communities/${communityId}`,
+          {
+            headers: {
+              "Cache-Control": "max-age=300", // Cache de 5 minutes
+            },
           }
-        });
+        );
 
         if (!communityResponse.ok) {
           router.push("/404");
@@ -349,15 +363,26 @@ const CommunityHub = () => {
       const membershipData = await membershipResponse.json();
 
       // Mettre à jour l'état d'adhésion
-      setIsMember(membershipData.isMember || membershipData.isCreator || membershipData.isContributor);
+      setIsMember(
+        membershipData.isMember ||
+          membershipData.isCreator ||
+          membershipData.isContributor
+      );
 
       // Récupérer les Membres bannis
-      const bansResponse = await fetch(`/api/communities/${communityId}/members/${session?.user?.id}/ban`);
+      const bansResponse = await fetch(
+        `/api/communities/${communityId}/members/${session?.user?.id}/ban`
+      );
       const bansData = await bansResponse.json();
       setBans(bansData);
 
       // Si l'utilisateur n'est pas membre ou banni, récupérer la présentation
-      if (!membershipData.isMember && !membershipData.isCreator && !membershipData.isContributor && bansData.length === 0) {
+      if (
+        !membershipData.isMember &&
+        !membershipData.isCreator &&
+        !membershipData.isContributor &&
+        bansData.length === 0
+      ) {
         const presentationResponse = await fetch(
           `/api/communities/${communityId}/presentation`
         );
@@ -366,40 +391,55 @@ const CommunityHub = () => {
         setShowJoinModal(true);
       }
 
-
       // Récupérer les communautés de l'utilisateur (avec mise en cache côté client)
       const userCommunitiesCacheKey = `user-communities-${session?.user?.id}`;
-
 
       try {
         // Fonction pour récupérer les communautés depuis l'API
         const fetchFromAPI = async () => {
-          const joinedCommunitiesResponse = await fetch(`/api/users/${session?.user?.id}/joined-communities`);
-          const ownedCommunitiesResponse = await fetch(`/api/users/${session?.user?.id}/owned-communities`);
-
+          const joinedCommunitiesResponse = await fetch(
+            `/api/users/${session?.user?.id}/joined-communities`
+          );
+          const ownedCommunitiesResponse = await fetch(
+            `/api/users/${session?.user?.id}/owned-communities`
+          );
 
           if (!joinedCommunitiesResponse.ok || !ownedCommunitiesResponse.ok) {
-            throw new Error(`Erreur HTTP: ${joinedCommunitiesResponse.status} ${ownedCommunitiesResponse.status}`);
+            throw new Error(
+              `Erreur HTTP: ${joinedCommunitiesResponse.status} ${ownedCommunitiesResponse.status}`
+            );
           }
 
           const joinedCommunities = await joinedCommunitiesResponse.json();
           const ownedCommunities = await ownedCommunitiesResponse.json();
 
-          const formattedOwnedCommunities = ownedCommunities.communities.map((community: any) => ({
-            id: community.id,
-            name: community.name,
-            createdAt: community.created_at,
-            role: "creator"
-          }));
-          console.log("formattedOwnedCommunities", formattedOwnedCommunities);
+          const formattedOwnedCommunities = ownedCommunities.communities.map(
+            (community: any) => ({
+              id: community.id,
+              name: community.name,
+              createdAt: community.created_at,
+              role: "creator",
+            })
+          );
 
-          if (joinedCommunities && joinedCommunities.communities && Array.isArray(joinedCommunities.communities) && formattedOwnedCommunities && Array.isArray(formattedOwnedCommunities)) {
-            const allCommunities = joinedCommunities.communities.concat(formattedOwnedCommunities);
+          if (
+            joinedCommunities &&
+            joinedCommunities.communities &&
+            Array.isArray(joinedCommunities.communities) &&
+            formattedOwnedCommunities &&
+            Array.isArray(formattedOwnedCommunities)
+          ) {
+            const allCommunities = joinedCommunities.communities.concat(
+              formattedOwnedCommunities
+            );
             setUserCommunities(allCommunities);
 
             // Sauvegarder dans sessionStorage
-            if (typeof window !== 'undefined') {
-              sessionStorage.setItem(userCommunitiesCacheKey, JSON.stringify(allCommunities));
+            if (typeof window !== "undefined") {
+              sessionStorage.setItem(
+                userCommunitiesCacheKey,
+                JSON.stringify(allCommunities)
+              );
             }
 
             return allCommunities;
@@ -410,9 +450,14 @@ const CommunityHub = () => {
         };
 
         // Vérifier si des données sont en cache
-        if (typeof window !== 'undefined' && sessionStorage.getItem(userCommunitiesCacheKey)) {
+        if (
+          typeof window !== "undefined" &&
+          sessionStorage.getItem(userCommunitiesCacheKey)
+        ) {
           try {
-            const cachedDataStr = sessionStorage.getItem(userCommunitiesCacheKey);
+            const cachedDataStr = sessionStorage.getItem(
+              userCommunitiesCacheKey
+            );
 
             if (cachedDataStr) {
               const cachedData = JSON.parse(cachedDataStr);
@@ -443,12 +488,12 @@ const CommunityHub = () => {
       // Si l'utilisateur est contributeur, récupérer le nombre de posts en attente
       if (membershipData.isContributor || membershipData.isCreator) {
         try {
-          await Promise.all([
-            fetchPendingPosts(),
-            fetchPendingEnrichments()
-          ]);
+          await Promise.all([fetchPendingPosts(), fetchPendingEnrichments()]);
         } catch (error) {
-          console.error("Erreur lors de la récupération des posts en attente:", error);
+          console.error(
+            "Erreur lors de la récupération des posts en attente:",
+            error
+          );
         }
       }
 
@@ -465,12 +510,20 @@ const CommunityHub = () => {
       console.error("Erreur lors du chargement des données:", error);
       setIsLoadingCommunity(false);
     }
-  }, [communityId, session, userId, router, fetchPendingPosts, fetchPendingEnrichments, fetchCommunityPosts]);
+  }, [
+    communityId,
+    session,
+    userId,
+    router,
+    fetchPendingPosts,
+    fetchPendingEnrichments,
+    fetchCommunityPosts,
+  ]);
 
   // Vérifier si le cache doit être invalidé après une action (comme rejoindre une communauté)
   useEffect(() => {
     // Vérifier si nous venons de rejoindre une communauté (via un paramètre d'URL ou un état local)
-    const justJoined = searchParams.get('joined') === 'true';
+    const justJoined = searchParams.get("joined") === "true";
 
     if (justJoined && communityId) {
       // Invalider les caches pertinents
@@ -486,8 +539,8 @@ const CommunityHub = () => {
 
       // Nettoyer l'URL pour éviter de réinvalider le cache lors des rechargements
       const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete('joined');
-      window.history.replaceState({}, '', newUrl.toString());
+      newUrl.searchParams.delete("joined");
+      window.history.replaceState({}, "", newUrl.toString());
     }
   }, [searchParams, communityId, session, invalidateCache, loadCommunityData]);
 
@@ -503,8 +556,11 @@ const CommunityHub = () => {
     // Fonction pour mettre à jour l'état en fonction des paramètres d'URL
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
-      const tabFromUrl = params.get('tab');
-      const votingFromUrl = params.get('voting') as "creation" | "enrichissement" | null;
+      const tabFromUrl = params.get("tab");
+      const votingFromUrl = params.get("voting") as
+        | "creation"
+        | "enrichissement"
+        | null;
 
       if (tabFromUrl) {
         setActiveTab(tabFromUrl);
@@ -516,18 +572,21 @@ const CommunityHub = () => {
     };
 
     // Ajouter l'écouteur d'événements pour les changements d'URL
-    window.addEventListener('popstate', handlePopState);
+    window.addEventListener("popstate", handlePopState);
 
     // Nettoyer l'écouteur d'événements lors du démontage du composant
     return () => {
-      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener("popstate", handlePopState);
     };
   }, []);
 
   // Effet pour surveiller les changements de searchParams et mettre à jour l'état local
   useEffect(() => {
-    const tabFromUrl = searchParams.get('tab');
-    const votingFromUrl = searchParams.get('voting') as "creation" | "enrichissement" | null;
+    const tabFromUrl = searchParams.get("tab");
+    const votingFromUrl = searchParams.get("voting") as
+      | "creation"
+      | "enrichissement"
+      | null;
 
     if (tabFromUrl && tabFromUrl !== activeTab) {
       setActiveTab(tabFromUrl);
@@ -546,7 +605,6 @@ const CommunityHub = () => {
     if (posts.length === 0) {
       await fetchCommunityPosts();
     }
-
   }, [communityId, session, posts.length]);
 
   // Ajouter un effet pour précharger les données lors du changement d'onglet
@@ -610,7 +668,12 @@ const CommunityHub = () => {
               {/* Indicateur de chargement */}
               {isLoadingCommunity && (
                 <div className="flex justify-center items-center py-8">
-                  <Loader size="lg" color="gradient" text="Chargement des données..." variant="spinner" />
+                  <Loader
+                    size="lg"
+                    color="gradient"
+                    text="Chargement des données..."
+                    variant="spinner"
+                  />
                 </div>
               )}
 
@@ -631,13 +694,21 @@ const CommunityHub = () => {
                     </Card>
                   ) : activeTab === "voting" ? (
                     <div id="voting-section">
-                      <VotingSession communityId={params.id ? params.id.toString() : ""} />
+                      <VotingSession
+                        communityId={params.id ? params.id.toString() : ""}
+                      />
                     </div>
                   ) : (
                     <div id="posts-section">
                       {isLoadingPosts ? (
                         <div className="flex justify-center items-center py-12">
-                          <Loader size="md" color="gradient" text="Chargement des posts..." variant="pulse" textPosition="right" />
+                          <Loader
+                            size="md"
+                            color="gradient"
+                            text="Chargement des posts..."
+                            variant="pulse"
+                            textPosition="right"
+                          />
                         </div>
                       ) : (
                         <CommunityPosts
@@ -657,14 +728,17 @@ const CommunityHub = () => {
 
           {/* Section Q&A avec Disclosure */}
           <div className="mt-8" id="qa-section">
-            {activeTab === "general" && session && !isLoadingCommunity && isMember && (
-              <QASection
-                communityId={communityId}
-                isContributor={isContributor}
-                isCreator={isCreator}
-                userId={session?.user?.id}
-              />
-            )}
+            {activeTab === "general" &&
+              session &&
+              !isLoadingCommunity &&
+              isMember && (
+                <QASection
+                  communityId={communityId}
+                  isContributor={isContributor}
+                  isCreator={isCreator}
+                  userId={session?.user?.id}
+                />
+              )}
           </div>
         </div>
       )}
@@ -673,12 +747,15 @@ const CommunityHub = () => {
       {!isLoadingCommunity && !isMember && (
         <div className="max-w-7xl mx-auto px-4 py-12 text-center">
           <div className="bg-white rounded-lg shadow-md p-8 max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Accès limité</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              Accès limité
+            </h2>
             <p className="text-gray-600 mb-6">
               Vous devez rejoindre cette communauté pour accéder à son contenu.
             </p>
             <p className="text-gray-600 mb-6">
-              Consultez la présentation de la communauté et rejoignez-la pour découvrir tous les posts, discussions et activités.
+              Consultez la présentation de la communauté et rejoignez-la pour
+              découvrir tous les posts, discussions et activités.
             </p>
             <button
               onClick={() => setShowJoinModal(true)}

@@ -25,9 +25,7 @@ const GenerateAddress = () => {
 
   const handleGenerateAddress = () => {
     try {
-      console.log("generateStarkNetAddress");
       const details = generateStarkNetAddress();
-      console.log("details", details);
       setAddressDetails(details as AddressDetails);
       setDeployStatus(null);
     } catch (error: unknown) {
@@ -45,11 +43,10 @@ const GenerateAddress = () => {
 
     try {
       setDeployStatus("Déploiement en cours...");
-      const result = await deployAccountContract(
+      const result = (await deployAccountContract(
         addressDetails.privateKey,
         addressDetails.publicKey
-      ) as DeploymentResult;
-      console.log("result", result);
+      )) as DeploymentResult;
       setDeployStatus(
         `Contrat déployé avec succès ! Transaction hash : ${result.transactionHash}`
       );

@@ -323,7 +323,6 @@ const HomePage = () => {
         if (isCacheValid) {
           setCommunities(communitiesCache.data!);
           setLoading(false);
-          console.log("loading false");
           return;
         }
 
@@ -364,8 +363,6 @@ const HomePage = () => {
           updatedAt: community.updated_at,
         }));
 
-        console.log("formattedCommunities", formattedCommunities);
-
         // Mettre à jour le cache
         communitiesCache.data = formattedCommunities;
         communitiesCache.timestamp = Date.now();
@@ -374,7 +371,6 @@ const HomePage = () => {
       } catch (error) {
         console.error("Erreur:", error);
       } finally {
-        console.log("loading false2");
         setLoading(false);
       }
     };
@@ -385,29 +381,20 @@ const HomePage = () => {
         return;
       }
 
-      console.log("hasFetched.current111", hasFetched.current);
-      console.log("1");
-
       const searchParams = new URLSearchParams(window.location.search);
 
       if (searchParams.get("update")) {
-        console.log("2");
         fetchCommunities();
       } else {
-        console.log("3");
         const cachedData = sessionStorage.getItem("communities");
         if (cachedData) {
-          console.log("4");
           setCommunities(JSON.parse(cachedData));
         } else {
-          console.log("5");
           fetchCommunities();
         }
       }
-      console.log("6");
 
       hasFetched.current = true;
-      console.log("hasFetched.current", hasFetched.current);
     }, []); // Pas besoin de dépendances
 
     const filters = [

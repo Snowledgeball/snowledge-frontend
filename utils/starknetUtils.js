@@ -152,9 +152,9 @@ export const deployAccountContract = async (privateKey, publicKey) => {
   // A augmenter quand on sera en prod pour valider d'autres transactions
   //   const amount = BigInt("10000000000000"); // 0.01 ETH en WEI
 
-  console.log("accountAddress", accountAddress);
-  console.log("privateKey", privateKey);
-  console.log("provider", provider);
+  //   console.log("accountAddress", accountAddress);
+  //   console.log("privateKey", privateKey);
+  //   console.log("provider", provider);
 
   const account = new Account(provider, accountAddress, privateKey);
   console.log("account", account);
@@ -211,9 +211,9 @@ export const generateStarkNetAddress = () => {
     0 // deployer address
   );
 
-  console.log("accountAddress", accountAddress);
-  console.log("publicKey", publicKey);
-  console.log("privateKey", privateKey);
+  //   console.log("accountAddress", accountAddress);
+  //   console.log("publicKey", publicKey);
+  //   console.log("privateKey", privateKey);
 
   return { privateKey, publicKey, accountAddress };
 };

@@ -55,12 +55,6 @@ export default function EnrichmentReview({
 
             const method = existingReview ? "PUT" : "POST";
 
-            console.log("endpoint", endpoint);
-            console.log("method", method);
-
-            console.log("comment", comment);
-            console.log("status", vote);
-
             const response = await fetch(endpoint, {
                 method,
                 headers: {
