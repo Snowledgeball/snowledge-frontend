@@ -22,6 +22,7 @@ export async function POST(request) {
 
         // Validation des données
         if (!name || !description || !category) {
+            console.log("Le nom, la description et la catégorie sont requis");
             return NextResponse.json(
                 { error: "Le nom, la description et la catégorie sont requis" },
                 { status: 400 }
@@ -31,7 +32,7 @@ export async function POST(request) {
         // Récupérer l'ID de la catégorie
         const categoryData = await prisma.community_category.findFirst({
             where: {
-                name: category
+                id: category
             }
         });
 
@@ -84,7 +85,7 @@ export async function POST(request) {
     } catch (error) {
         console.log("Erreur lors de la création de la communauté:", error.stack);
         return NextResponse.json(
-            { error: "Erreur lors de la création de la communauté" },
+            { error: "Erreur lors de la création de la communauté " + error.stack },
             { status: 500 }
         );
     } finally {

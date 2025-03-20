@@ -6,10 +6,67 @@ import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import Image from "next/image";
+
+// Créer un composant séparé pour le formulaire de catégorie
+const CategoryForm = ({ onSubmit, onCancel }: {
+    onSubmit: (name: string, label: string) => void;
+    onCancel: () => void;
+}) => {
+    const [name, setName] = useState("");
+    const [label, setLabel] = useState("");
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSubmit(name, label);
+        setName("");
+        setLabel("");
+    };
+
+    return (
+        <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+            <div className="space-y-3">
+                <div>
+                    <input
+                        type="text"
+                        placeholder="Identifiant unique (ex: nft)"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                        required
+                    />
+                </div>
+                <div>
+                    <input
+                        type="text"
+                        placeholder="Nom affiché (ex: NFT & Collections)"
+                        value={label}
+                        onChange={(e) => setLabel(e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                        required
+                    />
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleSubmit}
+                        className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700"
+                    >
+                        Créer la catégorie
+                    </button>
+                    <button
+                        onClick={onCancel}
+                        className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm hover:bg-gray-300"
+                    >
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export default function CreateCommunityPage() {
     const router = useRouter();
@@ -24,6 +81,9 @@ export default function CreateCommunityPage() {
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
+    const [showCategoryForm, setShowCategoryForm] = useState(false);
+    const [categories, setCategories] = useState<{ id: string, label: string }[]>([]);
+    const [isContentCreator, setIsContentCreator] = useState(false);
 
     useEffect(() => {
         return () => {
@@ -33,6 +93,26 @@ export default function CreateCommunityPage() {
         };
     }, [previewImage]);
 
+    useEffect(() => {
+        const checkCreatorStatus = async () => {
+            const response = await fetch('/api/user/status');
+            const data = await response.json();
+            setIsContentCreator(data.isContentCreator);
+        };
+
+        checkCreatorStatus();
+    }, []);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            const response = await fetch('/api/categories');
+            const data = await response.json();
+            setCategories(data);
+        };
+
+        fetchCategories();
+    }, []);
+
     if (isLoading) {
         return <LoadingComponent />;
     }
@@ -40,13 +120,6 @@ export default function CreateCommunityPage() {
     if (!isAuthenticated) {
         return null;
     }
-
-    const categories = [
-        { id: "crypto", label: "Crypto & Web3" },
-        { id: "trading", label: "Trading" },
-        { id: "invest", label: "Investissement" },
-        { id: "defi", label: "DeFi" },
-    ];
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -89,7 +162,7 @@ export default function CreateCommunityPage() {
                 });
                 router.push(`/community/${data.id}/settings#presentation`);
             } else {
-                throw new Error("Erreur lors de la création de la communauté");
+                console.log(response);
             }
         } catch (error) {
             console.error("Erreur:", error);
@@ -108,6 +181,25 @@ export default function CreateCommunityPage() {
         // Créer une URL locale pour la prévisualisation
         const previewUrl = URL.createObjectURL(file);
         setPreviewImage(previewUrl);
+    };
+
+    const handleCategorySubmit = async (name: string, label: string) => {
+        try {
+            const response = await fetch("/api/categories", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, label })
+            });
+
+            if (response.ok) {
+                const newCat = await response.json();
+                setCategories(prev => [...prev, newCat]);
+                setShowCategoryForm(false);
+                toast.success("Catégorie créée avec succès");
+            }
+        } catch (error) {
+            toast.error("Erreur lors de la création de la catégorie");
+        }
     };
 
     if (!session) {
@@ -171,9 +263,38 @@ export default function CreateCommunityPage() {
 
                         {/* Catégorie */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Catégorie
-                            </label>
+                            <div className="flex justify-between items-center mb-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Catégorie
+                                </label>
+                                {isContentCreator && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowCategoryForm(!showCategoryForm)}
+                                        className="text-sm text-blue-600 hover:text-blue-700 flex items-center"
+                                    >
+                                        {showCategoryForm ? (
+                                            <>
+                                                <X className="w-4 h-4 mr-1" />
+                                                Annuler
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Plus className="w-4 h-4 mr-1" />
+                                                Ajouter une catégorie
+                                            </>
+                                        )}
+                                    </button>
+                                )}
+                            </div>
+
+                            {showCategoryForm && (
+                                <CategoryForm
+                                    onSubmit={handleCategorySubmit}
+                                    onCancel={() => setShowCategoryForm(false)}
+                                />
+                            )}
+
                             <select
                                 value={formData.category}
                                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
