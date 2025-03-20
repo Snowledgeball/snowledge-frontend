@@ -1,8 +1,26 @@
 "use client";
-import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Users, MessageCircle, TrendingUp, Search, Clock, Globe, Activity, Shield, Bitcoin, PiggyBank, Wallet, BookOpen, Sparkles
+  Users,
+  MessageCircle,
+  TrendingUp,
+  Search,
+  Clock,
+  Globe,
+  Activity,
+  Shield,
+  Bitcoin,
+  PiggyBank,
+  Wallet,
+  BookOpen,
+  Sparkles,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -14,7 +32,7 @@ import { Loader } from "@/components/ui/loader";
 const communitiesCache = {
   data: null as Community[] | null,
   timestamp: 0,
-  expiresIn: 5 * 60 * 1000 // 5 minutes en millisecondes
+  expiresIn: 5 * 60 * 1000, // 5 minutes en millisecondes
 };
 
 interface Community {
@@ -70,15 +88,15 @@ interface RawCommunity {
 // Fonction pour récupérer les stats
 const fetchStats = async () => {
   try {
-    const response = await fetch('/api/stats', {
-      next: { revalidate: 3600 } // Revalider toutes les heures
+    const response = await fetch("/api/stats", {
+      next: { revalidate: 3600 }, // Revalider toutes les heures
     });
 
-    if (!response.ok) throw new Error('Erreur réseau');
+    if (!response.ok) throw new Error("Erreur réseau");
 
     return response.json();
   } catch (error) {
-    console.error('Erreur lors du chargement des statistiques:', error);
+    console.error("Erreur lors du chargement des statistiques:", error);
     return null;
   }
 };
@@ -111,20 +129,22 @@ const HomePage = () => {
   //   return <Loader size="lg" color="gradient" text="Chargement des statistiques..." variant="spinner" />
   // }
 
-  const statsItems = stats ? [
-    {
-      ...stats.communities,
-      icon: Globe,
-    },
-    {
-      ...stats.members,
-      icon: Users,
-    },
-    {
-      ...stats.enrichments,
-      icon: Sparkles,
-    }
-  ] : [];
+  const statsItems = stats
+    ? [
+        {
+          ...stats.communities,
+          icon: Globe,
+        },
+        {
+          ...stats.members,
+          icon: Users,
+        },
+        {
+          ...stats.enrichments,
+          icon: Sparkles,
+        },
+      ]
+    : [];
 
   const CommunityCard = ({
     id,
@@ -138,7 +158,7 @@ const HomePage = () => {
     imageUrl,
     creator,
     community_learners_id,
-    community_contributors_id
+    community_contributors_id,
   }: {
     id: number;
     name: string;
@@ -180,7 +200,7 @@ const HomePage = () => {
         {/* Image de la communauté */}
         <div className="relative h-48 w-full">
           <Image
-            src={'https://' + imageUrl}
+            src={"https://" + imageUrl}
             alt={name}
             quality={75}
             loading="eager"
@@ -222,7 +242,9 @@ const HomePage = () => {
               priority={true}
             />
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900">{creator.name}</p>
+              <p className="text-sm font-medium text-gray-900">
+                {creator.name}
+              </p>
               {/* <p className="text-xs text-gray-500">Créateur</p> */}
             </div>
           </div>
@@ -230,7 +252,9 @@ const HomePage = () => {
           <div className="space-y-3">
             <div className="flex items-center text-gray-600">
               <Users className="w-5 h-5 text-blue-500 mr-3" />
-              <span className="font-medium">{new Intl.NumberFormat("fr-FR").format(members)} membres</span>
+              <span className="font-medium">
+                {new Intl.NumberFormat("fr-FR").format(members)} membres
+              </span>
             </div>
             {/* <div className="flex items-center text-gray-600">
               <MessageCircle className="w-5 h-5 text-green-500 mr-3" />
@@ -254,12 +278,14 @@ const HomePage = () => {
             </div> */}
           </div>
           <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            {userId ? (
-              creator.id === parseInt(userId) ?
-                "Accéder à votre communauté" :
-                (community_learners_id.includes(parseInt(userId)) || community_contributors_id.includes(parseInt(userId))) ?
-                  "Accéder" : "Rejoindre"
-            ) : "Rejoindre"}
+            {userId
+              ? creator.id === parseInt(userId)
+                ? "Accéder à votre communauté"
+                : community_learners_id.includes(parseInt(userId)) ||
+                  community_contributors_id.includes(parseInt(userId))
+                ? "Accéder"
+                : "Rejoindre"
+              : "Rejoindre"}
           </button>
         </CardContent>
       </Card>
@@ -271,7 +297,9 @@ const HomePage = () => {
     const [selectedFilter, setSelectedFilter] = useState("all");
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [loading, setLoading] = useState(true);
-    const [filteredCommunities, setFilteredCommunities] = useState<Community[]>([]);
+    const [filteredCommunities, setFilteredCommunities] = useState<Community[]>(
+      []
+    );
 
     const categories = [
       { id: "all", label: "Toutes les catégories", icon: Globe },
@@ -283,8 +311,10 @@ const HomePage = () => {
 
     // Fonction pour vérifier si le cache est valide
     const isCacheValid = useMemo(() => {
-      return communitiesCache.data !== null &&
-        (Date.now() - communitiesCache.timestamp) < communitiesCache.expiresIn;
+      return (
+        communitiesCache.data !== null &&
+        Date.now() - communitiesCache.timestamp < communitiesCache.expiresIn
+      );
     }, []);
 
     const fetchCommunities = async () => {
@@ -297,13 +327,14 @@ const HomePage = () => {
           return;
         }
 
-        const response = await fetch('/api/communities', {
+        const response = await fetch("/api/communities", {
           headers: {
-            'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
-          }
+            "Cache-Control": "max-age=300", // Cache de 5 minutes côté serveur
+          },
         });
 
-        if (!response.ok) throw new Error('Erreur lors de la récupération des communautés');
+        if (!response.ok)
+          throw new Error("Erreur lors de la récupération des communautés");
 
         const data = await response.json();
         const formattedCommunities = data.map((community: RawCommunity) => ({
@@ -315,14 +346,20 @@ const HomePage = () => {
           category: community.category.label,
           lastActive: "il y a 2h",
           trustScore: Math.floor(Math.random() * 30) + 65,
-          imageUrl: community.image_url || "images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000&auto=format&fit=crop",
+          imageUrl:
+            community.image_url ||
+            "images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000&auto=format&fit=crop",
           creator: {
             id: community.creator.id,
             name: community.creator.fullName,
             avatar: community.creator.profilePicture,
           },
-          community_learners_id: community.community_learners.map(learner => learner.learner_id),
-          community_contributors_id: community.community_contributors.map(contributor => contributor.contributor_id),
+          community_learners_id: community.community_learners.map(
+            (learner) => learner.learner_id
+          ),
+          community_contributors_id: community.community_contributors.map(
+            (contributor) => contributor.contributor_id
+          ),
           createdAt: community.created_at,
           updatedAt: community.updated_at,
         }));
@@ -343,19 +380,22 @@ const HomePage = () => {
     };
 
     useEffect(() => {
-      if (typeof window === 'undefined' || hasFetched.current) return;
+      if (typeof window === "undefined" || hasFetched.current) {
+        setLoading(false);
+        return;
+      }
 
       console.log("hasFetched.current111", hasFetched.current);
       console.log("1");
 
       const searchParams = new URLSearchParams(window.location.search);
 
-      if (searchParams.get('update')) {
+      if (searchParams.get("update")) {
         console.log("2");
         fetchCommunities();
       } else {
         console.log("3");
-        const cachedData = sessionStorage.getItem('communities');
+        const cachedData = sessionStorage.getItem("communities");
         if (cachedData) {
           console.log("4");
           setCommunities(JSON.parse(cachedData));
@@ -394,13 +434,13 @@ const HomePage = () => {
       }
 
       // Filtrage par catégorie
-      if (selectedCategory !== 'all') {
+      if (selectedCategory !== "all") {
         filtered = filtered.filter((community) => {
           const categoryMap: { [key: string]: string } = {
-            'crypto': 'Crypto & Web3',
-            'trading': 'Trading',
-            'invest': 'Investissement',
-            'defi': 'DeFi'
+            crypto: "Crypto & Web3",
+            trading: "Trading",
+            invest: "Investissement",
+            defi: "DeFi",
           };
           return community.category === categoryMap[selectedCategory];
         });
@@ -408,14 +448,17 @@ const HomePage = () => {
 
       // Filtrage par type
       switch (selectedFilter) {
-        case 'largest':
+        case "largest":
           filtered.sort((a, b) => b.members - a.members);
           break;
-        case 'new':
+        case "new":
           // Supposons que nous avons un champ createdAt dans notre interface Community
-          filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          filtered.sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
           break;
-        case 'active':
+        case "active":
           filtered.sort((a, b) => b.activity - a.activity);
           break;
         default:
@@ -435,8 +478,13 @@ const HomePage = () => {
       <div className="min-h-screen">
         <header className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold text-gray-900">Explorez les communautés</h1>
-            <p className="mt-2 text-gray-600">Découvrez des communautés passionnantes et rejoignez celles qui vous correspondent</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Explorez les communautés
+            </h1>
+            <p className="mt-2 text-gray-600">
+              Découvrez des communautés passionnantes et rejoignez celles qui
+              vous correspondent
+            </p>
           </div>
         </header>
 
@@ -452,11 +500,13 @@ const HomePage = () => {
                   <div>
                     <p className="text-sm text-gray-600">{item.label}</p>
                     <h3 className="text-2xl font-semibold mt-1">
-                      {typeof item.total === 'number'
-                        ? item.total.toLocaleString('fr-FR')
+                      {typeof item.total === "number"
+                        ? item.total.toLocaleString("fr-FR")
                         : item.total}
                     </h3>
-                    <p className="text-xs text-gray-500 mt-1">{item.description}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {item.description}
+                    </p>
                   </div>
                   {item.icon && <item.icon className="h-8 w-8 text-blue-500" />}
                 </div>
@@ -477,7 +527,9 @@ const HomePage = () => {
           {/* Section Explorer */}
           <section>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Explorer les communautés</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">
+                Explorer les communautés
+              </h2>
 
               <div className="relative w-full sm:w-72">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -497,10 +549,11 @@ const HomePage = () => {
                 <button
                   key={id}
                   onClick={() => setSelectedCategory(id)}
-                  className={`flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-colors ${selectedCategory === id
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-600 hover:bg-gray-50"
-                    }`}
+                  className={`flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                    selectedCategory === id
+                      ? "bg-blue-600 text-white"
+                      : "bg-white text-gray-600 hover:bg-gray-50"
+                  }`}
                 >
                   <Icon className="w-4 h-4 mr-2" />
                   {label}
@@ -514,10 +567,11 @@ const HomePage = () => {
                 <button
                   key={filter.id}
                   onClick={() => setSelectedFilter(filter.id)}
-                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${selectedFilter === filter.id
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-600 hover:bg-gray-50"
-                    }`}
+                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                    selectedFilter === filter.id
+                      ? "bg-blue-600 text-white"
+                      : "bg-white text-gray-600 hover:bg-gray-50"
+                  }`}
                 >
                   {filter.label}
                 </button>
@@ -525,26 +579,28 @@ const HomePage = () => {
             </div>
 
             {/* Ajouter un indicateur de filtres actifs */}
-            {(selectedCategory !== 'all' || selectedFilter !== 'all' || searchTerm) && (
+            {(selectedCategory !== "all" ||
+              selectedFilter !== "all" ||
+              searchTerm) && (
               <div className="mb-4 flex items-center gap-2">
                 <span className="text-sm text-gray-500">Filtres actifs:</span>
                 <div className="flex gap-2">
-                  {selectedCategory !== 'all' && (
+                  {selectedCategory !== "all" && (
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
-                      {categories.find(c => c.id === selectedCategory)?.label}
+                      {categories.find((c) => c.id === selectedCategory)?.label}
                       <button
-                        onClick={() => setSelectedCategory('all')}
+                        onClick={() => setSelectedCategory("all")}
                         className="ml-2 text-blue-500 hover:text-blue-700"
                       >
                         ×
                       </button>
                     </span>
                   )}
-                  {selectedFilter !== 'all' && (
+                  {selectedFilter !== "all" && (
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
-                      {filters.find(f => f.id === selectedFilter)?.label}
+                      {filters.find((f) => f.id === selectedFilter)?.label}
                       <button
-                        onClick={() => setSelectedFilter('all')}
+                        onClick={() => setSelectedFilter("all")}
                         className="ml-2 text-blue-500 hover:text-blue-700"
                       >
                         ×
@@ -555,7 +611,7 @@ const HomePage = () => {
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
                       Recherche: {searchTerm}
                       <button
-                        onClick={() => setSearchTerm('')}
+                        onClick={() => setSearchTerm("")}
                         className="ml-2 text-blue-500 hover:text-blue-700"
                       >
                         ×
@@ -564,9 +620,9 @@ const HomePage = () => {
                   )}
                   <button
                     onClick={() => {
-                      setSelectedCategory('all');
-                      setSelectedFilter('all');
-                      setSearchTerm('');
+                      setSelectedCategory("all");
+                      setSelectedFilter("all");
+                      setSearchTerm("");
                     }}
                     className="text-sm text-gray-500 hover:text-gray-700"
                   >
@@ -579,7 +635,12 @@ const HomePage = () => {
             {/* Grille des communautés */}
             {loading ? (
               <div className="text-center py-12">
-                <Loader size="lg" color="gradient" text="Chargement des communautés..." variant="spinner" />
+                <Loader
+                  size="lg"
+                  color="gradient"
+                  text="Chargement des communautés..."
+                  variant="spinner"
+                />
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
