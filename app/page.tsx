@@ -131,19 +131,19 @@ const HomePage = () => {
 
   const statsItems = stats
     ? [
-        {
-          ...stats.communities,
-          icon: Globe,
-        },
-        {
-          ...stats.members,
-          icon: Users,
-        },
-        {
-          ...stats.enrichments,
-          icon: Sparkles,
-        },
-      ]
+      {
+        ...stats.communities,
+        icon: Globe,
+      },
+      {
+        ...stats.members,
+        icon: Users,
+      },
+      {
+        ...stats.enrichments,
+        icon: Sparkles,
+      },
+    ]
     : [];
 
   const CommunityCard = ({
@@ -283,8 +283,8 @@ const HomePage = () => {
                 ? "Accéder à votre communauté"
                 : community_learners_id.includes(parseInt(userId)) ||
                   community_contributors_id.includes(parseInt(userId))
-                ? "Accéder"
-                : "Rejoindre"
+                  ? "Accéder"
+                  : "Rejoindre"
               : "Rejoindre"}
           </button>
         </CardContent>
@@ -300,14 +300,19 @@ const HomePage = () => {
     const [filteredCommunities, setFilteredCommunities] = useState<Community[]>(
       []
     );
+    const [categories, setCategories] = useState<{ id: string, label: string }[]>([
+      { id: "all", label: "Toutes les catégories" }
+    ]);
 
-    const categories = [
-      { id: "all", label: "Toutes les catégories", icon: Globe },
-      { id: "crypto", label: "Crypto & Web3", icon: Bitcoin },
-      { id: "trading", label: "Trading", icon: TrendingUp },
-      { id: "invest", label: "Investissement", icon: PiggyBank },
-      { id: "defi", label: "DeFi", icon: Wallet },
-    ];
+    useEffect(() => {
+      const fetchCategories = async () => {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        setCategories([...categories, ...data]);
+      };
+
+      fetchCategories();
+    }, []);
 
     // Fonction pour vérifier si le cache est valide
     const isCacheValid = useMemo(() => {
@@ -422,14 +427,9 @@ const HomePage = () => {
 
       // Filtrage par catégorie
       if (selectedCategory !== "all") {
+        console.log("selectedCategory", selectedCategory);
         filtered = filtered.filter((community) => {
-          const categoryMap: { [key: string]: string } = {
-            crypto: "Crypto & Web3",
-            trading: "Trading",
-            invest: "Investissement",
-            defi: "DeFi",
-          };
-          return community.category === categoryMap[selectedCategory];
+          return community.category === categories.find((c) => c.id === selectedCategory)?.label;
         });
       }
 
@@ -532,17 +532,15 @@ const HomePage = () => {
 
             {/* Catégories */}
             <div className="flex flex-wrap gap-3 mb-6">
-              {categories.map(({ id, label, icon: Icon }) => (
+              {categories.map(({ id, label }) => (
                 <button
                   key={id}
                   onClick={() => setSelectedCategory(id)}
-                  className={`flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                    selectedCategory === id
-                      ? "bg-blue-600 text-white"
-                      : "bg-white text-gray-600 hover:bg-gray-50"
-                  }`}
+                  className={`flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-colors ${selectedCategory === id
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-gray-600 hover:bg-gray-50"
+                    }`}
                 >
-                  <Icon className="w-4 h-4 mr-2" />
                   {label}
                 </button>
               ))}
@@ -554,11 +552,10 @@ const HomePage = () => {
                 <button
                   key={filter.id}
                   onClick={() => setSelectedFilter(filter.id)}
-                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                    selectedFilter === filter.id
-                      ? "bg-blue-600 text-white"
-                      : "bg-white text-gray-600 hover:bg-gray-50"
-                  }`}
+                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${selectedFilter === filter.id
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-gray-600 hover:bg-gray-50"
+                    }`}
                 >
                   {filter.label}
                 </button>
@@ -569,55 +566,55 @@ const HomePage = () => {
             {(selectedCategory !== "all" ||
               selectedFilter !== "all" ||
               searchTerm) && (
-              <div className="mb-4 flex items-center gap-2">
-                <span className="text-sm text-gray-500">Filtres actifs:</span>
-                <div className="flex gap-2">
-                  {selectedCategory !== "all" && (
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
-                      {categories.find((c) => c.id === selectedCategory)?.label}
-                      <button
-                        onClick={() => setSelectedCategory("all")}
-                        className="ml-2 text-blue-500 hover:text-blue-700"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  )}
-                  {selectedFilter !== "all" && (
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
-                      {filters.find((f) => f.id === selectedFilter)?.label}
-                      <button
-                        onClick={() => setSelectedFilter("all")}
-                        className="ml-2 text-blue-500 hover:text-blue-700"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  )}
-                  {searchTerm && (
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
-                      Recherche: {searchTerm}
-                      <button
-                        onClick={() => setSearchTerm("")}
-                        className="ml-2 text-blue-500 hover:text-blue-700"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  )}
-                  <button
-                    onClick={() => {
-                      setSelectedCategory("all");
-                      setSelectedFilter("all");
-                      setSearchTerm("");
-                    }}
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                  >
-                    Réinitialiser tous les filtres
-                  </button>
+                <div className="mb-4 flex items-center gap-2">
+                  <span className="text-sm text-gray-500">Filtres actifs:</span>
+                  <div className="flex gap-2">
+                    {selectedCategory !== "all" && (
+                      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
+                        {categories.find((c) => c.id === selectedCategory)?.label}
+                        <button
+                          onClick={() => setSelectedCategory("all")}
+                          className="ml-2 text-blue-500 hover:text-blue-700"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    )}
+                    {selectedFilter !== "all" && (
+                      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
+                        {filters.find((f) => f.id === selectedFilter)?.label}
+                        <button
+                          onClick={() => setSelectedFilter("all")}
+                          className="ml-2 text-blue-500 hover:text-blue-700"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    )}
+                    {searchTerm && (
+                      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
+                        Recherche: {searchTerm}
+                        <button
+                          onClick={() => setSearchTerm("")}
+                          className="ml-2 text-blue-500 hover:text-blue-700"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    )}
+                    <button
+                      onClick={() => {
+                        setSelectedCategory("all");
+                        setSelectedFilter("all");
+                        setSearchTerm("");
+                      }}
+                      className="text-sm text-gray-500 hover:text-gray-700"
+                    >
+                      Réinitialiser tous les filtres
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Grille des communautés */}
             {loading ? (
