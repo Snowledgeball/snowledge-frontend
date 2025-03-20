@@ -59,7 +59,8 @@
     "app/api/starknet/deploy-account/route.js",
     "app/api/mint-sbt/route.js",
     "app/api/user/status/route.js",
-    "app/api/categories/route.js"
+    "app/api/categories/route.js",
+    "app/api/communities/[id]/posts/categories/route.js"
   ],
   "exclude": [
     "node_modules"

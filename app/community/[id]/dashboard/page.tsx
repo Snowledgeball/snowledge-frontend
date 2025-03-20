@@ -149,15 +149,6 @@ interface Post {
   };
 }
 
-const POST_TAGS = [
-  { value: "analyse-technique", label: "Analyse Technique" },
-  { value: "analyse-macro", label: "Analyse Macro" },
-  { value: "defi", label: "DeFi" },
-  { value: "news", label: "News" },
-  { value: "education", label: "Éducation" },
-  { value: "trading", label: "Trading" },
-];
-
 export default function CommunityDashboard() {
   const router = useRouter();
   const params = useParams();
@@ -249,6 +240,10 @@ export default function CommunityDashboard() {
   const [loadingBan, setLoadingBan] = useState(false);
   const [loadingPromote, setLoadingPromote] = useState<number | null>(null);
   const [loadingDemote, setLoadingDemote] = useState<number | null>(null);
+  const [categories, setCategories] = useState<Array<{ value: string, label: string }>>([]);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryLabel, setNewCategoryLabel] = useState('');
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -256,6 +251,56 @@ export default function CommunityDashboard() {
       setUserId(userId);
     }
   }, [session]);
+
+  // Fetch des catégories
+  useEffect(() => {
+    console.log("Fetching categories");
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`/api/communities/${params.id}/categories`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          setCategories(data.map((cat: any) => ({
+            value: cat.name,
+            label: cat.label
+          })));
+        }
+      } catch (error) {
+        toast.error("Erreur lors du chargement des catégories");
+      }
+    };
+    fetchCategories();
+  }, [params.id]);
+
+  // Fonction pour créer une nouvelle catégorie
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`/api/communities/${params.id}/categories`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newCategoryName,
+          label: newCategoryLabel
+        })
+      });
+
+      if (response.ok) {
+        const newCategory = await response.json();
+        setCategories(prev => [...prev, {
+          value: newCategory.name,
+          label: newCategory.label
+        }]);
+        setShowCategoryForm(false);
+        setNewCategoryName('');
+        setNewCategoryLabel('');
+        toast.success("Catégorie créée avec succès");
+      }
+    } catch (error) {
+      toast.error("Erreur lors de la création de la catégorie");
+    }
+  };
 
   // Fonction pour récupérer les données du dashboard avec cache
   const fetchDashboardData = useCallback(async () => {
@@ -1009,8 +1054,13 @@ export default function CommunityDashboard() {
                           <td className="py-4">{post.title}</td>
                           <td className="py-4">
                             <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                              {POST_TAGS.find((t) => t.value === post.tag)
-                                ?.label || post.tag}
+                              {selectedTag === post.tag ? (
+                                <span className="text-green-600">
+                                  {post.tag}
+                                </span>
+                              ) : (
+                                post.tag
+                              )}
                             </span>
                           </td>
                           <td className="py-4">
@@ -1110,8 +1160,13 @@ export default function CommunityDashboard() {
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
                             <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">
-                              {POST_TAGS.find((t) => t.value === post.tag)
-                                ?.label || post.tag}
+                              {selectedTag === post.tag ? (
+                                <span className="text-green-600">
+                                  {post.tag}
+                                </span>
+                              ) : (
+                                post.tag
+                              )}
                             </span>
                             <div className="flex items-center space-x-2">
                               <span className="text-sm text-gray-500">
@@ -1620,20 +1675,26 @@ export default function CommunityDashboard() {
                       </label>
                     )}
                   </div>
-                  <select
-                    value={selectedTag}
-                    onChange={(e) => setSelectedTag(e.target.value)}
-                    className="flex-1 px-3 py-2 border rounded-lg bg-white"
-                  >
-                    <option defaultValue={POST_TAGS[0].value}>
-                      Choisir une catégorie
-                    </option>
-                    {POST_TAGS.map((tag) => (
-                      <option key={tag.value} value={tag.value}>
-                        {tag.label}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex gap-2 items-start">
+                    <select
+                      value={selectedTag}
+                      onChange={(e) => setSelectedTag(e.target.value)}
+                      className="flex-1 px-3 py-2 border rounded-lg bg-white"
+                    >
+                      <option value="">Choisir une catégorie</option>
+                      {categories.map((tag) => (
+                        <option key={tag.value} value={tag.value}>
+                          {tag.label}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => setShowCategoryForm(true)}
+                      className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
                 <input
                   type="text"
@@ -1711,7 +1772,7 @@ export default function CommunityDashboard() {
             {/* Tag */}
             {selectedTag && (
               <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm mb-4">
-                {POST_TAGS.find((t) => t.value === selectedTag)?.label}
+                {selectedTag}
               </span>
             )}
 
@@ -1878,6 +1939,51 @@ export default function CommunityDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {showCategoryForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h3 className="text-lg font-semibold mb-4">Nouvelle catégorie</h3>
+            <form onSubmit={handleCreateCategory} className="space-y-4">
+              <div>
+                <input
+                  type="text"
+                  placeholder="Identifiant unique (ex: defi)"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Nom affiché (ex: DeFi)"
+                  value={newCategoryLabel}
+                  onChange={(e) => setNewCategoryLabel(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryForm(false)}
+                  className="px-4 py-2 bg-gray-200 rounded-lg"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                >
+                  Créer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
