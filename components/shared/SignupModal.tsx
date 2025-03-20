@@ -110,6 +110,13 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
     e.preventDefault();
     setError("");
     setProfilePictureError(false);
+
+    // Vérifier si l'email contient un +
+    if (email.includes('+')) {
+      setError("Le caractère '+' n'est pas autorisé dans l'adresse email");
+      return;
+    }
+
     setIsLoading(true);
 
     if (!profilePicture) {
@@ -208,6 +215,17 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
     }
   };
 
+  // Optionnel : validation en temps réel
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.includes('+')) {
+      setError("Le caractère '+' n'est pas autorisé dans l'adresse email");
+    } else {
+      setError('');
+    }
+    setEmail(value);
+  };
+
   return (
     <div className="w-full max-w-md space-y-6">
       <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
@@ -248,13 +266,12 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                   <Circle className="h-5 w-5 text-gray-300 mr-2" />
                 )}
                 <span
-                  className={`text-sm ${
-                    step.completed
-                      ? "text-green-700"
-                      : step.current
+                  className={`text-sm ${step.completed
+                    ? "text-green-700"
+                    : step.current
                       ? "text-blue-700 font-medium"
                       : "text-gray-500"
-                  }`}
+                    }`}
                 >
                   {step.name}
                 </span>
@@ -277,14 +294,12 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
               </div>
             ) : (
               <div
-                className={`w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center border-4 ${
-                  profilePictureError ? "border-red-200" : "border-blue-100"
-                } shadow-md`}
+                className={`w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center border-4 ${profilePictureError ? "border-red-200" : "border-blue-100"
+                  } shadow-md`}
               >
                 <Camera
-                  className={`w-10 h-10 ${
-                    profilePictureError ? "text-red-400" : "text-blue-400"
-                  }`}
+                  className={`w-10 h-10 ${profilePictureError ? "text-red-400" : "text-blue-400"
+                    }`}
                 />
               </div>
             )}
@@ -354,7 +369,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
               type="email"
               placeholder="Email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleEmailChange}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
               autoComplete="username"
               required
