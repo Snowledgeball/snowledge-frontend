@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request, { params }) {
   try {
@@ -68,8 +68,6 @@ export async function GET(request, { params }) {
         gains: contributorData?.earnings || 0,
       };
     });
-
-    console.log("members", members);
 
     return NextResponse.json(members);
   } catch (error) {

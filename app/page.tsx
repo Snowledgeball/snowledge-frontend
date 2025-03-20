@@ -427,7 +427,6 @@ const HomePage = () => {
 
       // Filtrage par catégorie
       if (selectedCategory !== "all") {
-        console.log("selectedCategory", selectedCategory);
         filtered = filtered.filter((community) => {
           return community.category === categories.find((c) => c.id === selectedCategory)?.label;
         });

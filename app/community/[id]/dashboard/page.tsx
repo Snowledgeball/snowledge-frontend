@@ -60,17 +60,17 @@ import { Input } from "@/components/ui/input";
 
 // Système de cache pour les données du dashboard
 const dashboardCache = {
-  dashboardData: new Map<string, { data: any, timestamp: number }>(),
-  members: new Map<string, { data: any[], timestamp: number }>(),
-  contributorRequests: new Map<string, { data: any[], timestamp: number }>(),
-  posts: new Map<string, { data: any[], timestamp: number }>(),
+  dashboardData: new Map<string, { data: any; timestamp: number }>(),
+  members: new Map<string, { data: any[]; timestamp: number }>(),
+  contributorRequests: new Map<string, { data: any[]; timestamp: number }>(),
+  posts: new Map<string, { data: any[]; timestamp: number }>(),
   // Durée de validité du cache (5 minutes)
-  expiresIn: 5 * 60 * 1000
+  expiresIn: 5 * 60 * 1000,
 };
 
 // Fonction pour vérifier si le cache est valide
 const isCacheValid = (cache: { timestamp: number }) => {
-  return (Date.now() - cache.timestamp) < dashboardCache.expiresIn;
+  return Date.now() - cache.timestamp < dashboardCache.expiresIn;
 };
 
 interface DashboardData {
@@ -149,15 +149,6 @@ interface Post {
   };
 }
 
-const POST_TAGS = [
-  { value: "analyse-technique", label: "Analyse Technique" },
-  { value: "analyse-macro", label: "Analyse Macro" },
-  { value: "defi", label: "DeFi" },
-  { value: "news", label: "News" },
-  { value: "education", label: "Éducation" },
-  { value: "trading", label: "Trading" },
-];
-
 export default function CommunityDashboard() {
   const router = useRouter();
   const params = useParams();
@@ -167,7 +158,7 @@ export default function CommunityDashboard() {
   const { data: session } = useSession();
 
   // Récupérer le paramètre tab de l'URL
-  const tabParam = searchParams.get('tab');
+  const tabParam = searchParams.get("tab");
 
   // Initialiser l'onglet actif en fonction du paramètre d'URL
   const [activeTab, setActiveTab] = useState(tabParam ? tabParam : "overview");
@@ -249,6 +240,12 @@ export default function CommunityDashboard() {
   const [loadingBan, setLoadingBan] = useState(false);
   const [loadingPromote, setLoadingPromote] = useState<number | null>(null);
   const [loadingDemote, setLoadingDemote] = useState<number | null>(null);
+  const [categories, setCategories] = useState<
+    Array<{ value: string; label: string }>
+  >([]);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryLabel, setNewCategoryLabel] = useState("");
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -256,6 +253,63 @@ export default function CommunityDashboard() {
       setUserId(userId);
     }
   }, [session]);
+
+  // Fetch des catégories
+  useEffect(() => {
+    console.log("Fetching categories");
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(
+          `/api/communities/${params.id}/categories`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          console.log("data", data);
+          setCategories(
+            data.map((cat: any) => ({
+              value: cat.name,
+              label: cat.label,
+            }))
+          );
+        }
+      } catch (error) {
+        toast.error("Erreur lors du chargement des catégories");
+      }
+    };
+    fetchCategories();
+  }, [params.id]);
+
+  // Fonction pour créer une nouvelle catégorie
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`/api/communities/${params.id}/categories`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newCategoryName,
+          label: newCategoryLabel,
+        }),
+      });
+
+      if (response.ok) {
+        const newCategory = await response.json();
+        setCategories((prev) => [
+          ...prev,
+          {
+            value: newCategory.name,
+            label: newCategory.label,
+          },
+        ]);
+        setShowCategoryForm(false);
+        setNewCategoryName("");
+        setNewCategoryLabel("");
+        toast.success("Catégorie créée avec succès");
+      }
+    } catch (error) {
+      toast.error("Erreur lors de la création de la catégorie");
+    }
+  };
 
   // Fonction pour récupérer les données du dashboard avec cache
   const fetchDashboardData = useCallback(async () => {
@@ -275,8 +329,8 @@ export default function CommunityDashboard() {
 
       const response = await fetch(`/api/communities/${communityId}`, {
         headers: {
-          'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
-        }
+          "Cache-Control": "max-age=300", // Cache de 5 minutes côté serveur
+        },
       });
 
       if (response.ok && userId) {
@@ -313,7 +367,7 @@ export default function CommunityDashboard() {
         // Mettre à jour le cache
         dashboardCache.dashboardData.set(cacheKey, {
           data: transformedData,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
 
         setDashboardData(transformedData);
@@ -348,8 +402,8 @@ export default function CommunityDashboard() {
 
       const response = await fetch(`/api/communities/${communityId}/members`, {
         headers: {
-          'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
-        }
+          "Cache-Control": "max-age=300", // Cache de 5 minutes côté serveur
+        },
       });
 
       if (response.ok) {
@@ -358,7 +412,7 @@ export default function CommunityDashboard() {
         // Mettre à jour le cache
         dashboardCache.members.set(cacheKey, {
           data: data.members,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
 
         setMembers(data);
@@ -382,11 +436,14 @@ export default function CommunityDashboard() {
         }
       }
 
-      const response = await fetch(`/api/communities/${communityId}/contributor-requests`, {
-        headers: {
-          'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
+      const response = await fetch(
+        `/api/communities/${communityId}/contributor-requests`,
+        {
+          headers: {
+            "Cache-Control": "max-age=300", // Cache de 5 minutes côté serveur
+          },
         }
-      });
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -394,7 +451,7 @@ export default function CommunityDashboard() {
         // Mettre à jour le cache
         dashboardCache.contributorRequests.set(cacheKey, {
           data: data.requests,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
 
         setContributorRequests(data.requests);
@@ -419,8 +476,8 @@ export default function CommunityDashboard() {
 
       const response = await fetch(`/api/communities/${communityId}/posts`, {
         headers: {
-          'Cache-Control': 'max-age=300', // Cache de 5 minutes côté serveur
-        }
+          "Cache-Control": "max-age=300", // Cache de 5 minutes côté serveur
+        },
       });
 
       if (response.ok) {
@@ -429,7 +486,7 @@ export default function CommunityDashboard() {
         // Mettre à jour le cache
         dashboardCache.posts.set(cacheKey, {
           data: data.posts,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
 
         setPosts(data.posts);
@@ -442,16 +499,16 @@ export default function CommunityDashboard() {
   // Fonction pour invalider le cache après une modification
   const invalidateCache = useCallback((cacheType: string, key: string) => {
     switch (cacheType) {
-      case 'dashboardData':
+      case "dashboardData":
         dashboardCache.dashboardData.delete(key);
         break;
-      case 'members':
+      case "members":
         dashboardCache.members.delete(key);
         break;
-      case 'contributorRequests':
+      case "contributorRequests":
         dashboardCache.contributorRequests.delete(key);
         break;
-      case 'posts':
+      case "posts":
         dashboardCache.posts.delete(key);
         break;
       default:
@@ -464,11 +521,16 @@ export default function CommunityDashboard() {
   }, []);
 
   // Fonction pour changer d'onglet et mettre à jour l'URL
-  const handleTabChange = useCallback((tab: string) => {
-    setActiveTab(tab);
-    // Mettre à jour l'URL sans recharger la page
-    router.push(`/community/${communityId}/dashboard?tab=${tab}`, { scroll: false });
-  }, [communityId, router]);
+  const handleTabChange = useCallback(
+    (tab: string) => {
+      setActiveTab(tab);
+      // Mettre à jour l'URL sans recharger la page
+      router.push(`/community/${communityId}/dashboard?tab=${tab}`, {
+        scroll: false,
+      });
+    },
+    [communityId, router]
+  );
 
   // Fonction pour gérer le clic sur le bouton de rejet
   const handleRejectClick = useCallback((requestId: number) => {
@@ -477,68 +539,77 @@ export default function CommunityDashboard() {
   }, []);
 
   // Fonction pour gérer l'upload d'image
-  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0]) return;
+  const handleImageUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!e.target.files || !e.target.files[0]) return;
 
-    const file = e.target.files[0];
-    setIsUploading(true);
+      const file = e.target.files[0];
+      setIsUploading(true);
 
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
 
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
 
-      if (!response.ok) {
-        throw new Error("Erreur lors de l'upload");
+        if (!response.ok) {
+          throw new Error("Erreur lors de l'upload");
+        }
+
+        const data = await response.json();
+        setCoverImage(data.url);
+        toast.success("Image uploadée avec succès");
+      } catch (error) {
+        toast.error("Erreur lors de l'upload de l'image");
+        console.error(error);
+      } finally {
+        setIsUploading(false);
       }
-
-      const data = await response.json();
-      setCoverImage(data.url);
-      toast.success("Image uploadée avec succès");
-    } catch (error) {
-      toast.error("Erreur lors de l'upload de l'image");
-      console.error(error);
-    } finally {
-      setIsUploading(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   // Fonction pour approuver une demande de contributeur avec invalidation du cache
-  const handleApproveRequest = useCallback(async (requestId: number) => {
-    // Ajouter l'ID de la requête en cours d'approbation
-    setLoadingApproval(requestId);
+  const handleApproveRequest = useCallback(
+    async (requestId: number) => {
+      // Ajouter l'ID de la requête en cours d'approbation
+      setLoadingApproval(requestId);
 
-    try {
-      const response = await fetch(
-        `/api/communities/${communityId}/contributor-requests/${requestId}/approve`,
-        {
-          method: "POST",
+      try {
+        const response = await fetch(
+          `/api/communities/${communityId}/contributor-requests/${requestId}/approve`,
+          {
+            method: "POST",
+          }
+        );
+
+        if (response.ok) {
+          toast.success("Demande approuvée avec succès");
+          // Invalider les caches concernés
+          invalidateCache(
+            "contributorRequests",
+            `contributor-requests-${communityId}`
+          );
+          invalidateCache("members", `members-${communityId}`);
+          // Recharger les données
+          fetchContributorRequests();
+          fetchMembers();
+        } else {
+          toast.error("Erreur lors de l'approbation de la demande");
         }
-      );
-
-      if (response.ok) {
-        toast.success("Demande approuvée avec succès");
-        // Invalider les caches concernés
-        invalidateCache('contributorRequests', `contributor-requests-${communityId}`);
-        invalidateCache('members', `members-${communityId}`);
-        // Recharger les données
-        fetchContributorRequests();
-        fetchMembers();
-      } else {
-        toast.error("Erreur lors de l'approbation de la demande");
+      } catch (error) {
+        console.error("Erreur:", error);
+        toast.error("Une erreur est survenue");
+      } finally {
+        // Réinitialiser l'état de chargement
+        setLoadingApproval(null);
       }
-    } catch (error) {
-      console.error("Erreur:", error);
-      toast.error("Une erreur est survenue");
-    } finally {
-      // Réinitialiser l'état de chargement
-      setLoadingApproval(null);
-    }
-  }, [communityId, fetchContributorRequests, fetchMembers, invalidateCache]);
+    },
+    [communityId, fetchContributorRequests, fetchMembers, invalidateCache]
+  );
 
   // Fonction pour rejeter une demande de contributeur avec invalidation du cache
   const handleRejectRequest = useCallback(async () => {
@@ -565,7 +636,10 @@ export default function CommunityDashboard() {
         // Réinitialiser la raison du rejet
         setRejectionReason("");
         // Invalider le cache des demandes de contributeur
-        invalidateCache('contributorRequests', `contributor-requests-${communityId}`);
+        invalidateCache(
+          "contributorRequests",
+          `contributor-requests-${communityId}`
+        );
         // Recharger les données
         fetchContributorRequests();
       } else {
@@ -578,7 +652,13 @@ export default function CommunityDashboard() {
       // Réinitialiser l'état de chargement
       setLoadingRejection(false);
     }
-  }, [communityId, fetchContributorRequests, invalidateCache, rejectionReason, selectedRequestId]);
+  }, [
+    communityId,
+    fetchContributorRequests,
+    invalidateCache,
+    rejectionReason,
+    selectedRequestId,
+  ]);
 
   // Fonction pour soumettre un post avec invalidation du cache
   const handleSubmitPost = useCallback(async () => {
@@ -610,8 +690,8 @@ export default function CommunityDashboard() {
         setSelectedTag("");
         setContributionsEnabled(false);
         // Invalider le cache des posts
-        invalidateCache('posts', `posts-${communityId}`);
-        invalidateCache('dashboardData', `dashboard-${communityId}`);
+        invalidateCache("posts", `posts-${communityId}`);
+        invalidateCache("dashboardData", `dashboard-${communityId}`);
         // Recharger les données
         fetchPosts();
         fetchDashboardData();
@@ -622,69 +702,85 @@ export default function CommunityDashboard() {
       console.error("Erreur:", error);
       toast.error("Une erreur est survenue");
     }
-  }, [postTitle, editorContent, coverImage, selectedTag, contributionsEnabled, communityId, fetchPosts, fetchDashboardData, invalidateCache]);
+  }, [
+    postTitle,
+    editorContent,
+    coverImage,
+    selectedTag,
+    contributionsEnabled,
+    communityId,
+    fetchPosts,
+    fetchDashboardData,
+    invalidateCache,
+  ]);
 
   // Fonction pour promouvoir un membre avec invalidation du cache
-  const handlePromoteMember = useCallback(async (memberId: number, memberName: string) => {
-    // Activer l'indicateur de chargement
-    setLoadingPromote(memberId);
+  const handlePromoteMember = useCallback(
+    async (memberId: number, memberName: string) => {
+      // Activer l'indicateur de chargement
+      setLoadingPromote(memberId);
 
-    try {
-      const response = await fetch(
-        `/api/communities/${communityId}/members/${memberId}/promote`,
-        {
-          method: "POST",
+      try {
+        const response = await fetch(
+          `/api/communities/${communityId}/members/${memberId}/promote`,
+          {
+            method: "POST",
+          }
+        );
+
+        if (response.ok) {
+          toast.success(`${memberName} a été promu au rang de contributeur`);
+          // Invalider le cache des membres
+          invalidateCache("members", `members-${communityId}`);
+          // Recharger les données
+          fetchMembers();
+        } else {
+          toast.error("Erreur lors de la promotion du membre");
         }
-      );
-
-      if (response.ok) {
-        toast.success(`${memberName} a été promu au rang de contributeur`);
-        // Invalider le cache des membres
-        invalidateCache('members', `members-${communityId}`);
-        // Recharger les données
-        fetchMembers();
-      } else {
-        toast.error("Erreur lors de la promotion du membre");
+      } catch (error) {
+        console.error("Erreur:", error);
+        toast.error("Une erreur est survenue");
+      } finally {
+        // Désactiver l'indicateur de chargement
+        setLoadingPromote(null);
       }
-    } catch (error) {
-      console.error("Erreur:", error);
-      toast.error("Une erreur est survenue");
-    } finally {
-      // Désactiver l'indicateur de chargement
-      setLoadingPromote(null);
-    }
-  }, [communityId, fetchMembers, invalidateCache]);
+    },
+    [communityId, fetchMembers, invalidateCache]
+  );
 
   // Fonction pour rétrograder un membre avec invalidation du cache
-  const handleDemoteMember = useCallback(async (memberId: number, memberName: string) => {
-    // Activer l'indicateur de chargement
-    setLoadingDemote(memberId);
+  const handleDemoteMember = useCallback(
+    async (memberId: number, memberName: string) => {
+      // Activer l'indicateur de chargement
+      setLoadingDemote(memberId);
 
-    try {
-      const response = await fetch(
-        `/api/communities/${communityId}/members/${memberId}/demote`,
-        {
-          method: "POST",
+      try {
+        const response = await fetch(
+          `/api/communities/${communityId}/members/${memberId}/demote`,
+          {
+            method: "POST",
+          }
+        );
+
+        if (response.ok) {
+          toast.success(`${memberName} a été rétrogradé au rang d'apprenant`);
+          // Invalider le cache des membres
+          invalidateCache("members", `members-${communityId}`);
+          // Recharger les données
+          fetchMembers();
+        } else {
+          toast.error("Erreur lors de la rétrogradation du membre");
         }
-      );
-
-      if (response.ok) {
-        toast.success(`${memberName} a été rétrogradé au rang d'apprenant`);
-        // Invalider le cache des membres
-        invalidateCache('members', `members-${communityId}`);
-        // Recharger les données
-        fetchMembers();
-      } else {
-        toast.error("Erreur lors de la rétrogradation du membre");
+      } catch (error) {
+        console.error("Erreur:", error);
+        toast.error("Une erreur est survenue");
+      } finally {
+        // Désactiver l'indicateur de chargement
+        setLoadingDemote(null);
       }
-    } catch (error) {
-      console.error("Erreur:", error);
-      toast.error("Une erreur est survenue");
-    } finally {
-      // Désactiver l'indicateur de chargement
-      setLoadingDemote(null);
-    }
-  }, [communityId, fetchMembers, invalidateCache]);
+    },
+    [communityId, fetchMembers, invalidateCache]
+  );
 
   // Fonction pour bannir un membre avec invalidation du cache
   const handleBanMember = useCallback(async () => {
@@ -706,13 +802,15 @@ export default function CommunityDashboard() {
       );
 
       if (response.ok) {
-        toast.success(`${selectedMemberToBan.fullName} a été banni de la communauté`);
+        toast.success(
+          `${selectedMemberToBan.fullName} a été banni de la communauté`
+        );
         setIsBanModalOpen(false);
         setBanReason("");
         setSelectedMemberToBan(null);
         // Invalider les caches concernés
-        invalidateCache('members', `members-${communityId}`);
-        invalidateCache('dashboardData', `dashboard-${communityId}`);
+        invalidateCache("members", `members-${communityId}`);
+        invalidateCache("dashboardData", `dashboard-${communityId}`);
         // Recharger les données
         fetchMembers();
         fetchDashboardData();
@@ -726,7 +824,14 @@ export default function CommunityDashboard() {
       // Désactiver l'indicateur de chargement
       setLoadingBan(false);
     }
-  }, [selectedMemberToBan, banReason, communityId, fetchMembers, fetchDashboardData, invalidateCache]);
+  }, [
+    selectedMemberToBan,
+    banReason,
+    communityId,
+    fetchMembers,
+    fetchDashboardData,
+    invalidateCache,
+  ]);
 
   useEffect(() => {
     if (communityId && userId) {
@@ -735,7 +840,14 @@ export default function CommunityDashboard() {
       fetchContributorRequests();
       fetchPosts();
     }
-  }, [communityId, userId, fetchDashboardData, fetchMembers, fetchContributorRequests, fetchPosts]);
+  }, [
+    communityId,
+    userId,
+    fetchDashboardData,
+    fetchMembers,
+    fetchContributorRequests,
+    fetchPosts,
+  ]);
 
   // Mettre à jour l'onglet actif si le paramètre d'URL change
   useEffect(() => {
@@ -800,7 +912,9 @@ export default function CommunityDashboard() {
             </h3>
             <div className="space-y-1">
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "overview" ? "bg-gray-800" : "hover:bg-gray-800"}`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${
+                  activeTab === "overview" ? "bg-gray-800" : "hover:bg-gray-800"
+                }`}
                 onClick={() => handleTabChange("overview")}
               >
                 📊 Tableau de bord
@@ -809,7 +923,9 @@ export default function CommunityDashboard() {
             </div>
             <div className="space-y-1">
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "members" ? "bg-gray-800" : "hover:bg-gray-800"}`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${
+                  activeTab === "members" ? "bg-gray-800" : "hover:bg-gray-800"
+                }`}
                 onClick={() => handleTabChange("members")}
               >
                 👥 Membres
@@ -834,7 +950,9 @@ export default function CommunityDashboard() {
                 <ChevronRight className="ml-auto w-4 h-4" />
               </button> */}
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "creation" ? "bg-gray-800" : "hover:bg-gray-800"}`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${
+                  activeTab === "creation" ? "bg-gray-800" : "hover:bg-gray-800"
+                }`}
                 onClick={() => handleTabChange("creation")}
               >
                 ✍️ Création de posts
@@ -1009,8 +1127,13 @@ export default function CommunityDashboard() {
                           <td className="py-4">{post.title}</td>
                           <td className="py-4">
                             <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                              {POST_TAGS.find((t) => t.value === post.tag)
-                                ?.label || post.tag}
+                              {selectedTag === post.tag ? (
+                                <span className="text-green-600">
+                                  {post.tag}
+                                </span>
+                              ) : (
+                                post.tag
+                              )}
                             </span>
                           </td>
                           <td className="py-4">
@@ -1110,8 +1233,13 @@ export default function CommunityDashboard() {
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
                             <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">
-                              {POST_TAGS.find((t) => t.value === post.tag)
-                                ?.label || post.tag}
+                              {selectedTag === post.tag ? (
+                                <span className="text-green-600">
+                                  {post.tag}
+                                </span>
+                              ) : (
+                                post.tag
+                              )}
                             </span>
                             <div className="flex items-center space-x-2">
                               <span className="text-sm text-gray-500">
@@ -1224,11 +1352,16 @@ export default function CommunityDashboard() {
                           <button
                             onClick={() => handleApproveRequest(request.id)}
                             className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center min-w-[90px]"
-                            disabled={loadingApproval === request.id || loadingRejection}
+                            disabled={
+                              loadingApproval === request.id || loadingRejection
+                            }
                           >
                             {loadingApproval === request.id ? (
                               <>
-                                <Loader size="sm" className="w-4 h-4 mr-2 animate-spin" />
+                                <Loader
+                                  size="sm"
+                                  className="w-4 h-4 mr-2 animate-spin"
+                                />
                                 <span>En cours...</span>
                               </>
                             ) : (
@@ -1238,11 +1371,17 @@ export default function CommunityDashboard() {
                           <button
                             onClick={() => handleRejectClick(request.id)}
                             className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center min-w-[90px]"
-                            disabled={loadingApproval === request.id || loadingRejection}
+                            disabled={
+                              loadingApproval === request.id || loadingRejection
+                            }
                           >
-                            {loadingRejection && selectedRequestId === request.id ? (
+                            {loadingRejection &&
+                            selectedRequestId === request.id ? (
                               <>
-                                <Loader size="sm" className="w-4 h-4 mr-2 animate-spin" />
+                                <Loader
+                                  size="sm"
+                                  className="w-4 h-4 mr-2 animate-spin"
+                                />
                                 <span>En cours...</span>
                               </>
                             ) : (
@@ -1295,117 +1434,149 @@ export default function CommunityDashboard() {
                           </tr>
                         </thead>
                         <tbody>
-                          {members && members.map((member) => (
-                            <tr key={member.id} className="hover:bg-gray-50">
-                              <td className="p-4">
-                                <div className="flex items-center space-x-3">
-                                  <Image
-                                    src={member.profilePicture}
-                                    alt={member.fullName}
-                                    className="w-10 h-10 rounded-full"
-                                    width={40}
-                                    height={40}
-                                  />
-                                  <div>
-                                    <p className="font-medium text-gray-900">
-                                      {member.fullName}
-                                    </p>
-                                    <p className="text-sm text-gray-500">
-                                      @{member.userName}
-                                    </p>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="p-4">
-                                <span
-                                  className={`px-3 py-1.5 rounded-full text-sm font-medium ${member.status === "Contributeur"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : "bg-green-100 text-green-700"
-                                    }`}
-                                >
-                                  {member.status}
-                                </span>
-                              </td>
-                              <td className="p-4 hidden lg:table-cell">
-                                {member.joinedAt
-                                  ? new Date(
-                                    member.joinedAt
-                                  ).toLocaleDateString("fr-FR")
-                                  : "Date inconnue"}
-                              </td>
-                              <td className="p-4 hidden sm:table-cell">
-                                {member.revisions}
-                              </td>
-                              <td className="p-4 hidden sm:table-cell">
-                                {member.posts}
-                              </td>
-                              <td className="p-4 font-medium">
-                                {member.gains}€
-                              </td>
-                              <td className="px-4 py-2 text-right">
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <div className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer inline-block">
-                                      <MoreVertical className="w-4 h-4 text-gray-500" />
+                          {members &&
+                            members.map((member) => (
+                              <tr key={member.id} className="hover:bg-gray-50">
+                                <td className="p-4">
+                                  <div className="flex items-center space-x-3">
+                                    <Image
+                                      src={member.profilePicture}
+                                      alt={member.fullName}
+                                      className="w-10 h-10 rounded-full"
+                                      width={40}
+                                      height={40}
+                                    />
+                                    <div>
+                                      <p className="font-medium text-gray-900">
+                                        {member.fullName}
+                                      </p>
+                                      <p className="text-sm text-gray-500">
+                                        @{member.userName}
+                                      </p>
                                     </div>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-48" align="end">
-                                    {member.status === "Apprenant" ? (
-                                      <button
-                                        onClick={() => handlePromoteMember(member.id, member.fullName)}
-                                        className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
-                                        disabled={loadingPromote === member.id || loadingDemote === member.id}
-                                      >
-                                        {loadingPromote === member.id ? (
-                                          <>
-                                            <Loader size="sm" className="w-4 h-4 animate-spin" />
-                                            <span>Promotion...</span>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <UserPlus className="w-4 h-4" />
-                                            <span>Promouvoir contributeur</span>
-                                          </>
-                                        )}
-                                      </button>
-                                    ) : (
-                                      <button
-                                        onClick={() => handleDemoteMember(member.id, member.fullName)}
-                                        className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
-                                        disabled={loadingPromote === member.id || loadingDemote === member.id}
-                                      >
-                                        {loadingDemote === member.id ? (
-                                          <>
-                                            <Loader size="sm" className="w-4 h-4 animate-spin" />
-                                            <span>Rétrogradation...</span>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <UserMinus className="w-4 h-4" />
-                                            <span>Retirer contributeur</span>
-                                          </>
-                                        )}
-                                      </button>
-                                    )}
-                                    <button
-                                      onClick={() => {
-                                        setSelectedMemberToBan({
-                                          id: member.id,
-                                          fullName: member.fullName,
-                                        });
-                                        setIsBanModalOpen(true);
-                                      }}
-                                      className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
-                                      disabled={loadingPromote === member.id || loadingDemote === member.id}
+                                  </div>
+                                </td>
+                                <td className="p-4">
+                                  <span
+                                    className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                                      member.status === "Contributeur"
+                                        ? "bg-blue-100 text-blue-700"
+                                        : "bg-green-100 text-green-700"
+                                    }`}
+                                  >
+                                    {member.status}
+                                  </span>
+                                </td>
+                                <td className="p-4 hidden lg:table-cell">
+                                  {member.joinedAt
+                                    ? new Date(
+                                        member.joinedAt
+                                      ).toLocaleDateString("fr-FR")
+                                    : "Date inconnue"}
+                                </td>
+                                <td className="p-4 hidden sm:table-cell">
+                                  {member.revisions}
+                                </td>
+                                <td className="p-4 hidden sm:table-cell">
+                                  {member.posts}
+                                </td>
+                                <td className="p-4 font-medium">
+                                  {member.gains}€
+                                </td>
+                                <td className="px-4 py-2 text-right">
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <div className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer inline-block">
+                                        <MoreVertical className="w-4 h-4 text-gray-500" />
+                                      </div>
+                                    </PopoverTrigger>
+                                    <PopoverContent
+                                      className="w-48"
+                                      align="end"
                                     >
-                                      <UserX className="w-4 h-4" />
-                                      <span>Bannir</span>
-                                    </button>
-                                  </PopoverContent>
-                                </Popover>
-                              </td>
-                            </tr>
-                          ))}
+                                      {member.status === "Apprenant" ? (
+                                        <button
+                                          onClick={() =>
+                                            handlePromoteMember(
+                                              member.id,
+                                              member.fullName
+                                            )
+                                          }
+                                          className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                                          disabled={
+                                            loadingPromote === member.id ||
+                                            loadingDemote === member.id
+                                          }
+                                        >
+                                          {loadingPromote === member.id ? (
+                                            <>
+                                              <Loader
+                                                size="sm"
+                                                className="w-4 h-4 animate-spin"
+                                              />
+                                              <span>Promotion...</span>
+                                            </>
+                                          ) : (
+                                            <>
+                                              <UserPlus className="w-4 h-4" />
+                                              <span>
+                                                Promouvoir contributeur
+                                              </span>
+                                            </>
+                                          )}
+                                        </button>
+                                      ) : (
+                                        <button
+                                          onClick={() =>
+                                            handleDemoteMember(
+                                              member.id,
+                                              member.fullName
+                                            )
+                                          }
+                                          className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                                          disabled={
+                                            loadingPromote === member.id ||
+                                            loadingDemote === member.id
+                                          }
+                                        >
+                                          {loadingDemote === member.id ? (
+                                            <>
+                                              <Loader
+                                                size="sm"
+                                                className="w-4 h-4 animate-spin"
+                                              />
+                                              <span>Rétrogradation...</span>
+                                            </>
+                                          ) : (
+                                            <>
+                                              <UserMinus className="w-4 h-4" />
+                                              <span>Retirer contributeur</span>
+                                            </>
+                                          )}
+                                        </button>
+                                      )}
+                                      <button
+                                        onClick={() => {
+                                          setSelectedMemberToBan({
+                                            id: member.id,
+                                            fullName: member.fullName,
+                                          });
+                                          setIsBanModalOpen(true);
+                                        }}
+                                        className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                                        disabled={
+                                          loadingPromote === member.id ||
+                                          loadingDemote === member.id
+                                        }
+                                      >
+                                        <UserX className="w-4 h-4" />
+                                        <span>Bannir</span>
+                                      </button>
+                                    </PopoverContent>
+                                  </Popover>
+                                </td>
+                              </tr>
+                            ))}
                         </tbody>
                       </table>
                     </div>
@@ -1613,27 +1784,34 @@ export default function CommunityDashboard() {
                     {coverImage && (
                       <label
                         htmlFor="cover-image"
-                        className={`px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors ${isUploading ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
+                        className={`px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors ${
+                          isUploading ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       >
                         Modifier
                       </label>
                     )}
                   </div>
-                  <select
-                    value={selectedTag}
-                    onChange={(e) => setSelectedTag(e.target.value)}
-                    className="flex-1 px-3 py-2 border rounded-lg bg-white"
-                  >
-                    <option defaultValue={POST_TAGS[0].value}>
-                      Choisir une catégorie
-                    </option>
-                    {POST_TAGS.map((tag) => (
-                      <option key={tag.value} value={tag.value}>
-                        {tag.label}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex gap-2 items-start">
+                    <select
+                      value={selectedTag}
+                      onChange={(e) => setSelectedTag(e.target.value)}
+                      className="flex-1 px-3 py-2 border rounded-lg bg-white"
+                    >
+                      <option value="">Choisir une catégorie</option>
+                      {categories.map((tag) => (
+                        <option key={tag.value} value={tag.value}>
+                          {tag.label}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => setShowCategoryForm(true)}
+                      className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
                 <input
                   type="text"
@@ -1711,7 +1889,7 @@ export default function CommunityDashboard() {
             {/* Tag */}
             {selectedTag && (
               <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm mb-4">
-                {POST_TAGS.find((t) => t.value === selectedTag)?.label}
+                {selectedTag}
               </span>
             )}
 
@@ -1723,88 +1901,90 @@ export default function CommunityDashboard() {
             {/* Contenu */}
             <div id="post-preview-content">
               <style jsx global>{`
-                                #post-preview-content h1 {
-                                    font-size: 2rem;
-                                    font-weight: 700;
-                                    margin-top: 1.5rem;
-                                    margin-bottom: 1rem;
-                                    color: #1f2937;
-                                    line-height: 1.3;
-                                }
-                                #post-preview-content h2 {
-                                    font-size: 1.75rem;
-                                    font-weight: 700;
-                                    margin-top: 1.5rem;
-                                    margin-bottom: 1rem;
-                                    color: #1f2937;
-                                    line-height: 1.3;
-                                }
-                                #post-preview-content h3 {
-                                    font-size: 1.5rem;
-                                    font-weight: 600;
-                                    margin-top: 1.25rem;
-                                    margin-bottom: 0.75rem;
-                                    color: #1f2937;
-                                }
-                                #post-preview-content p {
-                                    margin-bottom: 1rem;
-                                    line-height: 1.7;
-                                    color: #4b5563;
-                                }
-                                #post-preview-content ul, #post-preview-content ol {
-                                    margin-left: 1.5rem;
-                                    margin-bottom: 1rem;
-                                }
-                                #post-preview-content ul {
-                                    list-style-type: disc;
-                                }
-                                #post-preview-content ol {
-                                    list-style-type: decimal;
-                                }
-                                #post-preview-content a {
-                                    color: #2563eb;
-                                    text-decoration: underline;
-                                }
-                                #post-preview-content blockquote {
-                                    border-left: 4px solid #e5e7eb;
-                                    padding-left: 1rem;
-                                    font-style: italic;
-                                    color: #6b7280;
-                                    margin: 1.5rem 0;
-                                }
-                                #post-preview-content img {
-                                    max-width: 100%;
-                                    height: auto;
-                                    border-radius: 0.5rem;
-                                    margin: 1.5rem 0;
-                                }
-                                #post-preview-content pre {
-                                    background-color: #f3f4f6;
-                                    padding: 1rem;
-                                    border-radius: 0.5rem;
-                                    overflow-x: auto;
-                                    margin: 1.5rem 0;
-                                }
-                                #post-preview-content code {
-                                    background-color: #f3f4f6;
-                                    padding: 0.2rem 0.4rem;
-                                    border-radius: 0.25rem;
-                                    font-family: monospace;
-                                }
-                                #post-preview-content table {
-                                    width: 100%;
-                                    border-collapse: collapse;
-                                    margin: 1.5rem 0;
-                                }
-                                #post-preview-content th, #post-preview-content td {
-                                    border: 1px solid #e5e7eb;
-                                    padding: 0.5rem;
-                                }
-                                #post-preview-content th {
-                                    background-color: #f9fafb;
-                                    font-weight: 600;
-                                }
-                            `}</style>
+                #post-preview-content h1 {
+                  font-size: 2rem;
+                  font-weight: 700;
+                  margin-top: 1.5rem;
+                  margin-bottom: 1rem;
+                  color: #1f2937;
+                  line-height: 1.3;
+                }
+                #post-preview-content h2 {
+                  font-size: 1.75rem;
+                  font-weight: 700;
+                  margin-top: 1.5rem;
+                  margin-bottom: 1rem;
+                  color: #1f2937;
+                  line-height: 1.3;
+                }
+                #post-preview-content h3 {
+                  font-size: 1.5rem;
+                  font-weight: 600;
+                  margin-top: 1.25rem;
+                  margin-bottom: 0.75rem;
+                  color: #1f2937;
+                }
+                #post-preview-content p {
+                  margin-bottom: 1rem;
+                  line-height: 1.7;
+                  color: #4b5563;
+                }
+                #post-preview-content ul,
+                #post-preview-content ol {
+                  margin-left: 1.5rem;
+                  margin-bottom: 1rem;
+                }
+                #post-preview-content ul {
+                  list-style-type: disc;
+                }
+                #post-preview-content ol {
+                  list-style-type: decimal;
+                }
+                #post-preview-content a {
+                  color: #2563eb;
+                  text-decoration: underline;
+                }
+                #post-preview-content blockquote {
+                  border-left: 4px solid #e5e7eb;
+                  padding-left: 1rem;
+                  font-style: italic;
+                  color: #6b7280;
+                  margin: 1.5rem 0;
+                }
+                #post-preview-content img {
+                  max-width: 100%;
+                  height: auto;
+                  border-radius: 0.5rem;
+                  margin: 1.5rem 0;
+                }
+                #post-preview-content pre {
+                  background-color: #f3f4f6;
+                  padding: 1rem;
+                  border-radius: 0.5rem;
+                  overflow-x: auto;
+                  margin: 1.5rem 0;
+                }
+                #post-preview-content code {
+                  background-color: #f3f4f6;
+                  padding: 0.2rem 0.4rem;
+                  border-radius: 0.25rem;
+                  font-family: monospace;
+                }
+                #post-preview-content table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin: 1.5rem 0;
+                }
+                #post-preview-content th,
+                #post-preview-content td {
+                  border: 1px solid #e5e7eb;
+                  padding: 0.5rem;
+                }
+                #post-preview-content th {
+                  background-color: #f9fafb;
+                  font-weight: 600;
+                }
+              `}</style>
               <div
                 className="prose max-w-none"
                 dangerouslySetInnerHTML={{ __html: editorContent }}
@@ -1878,6 +2058,51 @@ export default function CommunityDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {showCategoryForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h3 className="text-lg font-semibold mb-4">Nouvelle catégorie</h3>
+            <form onSubmit={handleCreateCategory} className="space-y-4">
+              <div>
+                <input
+                  type="text"
+                  placeholder="Identifiant unique (ex: defi)"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Nom affiché (ex: DeFi)"
+                  value={newCategoryLabel}
+                  onChange={(e) => setNewCategoryLabel(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryForm(false)}
+                  className="px-4 py-2 bg-gray-200 rounded-lg"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                >
+                  Créer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
