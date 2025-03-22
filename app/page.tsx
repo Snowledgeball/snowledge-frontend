@@ -177,7 +177,9 @@ const HomePage = () => {
     community_learners_id: number[];
     community_contributors_id: number[];
   }) => {
-    const [contributorsCount, setContributorsCount] = useState(0);
+    const [contributorsCount, setContributorsCount] = useState(
+      community_contributors_id.length
+    );
 
     useEffect(() => {
       const fetchContributorsCount = async () => {
@@ -185,18 +187,19 @@ const HomePage = () => {
           const response = await fetch(
             `/api/communities/${id}/contributors/count`
           );
-          const data = await response.json();
-          setContributorsCount(data.count);
+          if (response.ok) {
+            const data = await response.json();
+            setContributorsCount(data.count);
+          } else {
+            console.log("Impossible de récupérer le nombre de contributeurs");
+          }
         } catch (error) {
-          console.error(
-            "Erreur lors du chargement du nombre de contributeurs:",
-            error
-          );
+          console.error("Erreur:", error);
         }
       };
 
       fetchContributorsCount();
-    }, [id]);
+    }, [id, community_contributors_id.length]);
 
     // const getTrustScoreColor = (score: number) => {
     //   if (score >= 90) return "text-emerald-500";
