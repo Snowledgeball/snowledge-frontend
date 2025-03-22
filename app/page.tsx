@@ -131,19 +131,19 @@ const HomePage = () => {
 
   const statsItems = stats
     ? [
-      {
-        ...stats.communities,
-        icon: Globe,
-      },
-      {
-        ...stats.members,
-        icon: Users,
-      },
-      {
-        ...stats.enrichments,
-        icon: Sparkles,
-      },
-    ]
+        {
+          ...stats.communities,
+          icon: Globe,
+        },
+        {
+          ...stats.members,
+          icon: Users,
+        },
+        {
+          ...stats.enrichments,
+          icon: Sparkles,
+        },
+      ]
     : [];
 
   const CommunityCard = ({
@@ -177,6 +177,27 @@ const HomePage = () => {
     community_learners_id: number[];
     community_contributors_id: number[];
   }) => {
+    const [contributorsCount, setContributorsCount] = useState(0);
+
+    useEffect(() => {
+      const fetchContributorsCount = async () => {
+        try {
+          const response = await fetch(
+            `/api/communities/${id}/contributors/count`
+          );
+          const data = await response.json();
+          setContributorsCount(data.count);
+        } catch (error) {
+          console.error(
+            "Erreur lors du chargement du nombre de contributeurs:",
+            error
+          );
+        }
+      };
+
+      fetchContributorsCount();
+    }, [id]);
+
     // const getTrustScoreColor = (score: number) => {
     //   if (score >= 90) return "text-emerald-500";
     //   if (score >= 75) return "text-blue-500";
@@ -256,6 +277,13 @@ const HomePage = () => {
                 {new Intl.NumberFormat("fr-FR").format(members)} membres
               </span>
             </div>
+            <div className="flex items-center text-gray-600">
+              <Shield className="w-5 h-5 text-green-500 mr-3" />
+              <span className="font-medium">
+                {new Intl.NumberFormat("fr-FR").format(contributorsCount)}{" "}
+                contributeurs
+              </span>
+            </div>
             {/* <div className="flex items-center text-gray-600">
               <MessageCircle className="w-5 h-5 text-green-500 mr-3" />
               <span className="font-medium">{activity} messages/jour</span>
@@ -283,8 +311,8 @@ const HomePage = () => {
                 ? "Accéder à votre communauté"
                 : community_learners_id.includes(parseInt(userId)) ||
                   community_contributors_id.includes(parseInt(userId))
-                  ? "Accéder"
-                  : "Rejoindre"
+                ? "Accéder"
+                : "Rejoindre"
               : "Rejoindre"}
           </button>
         </CardContent>
@@ -300,13 +328,13 @@ const HomePage = () => {
     const [filteredCommunities, setFilteredCommunities] = useState<Community[]>(
       []
     );
-    const [categories, setCategories] = useState<{ id: string, label: string }[]>([
-      { id: "all", label: "Toutes les catégories" }
-    ]);
+    const [categories, setCategories] = useState<
+      { id: string; label: string }[]
+    >([{ id: "all", label: "Toutes les catégories" }]);
 
     useEffect(() => {
       const fetchCategories = async () => {
-        const response = await fetch('/api/categories');
+        const response = await fetch("/api/categories");
         const data = await response.json();
         setCategories([...categories, ...data]);
       };
@@ -428,7 +456,10 @@ const HomePage = () => {
       // Filtrage par catégorie
       if (selectedCategory !== "all") {
         filtered = filtered.filter((community) => {
-          return community.category === categories.find((c) => c.id === selectedCategory)?.label;
+          return (
+            community.category ===
+            categories.find((c) => c.id === selectedCategory)?.label
+          );
         });
       }
 
@@ -535,10 +566,11 @@ const HomePage = () => {
                 <button
                   key={id}
                   onClick={() => setSelectedCategory(id)}
-                  className={`flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-colors ${selectedCategory === id
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-600 hover:bg-gray-50"
-                    }`}
+                  className={`flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                    selectedCategory === id
+                      ? "bg-blue-600 text-white"
+                      : "bg-white text-gray-600 hover:bg-gray-50"
+                  }`}
                 >
                   {label}
                 </button>
@@ -551,10 +583,11 @@ const HomePage = () => {
                 <button
                   key={filter.id}
                   onClick={() => setSelectedFilter(filter.id)}
-                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${selectedFilter === filter.id
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-600 hover:bg-gray-50"
-                    }`}
+                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                    selectedFilter === filter.id
+                      ? "bg-blue-600 text-white"
+                      : "bg-white text-gray-600 hover:bg-gray-50"
+                  }`}
                 >
                   {filter.label}
                 </button>
@@ -565,55 +598,55 @@ const HomePage = () => {
             {(selectedCategory !== "all" ||
               selectedFilter !== "all" ||
               searchTerm) && (
-                <div className="mb-4 flex items-center gap-2">
-                  <span className="text-sm text-gray-500">Filtres actifs:</span>
-                  <div className="flex gap-2">
-                    {selectedCategory !== "all" && (
-                      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
-                        {categories.find((c) => c.id === selectedCategory)?.label}
-                        <button
-                          onClick={() => setSelectedCategory("all")}
-                          className="ml-2 text-blue-500 hover:text-blue-700"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    )}
-                    {selectedFilter !== "all" && (
-                      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
-                        {filters.find((f) => f.id === selectedFilter)?.label}
-                        <button
-                          onClick={() => setSelectedFilter("all")}
-                          className="ml-2 text-blue-500 hover:text-blue-700"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    )}
-                    {searchTerm && (
-                      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
-                        Recherche: {searchTerm}
-                        <button
-                          onClick={() => setSearchTerm("")}
-                          className="ml-2 text-blue-500 hover:text-blue-700"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    )}
-                    <button
-                      onClick={() => {
-                        setSelectedCategory("all");
-                        setSelectedFilter("all");
-                        setSearchTerm("");
-                      }}
-                      className="text-sm text-gray-500 hover:text-gray-700"
-                    >
-                      Réinitialiser tous les filtres
-                    </button>
-                  </div>
+              <div className="mb-4 flex items-center gap-2">
+                <span className="text-sm text-gray-500">Filtres actifs:</span>
+                <div className="flex gap-2">
+                  {selectedCategory !== "all" && (
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
+                      {categories.find((c) => c.id === selectedCategory)?.label}
+                      <button
+                        onClick={() => setSelectedCategory("all")}
+                        className="ml-2 text-blue-500 hover:text-blue-700"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {selectedFilter !== "all" && (
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
+                      {filters.find((f) => f.id === selectedFilter)?.label}
+                      <button
+                        onClick={() => setSelectedFilter("all")}
+                        className="ml-2 text-blue-500 hover:text-blue-700"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {searchTerm && (
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
+                      Recherche: {searchTerm}
+                      <button
+                        onClick={() => setSearchTerm("")}
+                        className="ml-2 text-blue-500 hover:text-blue-700"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  <button
+                    onClick={() => {
+                      setSelectedCategory("all");
+                      setSelectedFilter("all");
+                      setSearchTerm("");
+                    }}
+                    className="text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    Réinitialiser tous les filtres
+                  </button>
                 </div>
-              )}
+              </div>
+            )}
 
             {/* Grille des communautés */}
             {loading ? (
