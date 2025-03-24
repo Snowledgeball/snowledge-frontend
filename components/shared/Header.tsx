@@ -47,7 +47,7 @@ export default function Header() {
           <div className="flex items-center space-x-8 mr-8">
             {/* Logo et navigation gauche */}
             <Link href="/" className="flex items-center">
-              <img src="/images/logo.svg" alt="Logo" className="w-auto h-12" />
+              <img src="/images/Logo.png" alt="Logo" className="w-auto h-10" />
             </Link>
 
             {/* Navigation desktop */}
