@@ -25,6 +25,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
+import Image from "next/image";
+import { toast } from "sonner";
 
 interface SignUpModalProps {
   isOpen: boolean;
@@ -112,7 +114,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
     setProfilePictureError(false);
 
     // Vérifier si l'email contient un +
-    if (email.includes('+')) {
+    if (email.includes("+")) {
       setError("Le caractère '+' n'est pas autorisé dans l'adresse email");
       return;
     }
@@ -218,10 +220,10 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
   // Optionnel : validation en temps réel
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (value.includes('+')) {
+    if (value.includes("+")) {
       setError("Le caractère '+' n'est pas autorisé dans l'adresse email");
     } else {
-      setError('');
+      setError("");
     }
     setEmail(value);
   };
@@ -266,12 +268,13 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                   <Circle className="h-5 w-5 text-gray-300 mr-2" />
                 )}
                 <span
-                  className={`text-sm ${step.completed
-                    ? "text-green-700"
-                    : step.current
+                  className={`text-sm ${
+                    step.completed
+                      ? "text-green-700"
+                      : step.current
                       ? "text-blue-700 font-medium"
                       : "text-gray-500"
-                    }`}
+                  }`}
                 >
                   {step.name}
                 </span>
@@ -294,12 +297,14 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
               </div>
             ) : (
               <div
-                className={`w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center border-4 ${profilePictureError ? "border-red-200" : "border-blue-100"
-                  } shadow-md`}
+                className={`w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center border-4 ${
+                  profilePictureError ? "border-red-200" : "border-blue-100"
+                } shadow-md`}
               >
                 <Camera
-                  className={`w-10 h-10 ${profilePictureError ? "text-red-400" : "text-blue-400"
-                    }`}
+                  className={`w-10 h-10 ${
+                    profilePictureError ? "text-red-400" : "text-blue-400"
+                  }`}
                 />
               </div>
             )}
@@ -407,6 +412,74 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
         >
           {isLoading ? "Inscription en cours..." : "S'inscrire"}
         </button>
+
+        {/* Séparateur */}
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">
+              Ou s'inscrire avec
+            </span>
+          </div>
+        </div>
+
+        {/* Boutons de connexion sociale */}
+        <div className="grid grid-cols-3 gap-4">
+          <button
+            type="button"
+            onClick={() =>
+              toast.info("L'inscription avec Google sera bientôt disponible")
+            }
+            className="flex items-center justify-center p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Image
+              src="/images/google-logo.png"
+              alt="Google"
+              width={24}
+              height={24}
+              className="w-6 h-6"
+            />
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              toast.info("L'inscription avec Facebook sera bientôt disponible")
+            }
+            className="flex items-center justify-center p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Image
+              src="/images/facebook-logo.png"
+              alt="Facebook"
+              width={24}
+              height={24}
+              className="w-6 h-6"
+            />
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              toast.info("L'inscription avec Twitter sera bientôt disponible")
+            }
+            className="flex items-center justify-center p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Image
+              src="/images/twitter-logo.png"
+              alt="Twitter"
+              width={24}
+              height={24}
+              className="w-6 h-6"
+            />
+          </button>
+        </div>
+
+        {/* Note en bas */}
+        <p className="text-xs text-center text-gray-500 mt-4">
+          D'autres options d'inscription seront bientôt disponibles
+        </p>
       </form>
     </div>
   );
