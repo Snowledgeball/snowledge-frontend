@@ -4,6 +4,7 @@ import "./globals.css";
 import SessionProvider from "@/components/shared/SessionProvider";
 import Header from "@/components/shared/Header";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,7 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Snowledgeball",
-  description: "Impulser l'effet boule de neige à la connaissance"
+  description: "Impulser l'effet boule de neige à la connaissance",
 };
 
 export default function RootLayout({
@@ -33,12 +34,11 @@ export default function RootLayout({
         <Toaster position="top-center" />
         <SessionProvider>
           <Header />
-          <main className="flex-grow">
-            {children}
-          </main>
+          <main className="flex-grow">{children}</main>
+          <Analytics />
           {/* <Footer /> */}
         </SessionProvider>
       </body>
-    </html >
+    </html>
   );
 }
