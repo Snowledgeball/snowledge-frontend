@@ -26,10 +26,12 @@ export async function POST(request) {
       );
     }
 
+    console.log("category", category);
+
     // Récupérer l'ID de la catégorie
     const categoryData = await prisma.community_category.findFirst({
       where: {
-        name: category,
+        id: Number(category),
       },
     });
 
