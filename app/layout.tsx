@@ -5,6 +5,7 @@ import SessionProvider from "@/components/shared/SessionProvider";
 import Header from "@/components/shared/Header";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,6 +37,7 @@ export default function RootLayout({
           <Header />
           <main className="flex-grow">{children}</main>
           <Analytics />
+          <SpeedInsights />
           {/* <Footer /> */}
         </SessionProvider>
       </body>
