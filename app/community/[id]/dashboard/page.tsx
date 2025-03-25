@@ -622,7 +622,7 @@ export default function CommunityDashboard() {
       const response = await fetch(
         `/api/communities/${communityId}/contributor-requests/${selectedRequestId}/reject`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
