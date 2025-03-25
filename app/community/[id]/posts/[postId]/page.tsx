@@ -4,13 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
-import {
-  Users,
-  ArrowLeft,
-  MessageCircle,
-  Edit,
-  Copy
-} from "lucide-react";
+import { Users, ArrowLeft, MessageCircle, Edit, Copy } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -35,6 +29,11 @@ interface Post {
   };
   status: string;
   author_id: number;
+  community_posts_category: {
+    id: number;
+    name: string;
+    label: string;
+  };
 }
 
 export default function PostPage() {
@@ -54,6 +53,7 @@ export default function PostPage() {
         );
         if (!response.ok) throw new Error("Post non trouvé");
         const data = await response.json();
+        console.log("data", data);
         setPost(data);
       } catch (error) {
         toast.error("Erreur lors du chargement du post");
@@ -72,7 +72,9 @@ export default function PostPage() {
       // Vérifier si l'utilisateur est membre de la communauté
       const checkMembership = async () => {
         try {
-          const response = await fetch(`/api/communities/${params.id}/membership`);
+          const response = await fetch(
+            `/api/communities/${params.id}/membership`
+          );
           if (response.ok) {
             const data = await response.json();
             setIsContributorOrCreator(data.isContributor || data.isCreator);
@@ -141,18 +143,21 @@ export default function PostPage() {
                     </div>
                   </div>
                   <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">
-                    {post.tag}
+                    {post.community_posts_category.label}
                   </span>
 
-                  {post.accept_contributions && session && !isAuthor && isContributorOrCreator && (
-                    <Link
-                      href={`/community/${params.id}/posts/${params.postId}/enrich`}
-                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Contribuer
-                    </Link>
-                  )}
+                  {post.accept_contributions &&
+                    session &&
+                    !isAuthor &&
+                    isContributorOrCreator && (
+                      <Link
+                        href={`/community/${params.id}/posts/${params.postId}/enrich`}
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Contribuer
+                      </Link>
+                    )}
 
                   {session && !isAuthor && isContributorOrCreator && (
                     <Link
@@ -163,8 +168,8 @@ export default function PostPage() {
                           content: post.content,
                           coverImageUrl: post.cover_image_url,
                           tag: post.tag,
-                          fromPost: post.id
-                        }
+                          fromPost: post.id,
+                        },
                       }}
                       className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                     >
@@ -221,7 +226,8 @@ export default function PostPage() {
                       line-height: 1.7;
                       color: #4b5563;
                     }
-                    #post-content ul, #post-content ol {
+                    #post-content ul,
+                    #post-content ol {
                       margin-left: 1.5rem;
                       margin-bottom: 1rem;
                     }
@@ -266,7 +272,8 @@ export default function PostPage() {
                       border-collapse: collapse;
                       margin: 1.5rem 0;
                     }
-                    #post-content th, #post-content td {
+                    #post-content th,
+                    #post-content td {
                       border: 1px solid #e5e7eb;
                       padding: 0.5rem;
                     }

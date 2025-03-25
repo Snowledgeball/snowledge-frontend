@@ -9,6 +9,7 @@ import EditReviewCreation from "@/components/community/EditReviewCreation";
 // import EnrichmentReview from "@/components/community/EnrichmentReview"; // Ce composant sera créé plus tard pour les contributions
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
+import ReviewsSidebar from "@/components/community/ReviewsSidebar";
 
 export default function ReviewPost() {
   const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
@@ -23,6 +24,7 @@ export default function ReviewPost() {
   const [hasAlreadyVoted, setHasAlreadyVoted] = useState(false);
   const [existingReview, setExistingReview] = useState<any>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isCreatorMode, setIsCreatorMode] = useState(false);
   const { data: session } = useSession();
   useEffect(() => {
     const fetchData = async () => {
@@ -39,6 +41,11 @@ export default function ReviewPost() {
           toast.error("Vous devez être contributeur pour réviser un post");
           router.push(`/community/${params.id}`);
           return;
+        }
+        // Vérifier si on est en mode créateur
+        const creator = searchParams.get("creator");
+        if (creator === "true") {
+          setIsCreatorMode(true);
         }
 
         // Récupérer les données du post
@@ -59,7 +66,6 @@ export default function ReviewPost() {
         const communityResponse = await fetch(`/api/communities/${params.id}`);
         const communityData = await communityResponse.json();
 
-
         // Vérifier si l'utilisateur est un contributeur ou le créateur de la communauté
         const isContributor = membershipData.isContributor;
         const isCreator = communityData.creator_id == session?.user?.id;
@@ -74,7 +80,7 @@ export default function ReviewPost() {
           redirect(`/community/${params.id}/posts/${params.postId}`);
         }
 
-        // Vérifier si l'utilisateur a déjà voté    
+        // Vérifier si l'utilisateur a déjà voté
         const hasVotedResponse = await fetch(
           `/api/communities/${params.id}/posts/${params.postId}/reviews/user`
         );
@@ -91,11 +97,18 @@ export default function ReviewPost() {
               setIsEditMode(true);
             } else {
               toast.info("Vous avez déjà voté sur ce post", {
-                description: `Votre vote: ${hasVotedData.review.status === "APPROVED" ? "Approuvé" : "Rejeté"}`,
+                description: `Votre vote: ${
+                  hasVotedData.review.status === "APPROVED"
+                    ? "Approuvé"
+                    : "Rejeté"
+                }`,
                 duration: 5000,
                 action: {
                   label: "Modifier",
-                  onClick: () => router.push(`/community/${params.id}/posts/${params.postId}/review?authorId=${postData.authorId}&edit=true`),
+                  onClick: () =>
+                    router.push(
+                      `/community/${params.id}/posts/${params.postId}/review?authorId=${postData.authorId}&edit=true`
+                    ),
                 },
               });
             }
@@ -126,8 +139,13 @@ export default function ReviewPost() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="bg-white p-8 rounded-lg shadow">
-            <h2 className="text-2xl font-bold mb-4">Vous avez déjà voté sur ce post</h2>
-            <p className="mb-6">Votre vote: {existingReview?.status === "APPROVED" ? "Approuvé" : "Rejeté"}</p>
+            <h2 className="text-2xl font-bold mb-4">
+              Vous avez déjà voté sur ce post
+            </h2>
+            <p className="mb-6">
+              Votre vote:{" "}
+              {existingReview?.status === "APPROVED" ? "Approuvé" : "Rejeté"}
+            </p>
             <div className="flex justify-center space-x-4">
               <button
                 onClick={() => router.push(`/community/${params.id}`)}
@@ -136,7 +154,11 @@ export default function ReviewPost() {
                 Retour à la communauté
               </button>
               <button
-                onClick={() => router.push(`/community/${params.id}/posts/${params.postId}/review?authorId=${post.authorId}&edit=true`)}
+                onClick={() =>
+                  router.push(
+                    `/community/${params.id}/posts/${params.postId}/review?authorId=${post.authorId}&edit=true`
+                  )
+                }
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Modifier mon vote
@@ -148,7 +170,45 @@ export default function ReviewPost() {
     );
   }
 
-  // Si l'utilisateur est en mode édition, afficher le formulaire d'édition
+  if (isCreatorMode) {
+    return (
+      <div className="flex">
+        {/* On affiche le contenu du post simplement */}
+        <div className="w-full">
+          <div className="max-w-5xl mx-auto px-4 text-center">
+            <h2 className="text-2xl font-bold mb-4">{post.title}</h2>
+            <p
+              className="mb-6"
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
+          </div>
+        </div>
+
+        {/* Sidebar des reviews */}
+        {post && post.status === "PENDING" && (
+          <div className="w-80">
+            <div className="sticky top-6">
+              <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+                <h3 className="text-lg font-medium mb-2">
+                  Conseils pour l'édition
+                </h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  Consultez les feedbacks des contributeurs pour améliorer votre
+                  post et augmenter vos chances d'approbation.
+                </p>
+              </div>
+
+              <ReviewsSidebar
+                communityId={params.id as string}
+                postId={params.postId as string}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (isEditMode && existingReview) {
     return (
       <EditReviewCreation

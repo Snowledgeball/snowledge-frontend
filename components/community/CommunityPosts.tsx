@@ -95,9 +95,8 @@ export default function CommunityPosts({
   const postsByCategory = useMemo(() => {
     const result: Record<string, Post[]> = {};
     if (!Array.isArray(posts)) return result;
-
     categories.forEach((category) => {
-      result[category.id] = posts.filter((post) => post.tag === category.name);
+      result[category.id] = posts.filter((post) => post.tag === category.id);
     });
 
     return result;

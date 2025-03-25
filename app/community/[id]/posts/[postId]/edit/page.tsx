@@ -123,6 +123,7 @@ export default function EditPost() {
       setPostTitle(data.title);
       setEditorContent(data.content);
       setCoverImage(data.cover_image_url || "");
+      console.log(data);
       setSelectedTag(data.tag);
       setContributionsEnabled(data.accept_contributions);
     } catch (error) {
@@ -516,7 +517,10 @@ export default function EditPost() {
                   </div>
                   <select
                     value={selectedTag}
-                    onChange={(e) => setSelectedTag(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedTag(e.target.value);
+                      console.log(e.target.value);
+                    }}
                     className="flex-1 px-3 py-2 border rounded-lg bg-white"
                   >
                     <option value="">Choisir une catégorie</option>
@@ -542,32 +546,6 @@ export default function EditPost() {
                   className="h-full"
                 />
               </div>
-
-              {/* Sidebar des reviews */}
-              {post && post.status === "PENDING" && (
-                <div className="w-80">
-                  <div className="sticky top-6">
-                    <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-                      <h3 className="text-lg font-medium mb-2">
-                        Conseils pour l'édition
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Consultez les feedbacks des contributeurs pour améliorer
-                        votre post et augmenter vos chances d'approbation.
-                      </p>
-                      <div className="text-xs text-gray-500">
-                        Les modifications que vous apportez seront soumises à un
-                        nouveau vote.
-                      </div>
-                    </div>
-
-                    <ReviewsSidebar
-                      communityId={params.id as string}
-                      postId={params.postId as string}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
           </Card>
         </div>

@@ -241,11 +241,16 @@ export default function CommunityDashboard() {
   const [loadingPromote, setLoadingPromote] = useState<number | null>(null);
   const [loadingDemote, setLoadingDemote] = useState<number | null>(null);
   const [categories, setCategories] = useState<
-    Array<{ value: string; label: string }>
+    Array<{ id: number; value: string; label: string }>
   >([]);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryLabel, setNewCategoryLabel] = useState("");
+
+  useEffect(() => {
+    console.log("categories", categories);
+    console.log("selectedTag", selectedTag);
+  }, [categories, selectedTag]);
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -267,6 +272,7 @@ export default function CommunityDashboard() {
           console.log("data", data);
           setCategories(
             data.map((cat: any) => ({
+              id: cat.id,
               value: cat.name,
               label: cat.label,
             }))
@@ -297,6 +303,7 @@ export default function CommunityDashboard() {
         setCategories((prev) => [
           ...prev,
           {
+            id: newCategory.id,
             value: newCategory.name,
             label: newCategory.label,
           },
@@ -1795,12 +1802,14 @@ export default function CommunityDashboard() {
                   <div className="flex gap-2 items-start">
                     <select
                       value={selectedTag}
-                      onChange={(e) => setSelectedTag(e.target.value)}
+                      onChange={(e) => {
+                        setSelectedTag(e.target.value);
+                      }}
                       className="flex-1 px-3 py-2 border rounded-lg bg-white"
                     >
                       <option value="">Choisir une catégorie</option>
                       {categories.map((tag) => (
-                        <option key={tag.value} value={tag.value}>
+                        <option key={tag.id} value={tag.id}>
                           {tag.label}
                         </option>
                       ))}

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/tooltip";
 import Link from "next/link";
 import { Loader } from "@/components/ui/loader";
+import { EyeIcon, PencilIcon } from "lucide-react";
 
 // Cache pour stocker les données
 const pendingPostsCache = new Map<string, { data: any[]; timestamp: number }>();
@@ -579,13 +580,44 @@ export default function CreationVotingSession({
                   <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
                       {isAuthor && (
-                        <>
+                        <div className="relative group">
                           <Link
-                            href={`/community/${communityId}/posts/${post.id}/edit`}
-                            className="text-blue-600 hover:text-blue-800 bg-blue-50 px-4 py-2 rounded-md"
+                            href={`/community/${communityId}/posts/${post.id}${
+                              post.community_posts_reviews.length > 0
+                                ? "/review?creator=true"
+                                : "/edit"
+                            }`}
+                            className={`
+                              px-4 py-2 rounded-md flex items-center gap-2
+                              ${
+                                post.community_posts_reviews.length > 0
+                                  ? "text-gray-600 hover:text-gray-800 bg-gray-100 cursor-pointer"
+                                  : "text-blue-600 hover:text-blue-800 bg-blue-50"
+                              }
+                            `}
                           >
-                            Modifier
+                            {post.community_posts_reviews.length > 0 ? (
+                              <>
+                                <EyeIcon className="w-4 h-4" />
+                                Consulter
+                              </>
+                            ) : (
+                              <>
+                                <PencilIcon className="w-4 h-4" />
+                                Consulter / Modifier
+                              </>
+                            )}
                           </Link>
+
+                          {post.community_posts_reviews.length > 0 && (
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-2/3 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                              <>
+                                <p>La modification n'est plus possible</p>
+                                <p> car le vote est déjà en cours</p>
+                              </>
+                              <div className="absolute top-full left-1/2 transform translate-x-2 border-4 border-transparent border-t-gray-900"></div>
+                            </div>
+                          )}
 
                           {publishable && (
                             <button
@@ -595,7 +627,7 @@ export default function CreationVotingSession({
                               Publier
                             </button>
                           )}
-                        </>
+                        </div>
                       )}
 
                       {!isAuthor && (

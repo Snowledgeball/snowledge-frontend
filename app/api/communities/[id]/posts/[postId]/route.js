@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -67,8 +67,17 @@ export async function GET(request, { params }) {
             profilePicture: true,
           },
         },
+        community_posts_category: {
+          select: {
+            id: true,
+            name: true,
+            label: true,
+          },
+        },
       },
     });
+
+    console.log("post", post);
 
     if (!post) {
       return NextResponse.json({ error: "Post non trouvé" }, { status: 404 });
