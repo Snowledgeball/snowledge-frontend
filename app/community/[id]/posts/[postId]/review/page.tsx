@@ -6,10 +6,10 @@ import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
 import ReviewCreation from "@/components/community/ReviewCreation";
 import EditReviewCreation from "@/components/community/EditReviewCreation";
-// import EnrichmentReview from "@/components/community/EnrichmentReview"; // Ce composant sera créé plus tard pour les contributions
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
 import ReviewsSidebar from "@/components/community/ReviewsSidebar";
+import TinyMCEStyledText from "@/components/shared/TinyMCEStyledText";
 
 export default function ReviewPost() {
   const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
@@ -177,10 +177,8 @@ export default function ReviewPost() {
         <div className="w-full">
           <div className="max-w-5xl mx-auto px-4 text-center">
             <h2 className="text-2xl font-bold mb-4">{post.title}</h2>
-            <p
-              className="mb-6"
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
+            {/* Contenu */}
+            <TinyMCEStyledText content={post.content} />
           </div>
         </div>
 
@@ -201,6 +199,7 @@ export default function ReviewPost() {
               <ReviewsSidebar
                 communityId={params.id as string}
                 postId={params.postId as string}
+                type="post"
               />
             </div>
           </div>

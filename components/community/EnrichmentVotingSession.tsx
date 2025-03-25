@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Check, Trash } from "lucide-react";
+import { Check, Trash, Eye, Pencil } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -59,6 +59,7 @@ interface Contribution {
       profilePicture: string;
     };
   }[];
+  enrichment_votes?: { id: number }[];
 }
 
 export default function EnrichmentVotingSession({
@@ -156,6 +157,7 @@ export default function EnrichmentVotingSession({
         if (response.ok) {
           const data = await response.json();
           setPendingContributions(data);
+          console.log("data", data);
 
           // Mettre en cache les données avec un timestamp
           pendingContributionsCache.set(cacheKey, {
@@ -356,12 +358,7 @@ export default function EnrichmentVotingSession({
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-8">
-        <Loader
-          size="md"
-          color="gradient"
-          text="Chargement..."
-          variant="pulse"
-        />
+        <Loader size="md" color="gradient" text="Chargement..." />
       </div>
     );
   }
@@ -425,7 +422,7 @@ export default function EnrichmentVotingSession({
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {pendingContributions.map((contribution) => (
-                <tr key={contribution.id}>
+                <tr className="overflow-hidden" key={contribution.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="text-sm font-medium text-gray-900">
@@ -578,13 +575,49 @@ export default function EnrichmentVotingSession({
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-3">
                       {isContributionAuthor(contribution) ? (
-                        // Bouton pour modifier mon enrichissement et le publier si c'est validé
-                        <Link
-                          href={`/community/${memoizedCommunityId}/posts/${memoizedPostId}/enrichments/${contribution.id}?edit=true`}
-                          className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
-                        >
-                          Modifier mon enrichissement
-                        </Link>
+                        <div className="relative group">
+                          <Link
+                            href={`/community/${memoizedCommunityId}/posts/${memoizedPostId}/enrichments/${
+                              contribution.id
+                            }${
+                              contribution.community_posts_enrichment_reviews
+                                ?.length > 0
+                                ? "/review?creator=true"
+                                : "/edit"
+                            }`}
+                            className={`
+                              inline-flex items-center px-3 py-1.5 rounded-md text-sm
+                              ${
+                                contribution.community_posts_enrichment_reviews
+                                  ?.length > 0
+                                  ? "text-gray-600 hover:text-gray-800 bg-gray-100 cursor-pointer"
+                                  : "text-blue-600 hover:text-blue-800 bg-blue-50"
+                              }
+                            `}
+                          >
+                            {contribution.community_posts_enrichment_reviews
+                              ?.length > 0 ? (
+                              <>
+                                <Eye className="w-4 h-4 mr-2" />
+                                Consulter
+                              </>
+                            ) : (
+                              <>
+                                <Pencil className="w-4 h-4 mr-2" />
+                                Consulter / Modifier
+                              </>
+                            )}
+                          </Link>
+
+                          {contribution.community_posts_enrichment_reviews
+                            ?.length > 0 && (
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                              <p>La modification n'est plus possible</p>
+                              <p>car le vote est déjà en cours</p>
+                              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                            </div>
+                          )}
+                        </div>
                       ) : (
                         <>
                           {hasUserVoted(contribution) ? (

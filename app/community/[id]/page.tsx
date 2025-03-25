@@ -706,7 +706,6 @@ const CommunityHub = () => {
                             size="md"
                             color="gradient"
                             text="Chargement des posts..."
-                            variant="pulse"
                             textPosition="right"
                           />
                         </div>
