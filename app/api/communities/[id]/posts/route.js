@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -80,16 +80,19 @@ export async function POST(request, { params }) {
       },
     });
 
-    const membersId = [...learners.map((learner) => learner.learner_id), ...contributors.map((contributor) => contributor.contributor_id)];
+    const membersId = [
+      ...learners.map((learner) => learner.learner_id),
+      ...contributors.map((contributor) => contributor.contributor_id),
+    ];
 
     //Filter pour ne pas avoir de doublons
-    const membersIdFiltered = membersId.filter((id, index, self) => self.indexOf(id) === index);
+    const membersIdFiltered = membersId.filter(
+      (id, index, self) => self.indexOf(id) === index
+    );
 
     console.log("membersId", membersIdFiltered);
 
-
     if (membersId.length === 0) return; // Pas de membres à notifier
-
 
     // Créer des notifications pour tous les membres en une seule opération
     await createBulkNotifications({
@@ -135,6 +138,7 @@ export async function GET(request, { params }) {
             profilePicture: true,
           },
         },
+        community_posts_category: true,
       },
       orderBy: {
         created_at: "desc",
@@ -149,7 +153,7 @@ export async function GET(request, { params }) {
       { posts: posts || [] },
       {
         status: 200,
-        headers
+        headers,
       }
     );
   } catch (error) {

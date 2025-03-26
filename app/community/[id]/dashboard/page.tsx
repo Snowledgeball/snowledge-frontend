@@ -148,6 +148,11 @@ interface Post {
     fullName: string;
     profilePicture: string;
   };
+  community_posts_category: {
+    id: number;
+    name: string;
+    label: string;
+  };
 }
 
 export default function CommunityDashboard() {
@@ -1132,13 +1137,7 @@ export default function CommunityDashboard() {
                           <td className="py-4">{post.title}</td>
                           <td className="py-4">
                             <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                              {selectedTag === post.tag ? (
-                                <span className="text-green-600">
-                                  {post.tag}
-                                </span>
-                              ) : (
-                                post.tag
-                              )}
+                              {post.community_posts_category.label}
                             </span>
                           </td>
                           <td className="py-4">
