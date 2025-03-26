@@ -88,7 +88,6 @@ export default function CreateCommunityPage() {
   const [categories, setCategories] = useState<{ id: string; label: string }[]>(
     []
   );
-  const [isContentCreator, setIsContentCreator] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -97,16 +96,6 @@ export default function CreateCommunityPage() {
       }
     };
   }, [previewImage]);
-
-  useEffect(() => {
-    const checkCreatorStatus = async () => {
-      const response = await fetch("/api/user/status");
-      const data = await response.json();
-      setIsContentCreator(data.isContentCreator);
-    };
-
-    checkCreatorStatus();
-  }, []);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -286,25 +275,24 @@ export default function CreateCommunityPage() {
                 <label className="block text-sm font-medium text-gray-700">
                   Catégorie
                 </label>
-                {isContentCreator && (
-                  <button
-                    type="button"
-                    onClick={() => setShowCategoryForm(!showCategoryForm)}
-                    className="text-sm text-blue-600 hover:text-blue-700 flex items-center"
-                  >
-                    {showCategoryForm ? (
-                      <>
-                        <X className="w-4 h-4 mr-1" />
-                        Annuler
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="w-4 h-4 mr-1" />
-                        Ajouter une catégorie
-                      </>
-                    )}
-                  </button>
-                )}
+
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryForm(!showCategoryForm)}
+                  className="text-sm text-blue-600 hover:text-blue-700 flex items-center"
+                >
+                  {showCategoryForm ? (
+                    <>
+                      <X className="w-4 h-4 mr-1" />
+                      Annuler
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4 mr-1" />
+                      Ajouter une catégorie
+                    </>
+                  )}
+                </button>
               </div>
 
               {showCategoryForm && (
