@@ -108,6 +108,19 @@ export async function POST(request, { params }) {
         },
       });
 
+      // Mettre à jour le post pour indiquer que l'enrichissement a été modifié
+      if (newStatus === "APPROVED") {
+        await prisma.community_posts.update({
+          where: {
+            id: parseInt(postId),
+          },
+          data: {
+            content: enrichment.content,
+          },
+        });
+        console.log("post updated");
+      }
+
       if (newStatus === "APPROVED" || newStatus === "REJECTED") {
         // Créer une notification pour l'auteur de l'enrichissement pour indiquer que son enrichissement a été approuvé ou rejeté
         await createBulkNotifications({

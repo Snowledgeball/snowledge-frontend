@@ -97,9 +97,10 @@ export async function PUT(request, { params }) {
       parseInt(enrichmentId),
       contributorsCount
     );
-
+    ci;
     // Mettre à jour le statut de la contribution si nécessaire
     if (shouldUpdate) {
+      console.log("shouldUpdate", shouldUpdate);
       await prisma.community_posts_enrichments.update({
         where: {
           id: parseInt(enrichmentId),
@@ -108,6 +109,19 @@ export async function PUT(request, { params }) {
           status: newStatus,
         },
       });
+
+      // Mettre à jour le post pour indiquer que l'enrichissement a été modifié
+      if (newStatus === "APPROVED") {
+        await prisma.community_posts.update({
+          where: {
+            id: parseInt(postId),
+          },
+          data: {
+            content: enrichment.content,
+          },
+        });
+        console.log("post updated");
+      }
 
       // Créer une notification pour l'auteur de la contribution
       if (newStatus === "APPROVED" || newStatus === "REJECTED") {
