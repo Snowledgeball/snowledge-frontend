@@ -249,11 +249,6 @@ export default function CommunityDashboard() {
   const [newCategoryLabel, setNewCategoryLabel] = useState("");
 
   useEffect(() => {
-    console.log("categories", categories);
-    console.log("selectedTag", selectedTag);
-  }, [categories, selectedTag]);
-
-  useEffect(() => {
     const userId = session?.user?.id;
     if (userId) {
       setUserId(userId);
@@ -270,7 +265,6 @@ export default function CommunityDashboard() {
         );
         if (response.ok) {
           const data = await response.json();
-          console.log("data", data);
           setCategories(
             data.map((cat: any) => ({
               id: cat.id,
@@ -477,6 +471,7 @@ export default function CommunityDashboard() {
       if (dashboardCache.posts.has(cacheKey)) {
         const cachedData = dashboardCache.posts.get(cacheKey)!;
         if (isCacheValid(cachedData)) {
+          console.log("cachedData.data", cachedData.data);
           setPosts(cachedData.data);
           return;
         }
@@ -496,6 +491,8 @@ export default function CommunityDashboard() {
           data: data.posts,
           timestamp: Date.now(),
         });
+
+        console.log("data.posts", data.posts);
 
         setPosts(data.posts);
       }
@@ -868,7 +865,7 @@ export default function CommunityDashboard() {
     return <Loader text="Chargement des données..." fullScreen />;
   }
 
-  if (!dashboardData) {
+  if (!dashboardData && !isLoading) {
     return <div>Erreur lors du chargement des données</div>;
   }
 
@@ -900,7 +897,7 @@ export default function CommunityDashboard() {
             </div>
             <div>
               <h2 className="font-semibold text-white">
-                {dashboardData.community.name}
+                {dashboardData?.community?.name}
               </h2>
               <p
                 onClick={() => router.push(`/community/${communityId}`)}
@@ -1013,7 +1010,7 @@ export default function CommunityDashboard() {
               {/* Titre et nom de la communauté plus petit */}
               <div>
                 <h2 className="text-xl font-medium">
-                  Tableau de bord - {dashboardData.community.name}
+                  Tableau de bord - {dashboardData?.community?.name}
                 </h2>
                 <p className="text-gray-600 pr-2">
                   Aujourd'hui est un bon jour pour partager ton savoir !
@@ -1043,7 +1040,7 @@ export default function CommunityDashboard() {
                     <div className="p-4 bg-gray-800 rounded-lg text-white">
                       <p className="text-sm">Revenus totaux</p>
                       <p className="text-xl font-bold">
-                        {dashboardData.stats.revenue}
+                        {dashboardData?.stats?.revenue}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-800 rounded-lg text-white">
@@ -1076,13 +1073,13 @@ export default function CommunityDashboard() {
                     <div className="p-4 bg-gray-800 rounded-lg text-white">
                       <p className="text-sm">Total membres</p>
                       <p className="text-xl font-bold">
-                        {dashboardData.stats.totalMembers}
+                        {dashboardData?.stats?.totalMembers}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-800 rounded-lg text-white">
                       <p className="text-sm">Taux d'engagement</p>
                       <p className="text-xl font-bold">
-                        {dashboardData.stats.engagementRate}%
+                        {dashboardData?.stats?.engagementRate}%
                       </p>
                     </div>
                     <div className="p-4 bg-gray-800 rounded-lg text-white">
