@@ -685,7 +685,7 @@ export default function CommunityDashboard() {
           title: postTitle,
           content: editorContent,
           coverImageUrl: coverImage,
-          tag: selectedTag,
+          tag: Number(selectedTag),
           acceptContributions: contributionsEnabled,
         }),
       });
