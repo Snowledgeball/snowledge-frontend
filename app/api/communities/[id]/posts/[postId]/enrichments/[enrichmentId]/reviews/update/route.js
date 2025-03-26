@@ -97,7 +97,7 @@ export async function PUT(request, { params }) {
       parseInt(enrichmentId),
       contributorsCount
     );
-    ci;
+
     // Mettre à jour le statut de la contribution si nécessaire
     if (shouldUpdate) {
       console.log("shouldUpdate", shouldUpdate);
