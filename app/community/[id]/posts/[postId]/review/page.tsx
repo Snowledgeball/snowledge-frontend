@@ -1,12 +1,16 @@
 "use client";
 
-import { useParams, useSearchParams, useRouter } from "next/navigation";
+import {
+  useParams,
+  useSearchParams,
+  useRouter,
+  redirect,
+} from "next/navigation";
 import { useState, useEffect } from "react";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
 import ReviewCreation from "@/components/community/ReviewCreation";
 import EditReviewCreation from "@/components/community/EditReviewCreation";
-import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
 import ReviewsSidebar from "@/components/community/ReviewsSidebar";
 import TinyMCEStyledText from "@/components/shared/TinyMCEStyledText";
@@ -16,6 +20,7 @@ export default function ReviewPost() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -25,7 +30,7 @@ export default function ReviewPost() {
   const [existingReview, setExistingReview] = useState<any>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isCreatorMode, setIsCreatorMode] = useState(false);
-  const { data: session } = useSession();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -33,6 +38,10 @@ export default function ReviewPost() {
         const membershipResponse = await fetch(
           `/api/communities/${params.id}/membership`
         );
+        if (!membershipResponse.ok) {
+          throw new Error(`HTTP error! status: ${membershipResponse.status}`);
+        }
+
         const membershipData = await membershipResponse.json();
         setIsContributor(membershipData.isContributor);
         setIsCreator(membershipData.isCreator);
@@ -55,6 +64,7 @@ export default function ReviewPost() {
 
         if (!postResponse.ok) {
           toast.error("Erreur lors de la récupération du post");
+          console.log("iciErreur");
           router.push(`/community/${params.id}`);
           return;
         }
@@ -72,12 +82,15 @@ export default function ReviewPost() {
 
         // Permettre l'accès à la page de revue si l'utilisateur est contributeur OU créateur
         if (!isContributor && !isCreator) {
-          redirect(`/community/${params.id}`);
+          toast.error(
+            "Vous n'avez pas les permissions pour accéder à cette page"
+          );
+          router.push(`/community/${params.id}`);
         }
-
-        // Vérifier si l'utilisateur est l'auteur du post
-        if (postData.authorId === session?.user?.id) {
-          redirect(`/community/${params.id}/posts/${params.postId}`);
+        // Empecher l'accès à la page de revue si l'utilisateur est l'auteur du post si y a pas ?creator=true
+        if (postData.authorId === session?.user?.id && !creator) {
+          toast.error("Vous ne pouvez pas voter sur votre propre post");
+          router.push(`/community/${params.id}`);
         }
 
         // Vérifier si l'utilisateur a déjà voté
@@ -115,22 +128,21 @@ export default function ReviewPost() {
           }
         }
       } catch (error) {
-        if (error instanceof Error) {
-          console.error("Erreur:", error.stack);
-        } else {
-          console.error("Une erreur inattendue s'est produite");
-        }
-        toast.error("Une erreur est survenue");
-        router.push(`/community/${params.id}`);
+        console.log("ici");
+        console.log("Error fetching data:", error);
+        toast.error("ici");
+        // router.push("/");
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [params.id, params.postId, router, searchParams]);
+  }, [status, session]);
 
-  if (isLoading || loading) return <LoadingComponent />;
+  if (isLoading || loading || status === "loading") {
+    return <LoadingComponent />;
+  }
   if (!isAuthenticated || !post) return null;
 
   // Si l'utilisateur a déjà voté et n'est pas en mode édition, afficher un message
@@ -175,7 +187,7 @@ export default function ReviewPost() {
       <div className="flex">
         {/* On affiche le contenu du post simplement */}
         <div className="w-full">
-          <div className="max-w-5xl mx-auto px-4 text-center">
+          <div className="max-w-5xl mx-auto px-4">
             <h2 className="text-2xl font-bold mb-4">{post.title}</h2>
             {/* Contenu */}
             <TinyMCEStyledText content={post.content} />
