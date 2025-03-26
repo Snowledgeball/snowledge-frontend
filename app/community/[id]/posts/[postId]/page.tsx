@@ -107,10 +107,10 @@ export default function PostPage() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Contenu principal */}
-          <main className="flex-1 order-2 lg:order-1">
+          <main className="flex-1 order-2 lg:order-1 max-w-4xl">
             <Card className="overflow-hidden">
               {post.cover_image_url && (
-                <div className="w-full h-96 relative">
+                <div className="w-full h-56 relative">
                   <Image
                     src={`https://${post.cover_image_url}`}
                     alt={post.title}
