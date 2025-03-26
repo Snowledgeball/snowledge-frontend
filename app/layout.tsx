@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Snowledgeball",
+  title: "Snowledge",
   description: "Impulser l'effet boule de neige à la connaissance",
 };
 
