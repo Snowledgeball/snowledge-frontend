@@ -698,7 +698,7 @@ const CommunityHub = () => {
                         communityId={params.id ? params.id.toString() : ""}
                       />
                     </div>
-                  ) : (
+                  ) : activeTab === "posts" ? (
                     <div id="posts-section">
                       {isLoadingPosts ? (
                         <div className="flex justify-center items-center py-12">
@@ -719,6 +719,12 @@ const CommunityHub = () => {
                         />
                       )}
                     </div>
+                  ) : activeTab === "masterclass" ? (
+                    <div id="masterclass-section">
+                      {/* <MasterclassSession communityId={communityId} /> */}
+                    </div>
+                  ) : (
+                    <div id="other-section"></div>
                   )}
                 </>
               )}
