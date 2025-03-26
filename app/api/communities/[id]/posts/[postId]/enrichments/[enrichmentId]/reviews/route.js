@@ -140,7 +140,7 @@ export async function POST(request, { params }) {
         type: NotificationType.FEEDBACK,
         title: "Nouveau vote sur votre enrichissement",
         message: `Votre enrichissement sur "${enrichment.community_posts.title}" a reçu un nouveau vote par la communauté.`,
-        link: `/community/${communityId}/posts/${postId}/enrichments/${enrichmentId}`,
+        link: `/community/${communityId}/posts/${postId}/enrichments/${enrichmentId}/review?creator=true`,
         metadata: {
           communityId: communityId,
           postId: postId,
