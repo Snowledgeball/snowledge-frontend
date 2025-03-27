@@ -46,6 +46,8 @@
     "next-auth": "^4.24.11",
     "pinata-web3": "^0.5.4",
     "prisma": "^6.3.0",
+    "pusher": "^5.2.0",
+    "pusher-js": "^8.4.0",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^18.2.0",
