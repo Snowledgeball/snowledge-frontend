@@ -99,7 +99,7 @@ export default function EditPost() {
           `/api/communities/${params.id}/posts/${params.postId}`,
           {
             headers: {
-              "Cache-Control": "max-age=300", // Cache de 5 minutes
+              "Cache-Control": "max-age=120", // Cache de 2 minutes
             },
           }
         );
@@ -108,7 +108,7 @@ export default function EditPost() {
           `/api/communities/${params.id}/posts/pending/${params.postId}`,
           {
             headers: {
-              "Cache-Control": "max-age=300", // Cache de 5 minutes
+              "Cache-Control": "max-age=120", // Cache de 2 minutes
             },
           }
         );

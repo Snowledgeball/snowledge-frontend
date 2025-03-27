@@ -364,7 +364,7 @@ const HomePage = () => {
 
         const response = await fetch("/api/communities", {
           headers: {
-            "Cache-Control": "max-age=300", // Cache de 5 minutes côté serveur
+            "Cache-Control": "max-age=120", // Cache de 2 minutes côté serveur
           },
         });
 

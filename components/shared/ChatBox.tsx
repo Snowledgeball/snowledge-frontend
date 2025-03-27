@@ -82,8 +82,11 @@ const DEFAULT_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"];
 const MAX_MESSAGE_LENGTH = 500;
 
 // Cache pour stocker les données de la communauté et des canaux
-const communityCache = new Map<string, { data: any, timestamp: number, isCreator: boolean }>();
-const channelsCache = new Map<string, { data: Channel[], timestamp: number }>();
+const communityCache = new Map<
+  string,
+  { data: any; timestamp: number; isCreator: boolean }
+>();
+const channelsCache = new Map<string, { data: Channel[]; timestamp: number }>();
 
 // Durée de validité du cache (5 minutes)
 const CACHE_DURATION = 5 * 60 * 1000;
@@ -187,121 +190,140 @@ export default function ChatBox({
 
       // Charger plus de messages si l'utilisateur fait défiler vers le haut
       if (scrollTop < 100 && hasMoreMessages) {
-        setMessageLimit(prev => prev + 50);
+        setMessageLimit((prev) => prev + 50);
       }
     }
   }, [hasMoreMessages]);
 
   // Vérifier si l'utilisateur est le créateur de la communauté (avec mise en cache)
-  const checkCreatorStatus = useCallback(async (forceRefresh = false) => {
-    try {
-      const cacheKey = getCommunityKey();
-      const now = Date.now();
+  const checkCreatorStatus = useCallback(
+    async (forceRefresh = false) => {
+      try {
+        const cacheKey = getCommunityKey();
+        const now = Date.now();
 
-      // Vérifier si les données sont dans le cache et si elles sont encore valides
-      if (!forceRefresh && communityCache.has(cacheKey)) {
-        const cachedData = communityCache.get(cacheKey)!;
-        if (now - cachedData.timestamp < CACHE_DURATION) {
-          setIsCreator(cachedData.isCreator);
-          return;
+        // Vérifier si les données sont dans le cache et si elles sont encore valides
+        if (!forceRefresh && communityCache.has(cacheKey)) {
+          const cachedData = communityCache.get(cacheKey)!;
+          if (now - cachedData.timestamp < CACHE_DURATION) {
+            setIsCreator(cachedData.isCreator);
+            return;
+          }
         }
+
+        const response = await fetch(
+          `/api/communities/${memoizedCommunityId}`,
+          {
+            headers: {
+              "Cache-Control": "max-age=120", // Cache de 2 minutes
+            },
+          }
+        );
+
+        const data = await response.json();
+        const creatorStatus = data.creator_id === parseInt(memoizedUserId);
+
+        // Mettre en cache les données avec un timestamp
+        communityCache.set(cacheKey, {
+          data,
+          timestamp: now,
+          isCreator: creatorStatus,
+        });
+
+        setIsCreator(creatorStatus);
+      } catch (error) {
+        console.error(
+          "Erreur lors de la vérification du statut de créateur:",
+          error
+        );
       }
-
-      const response = await fetch(`/api/communities/${memoizedCommunityId}`, {
-        headers: {
-          'Cache-Control': 'max-age=300', // Cache de 5 minutes
-        }
-      });
-
-      const data = await response.json();
-      const creatorStatus = data.creator_id === parseInt(memoizedUserId);
-
-      // Mettre en cache les données avec un timestamp
-      communityCache.set(cacheKey, {
-        data,
-        timestamp: now,
-        isCreator: creatorStatus
-      });
-
-      setIsCreator(creatorStatus);
-    } catch (error) {
-      console.error(
-        "Erreur lors de la vérification du statut de créateur:",
-        error
-      );
-    }
-  }, [memoizedCommunityId, memoizedUserId, getCommunityKey]);
+    },
+    [memoizedCommunityId, memoizedUserId, getCommunityKey]
+  );
 
   // Fonction optimisée pour récupérer les canaux
-  const fetchChannels = useCallback(async (forceRefresh = false) => {
-    try {
-      // Ne pas définir isLoading à true ici si selectedChannel est déjà défini
-      // pour éviter une boucle infinie
-      if (!selectedChannel) {
-        setIsLoading(true);
-      }
-
-      if (memoizedVariant === "post") {
-        // Pour les posts, on crée un canal virtuel unique
-        // Vérifier si le canal virtuel est déjà défini pour éviter une boucle infinie
-        if (isInitialRender.current || !selectedChannel || selectedChannel.id !== memoizedPostId) {
-          setSelectedChannel({
-            id: memoizedPostId as number,
-            name: "Discussion",
-            description: "Discussion du post",
-            icon: "💬",
-          });
-          isInitialRender.current = false;
+  const fetchChannels = useCallback(
+    async (forceRefresh = false) => {
+      try {
+        // Ne pas définir isLoading à true ici si selectedChannel est déjà défini
+        // pour éviter une boucle infinie
+        if (!selectedChannel) {
+          setIsLoading(true);
         }
-        setChannels([]);
-        setIsLoading(false);
-        return;
-      }
 
-      const cacheKey = getChannelsKey();
-      const now = Date.now();
-
-      // Vérifier si les données sont dans le cache et si elles sont encore valides
-      if (!forceRefresh && channelsCache.has(cacheKey)) {
-        const cachedData = channelsCache.get(cacheKey)!;
-        if (now - cachedData.timestamp < CACHE_DURATION) {
-          setChannels(cachedData.data);
-          // Seulement définir selectedChannel s'il n'est pas déjà défini ou si c'est le premier rendu
-          if (cachedData.data.length > 0 && (isInitialRender.current || !selectedChannel)) {
-            setSelectedChannel(cachedData.data[0]);
+        if (memoizedVariant === "post") {
+          // Pour les posts, on crée un canal virtuel unique
+          // Vérifier si le canal virtuel est déjà défini pour éviter une boucle infinie
+          if (
+            isInitialRender.current ||
+            !selectedChannel ||
+            selectedChannel.id !== memoizedPostId
+          ) {
+            setSelectedChannel({
+              id: memoizedPostId as number,
+              name: "Discussion",
+              description: "Discussion du post",
+              icon: "💬",
+            });
             isInitialRender.current = false;
           }
+          setChannels([]);
           setIsLoading(false);
           return;
         }
-      }
 
-      const response = await fetch(`/api/communities/${memoizedCommunityId}/channels`, {
-        headers: {
-          'Cache-Control': 'max-age=300', // Cache de 5 minutes
+        const cacheKey = getChannelsKey();
+        const now = Date.now();
+
+        // Vérifier si les données sont dans le cache et si elles sont encore valides
+        if (!forceRefresh && channelsCache.has(cacheKey)) {
+          const cachedData = channelsCache.get(cacheKey)!;
+          if (now - cachedData.timestamp < CACHE_DURATION) {
+            setChannels(cachedData.data);
+            // Seulement définir selectedChannel s'il n'est pas déjà défini ou si c'est le premier rendu
+            if (
+              cachedData.data.length > 0 &&
+              (isInitialRender.current || !selectedChannel)
+            ) {
+              setSelectedChannel(cachedData.data[0]);
+              isInitialRender.current = false;
+            }
+            setIsLoading(false);
+            return;
+          }
         }
-      });
 
-      const data = await response.json();
+        const response = await fetch(
+          `/api/communities/${memoizedCommunityId}/channels`,
+          {
+            headers: {
+              "Cache-Control": "max-age=120", // Cache de 2 minutes
+            },
+          }
+        );
 
-      // Mettre en cache les données avec un timestamp
-      channelsCache.set(cacheKey, {
-        data,
-        timestamp: now
-      });
+        const data = await response.json();
 
-      setChannels(data);
-      // Seulement définir selectedChannel s'il n'est pas déjà défini ou si c'est le premier rendu
-      if (data.length > 0 && (isInitialRender.current || !selectedChannel)) {
-        setSelectedChannel(data[0]);
-        isInitialRender.current = false;
+        // Mettre en cache les données avec un timestamp
+        channelsCache.set(cacheKey, {
+          data,
+          timestamp: now,
+        });
+
+        setChannels(data);
+        // Seulement définir selectedChannel s'il n'est pas déjà défini ou si c'est le premier rendu
+        if (data.length > 0 && (isInitialRender.current || !selectedChannel)) {
+          setSelectedChannel(data[0]);
+          isInitialRender.current = false;
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération des canaux:", error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Erreur lors de la récupération des canaux:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [memoizedCommunityId, memoizedPostId, memoizedVariant, getChannelsKey]);
+    },
+    [memoizedCommunityId, memoizedPostId, memoizedVariant, getChannelsKey]
+  );
 
   // Effet pour charger les données initiales
   useEffect(() => {
@@ -342,30 +364,39 @@ export default function ChatBox({
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const newMessages = snapshot.docs.map(
         (doc) =>
-        ({
-          id: doc.id,
-          ...doc.data(),
-        } as Message)
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as Message)
       );
       setMessages(newMessages);
       setHasMoreMessages(newMessages.length === messageLimit);
     });
 
     return () => unsubscribe();
-  }, [selectedChannel?.id, memoizedCommunityId, memoizedPostId, memoizedVariant, messageLimit]);
+  }, [
+    selectedChannel?.id,
+    memoizedCommunityId,
+    memoizedPostId,
+    memoizedVariant,
+    messageLimit,
+  ]);
 
   // Effet pour faire défiler vers le bas lorsque les messages changent
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  const handleMessageChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = e.target.value;
-    if (text.length <= MAX_MESSAGE_LENGTH) {
-      setNewMessage(text);
-      adjustTextareaHeight(e.target);
-    }
-  }, [adjustTextareaHeight]);
+  const handleMessageChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const text = e.target.value;
+      if (text.length <= MAX_MESSAGE_LENGTH) {
+        setNewMessage(text);
+        adjustTextareaHeight(e.target);
+      }
+    },
+    [adjustTextareaHeight]
+  );
 
   const sendMessage = useCallback(async () => {
     if (
@@ -380,7 +411,8 @@ export default function ChatBox({
       userId: user.id,
       username: user.name,
       userImage: user.image,
-      channelId: memoizedVariant === "post" ? "post" : selectedChannel.id.toString(),
+      channelId:
+        memoizedVariant === "post" ? "post" : selectedChannel.id.toString(),
       communityId: memoizedCommunityId,
       timestamp: serverTimestamp(),
       reactions: {},
@@ -401,40 +433,54 @@ export default function ChatBox({
 
     setNewMessage("");
     setReplyingTo(null);
-  }, [newMessage, selectedChannel, memoizedVariant, memoizedCommunityId, memoizedPostId, user, replyingTo]);
+  }, [
+    newMessage,
+    selectedChannel,
+    memoizedVariant,
+    memoizedCommunityId,
+    memoizedPostId,
+    user,
+    replyingTo,
+  ]);
 
-  const addReaction = useCallback(async (messageId: string, emoji: string) => {
-    const messageRef = doc(db, "messages", messageId);
-    const messageDoc = await getDoc(messageRef);
+  const addReaction = useCallback(
+    async (messageId: string, emoji: string) => {
+      const messageRef = doc(db, "messages", messageId);
+      const messageDoc = await getDoc(messageRef);
 
-    if (messageDoc.exists()) {
-      const reactions = messageDoc.data().reactions || {};
-      const userReactions = reactions[emoji] || [];
+      if (messageDoc.exists()) {
+        const reactions = messageDoc.data().reactions || {};
+        const userReactions = reactions[emoji] || [];
 
-      // Toggle user reaction
-      const updatedReactions = {
-        ...reactions,
-        [emoji]: userReactions.includes(user.id)
-          ? userReactions.filter((id: string) => id !== user.id)
-          : [...userReactions, user.id],
-      };
+        // Toggle user reaction
+        const updatedReactions = {
+          ...reactions,
+          [emoji]: userReactions.includes(user.id)
+            ? userReactions.filter((id: string) => id !== user.id)
+            : [...userReactions, user.id],
+        };
 
-      // Remove empty reaction arrays
-      if (updatedReactions[emoji].length === 0) {
-        delete updatedReactions[emoji];
+        // Remove empty reaction arrays
+        if (updatedReactions[emoji].length === 0) {
+          delete updatedReactions[emoji];
+        }
+
+        await updateDoc(messageRef, { reactions: updatedReactions });
       }
-
-      await updateDoc(messageRef, { reactions: updatedReactions });
-    }
-  }, [user.id]);
+    },
+    [user.id]
+  );
 
   const createChannel = useCallback(async () => {
     try {
-      const response = await fetch(`/api/communities/${memoizedCommunityId}/channels`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newChannel),
-      });
+      const response = await fetch(
+        `/api/communities/${memoizedCommunityId}/channels`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newChannel),
+        }
+      );
 
       if (response.ok) {
         // Invalider le cache des canaux
@@ -486,7 +532,13 @@ export default function ChatBox({
       console.error("Erreur lors de la suppression du canal:", error);
       setError("Une erreur est survenue lors de la suppression du canal.");
     }
-  }, [channelToDelete, memoizedCommunityId, channels, fetchChannels, getChannelsKey]);
+  }, [
+    channelToDelete,
+    memoizedCommunityId,
+    channels,
+    fetchChannels,
+    getChannelsKey,
+  ]);
 
   const handleDeleteMessage = useCallback(async () => {
     if (!messageToDelete) return;
@@ -501,24 +553,27 @@ export default function ChatBox({
     }
   }, [messageToDelete]);
 
-  const handleEditMessage = useCallback(async (messageId: string) => {
-    if (
-      !editedMessageText.trim() ||
-      editedMessageText.length > MAX_MESSAGE_LENGTH
-    )
-      return;
+  const handleEditMessage = useCallback(
+    async (messageId: string) => {
+      if (
+        !editedMessageText.trim() ||
+        editedMessageText.length > MAX_MESSAGE_LENGTH
+      )
+        return;
 
-    try {
-      const messageRef = doc(db, "messages", messageId);
-      await updateDoc(messageRef, {
-        text: editedMessageText,
-      });
-      setEditingMessageId(null);
-      setEditedMessageText("");
-    } catch (error) {
-      console.error("Erreur lors de la modification du message:", error);
-    }
-  }, [editedMessageText]);
+      try {
+        const messageRef = doc(db, "messages", messageId);
+        await updateDoc(messageRef, {
+          text: editedMessageText,
+        });
+        setEditingMessageId(null);
+        setEditedMessageText("");
+      } catch (error) {
+        console.error("Erreur lors de la modification du message:", error);
+      }
+    },
+    [editedMessageText]
+  );
 
   // Ajouter un nouvel état pour la modification du canal
   const [isEditChannelModalOpen, setIsEditChannelModalOpen] = useState(false);
@@ -529,15 +584,18 @@ export default function ChatBox({
     if (!editingChannel) return;
 
     try {
-      const response = await fetch(`/api/communities/${memoizedCommunityId}/channels/${editingChannel.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: editingChannel.name,
-          description: editingChannel.description,
-          icon: editingChannel.icon
-        })
-      });
+      const response = await fetch(
+        `/api/communities/${memoizedCommunityId}/channels/${editingChannel.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: editingChannel.name,
+            description: editingChannel.description,
+            icon: editingChannel.icon,
+          }),
+        }
+      );
 
       if (response.ok) {
         // Invalider le cache des canaux
@@ -564,64 +622,58 @@ export default function ChatBox({
         (!msg.timestamp ||
           !previousMessage.timestamp ||
           ("seconds" in (msg.timestamp as FirestoreTimestamp) &&
-            "seconds" in
-            (previousMessage.timestamp as FirestoreTimestamp) &&
+            "seconds" in (previousMessage.timestamp as FirestoreTimestamp) &&
             (msg.timestamp as FirestoreTimestamp).seconds -
-            (previousMessage.timestamp as FirestoreTimestamp)
-              .seconds <
-            3600));
+              (previousMessage.timestamp as FirestoreTimestamp).seconds <
+              3600));
 
       return (
         <div
           key={msg.id}
-          className={`group hover:bg-gray-100 rounded-lg transition-colors duration-200 ${isConsecutive ? "mt-0" : "mt-4"
-            }`}
+          className={`group hover:bg-gray-100 rounded-lg transition-colors duration-200 ${
+            isConsecutive ? "mt-0" : "mt-4"
+          }`}
         >
           {/* Message répondu */}
-          {msg.replyTo &&
-            messages.find((m) => m.id === msg.replyTo) && (
-              <div
-                className={`relative ${variant === "post" ? "ml-6 mb-1" : "ml-12 mb-2"
-                  }`}
-              >
-                <div className="absolute left-[5px] top-0 w-[2px] h-[calc(100%+3px)] bg-blue-300"></div>
-                <div className="flex items-center space-x-2 pl-4">
-                  <Image
-                    src={
-                      messages.find((m) => m.id === msg.replyTo)
-                        ?.userImage ||
-                      `https://ui-avatars.com/api/?name=${messages.find((m) => m.id === msg.replyTo)
-                        ?.username
-                      }`
-                    }
-                    alt={
-                      messages.find((m) => m.id === msg.replyTo)
-                        ?.username || ""
-                    }
-                    width={16}
-                    height={16}
-                    className="rounded-full"
-                  />
-                  <span className="text-sm font-medium text-gray-600">
-                    {
-                      messages.find((m) => m.id === msg.replyTo)
-                        ?.username
-                    }
-                  </span>
-                  <p className="text-gray-500 text-sm">
-                    {(() => {
-                      const replyMessage = messages.find(
-                        (m) => m.id === msg.replyTo
-                      );
-                      if (!replyMessage?.text) return "";
-                      return replyMessage.text.length > 100
-                        ? `${replyMessage.text.substring(0, 100)}...`
-                        : replyMessage.text;
-                    })()}
-                  </p>
-                </div>
+          {msg.replyTo && messages.find((m) => m.id === msg.replyTo) && (
+            <div
+              className={`relative ${
+                variant === "post" ? "ml-6 mb-1" : "ml-12 mb-2"
+              }`}
+            >
+              <div className="absolute left-[5px] top-0 w-[2px] h-[calc(100%+3px)] bg-blue-300"></div>
+              <div className="flex items-center space-x-2 pl-4">
+                <Image
+                  src={
+                    messages.find((m) => m.id === msg.replyTo)?.userImage ||
+                    `https://ui-avatars.com/api/?name=${
+                      messages.find((m) => m.id === msg.replyTo)?.username
+                    }`
+                  }
+                  alt={
+                    messages.find((m) => m.id === msg.replyTo)?.username || ""
+                  }
+                  width={16}
+                  height={16}
+                  className="rounded-full"
+                />
+                <span className="text-sm font-medium text-gray-600">
+                  {messages.find((m) => m.id === msg.replyTo)?.username}
+                </span>
+                <p className="text-gray-500 text-sm">
+                  {(() => {
+                    const replyMessage = messages.find(
+                      (m) => m.id === msg.replyTo
+                    );
+                    if (!replyMessage?.text) return "";
+                    return replyMessage.text.length > 100
+                      ? `${replyMessage.text.substring(0, 100)}...`
+                      : replyMessage.text;
+                  })()}
+                </p>
               </div>
-            )}
+            </div>
+          )}
 
           {/* Message principal */}
           <div className="flex items-start relative group">
@@ -639,12 +691,13 @@ export default function ChatBox({
                 />
               )}
               <div
-                className={`flex-1 ${isConsecutive
-                  ? variant === "post"
-                    ? "ml-[32px]"
-                    : "ml-[52px]"
-                  : ""
-                  }`}
+                className={`flex-1 ${
+                  isConsecutive
+                    ? variant === "post"
+                      ? "ml-[32px]"
+                      : "ml-[52px]"
+                    : ""
+                }`}
               >
                 {!isConsecutive && (
                   <div className="flex items-center space-x-2">
@@ -653,15 +706,14 @@ export default function ChatBox({
                     </span>
                     <span className="text-gray-500 text-xs">
                       {msg.timestamp &&
-                        (msg.timestamp as FirestoreTimestamp)
-                          .seconds !== undefined
+                      (msg.timestamp as FirestoreTimestamp).seconds !==
+                        undefined
                         ? new Date(
-                          (msg.timestamp as FirestoreTimestamp)
-                            .seconds * 1000
-                        ).toLocaleString()
+                            (msg.timestamp as FirestoreTimestamp).seconds * 1000
+                          ).toLocaleString()
                         : msg.timestamp instanceof Date
-                          ? msg.timestamp.toLocaleString()
-                          : ""}
+                        ? msg.timestamp.toLocaleString()
+                        : ""}
                     </span>
                   </div>
                 )}
@@ -670,9 +722,7 @@ export default function ChatBox({
                     <textarea
                       value={editedMessageText}
                       onChange={(e) => {
-                        if (
-                          e.target.value.length <= MAX_MESSAGE_LENGTH
-                        ) {
+                        if (e.target.value.length <= MAX_MESSAGE_LENGTH) {
                           setEditedMessageText(e.target.value);
                           adjustTextareaHeight(e.target);
                         }
@@ -710,11 +760,11 @@ export default function ChatBox({
                   </div>
                 ) : (
                   <p
-                    className={`text-gray-700 break-words whitespace-pre-wrap ${isConsecutive ? "" : "mt-1"
-                      } py-[1px] ${variant === "post"
-                        ? "max-w-[65%]"
-                        : "max-w-[650px]"
-                      } overflow-x-hidden`}
+                    className={`text-gray-700 break-words whitespace-pre-wrap ${
+                      isConsecutive ? "" : "mt-1"
+                    } py-[1px] ${
+                      variant === "post" ? "max-w-[65%]" : "max-w-[650px]"
+                    } overflow-x-hidden`}
                   >
                     {msg.text}
                   </p>
@@ -724,24 +774,25 @@ export default function ChatBox({
                 {Object.entries(msg.reactions || {}).some(
                   ([_, users]) => users.length > 0
                 ) && (
-                    <div className="mt-1 flex items-center flex-wrap gap-1">
-                      {Object.entries(msg.reactions || {}).map(
-                        ([emoji, users]) =>
-                          users.length > 0 && (
-                            <button
-                              key={emoji}
-                              onClick={() => addReaction(msg.id, emoji)}
-                              className={`px-2 py-0.5 rounded-md text-sm ${users.includes(user.id)
+                  <div className="mt-1 flex items-center flex-wrap gap-1">
+                    {Object.entries(msg.reactions || {}).map(
+                      ([emoji, users]) =>
+                        users.length > 0 && (
+                          <button
+                            key={emoji}
+                            onClick={() => addReaction(msg.id, emoji)}
+                            className={`px-2 py-0.5 rounded-md text-sm ${
+                              users.includes(user.id)
                                 ? "bg-blue-100 text-blue-700 border border-blue-200"
                                 : "bg-gray-100 text-gray-700 border border-gray-200"
-                                }`}
-                            >
-                              {emoji} {users.length}
-                            </button>
-                          )
-                      )}
-                    </div>
-                  )}
+                            }`}
+                          >
+                            {emoji} {users.length}
+                          </button>
+                        )
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -764,8 +815,9 @@ export default function ChatBox({
                   </span>
                   {showEmojiPicker === msg.id && (
                     <div
-                      className={`absolute right-0 bottom-full mb-2 bg-white border border-gray-200 rounded-lg shadow-md p-2 flex items-center space-x-2 z-40 ${variant === "post" ? "translate-x-1/4" : ""
-                        }`}
+                      className={`absolute right-0 bottom-full mb-2 bg-white border border-gray-200 rounded-lg shadow-md p-2 flex items-center space-x-2 z-40 ${
+                        variant === "post" ? "translate-x-1/4" : ""
+                      }`}
                     >
                       {DEFAULT_REACTIONS.map((emoji) => (
                         <button
@@ -832,10 +884,23 @@ export default function ChatBox({
         </div>
       );
     });
-  }, [messages, user.id, editingMessageId, editedMessageText, showEmojiPicker, handleEditMessage, addReaction, variant, adjustTextareaHeight, isCreator]);
+  }, [
+    messages,
+    user.id,
+    editingMessageId,
+    editedMessageText,
+    showEmojiPicker,
+    handleEditMessage,
+    addReaction,
+    variant,
+    adjustTextareaHeight,
+    isCreator,
+  ]);
 
   return (
-    <div className={`flex bg-white rounded-lg shadow-sm ${className} overflow-x-hidden`}>
+    <div
+      className={`flex bg-white rounded-lg shadow-sm ${className} overflow-x-hidden`}
+    >
       {/* Afficher la sidebar uniquement pour la variante community */}
       {variant === "community" && (
         <div className="w-64 bg-gray-100 border-r border-gray-200 flex flex-col">
@@ -864,8 +929,11 @@ export default function ChatBox({
                 <div
                   key={channel.id}
                   onClick={() => setSelectedChannel(channel)}
-                  className={`flex items-center justify-between px-4 py-3 text-gray-600 hover:bg-gray-200 cursor-pointer group transition-colors ${selectedChannel?.id === channel.id ? "bg-blue-50 text-blue-700 font-medium" : ""
-                    }`}
+                  className={`flex items-center justify-between px-4 py-3 text-gray-600 hover:bg-gray-200 cursor-pointer group transition-colors ${
+                    selectedChannel?.id === channel.id
+                      ? "bg-blue-50 text-blue-700 font-medium"
+                      : ""
+                  }`}
                 >
                   <div className="flex items-center space-x-2">
                     <span>{channel.icon}</span>
@@ -1012,8 +1080,9 @@ export default function ChatBox({
 
       {/* Zone principale de chat */}
       <div
-        className={`flex-1 flex flex-col bg-white ${variant === "post" ? "max-w-full" : ""
-          }`}
+        className={`flex-1 flex flex-col bg-white ${
+          variant === "post" ? "max-w-full" : ""
+        }`}
       >
         {selectedChannel ? (
           <>
@@ -1036,8 +1105,9 @@ export default function ChatBox({
             <div
               ref={messagesContainerRef}
               onScroll={handleScroll}
-              className={`flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar ${variant === "post" ? "p-4" : "p-6"
-                } bg-gray-50`}
+              className={`flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar ${
+                variant === "post" ? "p-4" : "p-6"
+              } bg-gray-50`}
             >
               {isLoading ? (
                 <div className="flex justify-center items-center h-full">
@@ -1053,7 +1123,7 @@ export default function ChatBox({
                   {hasMoreMessages && (
                     <div className="flex justify-center mb-4">
                       <button
-                        onClick={() => setMessageLimit(prev => prev + 50)}
+                        onClick={() => setMessageLimit((prev) => prev + 50)}
                         className="px-4 py-2 text-sm bg-blue-100 hover:bg-blue-200 rounded-md text-blue-700 font-medium transition-colors"
                       >
                         Charger plus de messages
@@ -1179,7 +1249,10 @@ export default function ChatBox({
                   type="text"
                   value={editingChannel.name}
                   onChange={(e) =>
-                    setEditingChannel({ ...editingChannel, name: e.target.value })
+                    setEditingChannel({
+                      ...editingChannel,
+                      name: e.target.value,
+                    })
                   }
                   className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -1210,7 +1283,10 @@ export default function ChatBox({
                   type="text"
                   value={editingChannel.icon || ""}
                   onChange={(e) =>
-                    setEditingChannel({ ...editingChannel, icon: e.target.value })
+                    setEditingChannel({
+                      ...editingChannel,
+                      icon: e.target.value,
+                    })
                   }
                   className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
