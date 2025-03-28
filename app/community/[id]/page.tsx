@@ -16,6 +16,8 @@ import CommunityPosts from "@/components/community/CommunityPosts";
 import CommunityPresentationModal from "@/components/community/CommunityPresentationModal";
 import BanModal from "@/components/community/BanModal";
 import { Loader } from "@/components/ui/loader";
+import React from "react";
+import { pusherClient } from "@/lib/pusher";
 
 // Cache pour stocker les données
 // Nous n'utilisons plus ces Maps car elles sont réinitialisées à chaque rechargement
@@ -177,39 +179,42 @@ const CommunityHub = () => {
   // Fonction optimisée pour récupérer les posts
   const fetchCommunityPosts = useCallback(
     async (forceRefresh = false) => {
+      console.log("0");
       if (!communityId || !session) return;
 
       const cacheKey = `posts-${communityId}`;
 
+      console.log("1");
       // Vérifier si les données sont dans le cache et si on ne force pas le rafraîchissement
       if (!forceRefresh && cacheUtils.has(cacheKey)) {
         const cachedData = cacheUtils.get(cacheKey);
         setPosts(cachedData.data);
+        console.log("2");
         return;
       }
 
       setIsLoadingPosts(true);
       try {
         const communityPostsResponse = await fetch(
-          `/api/communities/${communityId}/posts?status=PUBLISHED`,
-          {
-            headers: {
-              "Cache-Control": "max-age=300", // Cache de 5 minutes
-            },
-          }
+          `/api/communities/${communityId}/posts?status=PUBLISHED`
         );
+
+        console.log("3");
 
         if (!communityPostsResponse.ok)
           throw new Error("Erreur lors de la récupération des posts");
 
         const data = await communityPostsResponse.json();
 
+        console.log("4");
         // Vérifier que les données sont bien un tableau
         const postsData = Array.isArray(data.posts) ? data.posts : [];
 
+        console.log("5");
         // Mettre en cache les données
-        cacheUtils.set(cacheKey, postsData);
+        cacheUtils.set(cacheKey, postsData, 2);
 
+        console.log("6");
         setPosts(postsData);
       } catch (error) {
         console.error("Erreur lors de la récupération des posts:", error);
@@ -320,7 +325,7 @@ const CommunityHub = () => {
             `/api/communities/${communityId}`,
             {
               headers: {
-                "Cache-Control": "max-age=300", // Cache de 5 minutes
+                "Cache-Control": "max-age=120", // Cache de 2 minutes
               },
             }
           );
@@ -331,7 +336,7 @@ const CommunityHub = () => {
           }
 
           communityData = await communityResponse.json();
-          cacheUtils.set(communityCacheKey, communityData);
+          cacheUtils.set(communityCacheKey, communityData, 2);
           setCommunityData(communityData);
         }
       } else {
@@ -340,7 +345,7 @@ const CommunityHub = () => {
           `/api/communities/${communityId}`,
           {
             headers: {
-              "Cache-Control": "max-age=300", // Cache de 5 minutes
+              "Cache-Control": "max-age=120", // Cache de 2 minutes
             },
           }
         );
@@ -351,7 +356,7 @@ const CommunityHub = () => {
         }
 
         communityData = await communityResponse.json();
-        cacheUtils.set(communityCacheKey, communityData);
+        cacheUtils.set(communityCacheKey, communityData, 2);
         setCommunityData(communityData);
       }
 
@@ -611,6 +616,43 @@ const CommunityHub = () => {
   useEffect(() => {
     preloadTabData();
   }, [activeTab, preloadTabData]);
+
+  // Ajouter un effet pour détecter les nouveaux posts via Pusher
+  useEffect(() => {
+    const channel = pusherClient.subscribe(`community-${communityId}`);
+    console.log("🔄 Pusher client initialisé pour la communauté", communityId);
+    channel.bind("post-created", () => {
+      console.log("🔄 Nouveau post détecté via Pusher");
+      invalidateCache(`posts-${communityId}`);
+      fetchCommunityPosts(true);
+    });
+
+    return () => {
+      console.log("🔄 Désabonnement du canal Pusher");
+      channel.unbind_all();
+      channel.unsubscribe();
+    };
+  }, [communityId]);
+
+  // Au début du composant, après les déclarations de state
+  useEffect(() => {
+    // Nettoyer le cache au chargement initial
+    console.log("🧹 Nettoyage du cache au chargement");
+    invalidateCache(`posts-${communityId}`);
+
+    // Gérer le rafraîchissement
+    const handleBeforeUnload = () => {
+      console.log("🔄 Page rafraîchie, nettoyage du cache");
+      invalidateCache(`posts-${communityId}`);
+      invalidateCache(`community-${communityId}`);
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [communityId]);
 
   // Si en cours de chargement, afficher le loader
   if (isLoading) {

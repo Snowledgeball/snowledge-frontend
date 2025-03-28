@@ -37,8 +37,8 @@ body {
 
 @layer base {
   :root {
-    --background: #FFFFFF;
-    --foreground: #0A0A0A;
+    --background: #ffffff;
+    --foreground: #0a0a0a;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;

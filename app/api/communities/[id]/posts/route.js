@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createBulkNotifications } from "@/lib/notifications";
 import { NotificationType } from "@/types/notification";
+import { pusherServer } from "@/lib/pusher";
 
 export async function POST(request, { params }) {
   try {
@@ -108,6 +109,8 @@ export async function POST(request, { params }) {
       },
     });
 
+    pusherServer.trigger(`community-${communityId}`, "post-created", {});
+
     return NextResponse.json(post);
   } catch (error) {
     console.log("Erreur lors de la création du post:", error.stack);
@@ -145,15 +148,12 @@ export async function GET(request, { params }) {
       },
     });
 
-    // Ajouter des en-têtes de cache
-    const headers = new Headers();
-    headers.append("Cache-Control", "max-age=300, s-maxage=300");
+    console.log("posts", posts);
 
     return NextResponse.json(
       { posts: posts || [] },
       {
         status: 200,
-        headers,
       }
     );
   } catch (error) {

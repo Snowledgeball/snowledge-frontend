@@ -58,6 +58,7 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import TinyMCEStyledText from "@/components/shared/TinyMCEStyledText";
+import { pusherClient } from "@/lib/pusher";
 
 // Système de cache pour les données du dashboard
 const dashboardCache = {
@@ -152,6 +153,14 @@ interface Post {
     id: number;
     name: string;
     label: string;
+  };
+}
+
+// Ajouter cette interface pour typer l'événement
+interface PostCreatedEvent extends CustomEvent {
+  detail: {
+    communityId: string;
+    forceRefresh: boolean;
   };
 }
 
@@ -865,6 +874,22 @@ export default function CommunityDashboard() {
       setActiveTab("members");
     }
   }, [tabParam]);
+
+  // Ajouter un effet pour détecter les nouveaux posts via Pusher
+  useEffect(() => {
+    const channel = pusherClient.subscribe(`community-${communityId}`);
+    console.log("🔄 Pusher client initialisé pour le dashboard", communityId);
+    channel.bind("post-created", () => {
+      console.log("🔄 Nouveau post détecté via Pusher");
+      invalidateCache("posts", `posts-${communityId}`);
+      fetchPosts();
+    });
+
+    return () => {
+      channel.unbind_all();
+      channel.unsubscribe();
+    };
+  }, [communityId]);
 
   if (loading) {
     return <Loader text="Chargement des données..." fullScreen />;
