@@ -58,7 +58,6 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import TinyMCEStyledText from "@/components/shared/TinyMCEStyledText";
-import { pusherClient } from "@/lib/pusher";
 
 // Système de cache pour les données du dashboard
 const dashboardCache = {
@@ -271,7 +270,6 @@ export default function CommunityDashboard() {
 
   // Fetch des catégories
   useEffect(() => {
-    console.log("Fetching categories");
     const fetchCategories = async () => {
       try {
         const response = await fetch(
@@ -485,7 +483,6 @@ export default function CommunityDashboard() {
       if (dashboardCache.posts.has(cacheKey)) {
         const cachedData = dashboardCache.posts.get(cacheKey)!;
         if (isCacheValid(cachedData)) {
-          console.log("cachedData.data", cachedData.data);
           setPosts(cachedData.data);
           return;
         }
@@ -505,8 +502,6 @@ export default function CommunityDashboard() {
           data: data.posts,
           timestamp: Date.now(),
         });
-
-        console.log("data.posts", data.posts);
 
         setPosts(data.posts);
       }
@@ -874,22 +869,6 @@ export default function CommunityDashboard() {
       setActiveTab("members");
     }
   }, [tabParam]);
-
-  // Ajouter un effet pour détecter les nouveaux posts via Pusher
-  useEffect(() => {
-    const channel = pusherClient.subscribe(`community-${communityId}`);
-    console.log("🔄 Pusher client initialisé pour le dashboard", communityId);
-    channel.bind("post-created", () => {
-      console.log("🔄 Nouveau post détecté via Pusher");
-      invalidateCache("posts", `posts-${communityId}`);
-      fetchPosts();
-    });
-
-    return () => {
-      channel.unbind_all();
-      channel.unsubscribe();
-    };
-  }, [communityId]);
 
   if (loading) {
     return <Loader text="Chargement des données..." fullScreen />;

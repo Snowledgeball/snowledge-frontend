@@ -184,9 +184,8 @@ const CommunityHub = () => {
 
       const cacheKey = `posts-${communityId}`;
 
-      // Vérifier si les données sont dans le cache et si on ne force pas le rafraîchissement
+      // Si forceRefresh est true, on skip complètement le cache
       if (!forceRefresh && cacheUtils.has(cacheKey)) {
-        console.log("posts already in cache");
         const cachedData = cacheUtils.get(cacheKey);
         setPosts(cachedData.data);
 
@@ -195,13 +194,11 @@ const CommunityHub = () => {
         return;
       }
 
-      console.log("Fetching posts");
-
       if (!noLoading) {
         setIsLoadingPosts(true);
       }
+
       try {
-        console.log("Forced fetching posts");
         const communityPostsResponse = await fetch(
           `/api/communities/${communityId}/posts?status=PUBLISHED`
         );
@@ -210,13 +207,9 @@ const CommunityHub = () => {
           throw new Error("Erreur lors de la récupération des posts");
 
         const data = await communityPostsResponse.json();
-
-        // Vérifier que les données sont bien un tableau
         const postsData = Array.isArray(data.posts) ? data.posts : [];
 
-        // Mettre en cache les données
         cacheUtils.set(cacheKey, postsData, 2);
-
         setPosts(postsData);
       } catch (error) {
         console.error("Erreur lors de la récupération des posts:", error);
@@ -619,35 +612,31 @@ const CommunityHub = () => {
     preloadTabData();
   }, [activeTab, preloadTabData]);
 
-  // 2. Dans le composant
+  // 1. Modifier l'effet Pusher
   useEffect(() => {
     if (!client || !communityId) return;
 
-    console.log("🔄 Abonnement au canal", `community-${communityId}`);
+    // console.log("🔄 Abonnement au canal", `community-${communityId}`);
     const channel = client.subscribe(`community-${communityId}`);
 
-    channel.bind("post-created", async () => {
-      console.log("🔄 Nouveau post détecté via Pusher");
-      await fetchCommunityPosts(true);
-      console.log("After fetchCommunityPosts");
+    channel.bind("post-created", () => {
+      // console.log("🔄 Nouveau post détecté via Pusher");
+      // Forcer l'invalidation du cache avant de fetch
+      fetchCommunityPosts(true, true);
     });
 
     return () => {
-      console.log("🔄 Désabonnement du canal", `community-${communityId}`);
+      // console.log("🔄 Désabonnement du canal", `community-${communityId}`);
       channel.unbind_all();
       channel.unsubscribe();
     };
-  }, [communityId, client]);
+  }, [communityId, client, fetchCommunityPosts, invalidateCache]);
 
   // Au début du composant, après les déclarations de state
   useEffect(() => {
-    // Nettoyer le cache au chargement initial C PAS BIEN
-    // console.log("🧹 Nettoyage du cache au chargement");
-    // invalidateCache(`posts-${communityId}`);
-
     // Gérer le rafraîchissement
     const handleBeforeUnload = () => {
-      console.log("🔄 Page rafraîchie, nettoyage du cache");
+      // console.log("🔄 Page rafraîchie, nettoyage du cache");
       invalidateCache(`posts-${communityId}`);
       invalidateCache(`community-${communityId}`);
     };
