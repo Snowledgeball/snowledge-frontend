@@ -8,8 +8,9 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import { getPusherClient, disconnectPusher } from "@/lib/pusher";
+import { getPusherClient, disconnectPusher } from "@/lib/pusher-client";
 import PusherClient from "pusher-js";
+import { useMounted } from "@/lib/hooks/useMounted";
 
 // Définir les types d'événements que nous voulons écouter globalement
 interface PusherEvents {
@@ -27,6 +28,7 @@ const PusherContext = createContext<PusherContextType>({ client: null });
 const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
 export const PusherProvider = ({ children }: { children: React.ReactNode }) => {
+  const mounted = useMounted();
   const [client, setClient] = useState<PusherClient | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -55,6 +57,8 @@ export const PusherProvider = ({ children }: { children: React.ReactNode }) => {
   }, [resetInactivityTimeout]);
 
   useEffect(() => {
+    if (!mounted) return;
+
     console.log("🔄 Initialisation de la connexion Pusher globale");
     const pusherClient = getPusherClient();
     setClient(pusherClient);
@@ -63,10 +67,12 @@ export const PusherProvider = ({ children }: { children: React.ReactNode }) => {
       console.log("🔄 Fermeture de la connexion Pusher globale");
       disconnectPusher();
     };
-  }, []);
+  }, [mounted]);
 
   return (
-    <PusherContext.Provider value={{ client }}>
+    <PusherContext.Provider
+      value={{ client: mounted ? getPusherClient() : null }}
+    >
       {children}
     </PusherContext.Provider>
   );

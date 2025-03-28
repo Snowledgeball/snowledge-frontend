@@ -1,3 +1,5 @@
+"use client";
+
 type CacheItem<T> = {
   data: T;
   timestamp: number;
@@ -7,18 +9,37 @@ type CacheItem<T> = {
 type StorageType = "local" | "session";
 
 export class CacheManager {
-  private storage: Storage;
+  private storage: Storage | null = null;
 
   constructor(storageType: StorageType = "local") {
-    if (typeof window === "undefined") {
-      throw new Error("CacheManager ne peut être utilisé que côté client");
+    // Ne pas tenter d'accéder à window/localStorage/sessionStorage pendant la construction
+    // On les initialisera uniquement lors de l'appel des méthodes
+    this.storage = null;
+    this.storageType = storageType;
+  }
+
+  private storageType: StorageType;
+
+  // Méthode pour initialiser le storage seulement quand nécessaire
+  private getStorage(): Storage | null {
+    if (this.storage !== null) {
+      return this.storage;
     }
-    this.storage = storageType === "local" ? localStorage : sessionStorage;
+
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    this.storage = this.storageType === "local" ? localStorage : sessionStorage;
+    return this.storage;
   }
 
   get<T>(key: string): T | null {
     try {
-      const item = this.storage.getItem(key);
+      const storage = this.getStorage();
+      if (!storage) return null;
+
+      const item = storage.getItem(key);
       if (!item) return null;
 
       const parsedItem = JSON.parse(item) as CacheItem<T>;
@@ -38,12 +59,15 @@ export class CacheManager {
 
   set<T>(key: string, data: T, expirationInMinutes = 5): void {
     try {
+      const storage = this.getStorage();
+      if (!storage) return;
+
       const item: CacheItem<T> = {
         data,
         timestamp: Date.now(),
         expiration: Date.now() + expirationInMinutes * 60 * 1000,
       };
-      this.storage.setItem(key, JSON.stringify(item));
+      storage.setItem(key, JSON.stringify(item));
     } catch (error) {
       console.error("Erreur lors du stockage dans le cache:", error);
     }
@@ -51,7 +75,10 @@ export class CacheManager {
 
   has(key: string): boolean {
     try {
-      const item = this.storage.getItem(key);
+      const storage = this.getStorage();
+      if (!storage) return false;
+
+      const item = storage.getItem(key);
       if (!item) return false;
 
       const parsedItem = JSON.parse(item) as CacheItem<unknown>;
@@ -70,7 +97,10 @@ export class CacheManager {
 
   remove(key: string): void {
     try {
-      this.storage.removeItem(key);
+      const storage = this.getStorage();
+      if (!storage) return;
+
+      storage.removeItem(key);
     } catch (error) {
       console.error("Erreur lors de la suppression du cache:", error);
     }
@@ -78,18 +108,17 @@ export class CacheManager {
 
   clear(): void {
     try {
-      this.storage.clear();
+      const storage = this.getStorage();
+      if (!storage) return;
+
+      storage.clear();
     } catch (error) {
       console.error("Erreur lors du nettoyage du cache:", error);
     }
   }
 }
 
-// Créer des instances par défaut pour localStorage et sessionStorage
-export const localCache = new CacheManager("local");
-export const sessionCache = new CacheManager("session");
-
-// Constantes pour les clés de cache
+// Ajouter la clé PUSHER_CONNECTION aux CACHE_KEYS avant de les exporter
 export const CACHE_KEYS = {
   POSTS: (communityId: string) => `posts-${communityId}`,
   COMMUNITY: (communityId: string) => `community-${communityId}`,
@@ -97,4 +126,10 @@ export const CACHE_KEYS = {
   PENDING_ENRICHMENTS: (communityId: string) =>
     `pending-enrichments-${communityId}`,
   USER_COMMUNITIES: (userId: string) => `user-communities-${userId}`,
+  PUSHER_CONNECTION: () => "pusher_connection_id",
 } as const;
+
+// Ces instances ne seront créées que lorsqu'elles seront utilisées
+// grâce à la méthode getStorage() qui vérifie window
+export const localCache = new CacheManager("local");
+export const sessionCache = new CacheManager("session");

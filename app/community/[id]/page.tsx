@@ -18,14 +18,7 @@ import BanModal from "@/components/community/BanModal";
 import { Loader } from "@/components/ui/loader";
 import React from "react";
 import { usePusher } from "@/contexts/PusherContext";
-import { localCache, sessionCache, CACHE_KEYS } from "@/utils/cache";
-
-// Cache pour stocker les données
-// Nous n'utilisons plus ces Maps car elles sont réinitialisées à chaque rechargement
-// const communityCache = new Map<string, { data: any, timestamp: number }>();
-// const postsCache = new Map<string, any>();
-// const pendingPostsCache = new Map<string, any>();
-// const pendingEnrichmentsCache = new Map<string, any>();
+import { localCache, CACHE_KEYS } from "@/utils/cache";
 
 // Fonctions utilitaires pour le cache avec localStorage
 const cacheUtils = {
