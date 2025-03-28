@@ -17,7 +17,7 @@ import CommunityPresentationModal from "@/components/community/CommunityPresenta
 import BanModal from "@/components/community/BanModal";
 import { Loader } from "@/components/ui/loader";
 import React from "react";
-import { pusherClient } from "@/lib/pusher";
+import { usePusher } from "@/contexts/PusherContext";
 
 // Cache pour stocker les données
 // Nous n'utilisons plus ces Maps car elles sont réinitialisées à chaque rechargement
@@ -119,6 +119,7 @@ const CommunityHub = () => {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { client } = usePusher();
 
   // Récupérer l'onglet actif depuis l'URL ou utiliser "general" par défaut
   const tabFromUrl = searchParams.get("tab");
@@ -141,7 +142,7 @@ const CommunityHub = () => {
     (searchParams.get("voting") as "creation" | "enrichissement") || "creation"
   );
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
-  const [isLoadingCommunity, setIsLoadingCommunity] = useState(true);
+  const [isLoadingGeneral, setIsLoadingGeneral] = useState(true);
   const [isMember, setIsMember] = useState(false);
 
   // Mémoriser l'ID de la communauté pour éviter les re-rendus inutiles
@@ -178,43 +179,44 @@ const CommunityHub = () => {
 
   // Fonction optimisée pour récupérer les posts
   const fetchCommunityPosts = useCallback(
-    async (forceRefresh = false) => {
-      console.log("0");
+    async (forceRefresh = false, noLoading = false) => {
       if (!communityId || !session) return;
 
       const cacheKey = `posts-${communityId}`;
 
-      console.log("1");
       // Vérifier si les données sont dans le cache et si on ne force pas le rafraîchissement
       if (!forceRefresh && cacheUtils.has(cacheKey)) {
+        console.log("posts already in cache");
         const cachedData = cacheUtils.get(cacheKey);
         setPosts(cachedData.data);
-        console.log("2");
+
+        // On fetch quand meme pour s'assurer que les données sont bien à jour
+        fetchCommunityPosts(true, true);
         return;
       }
 
-      setIsLoadingPosts(true);
+      console.log("Fetching posts");
+
+      if (!noLoading) {
+        setIsLoadingPosts(true);
+      }
       try {
+        console.log("Forced fetching posts");
         const communityPostsResponse = await fetch(
           `/api/communities/${communityId}/posts?status=PUBLISHED`
         );
-
-        console.log("3");
 
         if (!communityPostsResponse.ok)
           throw new Error("Erreur lors de la récupération des posts");
 
         const data = await communityPostsResponse.json();
 
-        console.log("4");
         // Vérifier que les données sont bien un tableau
         const postsData = Array.isArray(data.posts) ? data.posts : [];
 
-        console.log("5");
         // Mettre en cache les données
         cacheUtils.set(cacheKey, postsData, 2);
 
-        console.log("6");
         setPosts(postsData);
       } catch (error) {
         console.error("Erreur lors de la récupération des posts:", error);
@@ -306,7 +308,7 @@ const CommunityHub = () => {
       setUserId(session.user.id);
     }
 
-    setIsLoadingCommunity(true);
+    setIsLoadingGeneral(true);
 
     try {
       // Vérifier si les données de la communauté sont dans le cache
@@ -510,10 +512,10 @@ const CommunityHub = () => {
       }
 
       // Marquer le chargement comme terminé
-      setIsLoadingCommunity(false);
+      setIsLoadingGeneral(false);
     } catch (error) {
       console.error("Erreur lors du chargement des données:", error);
-      setIsLoadingCommunity(false);
+      setIsLoadingGeneral(false);
     }
   }, [
     communityId,
@@ -617,28 +619,31 @@ const CommunityHub = () => {
     preloadTabData();
   }, [activeTab, preloadTabData]);
 
-  // Ajouter un effet pour détecter les nouveaux posts via Pusher
+  // 2. Dans le composant
   useEffect(() => {
-    const channel = pusherClient.subscribe(`community-${communityId}`);
-    console.log("🔄 Pusher client initialisé pour la communauté", communityId);
-    channel.bind("post-created", () => {
+    if (!client || !communityId) return;
+
+    console.log("🔄 Abonnement au canal", `community-${communityId}`);
+    const channel = client.subscribe(`community-${communityId}`);
+
+    channel.bind("post-created", async () => {
       console.log("🔄 Nouveau post détecté via Pusher");
-      invalidateCache(`posts-${communityId}`);
-      fetchCommunityPosts(true);
+      await fetchCommunityPosts(true);
+      console.log("After fetchCommunityPosts");
     });
 
     return () => {
-      console.log("🔄 Désabonnement du canal Pusher");
+      console.log("🔄 Désabonnement du canal", `community-${communityId}`);
       channel.unbind_all();
       channel.unsubscribe();
     };
-  }, [communityId]);
+  }, [communityId, client]);
 
   // Au début du composant, après les déclarations de state
   useEffect(() => {
-    // Nettoyer le cache au chargement initial
-    console.log("🧹 Nettoyage du cache au chargement");
-    invalidateCache(`posts-${communityId}`);
+    // Nettoyer le cache au chargement initial C PAS BIEN
+    // console.log("🧹 Nettoyage du cache au chargement");
+    // invalidateCache(`posts-${communityId}`);
 
     // Gérer le rafraîchissement
     const handleBeforeUnload = () => {
@@ -707,39 +712,32 @@ const CommunityHub = () => {
                 pendingEnrichmentsCount={pendingEnrichmentsCount}
               />
 
-              {/* Indicateur de chargement */}
-              {isLoadingCommunity && (
-                <div className="flex justify-center items-center py-8">
-                  <Loader
-                    size="lg"
-                    color="gradient"
-                    text="Chargement des données..."
-                    variant="spinner"
-                  />
-                </div>
-              )}
-
               {/* Contenu basé sur l'onglet actif */}
-              {!isLoadingCommunity && isMember && (
+              {isMember && (
                 <>
                   {activeTab === "general" ? (
-                    <Card className="bg-white shadow-sm" id="general-section">
-                      <div className="h-[600px] flex flex-col">
-                        {session && (
-                          <ChatBox
-                            user={session.user}
-                            communityId={parseInt(String(communityId))}
-                            className="h-full"
-                          />
-                        )}
+                    isLoadingGeneral ? (
+                      <div className="flex justify-center items-center py-8">
+                        <Loader
+                          size="lg"
+                          color="gradient"
+                          text="Chargement des données de la communauté..."
+                          variant="spinner"
+                        />
                       </div>
-                    </Card>
-                  ) : activeTab === "voting" ? (
-                    <div id="voting-section">
-                      <VotingSession
-                        communityId={params.id ? params.id.toString() : ""}
-                      />
-                    </div>
+                    ) : (
+                      <Card className="bg-white shadow-sm" id="general-section">
+                        <div className="h-[600px] flex flex-col">
+                          {session && (
+                            <ChatBox
+                              user={session.user}
+                              communityId={parseInt(String(communityId))}
+                              className="h-full"
+                            />
+                          )}
+                        </div>
+                      </Card>
+                    )
                   ) : activeTab === "posts" ? (
                     <div id="posts-section">
                       {isLoadingPosts ? (
@@ -765,6 +763,12 @@ const CommunityHub = () => {
                     <div id="masterclass-section">
                       {/* <MasterclassSession communityId={communityId} /> */}
                     </div>
+                  ) : activeTab === "voting" ? (
+                    <div id="voting-section">
+                      <VotingSession
+                        communityId={params.id ? params.id.toString() : ""}
+                      />
+                    </div>
                   ) : (
                     <div id="other-section"></div>
                   )}
@@ -777,7 +781,7 @@ const CommunityHub = () => {
           <div className="mt-8" id="qa-section">
             {activeTab === "general" &&
               session &&
-              !isLoadingCommunity &&
+              !isLoadingGeneral &&
               isMember && (
                 <QASection
                   communityId={communityId}
@@ -791,7 +795,7 @@ const CommunityHub = () => {
       )}
 
       {/* Message si l'utilisateur n'est pas membre */}
-      {!isLoadingCommunity && !isMember && (
+      {!isLoadingGeneral && !isMember && (
         <div className="max-w-7xl mx-auto px-4 py-12 text-center">
           <div className="bg-white rounded-lg shadow-md p-8 max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">

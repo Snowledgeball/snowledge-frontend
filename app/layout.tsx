@@ -6,6 +6,7 @@ import Header from "@/components/shared/Header";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { PusherProvider } from "@/contexts/PusherContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,11 +35,13 @@ export default function RootLayout({
       >
         <Toaster position="top-center" />
         <SessionProvider>
-          <Header />
-          <main className="flex-grow">{children}</main>
-          <Analytics />
-          <SpeedInsights />
-          {/* <Footer /> */}
+          <PusherProvider>
+            <Header />
+            <main className="flex-grow">{children}</main>
+            <Analytics />
+            <SpeedInsights />
+            {/* <Footer /> */}
+          </PusherProvider>
         </SessionProvider>
       </body>
     </html>
