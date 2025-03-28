@@ -18,6 +18,7 @@ import BanModal from "@/components/community/BanModal";
 import { Loader } from "@/components/ui/loader";
 import React from "react";
 import { usePusher } from "@/contexts/PusherContext";
+import { localCache, sessionCache, CACHE_KEYS } from "@/utils/cache";
 
 // Cache pour stocker les données
 // Nous n'utilisons plus ces Maps car elles sont réinitialisées à chaque rechargement
@@ -174,7 +175,7 @@ const CommunityHub = () => {
 
   // Fonction pour invalider le cache
   const invalidateCache = useCallback((cacheKey: string) => {
-    cacheUtils.remove(cacheKey);
+    localCache.remove(cacheKey);
   }, []);
 
   // Fonction optimisée pour récupérer les posts
@@ -182,15 +183,19 @@ const CommunityHub = () => {
     async (forceRefresh = false, noLoading = false) => {
       if (!communityId || !session) return;
 
-      const cacheKey = `posts-${communityId}`;
+      const cacheKey = CACHE_KEYS.POSTS(communityId);
 
       // Si forceRefresh est true, on skip complètement le cache
-      if (!forceRefresh && cacheUtils.has(cacheKey)) {
-        const cachedData = cacheUtils.get(cacheKey);
-        setPosts(cachedData.data);
+      if (!forceRefresh && localCache.has(cacheKey)) {
+        const cachedData = localCache.get<Post[]>(cacheKey);
+        if (cachedData) {
+          setPosts(cachedData);
 
-        // On fetch quand meme pour s'assurer que les données sont bien à jour
-        fetchCommunityPosts(true, true);
+          // On fetch quand meme pour s'assurer que les données sont bien à jour
+          fetchCommunityPosts(true, true);
+          return;
+        }
+
         return;
       }
 
@@ -199,17 +204,16 @@ const CommunityHub = () => {
       }
 
       try {
-        const communityPostsResponse = await fetch(
+        const response = await fetch(
           `/api/communities/${communityId}/posts?status=PUBLISHED`
         );
-
-        if (!communityPostsResponse.ok)
+        if (!response.ok)
           throw new Error("Erreur lors de la récupération des posts");
 
-        const data = await communityPostsResponse.json();
+        const data = await response.json();
         const postsData = Array.isArray(data.posts) ? data.posts : [];
 
-        cacheUtils.set(cacheKey, postsData, 2);
+        localCache.set(cacheKey, postsData, 2); // Cache pour 2 minutes
         setPosts(postsData);
       } catch (error) {
         console.error("Erreur lors de la récupération des posts:", error);
@@ -225,12 +229,12 @@ const CommunityHub = () => {
   const fetchPendingPosts = useCallback(async () => {
     if (!communityId || !session) return;
 
-    const cacheKey = `pending-posts-${communityId}`;
+    const cacheKey = CACHE_KEYS.PENDING_POSTS(communityId);
 
     // Vérifier si les données sont dans le cache et si elles sont récentes
-    if (cacheUtils.has(cacheKey)) {
-      const cachedData = cacheUtils.get(cacheKey);
-      setPendingPostsCount(cachedData.data.length);
+    if (localCache.has(cacheKey)) {
+      const cachedData = localCache.get<Post[]>(cacheKey);
+      setPendingPostsCount(cachedData?.length || 0);
       return;
     }
 
@@ -248,7 +252,7 @@ const CommunityHub = () => {
         const data = await response.json();
 
         // Mettre en cache les données
-        cacheUtils.set(cacheKey, data, 2); // 2 minutes d'expiration
+        localCache.set(cacheKey, data, 2); // 2 minutes d'expiration
 
         setPendingPostsCount(data.length);
       }
@@ -261,12 +265,12 @@ const CommunityHub = () => {
   const fetchPendingEnrichments = useCallback(async () => {
     if (!communityId || !session) return;
 
-    const cacheKey = `pending-enrichments-${communityId}`;
+    const cacheKey = CACHE_KEYS.PENDING_ENRICHMENTS(communityId);
 
     // Vérifier si les données sont dans le cache
-    if (cacheUtils.has(cacheKey)) {
-      const cachedData = cacheUtils.get(cacheKey);
-      setPendingEnrichmentsCount(cachedData.data.length);
+    if (localCache.has(cacheKey)) {
+      const cachedData = localCache.get<Post[]>(cacheKey);
+      setPendingEnrichmentsCount(cachedData?.length || 0);
       return;
     }
 
@@ -284,7 +288,7 @@ const CommunityHub = () => {
         const data = await response.json();
 
         // Mettre en cache les données
-        cacheUtils.set(cacheKey, data, 2); // 2 minutes d'expiration
+        localCache.set(cacheKey, data, 2); // 2 minutes d'expiration
 
         setPendingEnrichmentsCount(data.length);
       }
@@ -305,15 +309,15 @@ const CommunityHub = () => {
 
     try {
       // Vérifier si les données de la communauté sont dans le cache
-      const communityCacheKey = `community-${communityId}`;
+      const communityCacheKey = CACHE_KEYS.COMMUNITY(communityId);
       let communityData;
 
-      if (cacheUtils.has(communityCacheKey)) {
-        const cachedData = cacheUtils.get(communityCacheKey);
+      if (localCache.has(communityCacheKey)) {
+        const cachedData = localCache.get<Community>(communityCacheKey);
 
         if (cachedData) {
-          communityData = cachedData.data;
-          setCommunityData(cachedData.data);
+          communityData = cachedData;
+          setCommunityData(cachedData);
         } else {
           // Les données sont trop anciennes ou invalides, on les rafraîchit
           const communityResponse = await fetch(
@@ -331,7 +335,7 @@ const CommunityHub = () => {
           }
 
           communityData = await communityResponse.json();
-          cacheUtils.set(communityCacheKey, communityData, 2);
+          localCache.set(communityCacheKey, communityData, 2);
           setCommunityData(communityData);
         }
       } else {
@@ -351,7 +355,7 @@ const CommunityHub = () => {
         }
 
         communityData = await communityResponse.json();
-        cacheUtils.set(communityCacheKey, communityData, 2);
+        localCache.set(communityCacheKey, communityData, 2);
         setCommunityData(communityData);
       }
 
@@ -392,7 +396,9 @@ const CommunityHub = () => {
       }
 
       // Récupérer les communautés de l'utilisateur (avec mise en cache côté client)
-      const userCommunitiesCacheKey = `user-communities-${session?.user?.id}`;
+      const userCommunitiesCacheKey = CACHE_KEYS.USER_COMMUNITIES(
+        session?.user?.id
+      );
 
       try {
         // Fonction pour récupérer les communautés depuis l'API
@@ -527,11 +533,12 @@ const CommunityHub = () => {
 
     if (justJoined && communityId) {
       // Invalider les caches pertinents
-      invalidateCache(`community-${communityId}`);
+      invalidateCache(CACHE_KEYS.COMMUNITY(communityId));
 
       if (session?.user?.id) {
-        invalidateCache(`user-communities-${session.user.id}`);
-        invalidateCache(`joined-communities-${session.user.id}`);
+        invalidateCache(CACHE_KEYS.USER_COMMUNITIES(session.user.id));
+        invalidateCache(CACHE_KEYS.PENDING_POSTS(communityId));
+        invalidateCache(CACHE_KEYS.PENDING_ENRICHMENTS(communityId));
       }
 
       // Recharger les données de la communauté
@@ -616,29 +623,26 @@ const CommunityHub = () => {
   useEffect(() => {
     if (!client || !communityId) return;
 
-    // console.log("🔄 Abonnement au canal", `community-${communityId}`);
     const channel = client.subscribe(`community-${communityId}`);
 
-    channel.bind("post-created", () => {
-      // console.log("🔄 Nouveau post détecté via Pusher");
-      // Forcer l'invalidation du cache avant de fetch
-      fetchCommunityPosts(true, true);
+    channel.bind("post-created", async () => {
+      const cacheKey = CACHE_KEYS.POSTS(communityId);
+      localCache.remove(cacheKey);
+      await fetchCommunityPosts(true, true);
     });
 
     return () => {
-      // console.log("🔄 Désabonnement du canal", `community-${communityId}`);
       channel.unbind_all();
       channel.unsubscribe();
     };
-  }, [communityId, client, fetchCommunityPosts, invalidateCache]);
+  }, [communityId, client, fetchCommunityPosts]);
 
   // Au début du composant, après les déclarations de state
   useEffect(() => {
     // Gérer le rafraîchissement
     const handleBeforeUnload = () => {
-      // console.log("🔄 Page rafraîchie, nettoyage du cache");
-      invalidateCache(`posts-${communityId}`);
-      invalidateCache(`community-${communityId}`);
+      invalidateCache(CACHE_KEYS.POSTS(communityId));
+      invalidateCache(CACHE_KEYS.COMMUNITY(communityId));
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);

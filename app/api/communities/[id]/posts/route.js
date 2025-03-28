@@ -148,8 +148,6 @@ export async function GET(request, { params }) {
       },
     });
 
-    console.log("posts", posts);
-
     return NextResponse.json(
       { posts: posts || [] },
       {
