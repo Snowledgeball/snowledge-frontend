@@ -260,6 +260,7 @@ export default function CommunityDashboard() {
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryLabel, setNewCategoryLabel] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -676,10 +677,32 @@ export default function CommunityDashboard() {
 
   // Fonction pour soumettre un post avec invalidation du cache
   const handleSubmitPost = useCallback(async () => {
-    if (!postTitle.trim() || !editorContent.trim()) {
-      toast.error("Veuillez remplir tous les champs obligatoires");
+    // Vérification du titre
+    if (!postTitle.trim()) {
+      setError("Le titre du post est obligatoire");
       return;
     }
+
+    // Vérification du contenu
+    if (!editorContent.trim()) {
+      setError("Le contenu du post ne peut pas être vide");
+      return;
+    }
+
+    // Vérification de l'image
+    if (!coverImage) {
+      setError("Une image de couverture est requise");
+      return;
+    }
+
+    // Vérification du tag
+    if (!selectedTag) {
+      setError("Veuillez sélectionner une catégorie pour votre post");
+      return;
+    }
+
+    // Si on arrive ici, tout est valide
+    setError(null);
 
     try {
       const response = await fetch(`/api/communities/${communityId}/posts`, {
@@ -1760,6 +1783,13 @@ export default function CommunityDashboard() {
                   </button>
                 </div>
               </div>
+
+              {/* Affichage de l'erreur */}
+              {error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
+                  {error}
+                </div>
+              )}
 
               <div className="bg-white rounded-xl p-6">
                 <div className="flex w-full space-x-4">
