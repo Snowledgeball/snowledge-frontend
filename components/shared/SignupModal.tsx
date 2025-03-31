@@ -163,10 +163,10 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
         const formData = new FormData();
         const userData = {
           image: profilePictureUrl,
-          fullName,
+          // fullName,
           userName,
-          email,
-          accountAddress: addressDetails.accountAddress,
+          // email,
+          // accountAddress: addressDetails.accountAddress,
         };
 
         Object.entries(userData).forEach(([key, value]) => {
