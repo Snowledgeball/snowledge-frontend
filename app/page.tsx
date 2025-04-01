@@ -72,7 +72,7 @@ interface RawCommunity {
     community_id: number;
     joined_at: string;
   }[];
-  category: {
+  community_category: {
     label: string;
   };
   image_url: string;
@@ -372,13 +372,14 @@ const HomePage = () => {
           throw new Error("Erreur lors de la récupération des communautés");
 
         const data = await response.json();
+        console.log(data);
         const formattedCommunities = data.map((community: RawCommunity) => ({
           id: community.id,
           name: community.name,
           members: community.community_learners.length,
           activity: Math.floor(Math.random() * 300) + 50,
           trending: Math.random() > 0.7,
-          category: community.category.label,
+          category: community.community_category.label,
           lastActive: "il y a 2h",
           trustScore: Math.floor(Math.random() * 30) + 65,
           imageUrl:
