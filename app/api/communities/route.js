@@ -54,7 +54,7 @@ export async function POST(request) {
         category_id: categoryData.id,
       },
       include: {
-        category: true, // Inclure les données de la catégorie dans la réponse
+        community_category: true, // Inclure les données de la catégorie dans la réponse
       },
     });
 

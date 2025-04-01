@@ -372,7 +372,6 @@ const HomePage = () => {
           throw new Error("Erreur lors de la récupération des communautés");
 
         const data = await response.json();
-        console.log(data);
         const formattedCommunities = data.map((community: RawCommunity) => ({
           id: community.id,
           name: community.name,
