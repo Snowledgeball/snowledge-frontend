@@ -226,6 +226,7 @@ CREATE TABLE "user" (
     "iv" VARCHAR(32) NOT NULL,
     "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "test_field2" TEXT DEFAULT 'test2',
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );

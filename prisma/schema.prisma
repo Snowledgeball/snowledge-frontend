@@ -283,4 +283,5 @@ model user {
   community_posts_reviews            community_posts_reviews[]
   community_qa_answers               community_qa_answers[]
   community_qa_questions             community_qa_questions[]
+  test_field2                         String?                               @default("test2")
 }
