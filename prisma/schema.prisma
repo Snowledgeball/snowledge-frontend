@@ -288,4 +288,5 @@ model user {
 model test_field {
   id Int @id @default(autoincrement())
   test_field String? @default("test")
+  test_field2 String? @default("test2")
 }
