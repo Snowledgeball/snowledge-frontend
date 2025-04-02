@@ -21,6 +21,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
       - name: Deploy migrations to Preview
         if: github.ref == 'refs/heads/staging'
         run: npx prisma migrate deploy
