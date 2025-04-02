@@ -67,6 +67,12 @@ export default function Header() {
               >
                 COMMUNAUTÉS
               </Link>
+              <Link
+                href="/feedback"
+                className="text-[#000333] hover:text-gray-900 font-bold text-sm "
+              >
+                FEEDBACK
+              </Link>
             </nav>
           </div>
 
@@ -191,6 +197,13 @@ export default function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Créer une communauté
+              </Link>
+              <Link
+                href="/feedback"
+                className="block px-4 py-2 text-gray-600 font-bold hover:bg-gray-100 rounded-lg"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Feedback
               </Link>
               <div className="border-t border-gray-200 pt-4">
                 <div className="flex items-center justify-between">
