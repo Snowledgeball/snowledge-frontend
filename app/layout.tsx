@@ -37,7 +37,7 @@ export default function RootLayout({
         <SessionProvider>
           <PusherProvider>
             <Header />
-            <main className="flex-grow">{children}</main>
+            <main className="flex-grow md:px-[3rem]">{children}</main>
             <Analytics />
             <SpeedInsights />
             {/* <Footer /> */}
