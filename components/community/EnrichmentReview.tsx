@@ -92,7 +92,7 @@ export default function EnrichmentReview({
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-[90rem]px-4">
         <Card className="bg-white p-6 shadow-sm rounded-lg">
           <div className="mb-6">
             <h1 className="text-2xl font-bold">

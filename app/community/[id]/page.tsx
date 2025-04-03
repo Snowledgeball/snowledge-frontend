@@ -684,7 +684,7 @@ const CommunityHub = () => {
       <CommunityBanner communityData={communityData} />
 
       {session && (
-        <div className="max-w-7xl mx-auto px-4 pb-12" id="community-content">
+        <div className="max-w-[90rem]px-4 pb-12" id="community-content">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Contenu principal */}
             <main className="flex-1 order-1">
@@ -782,7 +782,7 @@ const CommunityHub = () => {
 
       {/* Message si l'utilisateur n'est pas membre */}
       {!isLoadingGeneral && !isMember && (
-        <div className="max-w-7xl mx-auto px-4 py-12 text-center">
+        <div className="max-w-[90rem]px-4 py-12 text-center">
           <div className="bg-white rounded-lg shadow-md p-8 max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
               Accès limité

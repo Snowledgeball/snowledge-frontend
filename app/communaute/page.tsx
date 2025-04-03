@@ -39,7 +39,7 @@ export default function CommunautePage() {
 
   // if (!session) {
   //     return (
-  //         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  //         <div className="max-w-[90rem]px-4 sm:px-6 lg:px-8 py-12">
 
   //             <div className="text-center">
   //                 <h1 className="text-3xl font-bold text-gray-900 mb-4">
@@ -55,7 +55,7 @@ export default function CommunautePage() {
 
   // if (isLoading) {
   //     return (
-  //         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  //         <div className="max-w-[90rem]px-4 sm:px-6 lg:px-8 py-12">
   //             <div className="animate-pulse">
   //                 {[...Array(3)].map((_, i) => (
   //                     <div key={i} className="mb-6 bg-gray-200 h-32 rounded-lg"></div>
@@ -66,7 +66,7 @@ export default function CommunautePage() {
   // }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-[90rem]px-4 sm:px-6 lg:px-8 py-12">
       <Loader
         size="lg"
         color="gradient"
@@ -84,7 +84,7 @@ export default function CommunautePage() {
         />
       </div>
     </div>
-    // <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    // <div className="max-w-[90rem]px-4 sm:px-6 lg:px-8 py-12">
     //     <h1 className="text-3xl font-bold text-gray-900 mb-12">
     //         Mes Communautés
     //     </h1>

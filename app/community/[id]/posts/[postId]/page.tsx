@@ -93,7 +93,7 @@ export default function PostPage() {
   return (
     <div className="min-h-screen bg-gray-50" id="post-page">
       <div className="w-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#003E8A] to-[#16215B] py-6 mb-8">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-[90rem]px-4">
           <button
             onClick={() => router.push(`/community/${params.id}`)}
             className="flex items-center text-white hover:text-gray-200"
@@ -104,7 +104,7 @@ export default function PostPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-[90rem]px-4">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Contenu principal */}
           <main className="flex-1 order-2 lg:order-1 max-w-4xl">

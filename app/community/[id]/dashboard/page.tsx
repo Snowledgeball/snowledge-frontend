@@ -1032,7 +1032,7 @@ export default function CommunityDashboard() {
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
       <div className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-[90rem]px-4 sm:px-6 lg:px-8 py-8">
           {/* En-tête */}
           <div className="flex justify-between items-center mb-8">
             <div>

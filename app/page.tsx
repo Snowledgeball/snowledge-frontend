@@ -497,7 +497,7 @@ const HomePage = () => {
     return (
       <div className="min-h-screen">
         <header className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto  px-4 py-6 sm:px-6">
+          <div className="max-w-[90rem] px-4 py-6 sm:px-6">
             <h1 className="text-3xl font-bold text-gray-900">
               Explorez les communautés
             </h1>
@@ -508,7 +508,7 @@ const HomePage = () => {
           </div>
         </header>
 
-        <main className="max-w-7xl mx-auto py-12 sm:px-6 lg:px-8">
+        <main className="max-w-[90rem]py-12 sm:px-6 lg:px-8">
           {/* Statistiques globales */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             {statsItems.map((item, index) => (

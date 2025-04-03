@@ -1006,7 +1006,7 @@ const ProfilePage = () => {
   }
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-[90rem]px-4 py-8">
         {/* En-tête responsive */}
         <div className="bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#003E8A] to-[#16215B] rounded-2xl p-4 lg:p-8 mb-8">
           <div className="flex flex-col lg:flex-row items-center">

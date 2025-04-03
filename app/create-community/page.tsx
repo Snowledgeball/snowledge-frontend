@@ -209,7 +209,7 @@ export default function CreateCommunityPage() {
 
   if (!session) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="max-w-[90rem]px-4 py-12">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             Connectez-vous pour créer une communauté
