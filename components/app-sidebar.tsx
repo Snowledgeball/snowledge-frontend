@@ -24,7 +24,9 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
+import { Separator } from "@radix-ui/react-separator";
 
 // This is sample data.
 const data = {
@@ -157,9 +159,27 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { state } = useSidebar();
+
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar variant="sidebar" collapsible="icon" {...props}>
       <SidebarHeader>
+        {state === "collapsed" ? (
+          <img
+            src="/images/logo-collapsed.png"
+            alt="Logo"
+            className="w-auto h-10 mx-auto cursor-pointer"
+            onClick={() => (window.location.href = "/")}
+          />
+        ) : (
+          <img
+            src="/images/logo.png"
+            alt="Logo"
+            className="w-auto h-10 pr-2 cursor-pointer"
+            onClick={() => (window.location.href = "/")}
+          />
+        )}
+        <Separator />
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
