@@ -589,10 +589,29 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                                 </AvatarFallback>
                               </Avatar>
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 overflow-hidden">
                               <div className="flex items-center gap-2">
-                                <h3 className="font-medium text-gray-800">
-                                  {contribution.title}
+                                <h3 className="font-medium text-gray-800 truncate">
+                                  {(() => {
+                                    // Créer un élément div temporaire pour gérer le décodage des entités HTML
+                                    const tempDiv =
+                                      document.createElement("div");
+                                    // Insérer le titre sans les balises HTML
+                                    tempDiv.innerHTML =
+                                      contribution.title.replace(
+                                        /<\/?[^>]+(>|$)/g,
+                                        ""
+                                      );
+                                    // Récupérer le texte décodé
+                                    const cleanTitle =
+                                      tempDiv.textContent ||
+                                      tempDiv.innerText ||
+                                      "";
+
+                                    return cleanTitle.length > 15
+                                      ? cleanTitle.substring(0, 15) + "..."
+                                      : cleanTitle;
+                                  })()}
                                 </h3>
                                 <span
                                   className={`text-xs font-medium px-2 py-0.5 rounded-full ${
@@ -606,18 +625,33 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                                     : "Enrichissement"}
                                 </span>
                               </div>
-                              <p className="text-sm text-gray-600 line-clamp-2">
-                                {contribution.content}
-                              </p>
+                              <div className="text-sm text-gray-600 contribution-preview">
+                                {(() => {
+                                  // Créer un élément div temporaire pour gérer le décodage des entités HTML
+                                  const tempDiv = document.createElement("div");
+                                  // Insérer le contenu sans les balises HTML
+                                  tempDiv.innerHTML =
+                                    contribution.content.replace(
+                                      /<\/?[^>]+(>|$)/g,
+                                      ""
+                                    );
+                                  // Récupérer le texte décodé
+                                  const cleanContent =
+                                    tempDiv.textContent ||
+                                    tempDiv.innerText ||
+                                    "";
+
+                                  return cleanContent.length > 32
+                                    ? cleanContent.substring(0, 32) + "..."
+                                    : cleanContent;
+                                })()}
+                              </div>
                               <div className="mt-2 flex justify-between items-center">
                                 <span className="text-xs text-gray-500">
                                   Proposé par {contribution.user.fullName} •{" "}
                                   {new Date(
                                     contribution.created_at
                                   ).toLocaleDateString()}
-                                </span>
-                                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                                  En attente
                                 </span>
                               </div>
                             </div>
@@ -821,10 +855,13 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Contenu
                       </label>
-                      <div className="p-4 bg-gray-50 rounded-md border border-gray-200 min-h-[200px]">
-                        <p className="text-gray-800 whitespace-pre-line">
-                          {selectedContribution.content}
-                        </p>
+                      <div className="p-4 bg-gray-50 rounded-md border border-gray-200 min-h-[200px] max-h-[400px] overflow-auto">
+                        <div
+                          className="contribution-content"
+                          dangerouslySetInnerHTML={{
+                            __html: selectedContribution.content,
+                          }}
+                        />
                       </div>
                     </div>
 

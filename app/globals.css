@@ -35,6 +35,44 @@ body {
   cursor: grabbing;
 }
 
+/* Styles pour les contributions HTML */
+.contribution-content p {
+  margin-bottom: 0.5rem;
+}
+
+.contribution-content h1, 
+.contribution-content h2, 
+.contribution-content h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.contribution-content ul, 
+.contribution-content ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.contribution-content li {
+  margin-bottom: 0.25rem;
+}
+
+.contribution-content img,
+.contribution-content iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+.contribution-preview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+}
+
 @layer base {
   :root {
     --background: #ffffff;
