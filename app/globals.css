@@ -40,15 +40,15 @@ body {
   margin-bottom: 0.5rem;
 }
 
-.contribution-content h1, 
-.contribution-content h2, 
+.contribution-content h1,
+.contribution-content h2,
 .contribution-content h3 {
   margin-top: 1rem;
   margin-bottom: 0.5rem;
   font-weight: 600;
 }
 
-.contribution-content ul, 
+.contribution-content ul,
 .contribution-content ol {
   padding-left: 1.5rem;
   margin-bottom: 0.5rem;
@@ -59,11 +59,15 @@ body {
 }
 
 .contribution-content img,
-.contribution-content iframe {
+.contribution-content iframe,
+.contribution-content video {
   max-width: 100%;
   height: auto;
+  display: block;
+  margin: 1rem auto;
 }
 
+/* Styles pour les prévisualisations de contributions */
 .contribution-preview {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -71,6 +75,70 @@ body {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   white-space: normal;
+}
+
+/* Amélioration des styles pour le composant de diff */
+.diff-added img,
+.diff-removed img,
+.diff-added iframe,
+.diff-removed iframe,
+.diff-added video,
+.diff-removed video {
+  max-width: 100%;
+  height: auto !important;
+  display: block;
+  margin: 0.5rem 0;
+  border: 1px solid #ccc;
+}
+
+/* Styles pour contenir les images dans les diffs */
+.diff-view-container {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.diff-view-container img,
+.diff-view-container iframe,
+.diff-view-container video {
+  max-width: 100%;
+  height: auto !important;
+}
+
+/* Styles pour les tableaux dans les diffs */
+.diff-view-container table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  overflow-x: auto;
+  display: block;
+}
+
+.diff-view-container th,
+.diff-view-container td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+/* Styles de base pour tous les contenus HTML */
+img,
+iframe,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  max-width: 100%;
+  overflow-x: auto;
+  display: block;
+}
+
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 @layer base {
@@ -170,4 +238,249 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
   /* bg-gray-500 */
+}
+
+/* Styles pour les contrôles fixes en haut de la comparaison d'enrichissement */
+.enrichment-controls {
+  position: sticky;
+  top: 0;
+  background-color: #f9fafb;
+  z-index: 10;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 0.5rem;
+}
+
+/* Styles spécifiques pour le mode d'affichage */
+.diff-content-container {
+  overflow: auto;
+  max-height: 300px;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+/* Empêcher les boutons de mode d'affichage de défiler avec le contenu */
+.mode-selector {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f9fafb;
+  padding: 0.5rem 0;
+}
+
+/* Modifications additionnelles pour le GoogleDocsStyleDiff */
+.diff-view-container .mode-selector-fixed {
+  position: static;
+}
+
+.diff-view-container .content-scrollable {
+  max-height: 300px;
+  overflow: auto;
+}
+
+/* Amélioration de l'apparence des textes dans un diff */
+.diff-added {
+  color: #166534 !important;
+}
+
+.diff-removed {
+  color: #9f1239 !important;
+}
+
+/* Styles pour les gros blocs de contenu */
+.enrichment-content-block {
+  max-height: 600px;
+  overflow: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+/* Styles pour le contenu TinyMCE */
+.tinymce-content {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.tinymce-content h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  color: #1f2937;
+  line-height: 1.3;
+}
+
+.tinymce-content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #1f2937;
+  line-height: 1.3;
+}
+
+.tinymce-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: #1f2937;
+}
+
+.tinymce-content p {
+  margin-bottom: 1rem;
+  line-height: 1.7;
+  color: #1f2937;
+}
+
+.tinymce-content ul,
+.tinymce-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.tinymce-content ul {
+  list-style-type: disc;
+}
+
+.tinymce-content ol {
+  list-style-type: decimal;
+}
+
+.tinymce-content a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.tinymce-content blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  font-style: italic;
+  color: #6b7280;
+  margin: 1.5rem 0;
+}
+
+.tinymce-content img {
+  max-width: 100%;
+  height: auto !important;
+  border-radius: 0.25rem;
+  margin: 1rem auto;
+  display: block;
+}
+
+.tinymce-content pre {
+  background-color: #f3f4f6;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+  font-family: monospace;
+}
+
+.tinymce-content code {
+  background-color: #f3f4f6;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
+.tinymce-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9em;
+}
+
+.tinymce-content th,
+.tinymce-content td {
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem;
+}
+
+.tinymce-content th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
+
+/* Styles spécifiques pour la visualisation des différences */
+.tinymce-content .diff-added {
+  background-color: rgba(204, 255, 204, 0.5);
+  border-bottom: 1px solid #4caf50;
+  padding: 0 2px;
+}
+
+.tinymce-content .diff-removed {
+  background-color: rgba(255, 204, 204, 0.5);
+  border-bottom: 1px solid #f44336;
+  padding: 0 2px;
+  text-decoration: line-through;
+}
+
+/* Styles pour le conteneur de la vue d'enrichissement */
+.enrichment-view-container {
+  /* Permet au header de rester fixe */
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+}
+
+/* Rendre l'en-tête du mode d'affichage vraiment fixe */
+.enrichment-controls.mode-selector {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: #f9fafb;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin: 0;
+  width: 100%;
+}
+
+/* Ajustement du conteneur de différence */
+.diff-content-container {
+  flex: 1;
+  overflow: auto;
+  max-height: calc(
+    500px - 48px
+  ); /* Hauteur totale moins la hauteur de l'en-tête */
+  border: none;
+  border-radius: 0;
+}
+
+/* Contenu scrollable pour le contenu */
+.content-scrollable {
+  padding: 1rem;
+  height: 100%;
+}
+
+/* Fix pour empêcher les débordements dans le conteneur GoogleDocsStyleDiff */
+.diff-view-container {
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0;
+  height: 100%;
+}
+
+/* Appliquer les marges uniquement dans la vue */
+.diff-view-container .tinymce-content {
+  padding: 1rem;
+}
+
+/* Ajuster les ajouts et suppressions pour être plus visibles */
+.diff-view-container .diff-added {
+  background-color: rgba(204, 255, 204, 0.5);
+  border-bottom: 1px solid #4caf50;
+  padding: 0 2px;
+  color: #166534;
+}
+
+.diff-view-container .diff-removed {
+  background-color: rgba(255, 204, 204, 0.5);
+  border-bottom: 1px solid #f44336;
+  padding: 0 2px;
+  color: #9f1239;
+  text-decoration: line-through;
 }

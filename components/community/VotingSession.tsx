@@ -43,6 +43,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import EnrichmentCompare from "./EnrichmentCompare";
 
 // Cache pour stocker les données
 const contributorsCache = new Map<
@@ -507,7 +508,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                 </div>
               </div>
 
-              <ScrollArea className="h-[500px]">
+              <ScrollArea className="h-[600px]">
                 <div className="p-2 space-y-2">
                   {activeTab === "sujets"
                     ? // Affichage des propositions de sujets
@@ -806,7 +807,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
               ) : selectedContribution && activeTab === "contributions" ? (
                 // Affichage du détail d'une contribution sélectionnée
                 <div className="space-y-6">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center border-b border-gray-200 pb-4">
                     <div className="flex items-center gap-2">
                       <h2 className="text-xl font-semibold text-gray-800">
                         {selectedContribution.title}
@@ -823,45 +824,56 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           : "Enrichissement"}
                       </span>
                     </div>
-                    <span className="text-sm font-medium px-2 py-1 rounded-full bg-amber-100 text-amber-800">
-                      En attente de validation
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3 border-b border-gray-200 pb-4">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage
-                        src={selectedContribution.user.profilePicture}
-                      />
-                      <AvatarFallback>
-                        {selectedContribution.user.fullName.substring(0, 2)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium text-gray-800">
-                        {selectedContribution.user.fullName}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Proposé le{" "}
-                        {new Date(
-                          selectedContribution.created_at
-                        ).toLocaleDateString()}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage
+                          src={selectedContribution.user.profilePicture}
+                        />
+                        <AvatarFallback>
+                          {selectedContribution.user.fullName.substring(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-gray-800">
+                          {selectedContribution.user.fullName}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Proposé le{" "}
+                          {new Date(
+                            selectedContribution.created_at
+                          ).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-2">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Contenu
-                      </label>
-                      <div className="p-4 bg-gray-50 rounded-md border border-gray-200 min-h-[200px] max-h-[400px] overflow-auto">
-                        <div
-                          className="contribution-content"
-                          dangerouslySetInnerHTML={{
-                            __html: selectedContribution.content,
-                          }}
-                        />
+                      {selectedContribution.tag === "creation" && (
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Contenu
+                        </label>
+                      )}
+                      <div className="bg-gray-50 rounded-md border border-gray-200 overflow-hidden">
+                        {selectedContribution.tag === "creation" ? (
+                          <div className="p-4 max-h-[500px] overflow-auto">
+                            <div
+                              className="contribution-content tinymce-content"
+                              dangerouslySetInnerHTML={{
+                                __html: selectedContribution.content,
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="enrichment-view-container">
+                            <EnrichmentCompare
+                              originalContent={
+                                selectedContribution.original_content || ""
+                              }
+                              modifiedContent={selectedContribution.content}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
 

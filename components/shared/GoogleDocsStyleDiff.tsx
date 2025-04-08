@@ -87,6 +87,10 @@ export default function GoogleDocsStyleDiff({
                         font-weight: bold;
                         display: inline-block;
                     }
+                    img, iframe, video {
+                        max-width: 100%;
+                        height: auto;
+                    }
                 </style>
             `;
 
@@ -321,16 +325,15 @@ export default function GoogleDocsStyleDiff({
   };
 
   return (
-    <div className="bg-gray-50 rounded-lg p-4">
+    <div className="bg-gray-50 rounded-lg p-4 diff-view-container">
       <div className="flex flex-col md:flex-row">
         {/* Contenu principal */}
         <div className="flex-grow">
-          <div className="mb-4">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-semibold">{description}</h3>
-            </div>
+          {/* On supprime le header avec mode d'affichage car il est géré par EnrichmentCompare */}
 
-            <div className="border rounded-lg p-4 bg-white">
+          {/* Contenu avec défilement */}
+          <div>
+            <div className="p-2 bg-white rounded-lg overflow-x-hidden">
               <TinyMCEStyledText content={processedHtml} />
             </div>
           </div>
