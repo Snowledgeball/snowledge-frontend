@@ -8,7 +8,7 @@ import { Community } from "@/types/community";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import ChatBox from "@/components/shared/ChatBox";
 import QASection from "@/components/shared/QASection";
-import VotingSession from "@/components/community/VotingSession";
+import { VotingSession } from "@/components/community/VotingSession";
 import CommunityHeader from "@/components/community/CommunityHeader";
 import CommunityBanner from "@/components/community/CommunityBanner";
 import CommunityTabs from "@/components/community/CommunityTabs";

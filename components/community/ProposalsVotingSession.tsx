@@ -333,40 +333,85 @@ export default function ProposalsVotingSession({
                           </div>
                         </HoverCardContent>
                       </HoverCard>
-                      <div className="flex-1">
+                      <div>
                         <h3 className="font-semibold text-lg">
                           {proposal.title}
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          {proposal.description}
+                          Proposé par {proposal.createdBy.name} •{" "}
+                          {new Date(proposal.createdAt).toLocaleDateString()}
                         </p>
-                        <div className="flex items-center gap-2 mt-4">
-                          <p className="text-sm text-muted-foreground">
-                            Proposé par {proposal.createdBy.name} •{" "}
-                            {new Date(proposal.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-10 h-10 rounded-full bg-green-100 hover:bg-green-200 p-0"
-                          onClick={() => handleVote(proposal.id, "approve")}
-                        >
-                          <ThumbsUp className="w-5 h-5 text-green-600" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-10 h-10 rounded-full bg-red-100 hover:bg-red-200 p-0"
-                          onClick={() => handleVote(proposal.id, "reject")}
-                        >
-                          <ThumbsDown className="w-5 h-5 text-red-600" />
-                        </Button>
                       </div>
                     </div>
+                    <div className="flex items-center gap-3">
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-green-600 hover:bg-green-50 hover:text-green-700"
+                          >
+                            <ThumbsUp className="w-4 h-4 mr-2" />
+                            {proposal.votes.approve}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Confirmer votre vote
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Voulez-vous vraiment approuver cette proposition ?
+                              Votre vote ne pourra pas être modifié.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <div className="flex justify-end gap-2">
+                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleVote(proposal.id, "approve")}
+                            >
+                              Confirmer
+                            </AlertDialogAction>
+                          </div>
+                        </AlertDialogContent>
+                      </AlertDialog>
+
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                          >
+                            <ThumbsDown className="w-4 h-4 mr-2" />
+                            {proposal.votes.reject}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Confirmer votre vote
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Voulez-vous vraiment rejeter cette proposition ?
+                              Votre vote ne pourra pas être modifié.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <div className="flex justify-end gap-2">
+                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleVote(proposal.id, "reject")}
+                            >
+                              Confirmer
+                            </AlertDialogAction>
+                          </div>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
+                  <p className="text-sm leading-relaxed">
+                    {proposal.description}
+                  </p>
                   <div className="flex justify-end">
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
