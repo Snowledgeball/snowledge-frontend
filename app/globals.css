@@ -69,12 +69,11 @@ body {
 
 /* Styles pour les prévisualisations de contributions */
 .contribution-preview {
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  white-space: normal;
+  display: inline-block;
+  max-width: 100%;
 }
 
 /* Amélioration des styles pour le composant de diff */
@@ -253,10 +252,11 @@ pre {
 
 /* Styles spécifiques pour le mode d'affichage */
 .diff-content-container {
+  flex: 1;
   overflow: auto;
-  max-height: 300px;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
+  max-height: calc(100% - 3rem); /* Utilisation d'une valeur relative */
+  border: none;
+  border-radius: 0;
 }
 
 /* Empêcher les boutons de mode d'affichage de défiler avec le contenu */
@@ -300,7 +300,8 @@ pre {
 .tinymce-content {
   font-family: Arial, sans-serif;
   line-height: 1.6;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .tinymce-content h1 {
@@ -421,10 +422,10 @@ pre {
 
 /* Styles pour le conteneur de la vue d'enrichissement */
 .enrichment-view-container {
-  /* Permet au header de rester fixe */
   display: flex;
   flex-direction: column;
-  height: 500px;
+  height: auto; /* Auto au lieu de hauteur fixe */
+  min-height: 24rem; /* min-height: 384px responsif */
 }
 
 /* Rendre l'en-tête du mode d'affichage vraiment fixe */
@@ -439,17 +440,6 @@ pre {
   width: 100%;
 }
 
-/* Ajustement du conteneur de différence */
-.diff-content-container {
-  flex: 1;
-  overflow: auto;
-  max-height: calc(
-    500px - 48px
-  ); /* Hauteur totale moins la hauteur de l'en-tête */
-  border: none;
-  border-radius: 0;
-}
-
 /* Contenu scrollable pour le contenu */
 .content-scrollable {
   padding: 1rem;
@@ -462,6 +452,7 @@ pre {
   overflow-y: auto;
   padding: 0;
   height: 100%;
+  width: 100%;
 }
 
 /* Appliquer les marges uniquement dans la vue */
@@ -483,4 +474,21 @@ pre {
   padding: 0 2px;
   color: #9f1239;
   text-decoration: line-through;
+}
+
+/* Ajout de classes pour mieux gérer les textes tronqués */
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Style pour les titres tronqués dans les listes */
+.truncate-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90%;
+  display: inline-block;
 }

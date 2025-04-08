@@ -1,23 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import {
-  AlertCircle,
-  Info,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  CheckCircle2,
-} from "lucide-react";
-import EnrichmentVotingSession from "./EnrichmentVotingSession";
-import CreationVotingSession from "./CreationVotingSession";
+import { AlertCircle, Info, Plus } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
-import ProposalsVotingSession from "./ProposalsVotingSession";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -44,6 +31,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import EnrichmentCompare from "./EnrichmentCompare";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 // Cache pour stocker les données
 const contributorsCache = new Map<
@@ -648,11 +637,13 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                                 })()}
                               </div>
                               <div className="mt-2 flex justify-between items-center">
-                                <span className="text-xs text-gray-500">
+                                <span className="text-xs text-gray-500 whitespace-nowrap">
                                   Proposé par {contribution.user.fullName} •{" "}
-                                  {new Date(
-                                    contribution.created_at
-                                  ).toLocaleDateString()}
+                                  {format(
+                                    new Date(contribution.created_at),
+                                    "d MMMM yyyy",
+                                    { locale: fr }
+                                  )}
                                 </span>
                               </div>
                             </div>
@@ -809,7 +800,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center border-b border-gray-200 pb-4">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-semibold text-gray-800">
+                      <h2 className="text-xl font-semibold text-gray-800 truncate max-w-[90%]">
                         {selectedContribution.title}
                       </h2>
                       <span
@@ -837,11 +828,13 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         <p className="font-medium text-gray-800">
                           {selectedContribution.user.fullName}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 whitespace-nowrap">
                           Proposé le{" "}
-                          {new Date(
-                            selectedContribution.created_at
-                          ).toLocaleDateString()}
+                          {format(
+                            new Date(selectedContribution.created_at),
+                            "d MMMM yyyy",
+                            { locale: fr }
+                          )}
                         </p>
                       </div>
                     </div>
@@ -849,23 +842,26 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
                   <div className="space-y-2">
                     <div>
-                      {selectedContribution.tag === "creation" && (
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Contenu
-                        </label>
-                      )}
                       <div className="bg-gray-50 rounded-md border border-gray-200 overflow-hidden">
                         {selectedContribution.tag === "creation" ? (
-                          <div className="p-4 max-h-[500px] overflow-auto">
+                          <div className="h-[30rem] md:h-[35rem] lg:h-[40rem]">
+                            {/* En-tête fixe avec les boutons de mode d'affichage */}
+                            <div className="sticky top-0 z-10 bg-gray-50 py-2 border-b border-gray-200">
+                              <div className="px-4 py-1.5 flex items-center space-x-2 justify-start">
+                                <span className="text-sm text-gray-500">
+                                  Contenu :
+                                </span>
+                              </div>
+                            </div>
                             <div
-                              className="contribution-content tinymce-content"
+                              className="contribution-content tinymce-content p-4 overflow-auto"
                               dangerouslySetInnerHTML={{
                                 __html: selectedContribution.content,
                               }}
                             />
                           </div>
                         ) : (
-                          <div className="enrichment-view-container">
+                          <div className="h-[30rem] md:h-[35rem] lg:h-[40rem]">
                             <EnrichmentCompare
                               originalContent={
                                 selectedContribution.original_content || ""

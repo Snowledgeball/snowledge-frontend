@@ -7,7 +7,7 @@ interface TinyMCEStyledTextProps {
 export default function TinyMCEStyledText({ content }: TinyMCEStyledTextProps) {
   return (
     <div
-      className="tinymce-content diff-view-container prose prose-sm"
+      className="tinymce-content prose prose-sm max-w-none text-ellipsis overflow-hidden"
       dangerouslySetInnerHTML={{ __html: content }}
     />
   );
