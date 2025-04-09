@@ -844,30 +844,34 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                     <div>
                       <div className="bg-gray-50 rounded-md border border-gray-200 overflow-hidden">
                         {selectedContribution.tag === "creation" ? (
-                          <div className="h-[30rem] md:h-[35rem] lg:h-[40rem]">
+                          <div className="h-[20rem] md:h-[25rem] lg:h-[30rem] flex flex-col">
                             {/* En-tête fixe avec les boutons de mode d'affichage */}
-                            <div className="sticky top-0 z-10 bg-gray-50 py-2 border-b border-gray-200">
+                            <div className="sticky top-0 z-10 bg-gray-50 py-2 border-b border-gray-200 flex-shrink-0">
                               <div className="px-4 py-1.5 flex items-center space-x-2 justify-start">
                                 <span className="text-sm text-gray-500">
                                   Contenu :
                                 </span>
                               </div>
                             </div>
-                            <div
-                              className="contribution-content tinymce-content p-4 overflow-auto"
-                              dangerouslySetInnerHTML={{
-                                __html: selectedContribution.content,
-                              }}
-                            />
+                            <div className="flex-1 overflow-y-auto">
+                              <div
+                                className="contribution-content tinymce-content p-4"
+                                dangerouslySetInnerHTML={{
+                                  __html: selectedContribution.content,
+                                }}
+                              />
+                            </div>
                           </div>
                         ) : (
-                          <div className="h-[30rem] md:h-[35rem] lg:h-[40rem]">
-                            <EnrichmentCompare
-                              originalContent={
-                                selectedContribution.original_content || ""
-                              }
-                              modifiedContent={selectedContribution.content}
-                            />
+                          <div className="h-[20rem] md:h-[25rem] lg:h-[30rem] flex flex-col">
+                            <div className="flex-1 overflow-y-auto">
+                              <EnrichmentCompare
+                                originalContent={
+                                  selectedContribution.original_content || ""
+                                }
+                                modifiedContent={selectedContribution.content}
+                              />
+                            </div>
                           </div>
                         )}
                       </div>
