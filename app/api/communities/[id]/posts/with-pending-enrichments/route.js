@@ -50,8 +50,6 @@ export async function GET(request, { params }) {
       (review) => review.contribution_id
     );
 
-    console.log("reviewedEnrichmentIds", reviewedEnrichmentIds);
-
     const postsEnrichments = await prisma.community_posts_enrichments.findMany({
       where: {
         id: {
@@ -62,8 +60,6 @@ export async function GET(request, { params }) {
         user: true,
       },
     });
-
-    console.log("postsEnrichments", postsEnrichments.length);
 
     // Récupérer les posts publiés qui ont des contributions en attente
     // const postsWithPendingContributions = await prisma.community_posts.findMany(

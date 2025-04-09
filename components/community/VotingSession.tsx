@@ -1025,7 +1025,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                     <span className="text-sm font-medium">Enrichissement</span>
                     <div className="w-3 h-3 rounded-full bg-amber-500 ml-4"></div>
                     <span className="text-sm font-medium">
-                      En attente de validation
+                      En attente de révision
                     </span>
                   </div>
                   <p className="text-gray-600">
@@ -1064,10 +1064,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       </div>
                       <div className="text-center">
                         <span className="text-2xl font-bold text-amber-600">
-                          {
-                            contributions.filter((c) => c.status === "PENDING")
-                              .length
-                          }
+                          {contributions.length}
                         </span>
                         <p className="text-sm text-gray-500">En attente</p>
                       </div>

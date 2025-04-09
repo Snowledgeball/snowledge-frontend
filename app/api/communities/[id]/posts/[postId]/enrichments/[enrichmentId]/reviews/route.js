@@ -42,7 +42,7 @@ export async function POST(request, { params }) {
       );
     }
 
-    // Vérifier que la révision existe
+    // Vérifier que la révision existe pas déjà
     const existingReview =
       await prisma.community_posts_enrichment_reviews.findFirst({
         where: {
@@ -53,7 +53,7 @@ export async function POST(request, { params }) {
 
     if (existingReview) {
       return NextResponse.json(
-        { error: "Vous avez déjà soumis une révision" },
+        { error: "Vous avez déjà soumis une révision pour cette contribution" },
         { status: 400 }
       );
     }
@@ -75,13 +75,17 @@ export async function POST(request, { params }) {
       },
     });
 
+    const reviews = await prisma.community_posts_enrichment_reviews.findMany({
+      where: {
+        contribution_id: parseInt(enrichmentId),
+      },
+    });
+
     // Vérifier le statut de la contribution après cette nouvelle révision
-    const { shouldUpdate, newStatus } = await checkContributionStatus(
-      parseInt(enrichmentId),
+    const { shouldUpdate, newStatus } = checkContributionStatus(
+      reviews,
       contributorsCount
     );
-
-    console.log("la3");
 
     // Mettre à jour le statut de la contribution si nécessaire
     const enrichment = await prisma.community_posts_enrichments.findUnique({
@@ -118,7 +122,6 @@ export async function POST(request, { params }) {
             content: enrichment.content,
           },
         });
-        console.log("post updated");
       }
 
       if (newStatus === "APPROVED" || newStatus === "REJECTED") {

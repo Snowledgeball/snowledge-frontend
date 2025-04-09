@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createBulkNotifications } from "@/lib/notifications";
 import { NotificationType } from "@/types/notification";
-import { checkPostStatus } from "@/lib/postUtils";
+import { checkContributionStatus } from "@/lib/contributionUtils";
 
 export async function POST(request, { params }) {
   try {
@@ -138,13 +138,10 @@ export async function POST(request, { params }) {
       },
     });
 
-    const isContributorsCountEven = contributorsCount % 2 === 0;
-
     // Vérifier le statut du post
-    const postStatus = checkPostStatus(
-      updatedPost,
-      contributorsCount,
-      isContributorsCountEven
+    const postStatus = checkContributionStatus(
+      updatedPost.community_posts_reviews,
+      contributorsCount
     );
 
     // Variable pour suivre si une notification spéciale a été envoyée
