@@ -1,121 +1,190 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(request, { params }) {
   const { id } = await params;
+  const communityId = parseInt(id);
+  const session = await getServerSession(authOptions);
 
-  // Fausses propositions de sujets
-  const mockProposals = [
-    {
-      id: "1",
-      title: "Introduction à TypeScript",
-      description:
-        "Un guide complet pour démarrer avec TypeScript, couvrant les types de base jusqu'aux fonctionnalités avancées.",
-      status: "pending",
-      createdBy: {
-        name: "Alexandre Pascal",
-        profilePicture:
-          "https://indigo-hidden-meerkat-77.mypinata.cloud/ipfs/bafybeiahrxumqtrj6lmw3rnpzsj6qdfprj4tdbzpvnc5ti4ou2c4uj5n5u",
+  try {
+    const proposalsVoted = await prisma.community_proposal_votes.findMany({
+      where: {
+        voter_id: parseInt(session.user.id),
       },
-      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 jours avant
-      votes: {
-        approve: 7,
-        reject: 2,
+      select: {
+        proposal_id: true,
       },
-    },
-    {
-      id: "2",
-      title: "Développement React avancé",
-      description:
-        "Techniques et patterns pour construire des applications React complexes et performantes. Ce sujet couvre les hooks personnalisés, l'optimisation des rendus et les architectures modernes.",
-      status: "pending",
-      createdBy: {
-        name: "Marie Dubois",
-        profilePicture:
-          "https://indigo-hidden-meerkat-77.mypinata.cloud/ipfs/bafybeidtf3y5opwklmivulgpzcx4b6wnp5p4gl36jbqldmvmszuya5gnpq",
-      },
-      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 jours avant
-      votes: {
-        approve: 12,
-        reject: 1,
-      },
-    },
-    {
-      id: "3",
-      title: "Déploiement avec Docker",
-      description:
-        "Apprendre à conteneuriser et déployer des applications web modernes avec Docker. Ce guide pratique vous aidera à comprendre les concepts fondamentaux et à mettre en place un workflow efficace.",
-      status: "pending",
-      createdBy: {
-        name: "Thomas Martin",
-        profilePicture:
-          "https://indigo-hidden-meerkat-77.mypinata.cloud/ipfs/bafybeif2qdm3plbj2zsgskblfybaffzfau7oj56ixi6unjrn6fkgmgdfem",
-      },
-      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 jours avant
-      votes: {
-        approve: 5,
-        reject: 3,
-      },
-    },
-    {
-      id: "4",
-      title: "API REST avec Node.js",
-      description:
-        "Comment concevoir et développer des API REST robustes et évolutives avec Node.js et Express. Ce tutoriel couvrira également les bonnes pratiques d'authentification et de sécurité.",
-      status: "pending",
-      createdBy: {
-        name: "Sophie Bernard",
-        profilePicture:
-          "https://indigo-hidden-meerkat-77.mypinata.cloud/ipfs/bafybeidznpoebhh2yv7aicgkkcnzfie7tbxch6rsjccvueoqzxnvfirsay",
-      },
-      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 jours avant
-      votes: {
-        approve: 9,
-        reject: 0,
-      },
-    },
-    {
-      id: "5",
-      title: "Intelligence Artificielle pour développeurs web",
-      description:
-        "Introduction aux concepts d'IA appliqués au développement web. Apprenez à intégrer des modèles pré-entraînés et à créer des fonctionnalités intelligentes pour vos applications.",
-      status: "pending",
-      createdBy: {
-        name: "Lucas Petit",
-        profilePicture:
-          "https://indigo-hidden-meerkat-77.mypinata.cloud/ipfs/bafybeidjnmpwjpdvwbf6auqgcm2mjzn74hy2cu3iovbhfvlwdyexwsrjyu",
-      },
-      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 jour avant
-      votes: {
-        approve: 15,
-        reject: 2,
-      },
-    },
-  ];
+    });
 
-  return NextResponse.json(mockProposals);
+    // Récupérer toutes les propositions de cette communauté
+    const proposals = await prisma.community_proposals.findMany({
+      where: {
+        community_id: communityId,
+        status: "PENDING",
+        NOT: [
+          {
+            id: {
+              in: proposalsVoted.map((proposal) => proposal.proposal_id),
+            },
+          },
+          {
+            author_id: parseInt(session.user.id),
+          },
+        ],
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            profilePicture: true,
+          },
+        },
+        community_proposal_votes: true,
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+    });
+
+    // Formater les données pour qu'elles correspondent au format attendu par le frontend
+    const formattedProposals = proposals.map((proposal) => ({
+      id: proposal.id.toString(),
+      title: proposal.title,
+      description: proposal.description,
+      status: proposal.status.toLowerCase(),
+      createdBy: {
+        name: proposal.user.fullName,
+        profilePicture: proposal.user.profilePicture,
+      },
+      createdAt: proposal.created_at,
+      votes: {
+        approve: proposal.community_proposal_votes.filter(
+          (vote) => vote.vote === "APPROVED"
+        ).length,
+        reject: proposal.community_proposal_votes.filter(
+          (vote) => vote.vote === "REJECTED"
+        ).length,
+      },
+    }));
+
+    return NextResponse.json(formattedProposals);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des propositions:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la récupération des propositions" },
+      { status: 500 }
+    );
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
 export async function POST(request, { params }) {
-  const { id } = params;
-  const data = await request.json();
+  const { id } = await params;
+  const communityId = parseInt(id);
 
-  // Simuler la création d'une nouvelle proposition
-  const newProposal = {
-    id: Math.floor(Math.random() * 1000).toString(),
-    title: data.title,
-    description: data.description,
-    status: "pending",
-    createdBy: {
-      name: "Utilisateur actuel",
-      profilePicture:
-        "https://indigo-hidden-meerkat-77.mypinata.cloud/ipfs/bafybeiahrxumqtrj6lmw3rnpzsj6qdfprj4tdbzpvnc5ti4ou2c4uj5n5u",
-    },
-    createdAt: new Date(),
-    votes: {
-      approve: 0,
-      reject: 0,
-    },
-  };
+  // Récupérer la session pour obtenir l'ID de l'utilisateur
+  const session = await getServerSession(authOptions);
 
-  return NextResponse.json(newProposal);
+  if (!session || !session.user) {
+    return NextResponse.json(
+      { error: "Vous devez être connecté pour soumettre une proposition" },
+      { status: 401 }
+    );
+  }
+
+  try {
+    const data = await request.json();
+    const { title, description, wantToContribute } = data;
+
+    console.log("wantToContribute", wantToContribute);
+
+    // Vérifier que les champs requis sont présents
+    if (!title || !description) {
+      return NextResponse.json(
+        { error: "Le titre et la description sont requis" },
+        { status: 400 }
+      );
+    }
+
+    // Vérifier que l'utilisateur est bien membre de la communauté
+    const isMember = await prisma.community_learners.findUnique({
+      where: {
+        community_id_learner_id: {
+          community_id: communityId,
+          learner_id: parseInt(session.user.id),
+        },
+      },
+    });
+
+    const isCreator = await prisma.community.findUnique({
+      where: {
+        id: communityId,
+        creator_id: parseInt(session.user.id),
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!isMember && !isCreator) {
+      return NextResponse.json(
+        {
+          error:
+            "Vous devez être membre de la communauté pour soumettre une proposition",
+        },
+        { status: 403 }
+      );
+    }
+
+    // Créer la nouvelle proposition
+    const newProposal = await prisma.community_proposals.create({
+      data: {
+        community_id: communityId,
+        author_id: parseInt(session.user.id),
+        title,
+        description,
+        status: "PENDING",
+        possible_contributors: wantToContribute ? session.user.id : null,
+      },
+      include: {
+        user: {
+          select: {
+            fullName: true,
+            profilePicture: true,
+          },
+        },
+      },
+    });
+
+    // Formater la réponse
+    const formattedProposal = {
+      id: newProposal.id.toString(),
+      title: newProposal.title,
+      description: newProposal.description,
+      status: "pending",
+      createdBy: {
+        name: newProposal.user.fullName,
+        profilePicture: newProposal.user.profilePicture,
+      },
+      createdAt: newProposal.created_at,
+      votes: {
+        approve: 0,
+        reject: 0,
+      },
+    };
+
+    return NextResponse.json(formattedProposal);
+  } catch (error) {
+    console.error("Erreur lors de la soumission de la proposition:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la soumission de la proposition" },
+      { status: 500 }
+    );
+  } finally {
+    await prisma.$disconnect();
+  }
 }

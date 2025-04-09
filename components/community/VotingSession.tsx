@@ -33,6 +33,7 @@ import { Textarea } from "@/components/ui/textarea";
 import EnrichmentCompare from "./EnrichmentCompare";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Switch } from "@/components/ui/switch";
 
 // Cache pour stocker les données
 const contributorsCache = new Map<
@@ -306,6 +307,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
   const handleSelectProposal = (proposal: TopicProposal) => {
     setSelectedProposal(proposal);
+    setWillContribute(false);
   };
 
   // Fonction pour sélectionner une contribution
@@ -318,8 +320,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     type: "APPROVED" | "REJECTED"
   ) => {
     if (!session) return;
+    console.log(willContribute);
 
     try {
+      setIsLoading(true);
       // Appel API pour enregistrer le vote
       const response = await fetch(
         `/api/communities/${memoizedCommunityId}/proposals/${proposalId}/vote`,
@@ -328,34 +332,29 @@ export function VotingSession({ communityId }: VotingSessionProps) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ vote: type }),
+          body: JSON.stringify({
+            vote: type,
+            wantToContribute: willContribute,
+          }),
         }
       );
 
       if (!response.ok) {
-        // Si l'API n'existe pas encore, simuler le vote
-        setProposals((prev) =>
-          prev.map((proposal) => {
-            if (proposal.id === proposalId) {
-              toast.success(
-                `Vote ${type === "APPROVED" ? "positif" : "négatif"} enregistré`
-              );
-            }
-            return proposal;
-          })
-        );
-      } else {
-        const data = await response.json();
-        toast.success(
-          `Vote ${type === "APPROVED" ? "positif" : "négatif"} enregistré`
-        );
-        // Rafraîchir les propositions
-        fetchProposals();
-        setSelectedProposal(null);
+        throw new Error(await response.text());
       }
+
+      const data = await response.json();
+      toast.success(
+        `Vote ${type === "APPROVED" ? "positif" : "négatif"} enregistré`
+      );
+
+      fetchProposals();
+      setSelectedProposal(null);
     } catch (error) {
       console.error("Erreur lors du vote:", error);
       toast.error("Erreur lors de l'enregistrement du vote");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -449,7 +448,9 @@ export function VotingSession({ communityId }: VotingSessionProps) {
   const handleSubmitProposal = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!session) return;
+
     try {
+      setIsLoading(true);
       // Appel API pour soumettre une proposition
       const response = await fetch(
         `/api/communities/${memoizedCommunityId}/proposals`,
@@ -458,37 +459,82 @@ export function VotingSession({ communityId }: VotingSessionProps) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(newProposal),
+          body: JSON.stringify({
+            ...newProposal,
+            wantToContribute: willContribute,
+          }),
         }
       );
 
       if (!response.ok) {
-        // Si l'API n'existe pas encore, simuler la soumission
-        const newProposalData: TopicProposal = {
-          id: Math.random().toString(),
-          title: newProposal.title,
-          description: newProposal.description,
-          status: "pending",
-          createdBy: {
-            name: session.user?.name || "Utilisateur actuel",
-            profilePicture: session.user?.image || "/images/default-avatar.png",
-          },
-          createdAt: new Date(),
-        };
-
-        setProposals((prev) => [...prev, newProposalData]);
-      } else {
-        const data = await response.json();
-        // Rafraîchir les propositions
-        fetchProposals();
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erreur lors de la soumission");
       }
 
+      // Récupérer la nouvelle proposition créée
+      const data = await response.json();
+
+      // Réinitialiser le formulaire
       setNewProposal({ title: "", description: "" });
+      setWillContribute(false);
       setIsProposalFormOpen(false);
+
       toast.success("Proposition soumise avec succès !");
     } catch (error) {
       console.error("Erreur lors de la soumission de la proposition:", error);
-      toast.error("Erreur lors de la soumission de la proposition");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Erreur lors de la soumission de la proposition"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fonction pour proposer sa contribution
+  const handleProposeContribution = async (proposalId: string) => {
+    if (!session) {
+      toast.error("Vous devez être connecté pour contribuer");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `/api/communities/${memoizedCommunityId}/proposals/${proposalId}/contribute`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Erreur lors de l'inscription comme contributeur"
+        );
+      }
+
+      const data = await response.json();
+      toast.success("Vous êtes inscrit comme contributeur potentiel");
+
+      // Réinitialiser l'état
+      setWillContribute(false);
+
+      // Rafraîchir les propositions pour mettre à jour la liste des contributeurs
+      fetchProposals();
+    } catch (error) {
+      console.error("Erreur lors de l'inscription comme contributeur:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Erreur lors de l'inscription comme contributeur"
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -569,163 +615,165 @@ export function VotingSession({ communityId }: VotingSessionProps) {
             ) : (
               <ScrollArea className="flex-1">
                 <div className="p-2 space-y-2">
-                  {activeTab === "sujets"
-                    ? // Affichage des propositions de sujets
-                      proposals.map((proposal) => (
-                        <div
-                          key={proposal.id}
-                          onClick={() => handleSelectProposal(proposal)}
-                          className={`p-4 rounded-md cursor-pointer transition-colors ${
-                            selectedProposal?.id === proposal.id
-                              ? "bg-blue-50 border border-blue-200"
-                              : "bg-white border border-gray-200 hover:border-blue-200 hover:bg-blue-50/30"
-                          }`}
-                        >
-                          <div className="flex gap-3">
-                            <div className="flex-shrink-0">
-                              <Avatar className="h-10 w-10">
-                                <AvatarImage
-                                  src={proposal.createdBy.profilePicture}
-                                />
-                                <AvatarFallback>
-                                  {proposal.createdBy.name.substring(0, 2)}
-                                </AvatarFallback>
-                              </Avatar>
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="font-medium text-gray-800">
-                                {proposal.title}
-                              </h3>
-                              <p className="text-sm text-gray-600 line-clamp-2">
-                                {proposal.description}
-                              </p>
-                            </div>
-                            <div className="flex gap-2">
-                              <button
-                                className="w-6 h-6 flex items-center justify-center rounded-full bg-green-100 hover:bg-green-200 text-green-600"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleProposalVote(proposal.id, "APPROVED");
-                                }}
-                              >
-                                <Plus className="w-4 h-4" />
-                              </button>
-                              <button
-                                className="w-6 h-6 flex items-center justify-center rounded-full bg-red-100 hover:bg-red-200 text-red-600"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleProposalVote(proposal.id, "REJECTED");
-                                }}
-                              >
-                                <Plus className="w-4 h-4 rotate-45" />
-                              </button>
-                            </div>
+                  {activeTab === "sujets" && proposals.length > 0 ? ( // Affichage des propositions de sujets
+                    proposals.map((proposal) => (
+                      <div
+                        key={proposal.id}
+                        onClick={() => handleSelectProposal(proposal)}
+                        className={`p-4 rounded-md cursor-pointer transition-colors ${
+                          selectedProposal?.id === proposal.id
+                            ? "bg-blue-50 border border-blue-200"
+                            : "bg-white border border-gray-200 hover:border-blue-200 hover:bg-blue-50/30"
+                        }`}
+                      >
+                        <div className="flex gap-3">
+                          <div className="flex-shrink-0">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage
+                                src={proposal.createdBy.profilePicture}
+                              />
+                              <AvatarFallback>
+                                {proposal.createdBy.name.substring(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
                           </div>
-                        </div>
-                      ))
-                    : // Affichage des contributions (créations et enrichissements)
-                      contributions.map((contribution) => (
-                        <div
-                          key={contribution.id}
-                          onClick={() => handleSelectContribution(contribution)}
-                          className={`rounded-md cursor-pointer overflow-hidden mb-2 border ${
-                            selectedContribution?.id === contribution.id
-                              ? contribution.tag === "creation"
-                                ? "bg-purple-100 border-purple-300"
-                                : "bg-blue-100 border-blue-300"
-                              : contribution.tag === "creation"
-                              ? "border-l-4 border-l-purple-500 border-gray-200 bg-white"
-                              : "border-l-4 border-l-blue-500 border-gray-200 bg-white"
-                          } hover:shadow-sm transition-all`}
-                        >
-                          {/* Section du contenu principal */}
-                          <div className="p-3">
-                            {/* Badge d'étiquette */}
-                            <div className="flex justify-between items-center mb-1.5">
-                              <span
-                                className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${
-                                  contribution.tag === "creation"
-                                    ? "bg-purple-100 text-purple-800"
-                                    : "bg-blue-100 text-blue-800"
-                                }`}
-                              >
-                                {contribution.tag === "creation"
-                                  ? "Création"
-                                  : "Enrichissement"}
-                              </span>
-                            </div>
-
-                            {/* Titre avec troncature */}
-                            <h3 className="font-medium text-gray-800 text-sm sm:text-base mb-1">
-                              {(() => {
-                                const tempDiv = document.createElement("div");
-                                tempDiv.innerHTML = contribution.title.replace(
-                                  /<\/?[^>]+(>|$)/g,
-                                  ""
-                                );
-                                const text =
-                                  tempDiv.textContent ||
-                                  tempDiv.innerText ||
-                                  "";
-                                // Limiter à 28 caractères pour le titre
-                                return text.length > 28
-                                  ? text.substring(0, 28) + "..."
-                                  : text;
-                              })()}
+                          <div className="flex-1">
+                            <h3 className="font-medium text-gray-800">
+                              {proposal.title}
                             </h3>
-
-                            {/* Contenu avec troncature */}
-                            <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                              {(() => {
-                                const tempDiv = document.createElement("div");
-                                tempDiv.innerHTML =
-                                  contribution.content.replace(
-                                    /<\/?[^>]+(>|$)/g,
-                                    ""
-                                  );
-                                const text =
-                                  tempDiv.textContent ||
-                                  tempDiv.innerText ||
-                                  "";
-                                // Limiter à 50 caractères pour le contenu
-                                return text.length > 40
-                                  ? text.substring(0, 40) + "..."
-                                  : text;
-                              })()}
+                            <p className="text-sm text-gray-600 line-clamp-2">
+                              {proposal.description}
                             </p>
                           </div>
-
-                          {/* Section de pied pour l'auteur */}
-                          <div className="px-3 py-2 bg-gray-50 border-t border-gray-100 flex justify-between items-center gap-2">
-                            <div className="flex items-center gap-1.5">
-                              <Avatar className="h-5 w-5 flex-shrink-0">
-                                <AvatarImage
-                                  src={contribution.user.profilePicture}
-                                />
-                                <AvatarFallback>
-                                  {contribution.user.fullName.substring(0, 2)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="text-xs text-gray-600">
-                                {(() => {
-                                  const name = contribution.user.fullName;
-                                  // Limiter à 15 caractères pour le nom d'utilisateur
-                                  return name.length > 15
-                                    ? name.substring(0, 15) + "..."
-                                    : name;
-                                })()}
-                              </span>
-                            </div>
-                            <span className="text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
-                              {format(
-                                new Date(contribution.created_at),
-                                "dd/MM/yy",
-                                { locale: fr }
-                              )}
-                            </span>
+                          <div className="flex gap-2">
+                            <button
+                              className="w-6 h-6 flex items-center justify-center rounded-full bg-green-100 hover:bg-green-200 text-green-600"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleProposalVote(proposal.id, "APPROVED");
+                              }}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                            <button
+                              className="w-6 h-6 flex items-center justify-center rounded-full bg-red-100 hover:bg-red-200 text-red-600"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleProposalVote(proposal.id, "REJECTED");
+                              }}
+                            >
+                              <Plus className="w-4 h-4 rotate-45" />
+                            </button>
                           </div>
                         </div>
-                      ))}
+                      </div>
+                    ))
+                  ) : activeTab === "sujets" && proposals.length === 0 ? (
+                    <div className="flex justify-center items-center py-8 flex-1">
+                      <p className="text-gray-500">
+                        Aucune proposition de sujet disponible.
+                      </p>
+                    </div>
+                  ) : (
+                    // Affichage des contributions (créations et enrichissements)
+                    contributions.map((contribution) => (
+                      <div
+                        key={contribution.id}
+                        onClick={() => handleSelectContribution(contribution)}
+                        className={`rounded-md cursor-pointer overflow-hidden mb-2 border ${
+                          selectedContribution?.id === contribution.id
+                            ? contribution.tag === "creation"
+                              ? "bg-purple-100 border-purple-300"
+                              : "bg-blue-100 border-blue-300"
+                            : contribution.tag === "creation"
+                            ? "border-l-4 border-l-purple-500 border-gray-200 bg-white"
+                            : "border-l-4 border-l-blue-500 border-gray-200 bg-white"
+                        } hover:shadow-sm transition-all`}
+                      >
+                        {/* Section du contenu principal */}
+                        <div className="p-3">
+                          {/* Badge d'étiquette */}
+                          <div className="flex justify-between items-center mb-1.5">
+                            <span
+                              className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${
+                                contribution.tag === "creation"
+                                  ? "bg-purple-100 text-purple-800"
+                                  : "bg-blue-100 text-blue-800"
+                              }`}
+                            >
+                              {contribution.tag === "creation"
+                                ? "Création"
+                                : "Enrichissement"}
+                            </span>
+                          </div>
+
+                          {/* Titre avec troncature */}
+                          <h3 className="font-medium text-gray-800 text-sm sm:text-base mb-1">
+                            {(() => {
+                              const tempDiv = document.createElement("div");
+                              tempDiv.innerHTML = contribution.title.replace(
+                                /<\/?[^>]+(>|$)/g,
+                                ""
+                              );
+                              const text =
+                                tempDiv.textContent || tempDiv.innerText || "";
+                              // Limiter à 28 caractères pour le titre
+                              return text.length > 28
+                                ? text.substring(0, 28) + "..."
+                                : text;
+                            })()}
+                          </h3>
+
+                          {/* Contenu avec troncature */}
+                          <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                            {(() => {
+                              const tempDiv = document.createElement("div");
+                              tempDiv.innerHTML = contribution.content.replace(
+                                /<\/?[^>]+(>|$)/g,
+                                ""
+                              );
+                              const text =
+                                tempDiv.textContent || tempDiv.innerText || "";
+                              // Limiter à 50 caractères pour le contenu
+                              return text.length > 40
+                                ? text.substring(0, 40) + "..."
+                                : text;
+                            })()}
+                          </p>
+                        </div>
+
+                        {/* Section de pied pour l'auteur */}
+                        <div className="px-3 py-2 bg-gray-50 border-t border-gray-100 flex justify-between items-center gap-2">
+                          <div className="flex items-center gap-1.5">
+                            <Avatar className="h-5 w-5 flex-shrink-0">
+                              <AvatarImage
+                                src={contribution.user.profilePicture}
+                              />
+                              <AvatarFallback>
+                                {contribution.user.fullName.substring(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs text-gray-600">
+                              {(() => {
+                                const name = contribution.user.fullName;
+                                // Limiter à 15 caractères pour le nom d'utilisateur
+                                return name.length > 15
+                                  ? name.substring(0, 15) + "..."
+                                  : name;
+                              })()}
+                            </span>
+                          </div>
+                          <span className="text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
+                            {format(
+                              new Date(contribution.created_at),
+                              "dd/MM/yy",
+                              { locale: fr }
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </ScrollArea>
             )}
@@ -800,16 +848,31 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                                 required
                               />
                             </div>
+                            <div className="flex items-center space-x-2">
+                              <Switch
+                                id="contribute-new"
+                                checked={willContribute}
+                                onCheckedChange={setWillContribute}
+                              />
+                              <Label
+                                htmlFor="contribute-new"
+                                className="text-sm text-gray-700"
+                              >
+                                Je souhaite contribuer à cette proposition
+                              </Label>
+                            </div>
                           </div>
-                          <SheetFooter>
-                            <SheetClose asChild>
-                              <Button type="button" variant="outline">
-                                Annuler
+                          <SheetFooter className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between w-full">
+                            <div className="flex space-x-2 sm:justify-end">
+                              <SheetClose asChild>
+                                <Button type="button" variant="outline">
+                                  Annuler
+                                </Button>
+                              </SheetClose>
+                              <Button type="submit">
+                                Soumettre la proposition
                               </Button>
-                            </SheetClose>
-                            <Button type="submit">
-                              Soumettre la proposition
-                            </Button>
+                            </div>
                           </SheetFooter>
                         </form>
                       </SheetContent>
@@ -1107,13 +1170,107 @@ export function VotingSession({ communityId }: VotingSessionProps) {
               </div>
             ) : (
               // Message par défaut quand rien n'est sélectionné
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-500">
-                  {activeTab === "sujets"
-                    ? "Sélectionnez un sujet pour voir les détails"
-                    : "Sélectionnez une contribution pour voir les détails"}
-                </p>
-              </div>
+              <>
+                <div className="flex justify-end m-4">
+                  {activeTab === "sujets" && (
+                    <Sheet
+                      open={isProposalFormOpen}
+                      onOpenChange={setIsProposalFormOpen}
+                    >
+                      <SheetTrigger asChild>
+                        <Button className="border border-dashed border-gray-300 bg-white hover:bg-gray-50 text-gray-700">
+                          Proposer un sujet
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent
+                        side="right"
+                        className="sm:max-w-[500px] bg-white"
+                      >
+                        <SheetHeader>
+                          <SheetTitle>Proposer un nouveau sujet</SheetTitle>
+                          <SheetDescription>
+                            Remplissez le formulaire ci-dessous pour proposer un
+                            nouveau sujet à la communauté.
+                          </SheetDescription>
+                        </SheetHeader>
+                        <form onSubmit={handleSubmitProposal}>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="title" className="text-right">
+                                Titre
+                              </Label>
+                              <Input
+                                id="title"
+                                value={newProposal.title}
+                                onChange={(e) =>
+                                  setNewProposal((prev) => ({
+                                    ...prev,
+                                    title: e.target.value,
+                                  }))
+                                }
+                                className="col-span-3"
+                                required
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label
+                                htmlFor="description"
+                                className="text-right self-start"
+                              >
+                                Description
+                              </Label>
+                              <Textarea
+                                id="description"
+                                value={newProposal.description}
+                                onChange={(e) =>
+                                  setNewProposal((prev) => ({
+                                    ...prev,
+                                    description: e.target.value,
+                                  }))
+                                }
+                                className="col-span-3 min-h-[200px]"
+                                required
+                              />
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Switch
+                                id="contribute-new"
+                                checked={willContribute}
+                                onCheckedChange={setWillContribute}
+                              />
+                              <Label
+                                htmlFor="contribute-new"
+                                className="text-sm text-gray-700"
+                              >
+                                Je souhaite contribuer à cette proposition
+                              </Label>
+                            </div>
+                          </div>
+                          <SheetFooter className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between w-full">
+                            <div className="flex space-x-2 sm:justify-end">
+                              <SheetClose asChild>
+                                <Button type="button" variant="outline">
+                                  Annuler
+                                </Button>
+                              </SheetClose>
+                              <Button type="submit">
+                                Soumettre la proposition
+                              </Button>
+                            </div>
+                          </SheetFooter>
+                        </form>
+                      </SheetContent>
+                    </Sheet>
+                  )}
+                </div>
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">
+                    {activeTab === "sujets"
+                      ? "Sélectionnez un sujet pour voir les détails"
+                      : "Sélectionnez une contribution pour voir les détails"}
+                  </p>
+                </div>
+              </>
             )}
           </div>
         </div>
