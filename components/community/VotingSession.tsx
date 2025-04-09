@@ -451,8 +451,11 @@ export function VotingSession({ communityId }: VotingSessionProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm" id="voting-sessions">
-      <div className="border-b border-gray-200 p-4">
+    <div
+      className="bg-white rounded-lg shadow-sm h-full flex flex-col"
+      id="voting-sessions"
+    >
+      <div className="border-b border-gray-200 p-4 flex-shrink-0">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold text-gray-800">
             Sessions de vote
@@ -465,7 +468,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center py-8">
+        <div className="flex justify-center items-center py-8 flex-1">
           <Loader
             size="md"
             color="gradient"
@@ -474,205 +477,198 @@ export function VotingSession({ communityId }: VotingSessionProps) {
           />
         </div>
       ) : (
-        <>
-          {/* <CreationVotingSession communityId={communityId} />
-          <EnrichmentVotingSession communityId={communityId} /> */}
-          <div className="flex">
-            {/* Sidebar avec les onglets */}
-            <div className="w-[350px] border-r border-gray-200 min-h-[600px]">
-              <div className="p-4 border-b border-gray-200">
-                <div className="flex space-x-2">
-                  <button
-                    className={`px-4 py-2 text-sm font-medium rounded-md flex-1 ${
-                      activeTab === "sujets"
-                        ? "bg-primary text-white"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                    onClick={() => handleTabChange("sujets")}
-                  >
-                    Sujets
-                  </button>
-                  <button
-                    className={`px-4 py-2 text-sm font-medium rounded-md flex-1 ${
-                      activeTab === "contributions"
-                        ? "bg-primary text-white"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                    onClick={() => handleTabChange("contributions")}
-                  >
-                    Contributions
-                  </button>
-                </div>
+        <div className="flex flex-1 overflow-hidden">
+          {/* Sidebar avec les onglets */}
+          <div className="w-[20rem] border-r border-gray-200 flex flex-col flex-shrink-0">
+            <div className="p-4 border-b border-gray-200 flex-shrink-0">
+              <div className="flex space-x-2">
+                <button
+                  className={`px-4 py-2 text-sm font-medium rounded-md flex-1 ${
+                    activeTab === "sujets"
+                      ? "bg-primary text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                  onClick={() => handleTabChange("sujets")}
+                >
+                  Sujets
+                </button>
+                <button
+                  className={`px-4 py-2 text-sm font-medium rounded-md flex-1 ${
+                    activeTab === "contributions"
+                      ? "bg-primary text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                  onClick={() => handleTabChange("contributions")}
+                >
+                  Contributions
+                </button>
               </div>
-
-              <ScrollArea className="h-[600px]">
-                <div className="p-2 space-y-2">
-                  {activeTab === "sujets"
-                    ? // Affichage des propositions de sujets
-                      proposals.map((proposal) => (
-                        <div
-                          key={proposal.id}
-                          onClick={() => handleSelectProposal(proposal)}
-                          className={`p-4 rounded-md cursor-pointer transition-colors ${
-                            selectedProposal?.id === proposal.id
-                              ? "bg-blue-50 border border-blue-200"
-                              : "bg-white border border-gray-200 hover:border-blue-200 hover:bg-blue-50/30"
-                          }`}
-                        >
-                          <div className="flex gap-3">
-                            <div className="flex-shrink-0">
-                              <Avatar className="h-10 w-10">
-                                <AvatarImage
-                                  src={proposal.createdBy.profilePicture}
-                                />
-                                <AvatarFallback>
-                                  {proposal.createdBy.name.substring(0, 2)}
-                                </AvatarFallback>
-                              </Avatar>
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="font-medium text-gray-800">
-                                {proposal.title}
-                              </h3>
-                              <p className="text-sm text-gray-600 line-clamp-2">
-                                {proposal.description}
-                              </p>
-                            </div>
-                            <div className="flex gap-2">
-                              <button
-                                className="w-6 h-6 flex items-center justify-center rounded-full bg-green-100 hover:bg-green-200 text-green-600"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleVote(proposal.id, "approve");
-                                }}
-                              >
-                                <Plus className="w-4 h-4" />
-                              </button>
-                              <button
-                                className="w-6 h-6 flex items-center justify-center rounded-full bg-red-100 hover:bg-red-200 text-red-600"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleVote(proposal.id, "reject");
-                                }}
-                              >
-                                <Plus className="w-4 h-4 rotate-45" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    : // Affichage des contributions (créations et enrichissements)
-                      contributions.map((contribution) => (
-                        <div
-                          key={contribution.id}
-                          onClick={() => handleSelectContribution(contribution)}
-                          className={`rounded-md cursor-pointer overflow-hidden mb-2 ${
-                            selectedContribution?.id === contribution.id
-                              ? contribution.tag === "creation"
-                                ? "bg-purple-100 border border-purple-300"
-                                : "bg-blue-100 border border-blue-300"
-                              : contribution.tag === "creation"
-                              ? "border-l-4 border-l-purple-500 bg-white"
-                              : "border-l-4 border-l-blue-500 bg-white"
-                          } border border-gray-200 hover:shadow-sm transition-all`}
-                        >
-                          {/* Section du contenu principal */}
-                          <div className="p-3">
-                            {/* Badge d'étiquette */}
-                            <div className="flex justify-between items-center mb-1.5">
-                              <span
-                                className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${
-                                  contribution.tag === "creation"
-                                    ? "bg-purple-100 text-purple-800"
-                                    : "bg-blue-100 text-blue-800"
-                                }`}
-                              >
-                                {contribution.tag === "creation"
-                                  ? "Création"
-                                  : "Enrichissement"}
-                              </span>
-                            </div>
-
-                            {/* Titre avec troncature */}
-                            <h3 className="font-medium text-gray-800 text-sm sm:text-base mb-1">
-                              {(() => {
-                                const tempDiv = document.createElement("div");
-                                tempDiv.innerHTML = contribution.title.replace(
-                                  /<\/?[^>]+(>|$)/g,
-                                  ""
-                                );
-                                const text =
-                                  tempDiv.textContent ||
-                                  tempDiv.innerText ||
-                                  "";
-                                // Limiter à 28 caractères pour le titre
-                                return text.length > 28
-                                  ? text.substring(0, 28) + "..."
-                                  : text;
-                              })()}
-                            </h3>
-
-                            {/* Contenu avec troncature */}
-                            <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                              {(() => {
-                                const tempDiv = document.createElement("div");
-                                tempDiv.innerHTML =
-                                  contribution.content.replace(
-                                    /<\/?[^>]+(>|$)/g,
-                                    ""
-                                  );
-                                const text =
-                                  tempDiv.textContent ||
-                                  tempDiv.innerText ||
-                                  "";
-                                // Limiter à 50 caractères pour le contenu
-                                return text.length > 40
-                                  ? text.substring(0, 40) + "..."
-                                  : text;
-                              })()}
-                            </p>
-                          </div>
-
-                          {/* Section de pied pour l'auteur */}
-                          <div className="px-3 py-2 bg-gray-50 border-t border-gray-100 flex justify-between items-center gap-2">
-                            <div className="flex items-center gap-1.5">
-                              <Avatar className="h-5 w-5 flex-shrink-0">
-                                <AvatarImage
-                                  src={contribution.user.profilePicture}
-                                />
-                                <AvatarFallback>
-                                  {contribution.user.fullName.substring(0, 2)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="text-xs text-gray-600">
-                                {(() => {
-                                  const name = contribution.user.fullName;
-                                  // Limiter à 15 caractères pour le nom d'utilisateur
-                                  return name.length > 15
-                                    ? name.substring(0, 15) + "..."
-                                    : name;
-                                })()}
-                              </span>
-                            </div>
-                            <span className="text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
-                              {format(
-                                new Date(contribution.created_at),
-                                "dd/MM/yy",
-                                { locale: fr }
-                              )}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                </div>
-              </ScrollArea>
             </div>
 
-            {/* Contenu principal */}
-            <div className="flex-1 p-6">
-              {selectedProposal && activeTab === "sujets" ? (
-                // Affichage du détail d'une proposition sélectionnée
-                <div className="space-y-6">
+            <ScrollArea className="flex-1">
+              <div className="p-2 space-y-2">
+                {activeTab === "sujets"
+                  ? // Affichage des propositions de sujets
+                    proposals.map((proposal) => (
+                      <div
+                        key={proposal.id}
+                        onClick={() => handleSelectProposal(proposal)}
+                        className={`p-4 rounded-md cursor-pointer transition-colors ${
+                          selectedProposal?.id === proposal.id
+                            ? "bg-blue-50 border border-blue-200"
+                            : "bg-white border border-gray-200 hover:border-blue-200 hover:bg-blue-50/30"
+                        }`}
+                      >
+                        <div className="flex gap-3">
+                          <div className="flex-shrink-0">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage
+                                src={proposal.createdBy.profilePicture}
+                              />
+                              <AvatarFallback>
+                                {proposal.createdBy.name.substring(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-medium text-gray-800">
+                              {proposal.title}
+                            </h3>
+                            <p className="text-sm text-gray-600 line-clamp-2">
+                              {proposal.description}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              className="w-6 h-6 flex items-center justify-center rounded-full bg-green-100 hover:bg-green-200 text-green-600"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleVote(proposal.id, "approve");
+                              }}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                            <button
+                              className="w-6 h-6 flex items-center justify-center rounded-full bg-red-100 hover:bg-red-200 text-red-600"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleVote(proposal.id, "reject");
+                              }}
+                            >
+                              <Plus className="w-4 h-4 rotate-45" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  : // Affichage des contributions (créations et enrichissements)
+                    contributions.map((contribution) => (
+                      <div
+                        key={contribution.id}
+                        onClick={() => handleSelectContribution(contribution)}
+                        className={`rounded-md cursor-pointer overflow-hidden mb-2 ${
+                          selectedContribution?.id === contribution.id
+                            ? contribution.tag === "creation"
+                              ? "bg-purple-100 border border-purple-300"
+                              : "bg-blue-100 border border-blue-300"
+                            : contribution.tag === "creation"
+                            ? "border-l-4 border-l-purple-500 bg-white"
+                            : "border-l-4 border-l-blue-500 bg-white"
+                        } border border-gray-200 hover:shadow-sm transition-all`}
+                      >
+                        {/* Section du contenu principal */}
+                        <div className="p-3">
+                          {/* Badge d'étiquette */}
+                          <div className="flex justify-between items-center mb-1.5">
+                            <span
+                              className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${
+                                contribution.tag === "creation"
+                                  ? "bg-purple-100 text-purple-800"
+                                  : "bg-blue-100 text-blue-800"
+                              }`}
+                            >
+                              {contribution.tag === "creation"
+                                ? "Création"
+                                : "Enrichissement"}
+                            </span>
+                          </div>
+
+                          {/* Titre avec troncature */}
+                          <h3 className="font-medium text-gray-800 text-sm sm:text-base mb-1">
+                            {(() => {
+                              const tempDiv = document.createElement("div");
+                              tempDiv.innerHTML = contribution.title.replace(
+                                /<\/?[^>]+(>|$)/g,
+                                ""
+                              );
+                              const text =
+                                tempDiv.textContent || tempDiv.innerText || "";
+                              // Limiter à 28 caractères pour le titre
+                              return text.length > 28
+                                ? text.substring(0, 28) + "..."
+                                : text;
+                            })()}
+                          </h3>
+
+                          {/* Contenu avec troncature */}
+                          <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                            {(() => {
+                              const tempDiv = document.createElement("div");
+                              tempDiv.innerHTML = contribution.content.replace(
+                                /<\/?[^>]+(>|$)/g,
+                                ""
+                              );
+                              const text =
+                                tempDiv.textContent || tempDiv.innerText || "";
+                              // Limiter à 50 caractères pour le contenu
+                              return text.length > 40
+                                ? text.substring(0, 40) + "..."
+                                : text;
+                            })()}
+                          </p>
+                        </div>
+
+                        {/* Section de pied pour l'auteur */}
+                        <div className="px-3 py-2 bg-gray-50 border-t border-gray-100 flex justify-between items-center gap-2">
+                          <div className="flex items-center gap-1.5">
+                            <Avatar className="h-5 w-5 flex-shrink-0">
+                              <AvatarImage
+                                src={contribution.user.profilePicture}
+                              />
+                              <AvatarFallback>
+                                {contribution.user.fullName.substring(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs text-gray-600">
+                              {(() => {
+                                const name = contribution.user.fullName;
+                                // Limiter à 15 caractères pour le nom d'utilisateur
+                                return name.length > 15
+                                  ? name.substring(0, 15) + "..."
+                                  : name;
+                              })()}
+                            </span>
+                          </div>
+                          <span className="text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
+                            {format(
+                              new Date(contribution.created_at),
+                              "dd/MM/yy",
+                              { locale: fr }
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+              </div>
+            </ScrollArea>
+          </div>
+
+          {/* Contenu principal */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {selectedProposal && activeTab === "sujets" ? (
+              // Affichage du détail d'une proposition sélectionnée
+              <div className="flex flex-col h-full">
+                <div className="p-4 border-b border-gray-200 flex-shrink-0">
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-gray-800">
                       {selectedProposal.title}
@@ -751,6 +747,9 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       </SheetContent>
                     </Sheet>
                   </div>
+                </div>
+
+                <div className="p-4 overflow-auto flex-1">
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -766,62 +765,60 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Description
                       </label>
-                      <div className="p-4 bg-gray-50 rounded-md border border-gray-200 min-h-[200px]">
+                      <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
                         <p className="text-gray-800">
                           {selectedProposal.description}
                         </p>
                       </div>
                     </div>
-
-                    <div className="flex space-x-3 pt-4">
-                      <Button
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() =>
-                          handleVote(selectedProposal.id, "approve")
-                        }
-                      >
-                        Valider le sujet
-                      </Button>
-                      <Button
-                        className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                        onClick={() =>
-                          handleVote(selectedProposal.id, "reject")
-                        }
-                      >
-                        Refuser
-                      </Button>
-                    </div>
-
-                    <div className="flex items-center space-x-2 py-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="contribute"
-                          checked={willContribute}
-                          onCheckedChange={(checked) =>
-                            setWillContribute(!!checked)
-                          }
-                        />
-                        <label
-                          htmlFor="contribute"
-                          className="text-sm font-medium text-gray-700 cursor-pointer"
-                        >
-                          Se proposer pour rédiger ce sujet
-                        </label>
-                      </div>
-                    </div>
                   </div>
                 </div>
-              ) : selectedContribution && activeTab === "contributions" ? (
-                // Affichage du détail d'une contribution sélectionnée
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center border-b border-gray-200 pb-4">
+
+                <div className="p-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+                  <div className="flex space-x-3">
+                    <Button
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => handleVote(selectedProposal.id, "approve")}
+                    >
+                      Valider le sujet
+                    </Button>
+                    <Button
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                      onClick={() => handleVote(selectedProposal.id, "reject")}
+                    >
+                      Refuser
+                    </Button>
+                  </div>
+                  <div className="flex items-center space-x-2 mt-3">
+                    <Checkbox
+                      id="contribute"
+                      checked={willContribute}
+                      onCheckedChange={(checked) =>
+                        setWillContribute(!!checked)
+                      }
+                    />
+                    <label
+                      htmlFor="contribute"
+                      className="text-sm font-medium text-gray-700 cursor-pointer"
+                    >
+                      Se proposer pour rédiger ce sujet
+                    </label>
+                  </div>
+                </div>
+              </div>
+            ) : selectedContribution && activeTab === "contributions" ? (
+              // Affichage du détail d'une contribution sélectionnée
+              <div className="flex flex-col h-full">
+                {/* En-tête avec le titre et informations */}
+                <div className="p-4 border-b border-gray-200 flex-shrink-0">
+                  <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <h2 className="text-xl font-semibold text-gray-800 truncate">
                         {selectedContribution.title.length > 40
                           ? selectedContribution.title.substring(0, 40) + "..."
                           : selectedContribution.title}
                       </h2>
-                      {/* <span
+                      <span
                         className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                           selectedContribution.tag === "creation"
                             ? "bg-purple-100 text-purple-800"
@@ -831,7 +828,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         {selectedContribution.tag === "creation"
                           ? "Création"
                           : "Enrichissement"}
-                      </span> */}
+                      </span>
                     </div>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
@@ -843,10 +840,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium text-gray-800">
+                        <p className="font-medium text-gray-800 truncate">
                           {selectedContribution.user.fullName}
                         </p>
-                        <p className="text-sm text-gray-500 whitespace-nowrap">
+                        <p className="text-sm text-gray-500 truncate">
                           Proposé le{" "}
                           {format(
                             new Date(selectedContribution.created_at),
@@ -857,194 +854,168 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="space-y-2">
-                    <div>
-                      <div className="bg-gray-50 rounded-md border border-gray-200 overflow-hidden">
-                        {selectedContribution.tag === "creation" ? (
-                          <div className="h-[20rem] md:h-[25rem] lg:h-[30rem] flex flex-col">
-                            {/* En-tête fixe avec les boutons de mode d'affichage */}
-                            <div className="sticky top-0 z-10 bg-gray-50 py-2 border-b border-gray-200 flex-shrink-0">
-                              <div className="px-4 py-1.5 flex items-center space-x-2 justify-start">
-                                <span className="text-sm text-gray-500">
-                                  Contenu :
-                                </span>
-                              </div>
-                            </div>
-                            <div className="flex-1 overflow-y-auto">
-                              <div
-                                className="contribution-content tinymce-content p-4"
-                                dangerouslySetInnerHTML={{
-                                  __html: selectedContribution.content,
-                                }}
-                              />
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="h-[20rem] md:h-[25rem] lg:h-[30rem] flex flex-col">
-                            <div className="flex-1 overflow-y-auto">
-                              <EnrichmentCompare
-                                originalContent={
-                                  selectedContribution.original_content || ""
-                                }
-                                modifiedContent={selectedContribution.content}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Text area pour la justification */}
-                    <div className="mt-4">
-                      <label
-                        htmlFor="feedback"
-                        className="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Justification de votre vote
-                      </label>
-                      <Textarea
-                        id="feedback"
-                        placeholder="Expliquez en quelques mots votre décision..."
-                        className="w-full min-h-[80px] text-sm"
-                        value={voteFeedback}
-                        onChange={(e) => setVoteFeedback(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="flex space-x-3 pt-4">
-                      <Button
-                        className={`flex-1 ${
-                          selectedContribution.tag === "creation"
-                            ? "bg-purple-600 hover:bg-purple-700"
-                            : "bg-blue-600 hover:bg-blue-700"
-                        } text-white`}
-                        onClick={() =>
-                          handleContributionVote(
-                            selectedContribution.id,
-                            "approve"
-                          )
-                        }
-                      >
-                        Approuver
-                      </Button>
-                      <Button
-                        className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                        onClick={() =>
-                          handleContributionVote(
-                            selectedContribution.id,
-                            "reject"
-                          )
-                        }
-                      >
-                        Rejeter
-                      </Button>
-                    </div>
-
-                    <div className="bg-amber-50 p-4 rounded-md border border-amber-200 mt-6">
-                      <div className="flex items-start gap-2">
-                        <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <h4 className="font-medium text-amber-800">
-                            À propos de cette validation
-                          </h4>
-                          <p className="text-sm text-amber-700 mt-1">
-                            {selectedContribution.tag === "creation"
-                              ? "En validant cette création, vous confirmez que le contenu respecte les règles de la communauté et apporte une valeur ajoutée."
-                              : "En validant cet enrichissement, vous confirmez que les modifications proposées améliorent le contenu existant."}
-                          </p>
+                {/* Zone de contenu scrollable */}
+                <div className="flex-1 overflow-hidden">
+                  {selectedContribution.tag === "creation" ? (
+                    <div className="h-full flex flex-col">
+                      <div className="sticky top-0 z-10 bg-gray-50 py-2 border-b border-gray-200 flex-shrink-0">
+                        <div className="px-4 py-1.5 flex items-center space-x-2 justify-start">
+                          <span className="text-sm text-gray-500">
+                            Contenu :
+                          </span>
                         </div>
                       </div>
+                      <div className="flex-1 overflow-y-auto">
+                        <div
+                          className="contribution-content tinymce-content p-4"
+                          dangerouslySetInnerHTML={{
+                            __html: selectedContribution.content,
+                          }}
+                        />
+                      </div>
                     </div>
+                  ) : (
+                    <div className="h-full flex flex-col">
+                      <div className="flex-1 overflow-y-auto">
+                        <EnrichmentCompare
+                          originalContent={
+                            selectedContribution.original_content || ""
+                          }
+                          modifiedContent={selectedContribution.content}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Pied de page fixe avec la zone de feedback et les boutons */}
+                <div className="p-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+                  <label
+                    htmlFor="feedback"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Justification de votre vote
+                  </label>
+                  <Textarea
+                    id="feedback"
+                    placeholder="Expliquez en quelques mots votre décision..."
+                    className="w-full h-[2.5rem] text-sm mb-4"
+                    value={voteFeedback}
+                    onChange={(e) => setVoteFeedback(e.target.value)}
+                  />
+
+                  <div className="flex space-x-3">
+                    <Button
+                      className={`flex-1 ${
+                        selectedContribution.tag === "creation"
+                          ? "bg-purple-600 hover:bg-purple-700"
+                          : "bg-blue-600 hover:bg-blue-700"
+                      } text-white`}
+                      onClick={() =>
+                        handleContributionVote(
+                          selectedContribution.id,
+                          "approve"
+                        )
+                      }
+                    >
+                      Approuver
+                    </Button>
+                    <Button
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                      onClick={() =>
+                        handleContributionVote(
+                          selectedContribution.id,
+                          "reject"
+                        )
+                      }
+                    >
+                      Rejeter
+                    </Button>
                   </div>
                 </div>
-              ) : activeTab === "contributions" && !selectedContribution ? (
-                // Affichage d'informations sur les contributions quand aucune n'est sélectionnée
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-semibold text-gray-800">
-                      Contributions à la communauté
-                    </h2>
-                  </div>
-                  <div className="bg-white p-6 rounded-lg border border-gray-200">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                      <span className="text-sm font-medium">
-                        Création de contenu
-                      </span>
-                      <div className="w-3 h-3 rounded-full bg-blue-500 ml-4"></div>
-                      <span className="text-sm font-medium">
-                        Enrichissement
-                      </span>
-                      <div className="w-3 h-3 rounded-full bg-amber-500 ml-4"></div>
-                      <span className="text-sm font-medium">
-                        En attente de validation
-                      </span>
-                    </div>
-                    <p className="text-gray-600">
-                      Les contributions représentent le contenu créé ou enrichi
-                      par les membres de la communauté. Sélectionnez une
-                      contribution dans la liste à gauche pour voir les détails
-                      et voter.
-                    </p>
-                  </div>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Statistiques des contributions</CardTitle>
-                      <CardDescription>
-                        Aperçu des contributions de la communauté
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex justify-between items-center">
-                        <div className="text-center">
-                          <span className="text-2xl font-bold text-purple-600">
-                            {
-                              contributions.filter((c) => c.tag === "creation")
-                                .length
-                            }
-                          </span>
-                          <p className="text-sm text-gray-500">Créations</p>
-                        </div>
-                        <div className="text-center">
-                          <span className="text-2xl font-bold text-blue-600">
-                            {
-                              contributions.filter(
-                                (c) => c.tag === "enrichment"
-                              ).length
-                            }
-                          </span>
-                          <p className="text-sm text-gray-500">
-                            Enrichissements
-                          </p>
-                        </div>
-                        <div className="text-center">
-                          <span className="text-2xl font-bold text-amber-600">
-                            {
-                              contributions.filter(
-                                (c) => c.status === "PENDING"
-                              ).length
-                            }
-                          </span>
-                          <p className="text-sm text-gray-500">En attente</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+              </div>
+            ) : activeTab === "contributions" && !selectedContribution ? (
+              // Affichage d'informations sur les contributions quand aucune n'est sélectionnée
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold text-gray-800">
+                    Contributions à la communauté
+                  </h2>
                 </div>
-              ) : (
-                // Message par défaut quand rien n'est sélectionné
-                <div className="flex items-center justify-center h-full">
-                  <p className="text-gray-500">
-                    {activeTab === "sujets"
-                      ? "Sélectionnez un sujet pour voir les détails"
-                      : "Sélectionnez une contribution pour voir les détails"}
+                <div className="bg-white p-6 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                    <span className="text-sm font-medium">
+                      Création de contenu
+                    </span>
+                    <div className="w-3 h-3 rounded-full bg-blue-500 ml-4"></div>
+                    <span className="text-sm font-medium">Enrichissement</span>
+                    <div className="w-3 h-3 rounded-full bg-amber-500 ml-4"></div>
+                    <span className="text-sm font-medium">
+                      En attente de validation
+                    </span>
+                  </div>
+                  <p className="text-gray-600">
+                    Les contributions représentent le contenu créé ou enrichi
+                    par les membres de la communauté. Sélectionnez une
+                    contribution dans la liste à gauche pour voir les détails et
+                    voter.
                   </p>
                 </div>
-              )}
-            </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Statistiques des contributions</CardTitle>
+                    <CardDescription>
+                      Aperçu des contributions de la communauté
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-between items-center">
+                      <div className="text-center">
+                        <span className="text-2xl font-bold text-purple-600">
+                          {
+                            contributions.filter((c) => c.tag === "creation")
+                              .length
+                          }
+                        </span>
+                        <p className="text-sm text-gray-500">Créations</p>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-2xl font-bold text-blue-600">
+                          {
+                            contributions.filter((c) => c.tag === "enrichment")
+                              .length
+                          }
+                        </span>
+                        <p className="text-sm text-gray-500">Enrichissements</p>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-2xl font-bold text-amber-600">
+                          {
+                            contributions.filter((c) => c.status === "PENDING")
+                              .length
+                          }
+                        </span>
+                        <p className="text-sm text-gray-500">En attente</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              // Message par défaut quand rien n'est sélectionné
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-500">
+                  {activeTab === "sujets"
+                    ? "Sélectionnez un sujet pour voir les détails"
+                    : "Sélectionnez une contribution pour voir les détails"}
+                </p>
+              </div>
+            )}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
