@@ -99,7 +99,7 @@ export async function POST(request, { params }) {
         title,
         content,
         cover_image_url,
-        tag,
+        tag: parseInt(tag),
         accept_contributions,
         status: "PENDING",
       },
