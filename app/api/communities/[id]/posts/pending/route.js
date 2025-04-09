@@ -16,10 +16,6 @@ export async function GET(request, { params }) {
 
     const user_id = session.user.id;
 
-    // Récupérer l'id de l'utilisateur dans l'UR
-
-    console.log("user_id", user_id);
-
     // Récupérer les review de l'utilisateur
     const postReviews = await prisma.community_posts_reviews.findMany({
       where: {

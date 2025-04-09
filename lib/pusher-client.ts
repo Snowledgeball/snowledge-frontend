@@ -14,7 +14,7 @@ export function getPusherClient() {
 
   // Vérifier si une connexion existe déjà en mémoire
   if (pusherInstance) {
-    console.log("♻️ Réutilisation de l'instance Pusher existante (mémoire)");
+    // console.log("♻️ Réutilisation de l'instance Pusher existante (mémoire)");
     return pusherInstance;
   }
 
@@ -24,7 +24,7 @@ export function getPusherClient() {
       CACHE_KEYS.PUSHER_CONNECTION()
     );
     if (existingConnection) {
-      console.log("♻️ Réutilisation de l'instance Pusher existante (session)");
+      // console.log("♻️ Réutilisation de l'instance Pusher existante (session)");
       pusherInstance = new PusherClient(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
         cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
         auth: {
@@ -37,7 +37,7 @@ export function getPusherClient() {
     }
 
     // Créer une nouvelle connexion
-    console.log("🔄 Création d'une nouvelle instance Pusher");
+    // console.log("🔄 Création d'une nouvelle instance Pusher");
     pusherInstance = new PusherClient(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
       cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
     });

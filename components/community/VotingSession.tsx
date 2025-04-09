@@ -54,15 +54,14 @@ type Contribution = {
   status: string;
   tag: "creation" | "enrichment";
   created_at: string;
-  cover_image_url: string | null;
   user: {
     id: number;
     fullName: string;
     profilePicture: string;
   };
   community_posts_reviews?: Array<any>;
-  community_posts_enrichments?: Array<any>;
   original_content?: string;
+  post_id?: number;
 };
 
 interface VotingSessionProps {
@@ -196,7 +195,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
       // Récupérer les propositions de création
       const creationsResponse = await fetch(
-        `/api/communities/${communityId}/posts/pending?user_id=${userId}`
+        `/api/communities/${communityId}/posts/pending`
       );
 
       if (!creationsResponse.ok) {
@@ -209,7 +208,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
       // Récupérer les enrichissements en attente
       const enrichmentsResponse = await fetch(
-        `/api/communities/${communityId}/posts/with-pending-enrichments?user_id=${userId}`
+        `/api/communities/${communityId}/posts/with-pending-enrichments`
       );
 
       if (!enrichmentsResponse.ok) {
@@ -220,6 +219,8 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
       const enrichmentsData = await enrichmentsResponse.json();
 
+      console.log("enrichmentsData", enrichmentsData);
+
       // Formater les créations
       const formattedCreations: Contribution[] = creationsData.map(
         (creation: any) => ({
@@ -229,7 +230,6 @@ export function VotingSession({ communityId }: VotingSessionProps) {
           status: creation.status,
           tag: "creation",
           created_at: creation.created_at,
-          cover_image_url: creation.cover_image_url,
           user: creation.user,
           community_posts_reviews: creation.community_posts_reviews,
         })
@@ -237,19 +237,17 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
       // Formater les enrichissements
       const formattedEnrichments: Contribution[] = [];
-      enrichmentsData.forEach((post: any) => {
-        post.community_posts_enrichments?.forEach((enrichment: any) => {
-          formattedEnrichments.push({
-            id: enrichment.id,
-            title: enrichment.title || `Enrichissement de ${post.title}`,
-            content: enrichment.content,
-            status: enrichment.status,
-            tag: "enrichment",
-            created_at: enrichment.created_at,
-            cover_image_url: post.cover_image_url,
-            user: enrichment.user,
-            original_content: enrichment.original_content,
-          });
+      enrichmentsData.forEach((enrichment: any) => {
+        formattedEnrichments.push({
+          id: enrichment.id,
+          title: enrichment.title,
+          content: enrichment.content,
+          status: enrichment.status,
+          tag: "enrichment",
+          created_at: enrichment.created_at,
+          original_content: enrichment.original_content,
+          post_id: enrichment.post_id,
+          user: enrichment.user,
         });
       });
 
@@ -277,6 +275,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     await Promise.all([fetchContributorsCount(), fetchProposals()]);
     setIsLoading(false);
   }, [fetchContributorsCount, fetchProposals]);
+
+  useEffect(() => {
+    console.log("selectedContribution", selectedContribution);
+  }, [selectedContribution]);
 
   // Effet pour charger les données initiales
   useEffect(() => {
@@ -364,6 +366,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
   };
 
   const handleSubmitEnrichmentVote = async (
+    contributionId: number,
     postId: number,
     vote: "APPROVED" | "REJECTED"
   ) => {
@@ -374,7 +377,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
     try {
       const response = await fetch(
-        `/api/communities/${communityId}/posts/enrichments/${postId}/reviews`,
+        `/api/communities/${communityId}/posts/${postId}/enrichments/${contributionId}/reviews`,
         {
           method: "POST",
           headers: {
@@ -406,7 +409,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
   };
 
   const handleSubmitCreationVote = async (
-    postId: number,
+    contributionId: number,
     vote: "APPROVED" | "REJECTED"
   ) => {
     if (!voteFeedback.trim()) {
@@ -416,7 +419,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
     try {
       const response = await fetch(
-        `/api/communities/${communityId}/posts/${postId}/reviews`,
+        `/api/communities/${communityId}/posts/${contributionId}/reviews`,
         {
           method: "POST",
           headers: {
@@ -986,6 +989,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                             )
                           : handleSubmitEnrichmentVote(
                               selectedContribution.id,
+                              selectedContribution.post_id || 0,
                               "APPROVED"
                             )
                       }
@@ -1002,6 +1006,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                             )
                           : handleSubmitEnrichmentVote(
                               selectedContribution.id,
+                              selectedContribution.post_id || 0,
                               "REJECTED"
                             )
                       }
