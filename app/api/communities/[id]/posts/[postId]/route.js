@@ -125,13 +125,6 @@ export async function PUT(request, { params }) {
     console.log("isContributor", isContributor);
     // Si c'est pour un commentaire, on vérifie que l'utilisateur est un contributeur ou l'auteur du post
     if (post.accept_contributions) {
-      console.log(
-        "dans le if post.accept_contributions",
-        post.accept_contributions
-      );
-
-      console.log("userId", userId);
-      console.log("post.community_id", post.community_id);
       isContributor = await prisma.community_contributors.findFirst({
         where: {
           contributor_id: userId,

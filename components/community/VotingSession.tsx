@@ -175,7 +175,6 @@ export function VotingSession({ communityId }: VotingSessionProps) {
       );
       const data = await response.json();
       setProposals(data);
-      console.log("proposals", data);
     } catch (error) {
       console.error("Erreur lors de la récupération des propositions:", error);
     }
@@ -189,9 +188,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     }
 
     try {
-      console.log("session", session);
       const userId = session.user.id;
-      console.log("userId", userId);
 
       // Récupérer les propositions de création
       const creationsResponse = await fetch(
@@ -218,8 +215,6 @@ export function VotingSession({ communityId }: VotingSessionProps) {
       }
 
       const enrichmentsData = await enrichmentsResponse.json();
-
-      console.log("enrichmentsData", enrichmentsData);
 
       // Formater les créations
       const formattedCreations: Contribution[] = creationsData.map(
@@ -275,10 +270,6 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     await Promise.all([fetchContributorsCount(), fetchProposals()]);
     setIsLoading(false);
   }, [fetchContributorsCount, fetchProposals]);
-
-  useEffect(() => {
-    console.log("selectedContribution", selectedContribution);
-  }, [selectedContribution]);
 
   // Effet pour charger les données initiales
   useEffect(() => {
@@ -630,15 +621,15 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       <div
                         key={contribution.id}
                         onClick={() => handleSelectContribution(contribution)}
-                        className={`rounded-md cursor-pointer overflow-hidden mb-2 ${
+                        className={`rounded-md cursor-pointer overflow-hidden mb-2 border ${
                           selectedContribution?.id === contribution.id
                             ? contribution.tag === "creation"
-                              ? "bg-purple-100 border border-purple-300"
-                              : "bg-blue-100 border border-blue-300"
+                              ? "bg-purple-100 border-purple-300"
+                              : "bg-blue-100 border-blue-300"
                             : contribution.tag === "creation"
-                            ? "border-l-4 border-l-purple-500 bg-white"
-                            : "border-l-4 border-l-blue-500 bg-white"
-                        } border border-gray-200 hover:shadow-sm transition-all`}
+                            ? "border-l-4 border-l-purple-500 border-gray-200 bg-white"
+                            : "border-l-4 border-l-blue-500 border-gray-200 bg-white"
+                        } hover:shadow-sm transition-all`}
                       >
                         {/* Section du contenu principal */}
                         <div className="p-3">
@@ -882,8 +873,8 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <h2 className="text-xl font-semibold text-gray-800 truncate">
-                        {selectedContribution.title.length > 40
-                          ? selectedContribution.title.substring(0, 40) + "..."
+                        {selectedContribution.title.length > 32
+                          ? selectedContribution.title.substring(0, 32) + "..."
                           : selectedContribution.title}
                       </h2>
                       <span
