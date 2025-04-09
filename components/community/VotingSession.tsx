@@ -96,6 +96,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
   });
   const [proposals, setProposals] = useState<TopicProposal[]>([]);
   const [contributions, setContributions] = useState<Contribution[]>([]);
+  const [voteFeedback, setVoteFeedback] = useState("");
 
   // Ajouter un nouvel état pour la contribution sélectionnée
   const [selectedContribution, setSelectedContribution] =
@@ -332,6 +333,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
         );
         // Rafraîchir les propositions
         fetchProposals();
+        setSelectedProposal(null);
       }
     } catch (error) {
       console.error("Erreur lors du vote:", error);
@@ -345,6 +347,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     type: "approve" | "reject"
   ) => {
     if (!session) return;
+    if (!voteFeedback.trim()) {
+      toast.error("Veuillez fournir une justification pour votre vote");
+      return;
+    }
 
     try {
       // Appel API pour approuver ou rejeter un enrichissement
@@ -356,6 +362,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
           headers: {
             "Content-Type": "application/json",
           },
+          body: JSON.stringify({ feedback: voteFeedback }),
         }
       );
 
@@ -380,6 +387,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
         );
         // Rafraîchir les contributions
         setSelectedContribution(null);
+        setVoteFeedback("");
       }
     } catch (error) {
       console.error("Erreur lors du vote sur la contribution:", error);
@@ -764,6 +772,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         </p>
                       </div>
                     </div>
+
                     <div className="flex space-x-3 pt-4">
                       <Button
                         className="flex-1 bg-green-600 hover:bg-green-700 text-white"
@@ -782,6 +791,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         Refuser
                       </Button>
                     </div>
+
                     <div className="flex items-center space-x-2 py-2">
                       <div className="flex items-center space-x-2">
                         <Checkbox
@@ -806,10 +816,12 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center border-b border-gray-200 pb-4">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-semibold text-gray-800 truncate max-w-[90%]">
-                        {selectedContribution.title}
+                      <h2 className="text-xl font-semibold text-gray-800 truncate">
+                        {selectedContribution.title.length > 40
+                          ? selectedContribution.title.substring(0, 40) + "..."
+                          : selectedContribution.title}
                       </h2>
-                      <span
+                      {/* <span
                         className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                           selectedContribution.tag === "creation"
                             ? "bg-purple-100 text-purple-800"
@@ -819,7 +831,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         {selectedContribution.tag === "creation"
                           ? "Création"
                           : "Enrichissement"}
-                      </span>
+                      </span> */}
                     </div>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
@@ -881,6 +893,23 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           </div>
                         )}
                       </div>
+                    </div>
+
+                    {/* Text area pour la justification */}
+                    <div className="mt-4">
+                      <label
+                        htmlFor="feedback"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
+                        Justification de votre vote
+                      </label>
+                      <Textarea
+                        id="feedback"
+                        placeholder="Expliquez en quelques mots votre décision..."
+                        className="w-full min-h-[80px] text-sm"
+                        value={voteFeedback}
+                        onChange={(e) => setVoteFeedback(e.target.value)}
+                      />
                     </div>
 
                     <div className="flex space-x-3 pt-4">
