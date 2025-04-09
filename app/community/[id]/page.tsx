@@ -752,7 +752,7 @@ const CommunityHub = () => {
                   ) : activeTab === "voting" ? (
                     <div
                       id="voting-section"
-                      className="max-w-[100vw] max-h-[100vh]"
+                      className="max-w-[98vw] max-h-[100vh]"
                     >
                       <VotingSession
                         communityId={params.id ? params.id.toString() : ""}

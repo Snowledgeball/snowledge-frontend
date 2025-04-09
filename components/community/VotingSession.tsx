@@ -558,19 +558,77 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         <div
                           key={contribution.id}
                           onClick={() => handleSelectContribution(contribution)}
-                          className={`p-4 rounded-md cursor-pointer transition-colors ${
+                          className={`rounded-md cursor-pointer overflow-hidden mb-2 ${
                             selectedContribution?.id === contribution.id
                               ? contribution.tag === "creation"
                                 ? "bg-purple-100 border border-purple-300"
                                 : "bg-blue-100 border border-blue-300"
                               : contribution.tag === "creation"
-                              ? "border-l-4 border-l-purple-500 bg-purple-50/30 hover:bg-purple-50"
-                              : "border-l-4 border-l-blue-500 bg-blue-50/30 hover:bg-blue-50"
-                          } border border-gray-200`}
+                              ? "border-l-4 border-l-purple-500 bg-white"
+                              : "border-l-4 border-l-blue-500 bg-white"
+                          } border border-gray-200 hover:shadow-sm transition-all`}
                         >
-                          <div className="flex gap-3">
-                            <div className="flex-shrink-0">
-                              <Avatar className="h-10 w-10">
+                          {/* Section du contenu principal */}
+                          <div className="p-3">
+                            {/* Badge d'étiquette */}
+                            <div className="flex justify-between items-center mb-1.5">
+                              <span
+                                className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${
+                                  contribution.tag === "creation"
+                                    ? "bg-purple-100 text-purple-800"
+                                    : "bg-blue-100 text-blue-800"
+                                }`}
+                              >
+                                {contribution.tag === "creation"
+                                  ? "Création"
+                                  : "Enrichissement"}
+                              </span>
+                            </div>
+
+                            {/* Titre avec troncature */}
+                            <h3 className="font-medium text-gray-800 text-sm sm:text-base mb-1">
+                              {(() => {
+                                const tempDiv = document.createElement("div");
+                                tempDiv.innerHTML = contribution.title.replace(
+                                  /<\/?[^>]+(>|$)/g,
+                                  ""
+                                );
+                                const text =
+                                  tempDiv.textContent ||
+                                  tempDiv.innerText ||
+                                  "";
+                                // Limiter à 28 caractères pour le titre
+                                return text.length > 28
+                                  ? text.substring(0, 28) + "..."
+                                  : text;
+                              })()}
+                            </h3>
+
+                            {/* Contenu avec troncature */}
+                            <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                              {(() => {
+                                const tempDiv = document.createElement("div");
+                                tempDiv.innerHTML =
+                                  contribution.content.replace(
+                                    /<\/?[^>]+(>|$)/g,
+                                    ""
+                                  );
+                                const text =
+                                  tempDiv.textContent ||
+                                  tempDiv.innerText ||
+                                  "";
+                                // Limiter à 50 caractères pour le contenu
+                                return text.length > 40
+                                  ? text.substring(0, 40) + "..."
+                                  : text;
+                              })()}
+                            </p>
+                          </div>
+
+                          {/* Section de pied pour l'auteur */}
+                          <div className="px-3 py-2 bg-gray-50 border-t border-gray-100 flex justify-between items-center gap-2">
+                            <div className="flex items-center gap-1.5">
+                              <Avatar className="h-5 w-5 flex-shrink-0">
                                 <AvatarImage
                                   src={contribution.user.profilePicture}
                                 />
@@ -578,75 +636,23 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                                   {contribution.user.fullName.substring(0, 2)}
                                 </AvatarFallback>
                               </Avatar>
-                            </div>
-                            <div className="flex-1 overflow-hidden">
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-medium text-gray-800 truncate">
-                                  {(() => {
-                                    // Créer un élément div temporaire pour gérer le décodage des entités HTML
-                                    const tempDiv =
-                                      document.createElement("div");
-                                    // Insérer le titre sans les balises HTML
-                                    tempDiv.innerHTML =
-                                      contribution.title.replace(
-                                        /<\/?[^>]+(>|$)/g,
-                                        ""
-                                      );
-                                    // Récupérer le texte décodé
-                                    const cleanTitle =
-                                      tempDiv.textContent ||
-                                      tempDiv.innerText ||
-                                      "";
-
-                                    return cleanTitle.length > 15
-                                      ? cleanTitle.substring(0, 15) + "..."
-                                      : cleanTitle;
-                                  })()}
-                                </h3>
-                                <span
-                                  className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                                    contribution.tag === "creation"
-                                      ? "bg-purple-100 text-purple-800"
-                                      : "bg-blue-100 text-blue-800"
-                                  }`}
-                                >
-                                  {contribution.tag === "creation"
-                                    ? "Création"
-                                    : "Enrichissement"}
-                                </span>
-                              </div>
-                              <div className="text-sm text-gray-600 contribution-preview">
+                              <span className="text-xs text-gray-600">
                                 {(() => {
-                                  // Créer un élément div temporaire pour gérer le décodage des entités HTML
-                                  const tempDiv = document.createElement("div");
-                                  // Insérer le contenu sans les balises HTML
-                                  tempDiv.innerHTML =
-                                    contribution.content.replace(
-                                      /<\/?[^>]+(>|$)/g,
-                                      ""
-                                    );
-                                  // Récupérer le texte décodé
-                                  const cleanContent =
-                                    tempDiv.textContent ||
-                                    tempDiv.innerText ||
-                                    "";
-
-                                  return cleanContent.length > 32
-                                    ? cleanContent.substring(0, 32) + "..."
-                                    : cleanContent;
+                                  const name = contribution.user.fullName;
+                                  // Limiter à 15 caractères pour le nom d'utilisateur
+                                  return name.length > 15
+                                    ? name.substring(0, 15) + "..."
+                                    : name;
                                 })()}
-                              </div>
-                              <div className="mt-2 flex justify-between items-center">
-                                <span className="text-xs text-gray-500 whitespace-nowrap">
-                                  Proposé par {contribution.user.fullName} •{" "}
-                                  {format(
-                                    new Date(contribution.created_at),
-                                    "d MMMM yyyy",
-                                    { locale: fr }
-                                  )}
-                                </span>
-                              </div>
+                              </span>
                             </div>
+                            <span className="text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
+                              {format(
+                                new Date(contribution.created_at),
+                                "dd/MM/yy",
+                                { locale: fr }
+                              )}
+                            </span>
                           </div>
                         </div>
                       ))}

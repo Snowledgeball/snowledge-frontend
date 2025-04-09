@@ -300,8 +300,7 @@ pre {
 .tinymce-content {
   font-family: Arial, sans-serif;
   line-height: 1.6;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 
 .tinymce-content h1 {
