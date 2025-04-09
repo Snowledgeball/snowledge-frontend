@@ -182,75 +182,94 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     }
   }, [memoizedCommunityId]);
 
-  // Hook pour récupérer et formater toutes les contributions
-  useEffect(() => {
-    const fetchAllContributions = async () => {
-      try {
-        // Récupérer les propositions de création
-        const creationsResponse = await fetch(
-          `/api/communities/${communityId}/posts/pending`
-        );
-        const creationsData = await creationsResponse.json();
+  // Fonction pour rafraîchir les contributions
+  const refreshContributions = async () => {
+    if (!session || !session.user?.id) {
+      console.error("Session utilisateur non disponible");
+      return;
+    }
 
-        // Récupérer les enrichissements en attente
-        const enrichmentsResponse = await fetch(
-          `/api/communities/${communityId}/posts/with-pending-enrichments`
-        );
-        const enrichmentsData = await enrichmentsResponse.json();
+    try {
+      console.log("session", session);
+      const userId = session.user.id;
+      console.log("userId", userId);
 
-        // Formater les créations
-        const formattedCreations: Contribution[] = creationsData.map(
-          (creation: any) => ({
-            id: creation.id,
-            title: creation.title,
-            content: creation.content,
-            status: creation.status,
-            tag: "creation",
-            created_at: creation.created_at,
-            cover_image_url: creation.cover_image_url,
-            user: creation.user,
-            community_posts_reviews: creation.community_posts_reviews,
-          })
-        );
+      // Récupérer les propositions de création
+      const creationsResponse = await fetch(
+        `/api/communities/${communityId}/posts/pending?user_id=${userId}`
+      );
 
-        // Formater les enrichissements
-        const formattedEnrichments: Contribution[] = [];
-        enrichmentsData.forEach((post: any) => {
-          post.community_posts_enrichments?.forEach((enrichment: any) => {
-            formattedEnrichments.push({
-              id: enrichment.id,
-              title: enrichment.title || `Enrichissement de ${post.title}`,
-              content: enrichment.content,
-              status: enrichment.status,
-              tag: "enrichment",
-              created_at: enrichment.created_at,
-              cover_image_url: post.cover_image_url,
-              user: enrichment.user,
-              original_content: enrichment.original_content,
-            });
-          });
-        });
-
-        // Combiner et trier par date (plus récent en premier)
-        const allContributions = [
-          ...formattedCreations,
-          ...formattedEnrichments,
-        ].sort(
-          (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-
-        setContributions(allContributions);
-      } catch (error) {
-        console.error(
-          "Erreur lors de la récupération des contributions:",
-          error
+      if (!creationsResponse.ok) {
+        throw new Error(
+          `Erreur lors de la récupération des créations : ${creationsResponse.status}`
         );
       }
-    };
 
-    fetchAllContributions();
-  }, [communityId]);
+      const creationsData = await creationsResponse.json();
+
+      // Récupérer les enrichissements en attente
+      const enrichmentsResponse = await fetch(
+        `/api/communities/${communityId}/posts/with-pending-enrichments?user_id=${userId}`
+      );
+
+      if (!enrichmentsResponse.ok) {
+        throw new Error(
+          `Erreur lors de la récupération des enrichissements : ${enrichmentsResponse.status}`
+        );
+      }
+
+      const enrichmentsData = await enrichmentsResponse.json();
+
+      // Formater les créations
+      const formattedCreations: Contribution[] = creationsData.map(
+        (creation: any) => ({
+          id: creation.id,
+          title: creation.title,
+          content: creation.content,
+          status: creation.status,
+          tag: "creation",
+          created_at: creation.created_at,
+          cover_image_url: creation.cover_image_url,
+          user: creation.user,
+          community_posts_reviews: creation.community_posts_reviews,
+        })
+      );
+
+      // Formater les enrichissements
+      const formattedEnrichments: Contribution[] = [];
+      enrichmentsData.forEach((post: any) => {
+        post.community_posts_enrichments?.forEach((enrichment: any) => {
+          formattedEnrichments.push({
+            id: enrichment.id,
+            title: enrichment.title || `Enrichissement de ${post.title}`,
+            content: enrichment.content,
+            status: enrichment.status,
+            tag: "enrichment",
+            created_at: enrichment.created_at,
+            cover_image_url: post.cover_image_url,
+            user: enrichment.user,
+            original_content: enrichment.original_content,
+          });
+        });
+      });
+
+      // Combiner et trier par date (plus récent en premier)
+      const allContributions = [
+        ...formattedCreations,
+        ...formattedEnrichments,
+      ].sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setContributions(allContributions);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des contributions:", error);
+      toast.error(
+        "Impossible de charger les contributions. Veuillez réessayer."
+      );
+    }
+  };
 
   // Fonction pour charger toutes les données nécessaires
   const loadAllData = useCallback(async () => {
@@ -298,7 +317,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     setSelectedContribution(contribution);
   };
 
-  const handleVote = async (proposalId: string, type: "approve" | "reject") => {
+  const handleProposalVote = async (
+    proposalId: string,
+    type: "APPROVED" | "REJECTED"
+  ) => {
     if (!session) return;
 
     try {
@@ -320,7 +342,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
           prev.map((proposal) => {
             if (proposal.id === proposalId) {
               toast.success(
-                `Vote ${type === "approve" ? "positif" : "négatif"} enregistré`
+                `Vote ${type === "APPROVED" ? "positif" : "négatif"} enregistré`
               );
             }
             return proposal;
@@ -329,7 +351,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
       } else {
         const data = await response.json();
         toast.success(
-          `Vote ${type === "approve" ? "positif" : "négatif"} enregistré`
+          `Vote ${type === "APPROVED" ? "positif" : "négatif"} enregistré`
         );
         // Rafraîchir les propositions
         fetchProposals();
@@ -341,57 +363,85 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     }
   };
 
-  // Fonction pour gérer le vote sur une contribution
-  const handleContributionVote = async (
-    contributionId: number,
-    type: "approve" | "reject"
+  const handleSubmitEnrichmentVote = async (
+    postId: number,
+    vote: "APPROVED" | "REJECTED"
   ) => {
-    if (!session) return;
     if (!voteFeedback.trim()) {
-      toast.error("Veuillez fournir une justification pour votre vote");
+      toast.error("Veuillez fournir un feedback");
       return;
     }
 
     try {
-      // Appel API pour approuver ou rejeter un enrichissement
-      const endpoint = type === "approve" ? "approve" : "reject";
       const response = await fetch(
-        `/api/communities/${memoizedCommunityId}/posts/${selectedContribution?.id}/enrichments/${contributionId}/${endpoint}`,
+        `/api/communities/${communityId}/posts/enrichments/${postId}/reviews`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ feedback: voteFeedback }),
+          body: JSON.stringify({
+            content: voteFeedback,
+            status: vote,
+          }),
         }
       );
 
       if (!response.ok) {
-        // Si l'API n'existe pas encore, simuler l'action
-        setContributions((prev) =>
-          prev.map((contribution) => {
-            if (contribution.id === contributionId) {
-              toast.success(
-                `Vote ${
-                  type === "approve" ? "positif" : "négatif"
-                } enregistré sur la contribution`
-              );
-            }
-            return contribution;
-          })
+        throw new Error(
+          "Erreur lors de la soumission de la révision d'enrichissement"
         );
-      } else {
-        const data = await response.json();
-        toast.success(
-          `Contribution ${type === "approve" ? "approuvée" : "rejetée"}`
-        );
-        // Rafraîchir les contributions
-        setSelectedContribution(null);
-        setVoteFeedback("");
       }
+
+      toast.success("Vote sur l'enrichissement soumis avec succès");
+      setVoteFeedback("");
+      setSelectedContribution(null);
+
+      // Rafraîchir les contributions
+      refreshContributions();
     } catch (error) {
-      console.error("Erreur lors du vote sur la contribution:", error);
-      toast.error("Erreur lors de l'enregistrement du vote");
+      console.error("Erreur:", error);
+      toast.error("Erreur lors de la soumission du vote sur l'enrichissement");
+    }
+  };
+
+  const handleSubmitCreationVote = async (
+    postId: number,
+    vote: "APPROVED" | "REJECTED"
+  ) => {
+    if (!voteFeedback.trim()) {
+      toast.error("Veuillez fournir un feedback");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/communities/${communityId}/posts/${postId}/reviews`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content: voteFeedback,
+            status: vote,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la soumission de la révision");
+      }
+
+      toast.success("Vote soumis avec succès");
+      setVoteFeedback("");
+      setSelectedContribution(null);
+
+      // Rafraîchir les contributions
+      refreshContributions();
+    } catch (error) {
+      console.error("Erreur:", error);
+      toast.error("Erreur lors de la soumission du vote");
     }
   };
 
@@ -442,13 +492,24 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     }
   };
 
-  const handlePageChange = (direction: "prev" | "next") => {
-    if (direction === "prev" && currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    } else if (direction === "next" && currentPage < 3) {
-      setCurrentPage((prev) => prev + 1);
+  // const handlePageChange = (direction: "prev" | "next") => {
+  //   if (direction === "prev" && currentPage > 1) {
+  //     setCurrentPage((prev) => prev - 1);
+  //   } else if (direction === "next" && currentPage < 3) {
+  //     setCurrentPage((prev) => prev + 1);
+  //   }
+  // };
+
+  // Hook pour récupérer et formater toutes les contributions
+  useEffect(() => {
+    if (!session) {
+      // Si la session n'est pas encore chargée, on ne fait rien
+      return;
     }
-  };
+
+    // Charger les contributions initiales
+    refreshContributions();
+  }, [communityId, session]); // Dépend de communityId et session
 
   return (
     <div
@@ -543,7 +604,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                               className="w-6 h-6 flex items-center justify-center rounded-full bg-green-100 hover:bg-green-200 text-green-600"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleVote(proposal.id, "approve");
+                                handleProposalVote(proposal.id, "APPROVED");
                               }}
                             >
                               <Plus className="w-4 h-4" />
@@ -552,7 +613,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                               className="w-6 h-6 flex items-center justify-center rounded-full bg-red-100 hover:bg-red-200 text-red-600"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleVote(proposal.id, "reject");
+                                handleProposalVote(proposal.id, "REJECTED");
                               }}
                             >
                               <Plus className="w-4 h-4 rotate-45" />
@@ -778,13 +839,17 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                   <div className="flex space-x-3">
                     <Button
                       className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                      onClick={() => handleVote(selectedProposal.id, "approve")}
+                      onClick={() =>
+                        handleProposalVote(selectedProposal.id, "APPROVED")
+                      }
                     >
                       Valider le sujet
                     </Button>
                     <Button
                       className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                      onClick={() => handleVote(selectedProposal.id, "reject")}
+                      onClick={() =>
+                        handleProposalVote(selectedProposal.id, "REJECTED")
+                      }
                     >
                       Refuser
                     </Button>
@@ -914,10 +979,15 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           : "bg-blue-600 hover:bg-blue-700"
                       } text-white`}
                       onClick={() =>
-                        handleContributionVote(
-                          selectedContribution.id,
-                          "approve"
-                        )
+                        selectedContribution.tag === "creation"
+                          ? handleSubmitCreationVote(
+                              selectedContribution.id,
+                              "APPROVED"
+                            )
+                          : handleSubmitEnrichmentVote(
+                              selectedContribution.id,
+                              "APPROVED"
+                            )
                       }
                     >
                       Approuver
@@ -925,10 +995,15 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                     <Button
                       className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                       onClick={() =>
-                        handleContributionVote(
-                          selectedContribution.id,
-                          "reject"
-                        )
+                        selectedContribution.tag === "creation"
+                          ? handleSubmitCreationVote(
+                              selectedContribution.id,
+                              "REJECTED"
+                            )
+                          : handleSubmitEnrichmentVote(
+                              selectedContribution.id,
+                              "REJECTED"
+                            )
                       }
                     >
                       Rejeter

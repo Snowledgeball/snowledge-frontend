@@ -9,15 +9,16 @@ export async function GET(request, { params }) {
     if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
-
     const { id: communityId } = await params;
+
+    const user_id = session.user.id;
 
     // Vérifier que l'utilisateur est contributeur
     const membership = await prisma.community_contributors.findUnique({
       where: {
         community_id_contributor_id: {
           community_id: parseInt(communityId),
-          contributor_id: parseInt(session.user.id),
+          contributor_id: parseInt(user_id),
         },
       },
     });
@@ -27,12 +28,27 @@ export async function GET(request, { params }) {
       select: { creator_id: true },
     });
 
-    if (!membership && community.creator_id !== parseInt(session.user.id)) {
+    if (!membership && community.creator_id !== parseInt(user_id)) {
       return NextResponse.json(
         { error: "Vous n'êtes pas membre de cette communauté" },
         { status: 403 }
       );
     }
+
+    // Récupérer les avis déjà donnés par l'utilisateur sur les enrichissements
+    const userEnrichmentReviews =
+      await prisma.community_posts_enrichment_reviews.findMany({
+        where: {
+          user_id: parseInt(user_id),
+        },
+        select: {
+          id: true,
+        },
+      });
+
+    const reviewedEnrichmentIds = userEnrichmentReviews.map(
+      (review) => review.id
+    );
 
     // Récupérer les posts publiés qui ont des contributions en attente
     const postsWithPendingContributions = await prisma.community_posts.findMany(
@@ -43,6 +59,12 @@ export async function GET(request, { params }) {
           community_posts_enrichments: {
             some: {
               status: "PENDING",
+              // Exclure les enrichissements que l'utilisateur a déjà évalués
+              AND: {
+                id: {
+                  notIn: reviewedEnrichmentIds,
+                },
+              },
             },
           },
         },
@@ -57,6 +79,12 @@ export async function GET(request, { params }) {
           community_posts_enrichments: {
             where: {
               status: "PENDING",
+              // Exclure les enrichissements que l'utilisateur a déjà évalués
+              AND: {
+                id: {
+                  notIn: reviewedEnrichmentIds,
+                },
+              },
             },
             include: {
               user: {
