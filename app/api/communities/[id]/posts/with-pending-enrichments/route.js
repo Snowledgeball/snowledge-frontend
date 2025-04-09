@@ -55,6 +55,9 @@ export async function GET(request, { params }) {
         id: {
           notIn: reviewedEnrichmentIds,
         },
+        user_id: {
+          not: parseInt(user_id),
+        },
       },
       include: {
         user: true,

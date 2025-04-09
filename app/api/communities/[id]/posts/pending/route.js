@@ -31,6 +31,9 @@ export async function GET(request, { params }) {
           id: {
             notIn: postReviews.map((review) => review.post_id),
           },
+          author_id: {
+            not: parseInt(user_id),
+          },
         },
       },
       include: {

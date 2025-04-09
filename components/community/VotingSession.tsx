@@ -188,8 +188,6 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     }
 
     try {
-      const userId = session.user.id;
-
       // Récupérer les propositions de création
       const creationsResponse = await fetch(
         `/api/communities/${communityId}/posts/pending`
