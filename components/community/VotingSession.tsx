@@ -620,10 +620,12 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                   proposals.length > 0 ? (
                     proposals.map((proposal) => (
                       <div
-                        key={proposal.id}
-                        onClick={() => handleSelectProposal(proposal)}
+                        key={proposal?.id || Math.random()}
+                        onClick={() =>
+                          proposal && handleSelectProposal(proposal)
+                        }
                         className={`p-4 rounded-md cursor-pointer transition-colors ${
-                          selectedProposal?.id === proposal.id
+                          selectedProposal?.id === proposal?.id
                             ? "bg-blue-50 border border-blue-200"
                             : "bg-white border border-gray-200 hover:border-blue-200 hover:bg-blue-50/30"
                         }`}
@@ -632,16 +634,17 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           <div className="flex-shrink-0">
                             <Avatar className="h-10 w-10">
                               <AvatarImage
-                                src={proposal.createdBy.profilePicture}
+                                src={proposal?.createdBy?.profilePicture}
                               />
                               <AvatarFallback>
-                                {proposal.createdBy.name.substring(0, 2)}
+                                {proposal?.createdBy?.name?.substring(0, 2) ||
+                                  "??"}
                               </AvatarFallback>
                             </Avatar>
                           </div>
                           <div className="flex-1">
                             <h3 className="font-medium text-gray-800">
-                              {proposal.title}
+                              {proposal.title || "Sans titre"}
                             </h3>
                             <p className="text-sm text-gray-600 line-clamp-2">
                               {proposal.description}
@@ -652,7 +655,9 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                               className="w-6 h-6 flex items-center justify-center rounded-full bg-green-100 hover:bg-green-200 text-green-600"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleProposalVote(proposal.id, "APPROVED");
+                                if (proposal?.id) {
+                                  handleProposalVote(proposal.id, "APPROVED");
+                                }
                               }}
                             >
                               <Plus className="w-4 h-4" />
@@ -661,7 +666,9 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                               className="w-6 h-6 flex items-center justify-center rounded-full bg-red-100 hover:bg-red-200 text-red-600"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleProposalVote(proposal.id, "REJECTED");
+                                if (proposal?.id) {
+                                  handleProposalVote(proposal.id, "REJECTED");
+                                }
                               }}
                             >
                               <Plus className="w-4 h-4 rotate-45" />
@@ -680,14 +687,16 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                   ) : contributions && contributions.length > 0 ? (
                     contributions.map((contribution) => (
                       <div
-                        key={contribution.id}
-                        onClick={() => handleSelectContribution(contribution)}
+                        key={contribution?.id || Math.random()}
+                        onClick={() =>
+                          contribution && handleSelectContribution(contribution)
+                        }
                         className={`rounded-md cursor-pointer overflow-hidden mb-2 border ${
-                          selectedContribution?.id === contribution.id
-                            ? contribution.tag === "creation"
+                          selectedContribution?.id === contribution?.id
+                            ? contribution?.tag === "creation"
                               ? "bg-purple-100 border-purple-300"
                               : "bg-blue-100 border-blue-300"
-                            : contribution.tag === "creation"
+                            : contribution?.tag === "creation"
                             ? "border-l-4 border-l-purple-500 border-gray-200 bg-white"
                             : "border-l-4 border-l-blue-500 border-gray-200 bg-white"
                         } hover:shadow-sm transition-all`}
@@ -754,12 +763,19 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                                 src={contribution.user.profilePicture}
                               />
                               <AvatarFallback>
-                                {contribution.user.fullName.substring(0, 2)}
+                                {(() => {
+                                  const name =
+                                    contribution?.user?.fullName || "";
+                                  // Limiter à 15 caractères pour le nom d'utilisateur
+                                  return name.length > 15
+                                    ? name.substring(0, 15) + "..."
+                                    : name;
+                                })()}
                               </AvatarFallback>
                             </Avatar>
                             <span className="text-xs text-gray-600">
                               {(() => {
-                                const name = contribution.user.fullName;
+                                const name = contribution?.user?.fullName || "";
                                 // Limiter à 15 caractères pour le nom d'utilisateur
                                 return name.length > 15
                                   ? name.substring(0, 15) + "..."
@@ -769,7 +785,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           </div>
                           <span className="text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
                             {format(
-                              new Date(contribution.created_at),
+                              new Date(contribution?.created_at || new Date()),
                               "dd/MM/yy",
                               { locale: fr }
                             )}
@@ -797,7 +813,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                 <div className="p-4 border-b border-gray-200 flex-shrink-0">
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-gray-800">
-                      {selectedProposal.title}
+                      {selectedProposal.title || ""}
                     </h2>
                     <Sheet
                       open={isProposalFormOpen}
@@ -898,7 +914,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       </label>
                       <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
                         <p className="text-gray-800">
-                          {selectedProposal.title}
+                          {selectedProposal.title || ""}
                         </p>
                       </div>
                     </div>
@@ -959,9 +975,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <h2 className="text-xl font-semibold text-gray-800 truncate">
-                        {selectedContribution.title.length > 32
-                          ? selectedContribution.title.substring(0, 32) + "..."
-                          : selectedContribution.title}
+                        {selectedContribution?.title?.length > 32
+                          ? selectedContribution?.title?.substring(0, 32) +
+                            "..."
+                          : selectedContribution?.title || ""}
                       </h2>
                       <span
                         className={`text-xs font-medium px-2 py-0.5 rounded-full ${
@@ -981,17 +998,33 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           src={selectedContribution.user.profilePicture}
                         />
                         <AvatarFallback>
-                          {selectedContribution.user.fullName.substring(0, 2)}
+                          {(() => {
+                            const name =
+                              selectedContribution?.user?.fullName || "";
+                            // Limiter à 15 caractères pour le nom d'utilisateur
+                            return name.length > 15
+                              ? name.substring(0, 15) + "..."
+                              : name;
+                          })()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium text-gray-800 truncate">
-                          {selectedContribution.user.fullName}
+                          {(() => {
+                            const name =
+                              selectedContribution?.user?.fullName || "";
+                            // Limiter à 15 caractères pour le nom d'utilisateur
+                            return name.length > 15
+                              ? name.substring(0, 15) + "..."
+                              : name;
+                          })()}
                         </p>
                         <p className="text-sm text-gray-500 truncate">
                           Proposé le{" "}
                           {format(
-                            new Date(selectedContribution.created_at),
+                            new Date(
+                              selectedContribution?.created_at || new Date()
+                            ),
                             "d MMMM yyyy",
                             { locale: fr }
                           )}
