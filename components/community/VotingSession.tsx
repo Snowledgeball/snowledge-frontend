@@ -319,7 +319,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     proposalId: string,
     type: "APPROVED" | "REJECTED"
   ) => {
-    if (!session) return;
+    if (!session || !proposalId) return;
     console.log(willContribute);
 
     try {
@@ -363,7 +363,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     postId: number,
     vote: "APPROVED" | "REJECTED"
   ) => {
-    if (!voteFeedback.trim()) {
+    if (!contributionId || !postId || !voteFeedback.trim()) {
       toast.error("Veuillez fournir un feedback");
       return;
     }
@@ -407,7 +407,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     contributionId: number,
     vote: "APPROVED" | "REJECTED"
   ) => {
-    if (!voteFeedback.trim()) {
+    if (!contributionId || !voteFeedback.trim()) {
       toast.error("Veuillez fournir un feedback");
       return;
     }
@@ -615,7 +615,9 @@ export function VotingSession({ communityId }: VotingSessionProps) {
             ) : (
               <ScrollArea className="flex-1">
                 <div className="p-2 space-y-2">
-                  {activeTab === "sujets" && proposals.length > 0 ? ( // Affichage des propositions de sujets
+                  {activeTab === "sujets" &&
+                  proposals &&
+                  proposals.length > 0 ? (
                     proposals.map((proposal) => (
                       <div
                         key={proposal.id}
@@ -668,14 +670,14 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         </div>
                       </div>
                     ))
-                  ) : activeTab === "sujets" && proposals.length === 0 ? (
+                  ) : activeTab === "sujets" &&
+                    (!proposals || proposals.length === 0) ? (
                     <div className="flex justify-center items-center py-8 flex-1">
                       <p className="text-gray-500">
                         Aucune proposition de sujet disponible.
                       </p>
                     </div>
-                  ) : (
-                    // Affichage des contributions (créations et enrichissements)
+                  ) : contributions && contributions.length > 0 ? (
                     contributions.map((contribution) => (
                       <div
                         key={contribution.id}
@@ -711,7 +713,8 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           <h3 className="font-medium text-gray-800 text-sm sm:text-base mb-1">
                             {(() => {
                               const tempDiv = document.createElement("div");
-                              tempDiv.innerHTML = contribution.title.replace(
+                              const safeTitle = contribution.title || "";
+                              tempDiv.innerHTML = safeTitle.replace(
                                 /<\/?[^>]+(>|$)/g,
                                 ""
                               );
@@ -728,7 +731,8 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           <p className="text-xs sm:text-sm text-gray-600 mt-1">
                             {(() => {
                               const tempDiv = document.createElement("div");
-                              tempDiv.innerHTML = contribution.content.replace(
+                              const safeContent = contribution.content || "";
+                              tempDiv.innerHTML = safeContent.replace(
                                 /<\/?[^>]+(>|$)/g,
                                 ""
                               );
@@ -773,6 +777,12 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         </div>
                       </div>
                     ))
+                  ) : (
+                    <div className="flex justify-center items-center py-8 flex-1">
+                      <p className="text-gray-500">
+                        Aucune contribution disponible.
+                      </p>
+                    </div>
                   )}
                 </div>
               </ScrollArea>
@@ -1006,7 +1016,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         <div
                           className="contribution-content tinymce-content p-4"
                           dangerouslySetInnerHTML={{
-                            __html: selectedContribution.content,
+                            __html: selectedContribution?.content || "",
                           }}
                         />
                       </div>
@@ -1016,9 +1026,9 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       <div className="flex-1 overflow-y-auto">
                         <EnrichmentCompare
                           originalContent={
-                            selectedContribution.original_content || ""
+                            selectedContribution?.original_content || ""
                           }
-                          modifiedContent={selectedContribution.content}
+                          modifiedContent={selectedContribution?.content || ""}
                         />
                       </div>
                     </div>
@@ -1051,6 +1061,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         isApproving ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                       onClick={() => {
+                        if (!selectedContribution) return;
                         setIsApproving(true);
                         if (selectedContribution.tag === "creation") {
                           handleSubmitCreationVote(
@@ -1080,6 +1091,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         isRejecting ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                       onClick={() => {
+                        if (!selectedContribution) return;
                         setIsRejecting(true);
                         if (selectedContribution.tag === "creation") {
                           handleSubmitCreationVote(
