@@ -155,14 +155,6 @@ interface Post {
   };
 }
 
-// Ajouter cette interface pour typer l'événement
-interface PostCreatedEvent extends CustomEvent {
-  detail: {
-    communityId: string;
-    forceRefresh: boolean;
-  };
-}
-
 export default function CommunityDashboard() {
   const router = useRouter();
   const params = useParams();
@@ -949,9 +941,8 @@ export default function CommunityDashboard() {
             </h3>
             <div className="space-y-1">
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${
-                  activeTab === "overview" ? "bg-gray-800" : "hover:bg-gray-800"
-                }`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "overview" ? "bg-gray-800" : "hover:bg-gray-800"
+                  }`}
                 onClick={() => handleTabChange("overview")}
               >
                 📊 Tableau de bord
@@ -960,9 +951,8 @@ export default function CommunityDashboard() {
             </div>
             <div className="space-y-1">
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${
-                  activeTab === "members" ? "bg-gray-800" : "hover:bg-gray-800"
-                }`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "members" ? "bg-gray-800" : "hover:bg-gray-800"
+                  }`}
                 onClick={() => handleTabChange("members")}
               >
                 👥 Membres
@@ -987,9 +977,8 @@ export default function CommunityDashboard() {
                 <ChevronRight className="ml-auto w-4 h-4" />
               </button> */}
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${
-                  activeTab === "creation" ? "bg-gray-800" : "hover:bg-gray-800"
-                }`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "creation" ? "bg-gray-800" : "hover:bg-gray-800"
+                  }`}
                 onClick={() => handleTabChange("creation")}
               >
                 ✍️ Création de posts
@@ -1407,7 +1396,7 @@ export default function CommunityDashboard() {
                             }
                           >
                             {loadingRejection &&
-                            selectedRequestId === request.id ? (
+                              selectedRequestId === request.id ? (
                               <>
                                 <Loader
                                   size="sm"
@@ -1489,11 +1478,10 @@ export default function CommunityDashboard() {
                                 </td>
                                 <td className="p-4">
                                   <span
-                                    className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-                                      member.status === "Contributeur"
-                                        ? "bg-blue-100 text-blue-700"
-                                        : "bg-green-100 text-green-700"
-                                    }`}
+                                    className={`px-3 py-1.5 rounded-full text-sm font-medium ${member.status === "Contributeur"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : "bg-green-100 text-green-700"
+                                      }`}
                                   >
                                     {member.status}
                                   </span>
@@ -1501,8 +1489,8 @@ export default function CommunityDashboard() {
                                 <td className="p-4 hidden lg:table-cell">
                                   {member.joinedAt
                                     ? new Date(
-                                        member.joinedAt
-                                      ).toLocaleDateString("fr-FR")
+                                      member.joinedAt
+                                    ).toLocaleDateString("fr-FR")
                                     : "Date inconnue"}
                                 </td>
                                 <td className="p-4 hidden sm:table-cell">
@@ -1822,9 +1810,8 @@ export default function CommunityDashboard() {
                     {coverImage && (
                       <label
                         htmlFor="cover-image"
-                        className={`px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors ${
-                          isUploading ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                        className={`px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors ${isUploading ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
                       >
                         Modifier
                       </label>
