@@ -42,7 +42,7 @@ export async function POST(request, { params }) {
       );
     }
 
-    // Vérifier que la révision existe
+    // Vérifier que la révision existe pas déjà
     const existingReview =
       await prisma.community_posts_enrichment_reviews.findFirst({
         where: {
@@ -53,7 +53,7 @@ export async function POST(request, { params }) {
 
     if (existingReview) {
       return NextResponse.json(
-        { error: "Vous avez déjà soumis une révision" },
+        { error: "Vous avez déjà soumis une révision pour cette contribution" },
         { status: 400 }
       );
     }
@@ -75,13 +75,23 @@ export async function POST(request, { params }) {
       },
     });
 
+    const reviews = await prisma.community_posts_enrichment_reviews.findMany({
+      where: {
+        contribution_id: parseInt(enrichmentId),
+      },
+    });
+
+    const community = await prisma.community.findUnique({
+      where: {
+        id: parseInt(communityId),
+      },
+    });
+
     // Vérifier le statut de la contribution après cette nouvelle révision
-    const { shouldUpdate, newStatus } = await checkContributionStatus(
-      parseInt(enrichmentId),
+    const { shouldUpdate, newStatus } = checkContributionStatus(
+      reviews,
       contributorsCount
     );
-
-    console.log("la3");
 
     // Mettre à jour le statut de la contribution si nécessaire
     const enrichment = await prisma.community_posts_enrichments.findUnique({
@@ -118,7 +128,35 @@ export async function POST(request, { params }) {
             content: enrichment.content,
           },
         });
-        console.log("post updated");
+
+        const communityUsers = await prisma.community_learners.findMany({
+          where: {
+            community_id: parseInt(communityId),
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        });
+
+        const userIds = communityUsers.map((user) => user.user.id);
+
+        // Notifier toute la communauté que l'enrichissement a été approuvé
+        await createBulkNotifications({
+          userIds: userIds,
+          title: "Un enrichissement a été approuvé",
+          message: `Le enrichissement "${enrichment.community_posts.title}" a été approuvé par la communauté.`,
+          type: NotificationType.ENRICHMENT_APPROVED,
+          link: `/community/${communityId}/posts/${postId}`,
+          metadata: {
+            communityId: communityId,
+            postId: postId,
+            enrichmentId: enrichmentId,
+          },
+        });
       }
 
       if (newStatus === "APPROVED" || newStatus === "REJECTED") {
@@ -146,21 +184,49 @@ export async function POST(request, { params }) {
         });
       }
     } else {
-      // Créer une notification pour l'auteur de la contribution pour indiquer que son enrichissement a reçu un nouveau vote négatif
-      // Notifier l'auteur de la contribution
-      await createBulkNotifications({
-        userIds: [enrichment.user_id],
-        type: NotificationType.FEEDBACK,
-        title: "Nouveau vote sur votre enrichissement",
-        message: `Votre enrichissement sur "${enrichment.community_posts.title}" a reçu un nouveau vote par la communauté.`,
-        link: `/community/${communityId}/posts/${postId}/enrichments/${enrichmentId}/review?creator=true`,
-        metadata: {
-          communityId: communityId,
-          postId: postId,
-          enrichmentId: enrichmentId,
-        },
-      });
+      // Si le statut ne change pas, envoyer une notification de feedback individuel
+      try {
+        await createBulkNotifications({
+          userIds: [enrichment.user_id],
+          title:
+            status === "APPROVED"
+              ? "Nouveau feedback positif"
+              : "Nouveau feedback négatif",
+          message: `${contributor.fullName} a laissé un feedback sur votre enrichissement "${enrichment.community_posts.title}"`,
+          type: NotificationType.FEEDBACK,
+          link: `/community/${communityId}/posts/${postId}/enrichments/${enrichmentId}/review?creator=true`,
+          metadata: {
+            communityId,
+            postId,
+            reviewerId: session.user.id,
+            reviewerName: contributor.fullName,
+            content: content,
+            status: status,
+          },
+        });
+      } catch (notifError) {
+        console.error(
+          "Erreur lors de l'envoi de la notification de feedback:",
+          notifError
+        );
+      }
     }
+
+    // lse {
+    //   // Créer une notification pour l'auteur de la contribution pour indiquer que son enrichissement a reçu un nouveau vote
+    //   await createBulkNotifications({
+    //     userIds: [enrichment.user_id],
+    //     type: NotificationType.FEEDBACK,
+    //     title: "Nouveau vote sur votre enrichissement",
+    //     message: `Votre enrichissement sur "${enrichment.community_posts.title}" a reçu un nouveau vote par la communauté.`,
+    //     link: `/community/${communityId}/posts/${postId}/enrichments/${enrichmentId}/review?creator=true`,
+    //     metadata: {
+    //       communityId: communityId,
+    //       postId: postId,
+    //       enrichmentId: enrichmentId,
+    //     },
+    //   });
+    // }
 
     return NextResponse.json({ success: true, review });
   } catch (error) {

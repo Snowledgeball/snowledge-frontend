@@ -8,7 +8,7 @@ import { Community } from "@/types/community";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import ChatBox from "@/components/shared/ChatBox";
 import QASection from "@/components/shared/QASection";
-import VotingSession from "@/components/community/VotingSession";
+import { VotingSession } from "@/components/community/VotingSession";
 import CommunityHeader from "@/components/community/CommunityHeader";
 import CommunityBanner from "@/components/community/CommunityBanner";
 import CommunityTabs from "@/components/community/CommunityTabs";
@@ -750,7 +750,10 @@ const CommunityHub = () => {
                       {/* <MasterclassSession communityId={communityId} /> */}
                     </div>
                   ) : activeTab === "voting" ? (
-                    <div id="voting-section">
+                    <div
+                      id="voting-section"
+                      className="max-w-[98vw] md:h-[40rem] lg:h-[40rem] xl:h-[47rem] 2xl:h-[47rem]"
+                    >
                       <VotingSession
                         communityId={params.id ? params.id.toString() : ""}
                       />

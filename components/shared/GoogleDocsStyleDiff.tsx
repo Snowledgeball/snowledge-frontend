@@ -87,6 +87,10 @@ export default function GoogleDocsStyleDiff({
                         font-weight: bold;
                         display: inline-block;
                     }
+                    img, iframe, video {
+                        max-width: 100%;
+                        height: auto;
+                    }
                 </style>
             `;
 
@@ -321,16 +325,13 @@ export default function GoogleDocsStyleDiff({
   };
 
   return (
-    <div className="bg-gray-50 rounded-lg p-4">
-      <div className="flex flex-col md:flex-row">
+    <div className="bg-gray-50 rounded-lg w-full overflow-hidden h-full">
+      <div className="flex flex-col md:flex-row h-full">
         {/* Contenu principal */}
-        <div className="flex-grow">
-          <div className="mb-4">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-semibold">{description}</h3>
-            </div>
-
-            <div className="border rounded-lg p-4 bg-white">
+        <div className="flex-grow h-full overflow-hidden">
+          {/* Contenu avec défilement */}
+          <div className="h-full">
+            <div className="bg-white rounded-lg overflow-x-hidden h-full">
               <TinyMCEStyledText content={processedHtml} />
             </div>
           </div>
@@ -338,8 +339,8 @@ export default function GoogleDocsStyleDiff({
 
         {/* Sidebar pour les enrichissements - uniquement si showControls est true */}
         {showControls && (
-          <div className="enrichment-sidebar w-80 ml-4 border-l pl-4">
-            <div className="sticky top-4">
+          <div className="w-full md:w-80 md:ml-4 mt-4 md:mt-0 md:border-l md:pl-4">
+            <div className="md:sticky md:top-4">
               <h3 className="text-lg font-semibold mb-3">Enrichissement</h3>
 
               <div className="enrichment-item bg-white rounded-lg border border-gray-200 p-4 mb-4">

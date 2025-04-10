@@ -41,4 +41,6 @@ export enum NotificationType {
   ENRICHMENT_REJECTED = "enrichment_rejected",
   REVIEW_VOTE = "review_vote",
 
+  PROPOSAL_APPROVED = "proposal_approved",
+  PROPOSAL_REJECTED = "proposal_rejected",
 }

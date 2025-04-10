@@ -9,16 +9,32 @@ import { NotificationType } from "@/types/notification";
 export async function GET(request, { params }) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
-
     const { id: communityId } = await params;
+
+    const user_id = session.user.id;
+
+    // Récupérer les review de l'utilisateur
+    const postReviews = await prisma.community_posts_reviews.findMany({
+      where: {
+        reviewer_id: parseInt(user_id),
+      },
+    });
 
     const pendingPosts = await prisma.community_posts.findMany({
       where: {
         community_id: parseInt(communityId),
         status: "PENDING",
+        AND: {
+          id: {
+            notIn: postReviews.map((review) => review.post_id),
+          },
+          author_id: {
+            not: parseInt(user_id),
+          },
+        },
       },
       include: {
         user: {
@@ -86,7 +102,7 @@ export async function POST(request, { params }) {
         title,
         content,
         cover_image_url,
-        tag,
+        tag: parseInt(tag),
         accept_contributions,
         status: "PENDING",
       },
