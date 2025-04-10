@@ -1052,16 +1052,18 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       }`}
                       onClick={() => {
                         setIsApproving(true);
-                        selectedContribution.tag === "creation"
-                          ? handleSubmitCreationVote(
-                              selectedContribution.id,
-                              "APPROVED"
-                            )
-                          : handleSubmitEnrichmentVote(
-                              selectedContribution.id,
-                              selectedContribution.post_id || 0,
-                              "APPROVED"
-                            );
+                        if (selectedContribution.tag === "creation") {
+                          handleSubmitCreationVote(
+                            selectedContribution.id,
+                            "APPROVED"
+                          );
+                        } else {
+                          handleSubmitEnrichmentVote(
+                            selectedContribution.id,
+                            selectedContribution.post_id || 0,
+                            "APPROVED"
+                          );
+                        }
                       }}
                     >
                       {isApproving ? (
@@ -1079,16 +1081,18 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       }`}
                       onClick={() => {
                         setIsRejecting(true);
-                        selectedContribution.tag === "creation"
-                          ? handleSubmitCreationVote(
-                              selectedContribution.id,
-                              "REJECTED"
-                            )
-                          : handleSubmitEnrichmentVote(
-                              selectedContribution.id,
-                              selectedContribution.post_id || 0,
-                              "REJECTED"
-                            );
+                        if (selectedContribution.tag === "creation") {
+                          handleSubmitCreationVote(
+                            selectedContribution.id,
+                            "REJECTED"
+                          );
+                        } else {
+                          handleSubmitEnrichmentVote(
+                            selectedContribution.id,
+                            selectedContribution.post_id || 0,
+                            "REJECTED"
+                          );
+                        }
                       }}
                     >
                       {isRejecting ? (
