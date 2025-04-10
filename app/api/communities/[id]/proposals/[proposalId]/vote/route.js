@@ -200,6 +200,21 @@ export async function POST(request, { params }) {
           proposalStatus: newStatus,
         },
       });
+    } else {
+      await createBulkNotifications({
+        userIds: [proposal.author_id],
+        title: `Vous avez reçu un vote ${vote === "APPROVED" ? "positif !" : "négatif"}`,
+        message: `Votre proposition "${proposal.title}" a reçu un vote ${vote === "APPROVED" ? "positif" : "négatif"} dans la communauté ${proposal.community.name}`,
+        type:
+          vote === "APPROVED"
+            ? NotificationType.VOTE_APPROVED
+            : NotificationType.VOTE_REJECTED,
+        link: `/community/${communityId}?tab=voting`,
+        metadata: {
+          communityId,
+          proposalId: proposalIdInt,
+        },
+      });
     }
 
     // Formater la réponse

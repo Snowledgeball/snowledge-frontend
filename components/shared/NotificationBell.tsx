@@ -167,6 +167,10 @@ export default function NotificationBell() {
         return <XCircle className="h-5 w-5 text-red-500" />;
       case NotificationType.INFO:
         return <Info className="h-5 w-5 text-blue-500" />;
+      case NotificationType.VOTE_APPROVED:
+        return <ThumbsUp className="h-5 w-5 text-green-500" />;
+      case NotificationType.VOTE_REJECTED:
+        return <ThumbsDown className="h-5 w-5 text-red-500" />;
       default:
         return <Bell className="h-5 w-5 text-gray-500" />;
     }
