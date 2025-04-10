@@ -758,8 +758,8 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                               const text =
                                 tempDiv.textContent || tempDiv.innerText || "";
                               // Limiter à 50 caractères pour le contenu
-                              return text.length > 40
-                                ? text.substring(0, 40) + "..."
+                              return text.length > 35
+                                ? text.substring(0, 35) + "..."
                                 : text;
                             })()}
                           </p>
