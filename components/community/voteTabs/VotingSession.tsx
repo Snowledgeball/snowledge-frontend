@@ -825,94 +825,96 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                     <h2 className="text-xl font-semibold text-gray-800">
                       {selectedProposal.title || ""}
                     </h2>
-                    <Sheet
-                      open={isProposalFormOpen}
-                      onOpenChange={setIsProposalFormOpen}
-                    >
-                      <SheetTrigger asChild>
-                        <Button className="border border-dashed border-gray-300 bg-white hover:bg-gray-50 text-gray-700">
-                          Proposer un sujet
-                        </Button>
-                      </SheetTrigger>
-                      <SheetContent
-                        side="right"
-                        className="sm:max-w-[500px] bg-white"
+                    {memberships?.isContributor || memberships?.isCreator && (
+                      <Sheet
+                        open={isProposalFormOpen}
+                        onOpenChange={setIsProposalFormOpen}
                       >
-                        <SheetHeader>
-                          <SheetTitle>Proposer un nouveau sujet</SheetTitle>
-                          <SheetDescription>
-                            Remplissez le formulaire ci-dessous pour proposer un
-                            nouveau sujet à la communauté.
-                          </SheetDescription>
-                        </SheetHeader>
-                        <form onSubmit={handleSubmitProposal}>
-                          <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="title" className="text-right">
-                                Titre
-                              </Label>
-                              <Input
-                                id="title"
-                                value={newProposal.title}
-                                onChange={(e) =>
-                                  setNewProposal((prev) => ({
-                                    ...prev,
-                                    title: e.target.value,
-                                  }))
-                                }
-                                className="col-span-3"
-                                required
-                              />
+                        <SheetTrigger asChild>
+                          <Button className="border border-dashed border-gray-300 bg-white hover:bg-gray-50 text-gray-700">
+                            Proposer un sujet
+                          </Button>
+                        </SheetTrigger>
+                        <SheetContent
+                          side="right"
+                          className="sm:max-w-[500px] bg-white"
+                        >
+                          <SheetHeader>
+                            <SheetTitle>Proposer un nouveau sujet</SheetTitle>
+                            <SheetDescription>
+                              Remplissez le formulaire ci-dessous pour proposer un
+                              nouveau sujet à la communauté.
+                            </SheetDescription>
+                          </SheetHeader>
+                          <form onSubmit={handleSubmitProposal}>
+                            <div className="grid gap-4 py-4">
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="title" className="text-right">
+                                  Titre
+                                </Label>
+                                <Input
+                                  id="title"
+                                  value={newProposal.title}
+                                  onChange={(e) =>
+                                    setNewProposal((prev) => ({
+                                      ...prev,
+                                      title: e.target.value,
+                                    }))
+                                  }
+                                  className="col-span-3"
+                                  required
+                                />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label
+                                  htmlFor="description"
+                                  className="text-right self-start"
+                                >
+                                  Description
+                                </Label>
+                                <Textarea
+                                  id="description"
+                                  value={newProposal.description}
+                                  onChange={(e) =>
+                                    setNewProposal((prev) => ({
+                                      ...prev,
+                                      description: e.target.value,
+                                    }))
+                                  }
+                                  className="col-span-3 min-h-[200px]"
+                                  required
+                                />
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Switch
+                                  id="contribute-new"
+                                  checked={willContribute}
+                                  onCheckedChange={setWillContribute}
+                                />
+                                <Label
+                                  htmlFor="contribute-new"
+                                  className="text-sm text-gray-700"
+                                >
+                                  Je souhaite contribuer à cette proposition
+                                </Label>
+                              </div>
                             </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label
-                                htmlFor="description"
-                                className="text-right self-start"
-                              >
-                                Description
-                              </Label>
-                              <Textarea
-                                id="description"
-                                value={newProposal.description}
-                                onChange={(e) =>
-                                  setNewProposal((prev) => ({
-                                    ...prev,
-                                    description: e.target.value,
-                                  }))
-                                }
-                                className="col-span-3 min-h-[200px]"
-                                required
-                              />
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Switch
-                                id="contribute-new"
-                                checked={willContribute}
-                                onCheckedChange={setWillContribute}
-                              />
-                              <Label
-                                htmlFor="contribute-new"
-                                className="text-sm text-gray-700"
-                              >
-                                Je souhaite contribuer à cette proposition
-                              </Label>
-                            </div>
-                          </div>
-                          <SheetFooter className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between w-full">
-                            <div className="flex space-x-2 sm:justify-end">
-                              <SheetClose asChild>
-                                <Button type="button" variant="outline">
-                                  Annuler
+                            <SheetFooter className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between w-full">
+                              <div className="flex space-x-2 sm:justify-end">
+                                <SheetClose asChild>
+                                  <Button type="button" variant="outline">
+                                    Annuler
+                                  </Button>
+                                </SheetClose>
+                                <Button type="submit">
+                                  Soumettre la proposition
                                 </Button>
-                              </SheetClose>
-                              <Button type="submit">
-                                Soumettre la proposition
-                              </Button>
-                            </div>
-                          </SheetFooter>
-                        </form>
-                      </SheetContent>
-                    </Sheet>
+                              </div>
+                            </SheetFooter>
+                          </form>
+                        </SheetContent>
+                      </Sheet>
+                    )}
                   </div>
                 </div>
 
@@ -1227,7 +1229,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
               // Message par défaut quand rien n'est sélectionné
               <>
                 <div className="flex justify-end m-4">
-                  {activeTab === "sujets" && (
+                  {activeTab === "sujets" && (memberships?.isContributor || memberships?.isCreator) && (
                     <Sheet
                       open={isProposalFormOpen}
                       onOpenChange={setIsProposalFormOpen}
