@@ -30,10 +30,21 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import EnrichmentCompare from "./EnrichmentCompare";
+import EnrichmentCompare from "../EnrichmentCompare";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Cache pour stocker les données
 const contributorsCache = new Map<
@@ -81,6 +92,12 @@ interface TopicProposal {
   createdAt: Date;
 }
 
+interface Membership {
+  isContributor: boolean;
+  isCreator: boolean;
+  isMember: boolean;
+}
+
 export function VotingSession({ communityId }: VotingSessionProps) {
   const { data: session } = useSession();
   const [contributorsCount, setContributorsCount] = useState(0);
@@ -100,6 +117,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
   const [proposals, setProposals] = useState<TopicProposal[]>([]);
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [voteFeedback, setVoteFeedback] = useState("");
+  const [memberships, setMemberships] = useState<Membership | null>(null);
 
   // Ajouter un nouvel état pour la contribution sélectionnée
   const [selectedContribution, setSelectedContribution] =
@@ -183,12 +201,31 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     }
   }, [memoizedCommunityId]);
 
+  const fetchMemberships = useCallback(async () => {
+    const response = await fetch(
+      `/api/communities/${memoizedCommunityId}/membership`
+    );
+    const data = await response.json();
+    console.log(data);
+    setMemberships(data);
+    return data;
+  }, [memoizedCommunityId]);
+
   // Fonction pour rafraîchir les contributions
   const refreshContributions = async () => {
     setIsRefreshingContributions(true);
+
     if (!session || !session.user?.id) {
       console.error("Session utilisateur non disponible");
       return;
+    }
+
+    if (!memberships) {
+      const membershipData = await fetchMemberships();
+      if (!membershipData?.isContributor && !membershipData?.isCreator) {
+        console.log("Vous n'êtes pas un contributeur de cette communauté", membershipData);
+        return;
+      }
     }
 
     try {
@@ -268,25 +305,30 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     }
   };
 
-  // Fonction pour charger toutes les données nécessaires
-  const loadAllData = useCallback(async () => {
+  const loadAllData = useCallback(() => {
+    if (!session) return;
     setIsLoading(true);
-    await Promise.all([fetchContributorsCount(), fetchProposals()]);
-    setIsLoading(false);
-  }, [fetchContributorsCount, fetchProposals]);
+    fetchContributorsCount().then(() => {
+      fetchProposals().then(() => {
+        refreshContributions().then(() => {
+          setIsLoading(false);
+          setIsRefreshingContributions(false);
+        });
+      });
+    });
+  }, [session]);
 
-  // Effet pour charger les données initiales
   useEffect(() => {
+    if (!session) return;
     loadAllData();
+    console.log("aaaaaaaaaaaaaa");
 
-    // Mettre en place un intervalle pour rafraîchir les données toutes les 2 minutes
     const intervalId = setInterval(() => {
       loadAllData();
     }, CACHE_DURATION);
 
-    // Nettoyer l'intervalle lors du démontage du composant
     return () => clearInterval(intervalId);
-  }, [loadAllData]);
+  }, [session]);
 
   // Mettre à jour le cache lorsque l'onglet change
   const handleTabChange = useCallback(
@@ -492,62 +534,8 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     }
   };
 
-  // Fonction pour proposer sa contribution
-  const handleProposeContribution = async (proposalId: string) => {
-    if (!session) {
-      toast.error("Vous devez être connecté pour contribuer");
-      return;
-    }
+  const [isContributorDialogOpen, setIsContributorDialogOpen] = useState(false);
 
-    try {
-      setIsLoading(true);
-      const response = await fetch(
-        `/api/communities/${memoizedCommunityId}/proposals/${proposalId}/contribute`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error || "Erreur lors de l'inscription comme contributeur"
-        );
-      }
-
-      const data = await response.json();
-      toast.success("Vous êtes inscrit comme contributeur potentiel");
-
-      // Réinitialiser l'état
-      setWillContribute(false);
-
-      // Rafraîchir les propositions pour mettre à jour la liste des contributeurs
-      fetchProposals();
-    } catch (error) {
-      console.error("Erreur lors de l'inscription comme contributeur:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Erreur lors de l'inscription comme contributeur"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Hook pour récupérer et formater toutes les contributions
-  useEffect(() => {
-    if (!session) {
-      // Si la session n'est pas encore chargée, on ne fait rien
-      return;
-    }
-
-    // Charger les contributions initiales
-    refreshContributions();
-  }, [communityId, session]); // Dépend de communityId et session
 
   return (
     <div
@@ -582,25 +570,50 @@ export function VotingSession({ communityId }: VotingSessionProps) {
             <div className="p-4 border-b border-gray-200 flex-shrink-0">
               <div className="flex space-x-2">
                 <button
-                  className={`px-4 py-2 text-sm font-medium rounded-md flex-1 ${
-                    activeTab === "sujets"
-                      ? "bg-primary text-white"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
+                  className={`px-4 py-2 text-sm font-medium rounded-md flex-1 ${activeTab === "sujets"
+                    ? "bg-primary text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                    }`}
                   onClick={() => handleTabChange("sujets")}
                 >
                   Sujets
                 </button>
-                <button
-                  className={`px-4 py-2 text-sm font-medium rounded-md flex-1 ${
-                    activeTab === "contributions"
+                {memberships?.isContributor || memberships?.isCreator ? (
+                  <button
+                    className={`px-4 py-2 text-sm font-medium rounded-md flex-1 ${activeTab === "contributions"
                       ? "bg-primary text-white"
                       : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                  onClick={() => handleTabChange("contributions")}
-                >
-                  Contributions
-                </button>
+                      }`}
+                    onClick={() => handleTabChange("contributions")}
+                  >
+                    Contributions
+                  </button>
+                ) : (
+                  <AlertDialog open={isContributorDialogOpen} onOpenChange={setIsContributorDialogOpen}>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md flex-1 opacity-50 
+                          cursor-not-allowed text-gray-500 bg-gray-100`}
+                      >
+                        Contributions
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="bg-white">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Accès restreint</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Vous devez être contributeur ou créateur de cette communauté pour accéder à cette section. Souhaitez-vous postuler en tant que contributeur ?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Fermer</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => window.location.href = `/profile`}>
+                          Postuler
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             </div>
             {isRefreshingContributions ? (
@@ -616,19 +629,18 @@ export function VotingSession({ communityId }: VotingSessionProps) {
               <ScrollArea className="flex-1">
                 <div className="p-2 space-y-2">
                   {activeTab === "sujets" &&
-                  proposals &&
-                  proposals.length > 0 ? (
+                    proposals &&
+                    proposals.length > 0 ? (
                     proposals.map((proposal) => (
                       <div
                         key={proposal?.id || Math.random()}
                         onClick={() =>
                           proposal && handleSelectProposal(proposal)
                         }
-                        className={`p-4 rounded-md cursor-pointer transition-colors ${
-                          selectedProposal?.id === proposal?.id
-                            ? "bg-blue-50 border border-blue-200"
-                            : "bg-white border border-gray-200 hover:border-blue-200 hover:bg-blue-50/30"
-                        }`}
+                        className={`p-4 rounded-md cursor-pointer transition-colors ${selectedProposal?.id === proposal?.id
+                          ? "bg-blue-50 border border-blue-200"
+                          : "bg-white border border-gray-200 hover:border-blue-200 hover:bg-blue-50/30"
+                          }`}
                       >
                         <div className="flex gap-3">
                           <div className="flex-shrink-0">
@@ -691,26 +703,24 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         onClick={() =>
                           contribution && handleSelectContribution(contribution)
                         }
-                        className={`rounded-md cursor-pointer overflow-hidden mb-2 border ${
-                          selectedContribution?.id === contribution?.id
-                            ? contribution?.tag === "creation"
-                              ? "bg-purple-100 border-purple-300"
-                              : "bg-blue-100 border-blue-300"
-                            : contribution?.tag === "creation"
+                        className={`rounded-md cursor-pointer overflow-hidden mb-2 border ${selectedContribution?.id === contribution?.id
+                          ? contribution?.tag === "creation"
+                            ? "bg-purple-100 border-purple-300"
+                            : "bg-blue-100 border-blue-300"
+                          : contribution?.tag === "creation"
                             ? "border-l-4 border-l-purple-500 border-gray-200 bg-white"
                             : "border-l-4 border-l-blue-500 border-gray-200 bg-white"
-                        } hover:shadow-sm transition-all`}
+                          } hover:shadow-sm transition-all`}
                       >
                         {/* Section du contenu principal */}
                         <div className="p-3">
                           {/* Badge d'étiquette */}
                           <div className="flex justify-between items-center mb-1.5">
                             <span
-                              className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${
-                                contribution.tag === "creation"
-                                  ? "bg-purple-100 text-purple-800"
-                                  : "bg-blue-100 text-blue-800"
-                              }`}
+                              className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${contribution.tag === "creation"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-blue-100 text-blue-800"
+                                }`}
                             >
                               {contribution.tag === "creation"
                                 ? "Création"
@@ -977,15 +987,14 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       <h2 className="text-xl font-semibold text-gray-800 truncate">
                         {selectedContribution?.title?.length > 32
                           ? selectedContribution?.title?.substring(0, 32) +
-                            "..."
+                          "..."
                           : selectedContribution?.title || ""}
                       </h2>
                       <span
-                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                          selectedContribution.tag === "creation"
-                            ? "bg-purple-100 text-purple-800"
-                            : "bg-blue-100 text-blue-800"
-                        }`}
+                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${selectedContribution.tag === "creation"
+                          ? "bg-purple-100 text-purple-800"
+                          : "bg-blue-100 text-blue-800"
+                          }`}
                       >
                         {selectedContribution.tag === "creation"
                           ? "Création"
@@ -1086,13 +1095,11 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
                   <div className="flex space-x-3">
                     <Button
-                      className={`flex-1 ${
-                        selectedContribution.tag === "creation"
-                          ? "bg-purple-600 hover:bg-purple-700"
-                          : "bg-blue-600 hover:bg-blue-700"
-                      } text-white ${
-                        isApproving ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                      className={`flex-1 ${selectedContribution.tag === "creation"
+                        ? "bg-purple-600 hover:bg-purple-700"
+                        : "bg-blue-600 hover:bg-blue-700"
+                        } text-white ${isApproving ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       onClick={() => {
                         if (!selectedContribution) return;
                         setIsApproving(true);
@@ -1120,9 +1127,8 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       )}
                     </Button>
                     <Button
-                      className={`flex-1 bg-red-600 hover:bg-red-700 text-white ${
-                        isRejecting ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                      className={`flex-1 bg-red-600 hover:bg-red-700 text-white ${isRejecting ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       onClick={() => {
                         if (!selectedContribution) return;
                         setIsRejecting(true);
