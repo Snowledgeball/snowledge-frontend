@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { checkProposalStatus } from "@/lib/proposalUtils";
 import { createBulkNotifications } from "@/lib/notifications";
+import { NotificationType } from "@/types/notification";
 
 export async function POST(request, { params }) {
   const { id, proposalId } = await params;

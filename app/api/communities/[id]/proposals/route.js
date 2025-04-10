@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { createBulkNotifications } from "@/lib/notifications";
+import { NotificationType } from "@/types/notification";
 
 export async function GET(request, { params }) {
   const { id } = await params;
@@ -157,6 +159,39 @@ export async function POST(request, { params }) {
             profilePicture: true,
           },
         },
+      },
+    });
+
+    const communityMembers = await prisma.community_learners.findMany({
+      where: {
+        community_id: communityId,
+      },
+      select: {
+        learner_id: true,
+      },
+    });
+
+    const learnersIds = communityMembers
+      .map((member) => member.learner_id)
+      .filter((id) => id !== parseInt(session.user.id));
+
+    const community = await prisma.community.findUnique({
+      where: {
+        id: communityId,
+      },
+    });
+
+    // Créer des notifications pour tous les membres en une seule opération
+    await createBulkNotifications({
+      userIds: learnersIds,
+      title: "Nouvelle proposition",
+      message: `"${newProposal.title}" a été soumise à la communauté ${community.name}`,
+      type: NotificationType.NEW_PROPOSAL,
+      link: `/community/${communityId}?tab=voting`,
+      metadata: {
+        communityId,
+        proposalId: newProposal.id,
+        creatorId: newProposal.author_id,
       },
     });
 
