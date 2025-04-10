@@ -10,20 +10,6 @@ export async function POST(request) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        // Vérifier si l'utilisateur a créé au moins une communauté
-        const communityCount = await prisma.community.count({
-            where: {
-                creator_id: parseInt(session.user.id)
-            }
-        });
-
-        if (communityCount === 0) {
-            return NextResponse.json(
-                { error: "Seuls les créateurs de communautés peuvent créer des catégories" },
-                { status: 403 }
-            );
-        }
-
         const { name, label } = await request.json();
 
         // Vérifier si la catégorie existe déjà
