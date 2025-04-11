@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   Users,
   MessageCircle,
@@ -23,7 +23,7 @@ import {
   AtSign,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import { Dialog } from "@headlessui/react";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { toast } from "sonner";
@@ -31,7 +31,6 @@ import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Loader } from "@/components/ui/loader";
-import { useSearchParams } from "next/navigation";
 
 // Système de cache pour les données du profil
 const profileCache = {
@@ -148,7 +147,17 @@ interface Message {
   user_id: string;
 }
 
+// Composant principal avec Suspense
 const ProfilePage = () => {
+  return (
+    <Suspense fallback={<div>Chargement...</div>}>
+      <ProfileContent />
+    </Suspense>
+  );
+};
+
+// Créer un composant séparé pour la partie qui utilise useSearchParams
+function ProfileContent() {
   const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -2045,6 +2054,6 @@ const ProfilePage = () => {
       </div>
     </div>
   );
-};
+}
 
 export default ProfilePage;
