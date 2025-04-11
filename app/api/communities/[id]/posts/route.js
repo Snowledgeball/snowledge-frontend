@@ -93,7 +93,7 @@ export async function POST(request, { params }) {
 
     console.log("membersId", membersIdFiltered);
 
-    if (membersId.length === 0) return; // Pas de membres à notifier
+    if (membersId.length === 0) return NextResponse.json(post);
 
     // Créer des notifications pour tous les membres en une seule opération
     await createBulkNotifications({

@@ -1,7 +1,32 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, UserPlus, MessageCircle, Award, AlertCircle, Check, X, CheckCircle, AlertTriangle, Send, XCircle } from "lucide-react";
+import {
+  Bell,
+  UserPlus,
+  MessageCircle,
+  Award,
+  AlertCircle,
+  Check,
+  X,
+  CheckCircle,
+  AlertTriangle,
+  Send,
+  XCircle,
+  FileText,
+  Clock,
+  RefreshCw,
+  MessageSquare,
+  Reply,
+  Megaphone,
+  Users,
+  Crown,
+  Ban,
+  FileEdit,
+  ThumbsUp,
+  ThumbsDown,
+  Info
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Notification, NotificationType } from "@/types/notification";
 import { formatDistanceToNow } from "date-fns";
@@ -93,55 +118,61 @@ export default function NotificationBell() {
   const getNotificationIcon = (type: NotificationType) => {
     switch (type) {
       case NotificationType.NEW_POST:
-        return "📝";
+        return <FileText className="h-5 w-5 text-blue-500" />;
       case NotificationType.NEW_POST_PENDING:
-        return "⏳";
+        return <Clock className="h-5 w-5 text-yellow-500" />;
       case NotificationType.NEW_ENRICHMENT_PENDING:
-        return "⏳";
+        return <Clock className="h-5 w-5 text-yellow-500" />;
       case NotificationType.ENRICHMENT_UPDATED:
-        return "🔄";
+        return <RefreshCw className="h-5 w-5 text-blue-500" />;
       case NotificationType.ENRICHMENT_APPROVED:
-        return "✅";
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
       case NotificationType.ENRICHMENT_REJECTED:
-        return "❌";
+        return <XCircle className="h-5 w-5 text-red-500" />;
       case NotificationType.COMMENT_ON_POST:
-        return "💬";
+        return <MessageSquare className="h-5 w-5 text-blue-500" />;
       case NotificationType.REPLY_TO_COMMENT:
-        return "↩️";
+        return <Reply className="h-5 w-5 text-blue-500" />;
       case NotificationType.MENTION:
-        return "📣";
+        return <Megaphone className="h-5 w-5 text-purple-500" />;
       case NotificationType.COMMUNITY_INVITATION:
-        return "🤝";
+        return <Users className="h-5 w-5 text-green-500" />;
       case NotificationType.ROLE_CHANGE:
-        return "👑";
+        return <Crown className="h-5 w-5 text-yellow-500" />;
       case NotificationType.BAN:
-        return <X className="h-5 w-5 text-red-600" />;
+        return <Ban className="h-5 w-5 text-red-600" />;
       case NotificationType.CONTRIBUTOR_ACCEPTED:
-        return "✅";
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
       case NotificationType.CONTRIBUTOR_REFUSED:
-        return "❌";
+        return <XCircle className="h-5 w-5 text-red-500" />;
       case NotificationType.CONTRIBUTOR_REQUEST:
         return <UserPlus className="h-5 w-5 text-blue-500" />;
-      // case NotificationType.MESSAGE:
-      //   return <MessageCircle className="h-5 w-5 text-green-500" />;
-      // case NotificationType.ACHIEVEMENT:
-      //   return <Award className="h-5 w-5 text-yellow-500" />;
-      // case NotificationType.WARNING:
-      //   return <AlertCircle className="h-5 w-5 text-red-500" />;
-      // case NotificationType.APPROVAL:
-      //   return <Check className="h-5 w-5 text-green-600" />;
+      case NotificationType.NEW_PROPOSAL:
+        return <FileEdit className="h-5 w-5 text-blue-500" />;
+      case NotificationType.PROPOSAL_APPROVED:
+        return <ThumbsUp className="h-5 w-5 text-green-500" />;
+      case NotificationType.PROPOSAL_REJECTED:
+        return <ThumbsDown className="h-5 w-5 text-red-500" />;
+      case NotificationType.REVIEW_VOTE:
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
       case NotificationType.APPROVAL:
-        return <CheckCircle className="text-green-500" />;
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
       case NotificationType.WARNING:
-        return <AlertTriangle className="text-yellow-500" />;
+        return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
       case NotificationType.FEEDBACK:
-        return <MessageCircle className="text-blue-500" />;
+        return <MessageCircle className="h-5 w-5 text-blue-500" />;
       case NotificationType.POST_READY_PUBLISH:
-        return <Send className="text-purple-500" />; // Icône pour les posts prêts à être publiés
+        return <Send className="h-5 w-5 text-purple-500" />;
       case NotificationType.POST_REJECTED:
-        return <XCircle className="text-red-500" />;
+        return <XCircle className="h-5 w-5 text-red-500" />;
+      case NotificationType.INFO:
+        return <Info className="h-5 w-5 text-blue-500" />;
+      case NotificationType.VOTE_APPROVED:
+        return <ThumbsUp className="h-5 w-5 text-green-500" />;
+      case NotificationType.VOTE_REJECTED:
+        return <ThumbsDown className="h-5 w-5 text-red-500" />;
       default:
-        return "🔔";
+        return <Bell className="h-5 w-5 text-gray-500" />;
     }
   };
 

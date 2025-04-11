@@ -72,7 +72,6 @@ export async function GET(request, { params }) {
 export async function POST(request, { params }) {
   try {
     const session = await getServerSession(authOptions);
-    console.log("session pending", session);
     if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
@@ -108,7 +107,6 @@ export async function POST(request, { params }) {
       },
     });
 
-    console.log("post", post);
 
     const contributors = await prisma.community_contributors.findMany({
       where: {
@@ -139,7 +137,7 @@ export async function POST(request, { params }) {
       (contributor) => contributor.id !== parseInt(session.user.id)
     );
 
-    if (contributorsFiltered.length === 0) return; // Pas de membres à notifier
+    if (contributorsFiltered.length === 0) return NextResponse.json(post); // Pas de membres à notifier
 
     // Créer des notifications pour tous les membres en une seule opération
     await createBulkNotifications({

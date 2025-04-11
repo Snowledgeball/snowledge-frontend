@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { checkProposalStatus } from "@/lib/proposalUtils";
 import { createBulkNotifications } from "@/lib/notifications";
+import { NotificationType } from "@/types/notification";
 
 export async function POST(request, { params }) {
   const { id, proposalId } = await params;
@@ -197,6 +198,21 @@ export async function POST(request, { params }) {
           communityId,
           proposalId: proposalIdInt,
           proposalStatus: newStatus,
+        },
+      });
+    } else {
+      await createBulkNotifications({
+        userIds: [proposal.author_id],
+        title: `Vous avez reçu un vote ${vote === "APPROVED" ? "positif !" : "négatif"}`,
+        message: `Votre proposition "${proposal.title}" a reçu un vote ${vote === "APPROVED" ? "positif" : "négatif"} dans la communauté ${proposal.community.name}`,
+        type:
+          vote === "APPROVED"
+            ? NotificationType.VOTE_APPROVED
+            : NotificationType.VOTE_REJECTED,
+        link: `/community/${communityId}?tab=voting`,
+        metadata: {
+          communityId,
+          proposalId: proposalIdInt,
         },
       });
     }

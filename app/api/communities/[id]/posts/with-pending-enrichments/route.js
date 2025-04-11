@@ -50,8 +50,14 @@ export async function GET(request, { params }) {
       (review) => review.contribution_id
     );
 
+
+
     const postsEnrichments = await prisma.community_posts_enrichments.findMany({
       where: {
+        community_posts: {
+          community_id: parseInt(communityId),
+        },
+        status: "PENDING",
         id: {
           notIn: reviewedEnrichmentIds,
         },
@@ -63,76 +69,6 @@ export async function GET(request, { params }) {
         user: true,
       },
     });
-
-    // Récupérer les posts publiés qui ont des contributions en attente
-    // const postsWithPendingContributions = await prisma.community_posts.findMany(
-    //   {
-    //     where: {
-    //       community_id: parseInt(communityId),
-    //       status: "PUBLISHED",
-    //       community_posts_enrichments: {
-    //         some: {
-    //           status: "PENDING",
-    //           // Exclure les enrichissements que l'utilisateur a déjà évalués
-    //           AND: {
-    //             id: {
-    //               notIn: reviewedEnrichmentIds,
-    //             },
-    //           },
-    //         },
-    //       },
-    //     },
-    //     include: {
-    //       user: {
-    //         select: {
-    //           id: true,
-    //           fullName: true,
-    //           profilePicture: true,
-    //         },
-    //       },
-    //       community_posts_enrichments: {
-    //         where: {
-    //           status: "PENDING",
-    //           // Exclure les enrichissements que l'utilisateur a déjà évalués
-    //           AND: {
-    //             id: {
-    //               notIn: reviewedEnrichmentIds,
-    //             },
-    //           },
-    //         },
-    //         include: {
-    //           user: {
-    //             select: {
-    //               id: true,
-    //               fullName: true,
-    //               profilePicture: true,
-    //             },
-    //           },
-    //           community_posts_enrichment_reviews: {
-    //             include: {
-    //               user: {
-    //                 select: {
-    //                   id: true,
-    //                   fullName: true,
-    //                   profilePicture: true,
-    //                 },
-    //               },
-    //             },
-    //           },
-    //         },
-    //       },
-    //     },
-    //     orderBy: {
-    //       created_at: "desc",
-    //     },
-    //   }
-    // );
-
-    // postsWithPendingContributions.forEach((post) => {
-    //   post.community_posts_enrichments.forEach((enrichment) => {
-    //     console.log("enrichment", enrichment);
-    //   });
-    // });
 
     return NextResponse.json(postsEnrichments);
   } catch (error) {
