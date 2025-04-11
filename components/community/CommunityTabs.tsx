@@ -47,19 +47,23 @@ export default function CommunityTabs({
         >
           Threads
         </button>
-        {/* Bouton Masterclass */}
+        {/* Bouton Masterclass verrouillé */}
         <button
-          className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "masterclass"
-            ? "border-blue-500 text-blue-600"
-            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          onClick={() =>
+            toast.info(
+              "Les masterclasses ne sont pas encore disponibles. Revenez bientôt !"
+            )
+          }
+          className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors opacity-60 cursor-not-allowed flex items-center gap-2
+            ${activeTab === "masterclass"
+              ? "border-blue-500 text-blue-600"
+              : "border-transparent text-gray-500"
             }`}
-          onClick={() => setActiveTab("masterclass")}
-          aria-controls="masterclass-section"
-          aria-selected={activeTab === "masterclass"}
-          role="tab"
+          aria-disabled="true"
           id="tab-masterclass"
         >
           Masterclass
+          <Lock className="w-4 h-4" />
         </button>
         {/* Bouton Cours verrouillé */}
         <button
