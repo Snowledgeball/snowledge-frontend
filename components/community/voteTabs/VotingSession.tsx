@@ -825,7 +825,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                     <h2 className="text-xl font-semibold text-gray-800">
                       {selectedProposal.title || ""}
                     </h2>
-                    {memberships?.isContributor || memberships?.isCreator && (
+                    {(memberships?.isContributor || memberships?.isCreator) && (
                       <Sheet
                         open={isProposalFormOpen}
                         onOpenChange={setIsProposalFormOpen}
@@ -962,21 +962,23 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       Refuser
                     </Button>
                   </div>
-                  <div className="flex items-center space-x-2 mt-3">
-                    <Checkbox
-                      id="contribute"
-                      checked={willContribute}
-                      onCheckedChange={(checked) =>
-                        setWillContribute(!!checked)
-                      }
-                    />
-                    <label
-                      htmlFor="contribute"
-                      className="text-sm font-medium text-gray-700 cursor-pointer"
-                    >
-                      Se proposer pour rédiger ce sujet
-                    </label>
-                  </div>
+                  {(memberships?.isContributor || memberships?.isCreator) && (
+                    <div className="flex items-center space-x-2 mt-3">
+                      <Checkbox
+                        id="contribute"
+                        checked={willContribute}
+                        onCheckedChange={(checked) =>
+                          setWillContribute(!!checked)
+                        }
+                      />
+                      <label
+                        htmlFor="contribute"
+                        className="text-sm font-medium text-gray-700 cursor-pointer"
+                      >
+                        Se proposer pour rédiger ce sujet
+                      </label>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : selectedContribution && activeTab === "contributions" ? (
