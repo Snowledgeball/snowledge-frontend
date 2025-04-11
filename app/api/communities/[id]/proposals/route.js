@@ -181,9 +181,11 @@ export async function POST(request, { params }) {
       },
     });
 
+    const learnersIdsAndCreator = [...learnersIds, community.creator_id];
+
     // Créer des notifications pour tous les membres en une seule opération
     await createBulkNotifications({
-      userIds: learnersIds,
+      userIds: learnersIdsAndCreator,
       title: "Nouvelle proposition",
       message: `"${newProposal.title}" a été soumise à la communauté ${community.name}`,
       type: NotificationType.NEW_PROPOSAL,
