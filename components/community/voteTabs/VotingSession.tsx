@@ -226,6 +226,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
         console.log("Vous n'êtes pas un contributeur de cette communauté", membershipData);
         return;
       }
+    } else {
+      if (!memberships?.isContributor && !memberships?.isCreator) {
+        return;
+      }
     }
 
     try {
