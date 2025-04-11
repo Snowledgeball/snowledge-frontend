@@ -607,7 +607,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Fermer</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => window.location.href = `/profile`}>
+                        <AlertDialogAction onClick={() => window.location.href = `/profile?contributeTo=${memoizedCommunityId}`}>
                           Postuler
                         </AlertDialogAction>
                       </AlertDialogFooter>

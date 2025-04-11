@@ -31,6 +31,7 @@ import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Loader } from "@/components/ui/loader";
+import { useSearchParams } from "next/navigation";
 
 // Système de cache pour les données du profil
 const profileCache = {
@@ -150,6 +151,9 @@ interface Message {
 const ProfilePage = () => {
   const { data: session } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const contributeTo = searchParams.get("contributeTo");
+
 
   const {
     isLoading: isLoadingAuth,
@@ -227,6 +231,20 @@ const ProfilePage = () => {
       setUserId(userId);
     }
   }, [session]);
+
+  useEffect(() => {
+    if (contributeTo) {
+      // Récupérer les informations de la communauté
+      const fetchCommunity = async () => {
+        const response = await fetch(`/api/communities/${contributeTo}`);
+        const data = await response.json();
+        console.log(data);
+        setSelectedCommunityForContribution(data.name);
+        setIsContributorModalOpen(true);
+      };
+      fetchCommunity();
+    }
+  }, [contributeTo]);
 
   // Fonction pour récupérer les données de l'utilisateur avec cache
   const fetchUserData = useCallback(async () => {
@@ -402,8 +420,8 @@ const ProfilePage = () => {
       const postsData = Array.isArray(data.posts)
         ? data.posts
         : Array.isArray(data)
-        ? data
-        : [];
+          ? data
+          : [];
 
       // Mettre à jour le cache
       profileCache.posts.set(cacheKey, {
@@ -449,8 +467,8 @@ const ProfilePage = () => {
       const enrichmentsData = Array.isArray(data.enrichments)
         ? data.enrichments
         : Array.isArray(data)
-        ? data
-        : [];
+          ? data
+          : [];
 
       // Mettre à jour le cache
       profileCache.enrichments.set(cacheKey, {
@@ -496,8 +514,8 @@ const ProfilePage = () => {
       const reviewsData = Array.isArray(data.reviews)
         ? data.reviews
         : Array.isArray(data)
-        ? data
-        : [];
+          ? data
+          : [];
 
       // Mettre à jour le cache
       if (!profileCache.reviews) {
@@ -553,8 +571,8 @@ const ProfilePage = () => {
       const proposalsData = Array.isArray(data.contentProposals)
         ? data.contentProposals
         : Array.isArray(data)
-        ? data
-        : [];
+          ? data
+          : [];
 
       // Mettre à jour le cache
       if (!profileCache.contentProposals) {
@@ -618,8 +636,8 @@ const ProfilePage = () => {
       const messagesData = Array.isArray(data.messages)
         ? data.messages
         : Array.isArray(data)
-        ? data
-        : [];
+          ? data
+          : [];
 
       // Mettre à jour le cache
       if (!profileCache.messages) {
@@ -778,8 +796,8 @@ const ProfilePage = () => {
           const postsData = Array.isArray(data.posts)
             ? data.posts
             : Array.isArray(data)
-            ? data
-            : [];
+              ? data
+              : [];
 
           // Mettre à jour le cache
           profileCache.communityPosts.set(cacheKey, {
@@ -1093,33 +1111,30 @@ const ProfilePage = () => {
           <nav className="-mb-px flex space-x-8">
             <button
               className={`border-b-2 py-4 px-1 text-sm font-medium transition-all duration-200 
-                                ${
-                                  activeTab === "communities"
-                                    ? "border-blue-500 text-blue-600"
-                                    : "border-transparent text-gray-500"
-                                }`}
+                                ${activeTab === "communities"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500"
+                }`}
               onClick={() => setActiveTab("communities")}
             >
               Communautés rejointes
             </button>
             <button
               className={`border-b-2 py-4 px-1 text-sm font-medium transition-all duration-200 
-                                ${
-                                  activeTab === "my-community"
-                                    ? "border-blue-500 text-blue-600"
-                                    : "border-transparent text-gray-500"
-                                }`}
+                                ${activeTab === "my-community"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500"
+                }`}
               onClick={() => setActiveTab("my-community")}
             >
               Communautés créées
             </button>
             <button
               className={`border-b-2 py-4 px-1 text-sm font-medium transition-all duration-200 
-                                ${
-                                  activeTab === "settings"
-                                    ? "border-blue-500 text-blue-600"
-                                    : "border-transparent text-gray-500"
-                                }`}
+                                ${activeTab === "settings"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500"
+                }`}
               onClick={() => setActiveTab("settings")}
             >
               Paramètres
@@ -1153,11 +1168,10 @@ const ProfilePage = () => {
                   joinedCommunities.map((community, index) => (
                     <div
                       key={index}
-                      className={`w-full bg-white rounded-lg p-4 hover:bg-gray-50 transition-all duration-200 ${
-                        selectedCommunity?.name === community.name
-                          ? "ring-2 ring-blue-500 shadow-md"
-                          : "border border-gray-200"
-                      }`}
+                      className={`w-full bg-white rounded-lg p-4 hover:bg-gray-50 transition-all duration-200 ${selectedCommunity?.name === community.name
+                        ? "ring-2 ring-blue-500 shadow-md"
+                        : "border border-gray-200"
+                        }`}
                     >
                       <div className="flex flex-col space-y-4">
                         <div className="flex justify-between items-start">
@@ -1236,19 +1250,18 @@ const ProfilePage = () => {
                           <div className="flex items-center justify-between">
                             <div>
                               <span
-                                className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                  enrichment.status === "APPROVED"
-                                    ? "bg-green-100 text-green-700"
-                                    : enrichment.status === "PENDING"
+                                className={`px-3 py-1 rounded-full text-xs font-medium ${enrichment.status === "APPROVED"
+                                  ? "bg-green-100 text-green-700"
+                                  : enrichment.status === "PENDING"
                                     ? "bg-yellow-100 text-yellow-700"
                                     : "bg-red-100 text-red-700"
-                                }`}
+                                  }`}
                               >
                                 {enrichment.status === "APPROVED"
                                   ? "Approuvé"
                                   : enrichment.status === "PENDING"
-                                  ? "En attente"
-                                  : "Rejeté"}
+                                    ? "En attente"
+                                    : "Rejeté"}
                               </span>
                               <h4 className="mt-2 font-medium text-gray-900">
                                 Enrichissement pour:{" "}
@@ -1301,7 +1314,7 @@ const ProfilePage = () => {
                     Mes posts
                   </h3>
                   {selectedCommunityPosts &&
-                  selectedCommunityPosts.length > 0 ? (
+                    selectedCommunityPosts.length > 0 ? (
                     <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                       {selectedCommunityPosts.map((post, idx) => (
                         <div
