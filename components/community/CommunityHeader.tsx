@@ -30,20 +30,21 @@ export default function CommunityHeader({
     return (
         <div
             id="no-header"
-            className="bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#003E8A] to-[#16215B]"
+            className="border-b border-gray-200"
+        // className="bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#003E8A] to-[#16215B]"
         >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-[95rem] mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center">
                         <button
                             onClick={() => router.back()}
-                            className="text-white/80 hover:text-white mr-4 transition-colors"
+                            className="text-gray-700 hover:text-gray-900 mr-4 transition-colors"
                         >
                             <ArrowLeft className="w-5 h-5" />
                         </button>
                         {/* Menu déroulant des communautés */}
                         <div className="relative group">
-                            <button className="flex items-center space-x-2 text-white">
+                            <button className="flex items-center space-x-2 text-gray-700">
                                 <h1 className="text-xl font-bold">{communityData.name}</h1>
                                 {isContributor && (pendingPostsCount > 0 || pendingEnrichmentsCount > 0) && (
                                     <span className="ml-2 px-2 py-1 bg-red-100 text-red-600 text-xs font-medium rounded-full">
@@ -101,19 +102,29 @@ export default function CommunityHeader({
                             </div>
                         </div>
                     </div>
-                    {sessionUserId &&
-                        communityData?.creator.id === parseInt(sessionUserId) && (
-                            <div className="flex items-center space-x-4">
-                                <button
-                                    onClick={() =>
-                                        router.push(`/community/${communityData.id}/settings`)
-                                    }
-                                    className="text-white/80 hover:text-white transition-colors"
-                                >
-                                    <Settings className="w-5 h-5" />
-                                </button>
+                    {/* {sessionUserId &&
+                        communityData?.creator.id === parseInt(sessionUserId) ? (
+                        <div className="flex items-center space-x-4">
+                            <button
+                                onClick={() =>
+                                    router.push(`/community/${communityData.id}/settings`)
+                                }
+                                className="text-gray-700 hover:text-gray-900 transition-colors"
+                            >
+                                <Settings className="w-5 h-5" />
+                            </button>
+                        </div>
+                    ) : ( */}
+                    <div className="flex-1 flex justify-end h-full">
+                        <div className="bg-black rounded-sm w-64 py-1 px-3">
+                            <div className="flex items-center justify-between">
+                                <span className="text-white text-sm">Prizepool</span>
+                                <span className="bg-green-500/20 text-green-500 text-sm py-0.5 rounded-lg">+ 28.8 %</span>
                             </div>
-                        )}
+                            <p className="text-white text-xl font-bold">2097 pts</p>
+                        </div>
+                    </div>
+                    {/* )} */}
                 </div>
             </div>
         </div>
