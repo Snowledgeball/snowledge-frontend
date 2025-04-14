@@ -47,7 +47,7 @@
     "html-react-parser": "^5.2.2",
     "htmldiff-js": "^1.0.5",
     "isomorphic-dompurify": "^2.22.0",
-    "lucide-react": "^0.486.0",
+    "lucide-react": "^0.488.0",
     "next": "15.2.4",
     "next-auth": "^4.24.11",
     "pinata-web3": "^0.5.4",
