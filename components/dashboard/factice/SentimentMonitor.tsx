@@ -58,8 +58,8 @@ export const SentimentMonitor = () => {
                                 <span className="font-medium">{item.topic}</span>
                                 <span
                                     className={`px-2 py-1 rounded-full text-xs ${item.sentiment === "positif" ? "bg-green-100 text-green-600" :
-                                            item.sentiment === "négatif" ? "bg-red-100 text-red-600" :
-                                                "bg-gray-100 text-gray-600"
+                                        item.sentiment === "négatif" ? "bg-red-100 text-red-600" :
+                                            "bg-gray-100 text-gray-600"
                                         }`}
                                 >
                                     {item.percentage}%
@@ -78,8 +78,8 @@ export const SentimentMonitor = () => {
                         <div
                             key={i}
                             className={`p-4 rounded-lg border ${item.sentiment === "positif" ? "border-green-200 bg-green-50" :
-                                    item.sentiment === "négatif" ? "border-red-200 bg-red-50" :
-                                        "border-gray-200 bg-gray-50"
+                                item.sentiment === "négatif" ? "border-red-200 bg-red-50" :
+                                    "border-gray-200 bg-gray-50"
                                 }`}
                         >
                             <p className="text-gray-800">{item.text}</p>
@@ -90,8 +90,8 @@ export const SentimentMonitor = () => {
                                 </div>
                                 <span
                                     className={`px-2 py-1 rounded-full text-xs ${item.sentiment === "positif" ? "bg-green-100 text-green-600" :
-                                            item.sentiment === "négatif" ? "bg-red-100 text-red-600" :
-                                                "bg-gray-100 text-gray-600"
+                                        item.sentiment === "négatif" ? "bg-red-100 text-red-600" :
+                                            "bg-gray-100 text-gray-600"
                                         }`}
                                 >
                                     {item.sentiment}
