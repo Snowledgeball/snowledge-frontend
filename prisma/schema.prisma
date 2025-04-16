@@ -320,3 +320,17 @@ model user {
   community_proposals                community_proposals[]
   community_proposal_votes           community_proposal_votes[]
 }
+
+model SnowledgeRegister {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String   @unique
+  how       String   // Comment ils ont connu Snowledge
+  why       String   // Raison du contact
+  language  String   @default("fr")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("snowledge_register")
+}

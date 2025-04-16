@@ -14,13 +14,12 @@ export default function CommunityBanner({
 
   return (
     <>
-      <div className="w-full h-[150px] relative overflow-hidden">
+      <div className="w-[64rem] h-[150px] relative overflow-hidden justify-self-center mt-10 rounded-xl">
         <Image
-          src={`https://${
-            communityData.image_url
-              ? communityData.image_url
-              : "images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000&auto=format&fit=crop"
-          }`}
+          src={`https://${communityData.image_url
+            ? communityData.image_url
+            : "images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000&auto=format&fit=crop"
+            }`}
           alt="Banner pattern"
           layout="fill"
           objectFit="cover"

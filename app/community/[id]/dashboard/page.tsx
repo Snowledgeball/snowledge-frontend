@@ -32,6 +32,35 @@ import {
   UserMinus,
   UserPlus,
   UserX,
+  Workflow,
+  Database,
+  Gauge,
+  Signal,
+  Coins,
+  BrainCircuit,
+  FileCode,
+  Wand2,
+  CheckCircle,
+  CalendarClock,
+  BarChart,
+  Share2,
+  Rocket,
+  Sparkles,
+  Hammer,
+  Repeat,
+  Microscope,
+  Zap,
+  Bot,
+  PaintBucket,
+  ThumbsUp,
+  Palette,
+  Lightbulb,
+  Clock,
+  Calendar,
+  Image as ImageLucid,
+  Link,
+  FileVideo,
+  Paperclip,
 } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
@@ -58,6 +87,7 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import TinyMCEStyledText from "@/components/shared/TinyMCEStyledText";
+import { ToolSelector } from '@/components/dashboard/ToolSelector';
 
 // Système de cache pour les données du dashboard
 const dashboardCache = {
@@ -174,6 +204,9 @@ export default function CommunityDashboard() {
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<Member[]>([]);
   const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
+
+  // Ajout de l'état pour l'outil sélectionné
+  const [selectedTool, setSelectedTool] = useState<string | null>(null);
 
   const [userId, setUserId] = useState<string | null>(null);
   const [contributorRequests, setContributorRequests] = useState<
@@ -943,7 +976,10 @@ export default function CommunityDashboard() {
               <button
                 className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "overview" ? "bg-gray-800" : "hover:bg-gray-800"
                   }`}
-                onClick={() => handleTabChange("overview")}
+                onClick={() => {
+                  handleTabChange("overview");
+                  setSelectedTool(null);
+                }}
               >
                 📊 Tableau de bord
                 <ChevronRight className="ml-auto w-4 h-4" />
@@ -953,7 +989,10 @@ export default function CommunityDashboard() {
               <button
                 className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "members" ? "bg-gray-800" : "hover:bg-gray-800"
                   }`}
-                onClick={() => handleTabChange("members")}
+                onClick={() => {
+                  handleTabChange("members");
+                  setSelectedTool(null);
+                }}
               >
                 👥 Membres
                 <ChevronRight className="ml-auto w-4 h-4" />
@@ -966,55 +1005,214 @@ export default function CommunityDashboard() {
               Création
             </h3>
             <div className="space-y-1">
-              {/* <button
+              <button
                 className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "veille" ? "bg-gray-800" : "hover:bg-gray-800"}`}
                 onClick={() => {
                   setActiveTab("veille");
-                  toast.error("Cette fonctionnalité n'est pas encore définie");
+                  setSelectedTool(null);
                 }}
               >
                 📡 Collecte et veille
                 <ChevronRight className="ml-auto w-4 h-4" />
-              </button> */}
+              </button>
               <button
                 className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "creation" ? "bg-gray-800" : "hover:bg-gray-800"
                   }`}
-                onClick={() => handleTabChange("creation")}
+                onClick={() => {
+                  handleTabChange("creation");
+                  setSelectedTool(null);
+                }}
               >
                 ✍️ Création de posts
                 <ChevronRight className="ml-auto w-4 h-4" />
               </button>
-              {/* <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "pending" ? "bg-gray-800" : "hover:bg-gray-800"}`}
-                onClick={() =>
-                  router.push(`/community/${params.id}/posts/pending`)
-                }
-              >
-                📝 Posts en attente
-                <ChevronRight className="ml-auto w-4 h-4" />
-              </button> */}
             </div>
           </div>
 
-          {/* <div>
+          <div>
             <h3 className="text-purple-400 text-xs font-medium mb-2">
-              Communication
+              Boîte à outils
             </h3>
             <div className="space-y-1">
-              <button
-                onClick={() =>
-                  toast.info("Cette fonctionnalité n'est pas encore définie")
-                }
-                className="w-full flex items-center text-white p-2 rounded-lg hover:bg-gray-800"
-              >
-                💬 Inbox
-                <ChevronRight className="ml-auto w-4 h-4" />
-              </button>
+              {/* Outils de collecte */}
+              <div className="mb-2">
+                <p className="text-gray-500 text-xs pl-2 mb-1">COLLECTE</p>
+                <button
+                  onClick={() => {
+                    setActiveTab("tools");
+                    setSelectedTool("aggregator");
+                  }}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "aggregator" ? "bg-gray-800" : "hover:bg-gray-800"
+                    }`}
+                >
+                  <Database className="w-4 h-4 mr-2 text-blue-500" />
+                  Agrégateur de sources
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("tools");
+                    setSelectedTool("trend-scanner");
+                  }}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "trend-scanner" ? "bg-gray-800" : "hover:bg-gray-800"
+                    }`}
+                >
+                  <Gauge className="w-4 h-4 mr-2 text-green-500" />
+                  Scanner de tendances
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("tools");
+                    setSelectedTool("sentiment");
+                  }}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "sentiment" ? "bg-gray-800" : "hover:bg-gray-800"
+                    }`}
+                >
+                  <ThumbsUp className="w-4 h-4 mr-2 text-yellow-500" />
+                  Moniteur de sentiments
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("tools");
+                    setSelectedTool("signals");
+                  }}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "signals" ? "bg-gray-800" : "hover:bg-gray-800"
+                    }`}
+                >
+                  <Signal className="w-4 h-4 mr-2 text-red-500" />
+                  Détecteur de signaux
+                </button>
+              </div>
+
+              {/* Outils d'édition */}
+              <div className="mb-2">
+                <p className="text-gray-500 text-xs pl-2 mb-1">ÉDITION</p>
+                <button
+                  onClick={() => {
+                    setActiveTab("tools");
+                    setSelectedTool("collab-editor");
+                  }}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "collab-editor" ? "bg-gray-800" : "hover:bg-gray-800"
+                    }`}
+                >
+                  <Workflow className="w-4 h-4 mr-2 text-indigo-500" />
+                  Éditeur collaboratif
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("tools");
+                    setSelectedTool("ai-assistant");
+                  }}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "ai-assistant" ? "bg-gray-800" : "hover:bg-gray-800"
+                    }`}
+                >
+                  <BrainCircuit className="w-4 h-4 mr-2 text-purple-500" />
+                  AI Assistant rédaction
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("tools");
+                    setSelectedTool("templates");
+                  }}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "templates" ? "bg-gray-800" : "hover:bg-gray-800"
+                    }`}
+                >
+                  <FileCode className="w-4 h-4 mr-2 text-amber-500" />
+                  Bibliothèque de templates
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("tools");
+                    setSelectedTool("fact-checker");
+                  }}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "fact-checker" ? "bg-gray-800" : "hover:bg-gray-800"
+                    }`}
+                >
+                  <CheckCircle className="w-4 h-4 mr-2 text-emerald-500" />
+                  Vérificateur de faits
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("tools");
+                    setSelectedTool("customizer");
+                  }}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "customizer" ? "bg-gray-800" : "hover:bg-gray-800"
+                    }`}
+                >
+                  <PaintBucket className="w-4 h-4 mr-2 text-pink-500" />
+                  Customisation visuelle
+                </button>
+              </div>
+
+              {/* Outils de diffusion */}
+              <div>
+                <p className="text-gray-500 text-xs pl-2 mb-1">DIFFUSION</p>
+                <button
+                  onClick={() => {
+                    setActiveTab("tools");
+                    setSelectedTool("scheduler");
+                  }}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "scheduler" ? "bg-gray-800" : "hover:bg-gray-800"
+                    }`}
+                >
+                  <Calendar className="w-4 h-4 mr-2 text-orange-500" />
+                  Planificateur de publication
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("tools");
+                    setSelectedTool("analytics");
+                  }}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "analytics" ? "bg-gray-800" : "hover:bg-gray-800"
+                    }`}
+                >
+                  <BarChart className="w-4 h-4 mr-2 text-cyan-500" />
+                  Analytics en temps réel
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("tools");
+                    setSelectedTool("multi-channel");
+                  }}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "multi-channel" ? "bg-gray-800" : "hover:bg-gray-800"
+                    }`}
+                >
+                  <Share2 className="w-4 h-4 mr-2 text-teal-500" />
+                  Diffusion multi-canaux
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("tools");
+                    setSelectedTool("amplifier");
+                  }}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "amplifier" ? "bg-gray-800" : "hover:bg-gray-800"
+                    }`}
+                >
+                  <Rocket className="w-4 h-4 mr-2 text-rose-500" />
+                  Amplificateur de contenu
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("tools");
+                    setSelectedTool("monetization");
+                  }}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "monetization" ? "bg-gray-800" : "hover:bg-gray-800"
+                    }`}
+                >
+                  <Coins className="w-4 h-4 mr-2 text-amber-500" />
+                  Monétisation automatique
+                </button>
+              </div>
             </div>
-          </div> */}
+          </div>
         </div>
       </div>
     );
+  };
+
+  // Composant pour l'interface des outils
+  const ToolInterface = () => {
+    if (!selectedTool) return null;
+    return <ToolSelector selectedTool={selectedTool} />;
   };
 
   return (
@@ -1152,7 +1350,7 @@ export default function CommunityDashboard() {
                         <tr key={post.id} className="border-b hover:bg-gray-50">
                           <td className="py-4">{post.title}</td>
                           <td className="py-4">
-                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
                               {post.community_posts_category.label}
                             </span>
                           </td>
@@ -1851,6 +2049,10 @@ export default function CommunityDashboard() {
                 <TinyEditor onChange={setEditorContent} />
               </div>
             </div>
+          )}
+
+          {activeTab === "tools" && (
+            <ToolInterface />
           )}
         </div>
       </div>

@@ -51,7 +51,7 @@ export default function Header() {
             </Link>
 
             {/* Navigation desktop */}
-            <nav className="hidden lg:flex items-center space-x-6">
+            {/* <nav className="hidden lg:flex items-center space-x-6">
               <Link
                 href="/"
                 className="text-[#000333] hover:text-gray-900 font-bold text-sm"
@@ -67,7 +67,7 @@ export default function Header() {
               >
                 COMMUNAUTÉS
               </Link>
-            </nav>
+            </nav> */}
           </div>
 
           {/* Menu mobile */}
