@@ -27,6 +27,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader } from "@/components/ui/loader";
+import { useTranslation } from "react-i18next";
 
 // Cache pour stocker les données des communautés
 const communitiesCache = {
@@ -108,6 +109,7 @@ const HomePage = () => {
   const [communities, setCommunities] = useState<Community[]>([]);
   const [stats, setStats] = useState<any>(null);
   const hasFetched = useRef(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -181,25 +183,26 @@ const HomePage = () => {
       community_contributors_id.length
     );
 
-    useEffect(() => {
-      const fetchContributorsCount = async () => {
-        try {
-          const response = await fetch(
-            `/api/communities/${id}/contributors/count`
-          );
-          if (response.ok) {
-            const data = await response.json();
-            setContributorsCount(data.count);
-          } else {
-            console.log("Impossible de récupérer le nombre de contributeurs");
-          }
-        } catch (error) {
-          console.error("Erreur:", error);
-        }
-      };
+    // AAAA REMETTRE
+    // useEffect(() => {
+    //   const fetchContributorsCount = async () => {
+    //     try {
+    //       const response = await fetch(
+    //         `/api/communities/${id}/contributors/count`
+    //       );
+    //       if (response.ok) {
+    //         const data = await response.json();
+    //         setContributorsCount(data.count);
+    //       } else {
+    //         console.log("Impossible de récupérer le nombre de contributeurs");
+    //       }
+    //     } catch (error) {
+    //       console.error("Erreur:", error);
+    //     }
+    //   };
 
-      fetchContributorsCount();
-    }, [id, community_contributors_id.length]);
+    //   fetchContributorsCount();
+    // }, [id, community_contributors_id.length]);
 
     // const getTrustScoreColor = (score: number) => {
     //   if (score >= 90) return "text-emerald-500";
@@ -498,13 +501,8 @@ const HomePage = () => {
       <div className="min-h-screen">
         <header className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold text-gray-900">
-              Explorez les communautés
-            </h1>
-            <p className="mt-2 text-gray-600">
-              Découvrez des communautés passionnantes et rejoignez celles qui
-              vous correspondent
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900">{t("explore")}</h1>
+            <p className="mt-2 text-gray-600">{t("description")}</p>
           </div>
         </header>
 
@@ -534,28 +532,18 @@ const HomePage = () => {
             ))}
           </div>
 
-          {/* Section En vedette */}
-          {/* <section className="mb-16">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">Communautés en vedette</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {communities.map((community, index) => (
-                <CommunityCard key={index} {...community} />
-              ))}
-            </div>
-          </section> */}
-
           {/* Section Explorer */}
           <section>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">
-                Explorer les communautés
+                {t("communities.explore")}
               </h2>
 
               <div className="relative w-full sm:w-72">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Rechercher une communauté..."
+                  placeholder={t("communities.search_placeholder")}
                   className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -665,7 +653,7 @@ const HomePage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {filteredCommunities.length === 0 ? (
                   <div className="col-span-full text-center py-8 text-gray-500">
-                    Aucune communauté ne correspond à votre recherche
+                    {t("communities.no_results")}
                   </div>
                 ) : (
                   filteredCommunities.map((community, index) => (

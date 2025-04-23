@@ -1,0 +1,45 @@
+{
+  "explore": "Explorer les communautés",
+  "description": "Découvrez des communautés passionnantes et rejoignez celles qui vous correspondent",
+  "navigation": {
+    "home": "Accueil",
+    "communities": "Communautés",
+    "settings": "Paramètres",
+    "profile": "Profil",
+    "profile_picture": "Photo de profil",
+    "logout": "Déconnexion",
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "explore": "Explorer",
+    "create_community": "Créer une communauté",
+    "become_creator": "Devenir créateur"
+  },
+  "actions": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "contribute": "Contribuer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "reset": "Réinitialiser"
+  },
+  "communities": {
+    "explore": "Explorer les communautés",
+    "featured": "Communautés en vedette",
+    "search_placeholder": "Rechercher une communauté...",
+    "no_results": "Aucune communauté ne correspond à votre recherche",
+    "members": "membres",
+    "contributors": "contributeurs",
+    "join": "Rejoindre",
+    "access": "Accéder"
+  },
+  "filters": {
+    "all": "Toutes",
+    "largest": "Plus grandes",
+    "newest": "Nouveautés",
+    "active": "Plus actives",
+    "categories": "Catégories",
+    "all_categories": "Toutes les catégories"
+  }
+}

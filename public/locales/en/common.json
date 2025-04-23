@@ -1,0 +1,45 @@
+{
+  "explore": "Explore communities",
+  "description": "Discover and join communities that match your interests",
+  "navigation": {
+    "home": "Home",
+    "communities": "Communities",
+    "settings": "Settings",
+    "profile": "Profile",
+    "profile_picture": "Profile picture",
+    "logout": "Logout",
+    "login": "Login",
+    "signup": "Sign up",
+    "explore": "Explore",
+    "create_community": "Create community",
+    "become_creator": "Become creator"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "contribute": "Contribute",
+    "search": "Search",
+    "filter": "Filter",
+    "reset": "Reset"
+  },
+  "communities": {
+    "explore": "Explore communities",
+    "featured": "Featured communities",
+    "search_placeholder": "Search for a community...",
+    "no_results": "No communities match your search",
+    "members": "members",
+    "contributors": "contributors",
+    "join": "Join",
+    "access": "Access"
+  },
+  "filters": {
+    "all": "All",
+    "largest": "Largest",
+    "newest": "Newest",
+    "active": "Most active",
+    "categories": "Categories",
+    "all_categories": "All categories"
+  }
+}

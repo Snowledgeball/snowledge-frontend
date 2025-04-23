@@ -13,6 +13,8 @@ import { PointsIcon } from "./icons/PointsIcon";
 import { WalletIcon } from "./icons/WalletIcon";
 import { toast } from "sonner";
 import NotificationBell from "./NotificationBell";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 interface User {
   id: number;
@@ -21,6 +23,7 @@ interface User {
 }
 
 export default function Header() {
+  const { t } = useTranslation();
   const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -45,7 +48,6 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo et navigation gauche */}
           <div className="flex items-center space-x-8 mr-8">
-            {/* Logo et navigation gauche */}
             <Link href="/" className="flex items-center">
               <img src="/images/logo.png" alt="Logo" className="w-auto h-10" />
             </Link>
@@ -70,7 +72,6 @@ export default function Header() {
             </nav> */}
           </div>
 
-          {/* Menu mobile */}
           <button
             className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -82,7 +83,6 @@ export default function Header() {
             )}
           </button>
 
-          {/* Actions desktop */}
           <div className="hidden lg:flex items-center space-x-4">
             <button
               onClick={() =>
@@ -113,34 +113,22 @@ export default function Header() {
                   </clipPath>
                 </defs>
               </svg>
-              <span className="xs:inline text-sm">Devenir créateur</span>
+              <span className="xs:inline text-sm">
+                {t("navigation.become_creator")}
+              </span>
             </button>
             {session && user ? (
               <>
-                {/* <div className="flex items-center rounded-xl border border-gray-200">
-                  <StatIndicator
-                    type="points"
-                    value={10458}
-                    icon={<PointsIcon />}
-                  />
-                  <StatIndicator
-                    type="wallet"
-                    value={512.02}
-                    icon={<WalletIcon />}
-                    valueClassName="text-emerald-500"
-                    noBorder
-                  />
-                </div> */}
                 <div className="flex items-center gap-3 sm:gap-4">
                   <NotificationBell />
                   <Link
                     href="/profile"
                     className="hover:opacity-80 transition-opacity"
-                    aria-label="Profil"
+                    aria-label={t("navigation.profile")}
                   >
                     <Image
                       src={user?.avatar}
-                      alt={user?.fullName || "Photo de profil"}
+                      alt={user?.fullName || t("navigation.profile_picture")}
                       width={32}
                       height={32}
                       className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
@@ -149,7 +137,7 @@ export default function Header() {
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="p-1.5 sm:p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
-                    aria-label="Déconnexion"
+                    aria-label={t("navigation.logout")}
                   >
                     <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
@@ -161,20 +149,20 @@ export default function Header() {
                   onClick={() => setIsLoginModalOpen(true)}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                 >
-                  Connexion
+                  {t("navigation.login")}
                 </button>
                 <button
                   onClick={() => setIsSignupModalOpen(true)}
                   className="border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 hover:border-blue-700 hover:text-blue-700 transition-all duration-200 ease-in-out"
                 >
-                  S'inscrire
+                  {t("navigation.signup")}
                 </button>
               </>
             )}
+            <LanguageSwitcher />
           </div>
         </div>
 
-        {/* Menu mobile overlay */}
         {isMenuOpen && (
           <div className="lg:hidden">
             <div className="py-4 space-y-4">
@@ -183,14 +171,14 @@ export default function Header() {
                 className="block px-4 py-2 text-gray-600 font-bold hover:bg-gray-100 rounded-lg"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Explorer
+                {t("navigation.explore")}
               </Link>
               <Link
                 href="/create-community"
                 className="block px-4 py-2 text-gray-600 font-bold hover:bg-gray-100 rounded-lg"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Créer une communauté
+                {t("navigation.create_community")}
               </Link>
               <div className="border-t border-gray-200 pt-4">
                 <div className="flex items-center justify-between">
@@ -227,21 +215,6 @@ export default function Header() {
                   </button>
                   {session && user ? (
                     <>
-                      {/* <div className="flex items-center rounded-xl border border-gray-200 mx-2">
-                        <StatIndicator
-                          type="points"
-                          value={10458}
-                          icon={<PointsIcon />}
-                        />
-                        <StatIndicator
-                          type="wallet"
-                          value={512.02}
-                          icon={<WalletIcon />}
-                          valueClassName="text-emerald-500"
-                          noBorder
-                        />
-                      </div> */}
-
                       <div className="flex items-center gap-2 sm:gap-4">
                         <button
                           className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors"
