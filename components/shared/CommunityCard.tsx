@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Shield } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface CommunityCardProps {
   id: number;
@@ -31,6 +32,7 @@ export default function CommunityCard({
 }: CommunityCardProps) {
   const router = useRouter();
   const contributorsCount = community_contributors_id.length;
+  const { t } = useTranslation();
 
   return (
     <Card
@@ -86,14 +88,15 @@ export default function CommunityCard({
           <div className="flex items-center text-gray-600">
             <Users className="w-5 h-5 text-blue-500 mr-3" />
             <span className="font-medium">
-              {new Intl.NumberFormat("fr-FR").format(members)} membres
+              {new Intl.NumberFormat("fr-FR").format(members)}{" "}
+              {t("communities.members")}
             </span>
           </div>
           <div className="flex items-center text-gray-600">
             <Shield className="w-5 h-5 text-green-500 mr-3" />
             <span className="font-medium">
               {new Intl.NumberFormat("fr-FR").format(contributorsCount)}{" "}
-              contributeurs
+              {t("communities.contributors")}
             </span>
           </div>
         </div>

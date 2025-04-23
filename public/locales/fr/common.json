@@ -12,7 +12,8 @@
     "signup": "S'inscrire",
     "explore": "Explorer",
     "create_community": "Créer une communauté",
-    "become_creator": "Devenir créateur"
+    "become_creator": "Devenir créateur",
+    "notifications": "Notifications"
   },
   "actions": {
     "save": "Enregistrer",
@@ -22,7 +23,7 @@
     "contribute": "Contribuer",
     "search": "Rechercher",
     "filter": "Filtrer",
-    "reset": "Réinitialiser"
+    "reset": "Réinitialiser tous les filtres"
   },
   "communities": {
     "explore": "Explorer les communautés",
@@ -32,7 +33,9 @@
     "members": "membres",
     "contributors": "contributeurs",
     "join": "Rejoindre",
-    "access": "Accéder"
+    "access": "Accéder",
+    "access_your_community": "Accéder à votre communauté",
+    "loading": "Chargement des communautés..."
   },
   "filters": {
     "all": "Toutes",
@@ -40,6 +43,8 @@
     "newest": "Nouveautés",
     "active": "Plus actives",
     "categories": "Catégories",
-    "all_categories": "Toutes les catégories"
+    "all_categories": "Toutes les catégories",
+    "active_filters": "Filtres actifs",
+    "search": "Recherche"
   }
 }

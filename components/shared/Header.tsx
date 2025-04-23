@@ -211,25 +211,29 @@ export default function Header() {
                         </clipPath>
                       </defs>
                     </svg>
-                    <span className="xs:inline">Devenir créateur</span>
+                    <span className="xs:inline">
+                      {t("navigation.become_creator")}
+                    </span>
                   </button>
                   {session && user ? (
                     <>
                       <div className="flex items-center gap-2 sm:gap-4">
                         <button
                           className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors"
-                          aria-label="Notifications"
+                          aria-label={t("navigation.notifications")}
                         >
                           <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                         </button>
                         <Link
                           href="/profile"
                           className="hover:opacity-80 transition-opacity"
-                          aria-label="Profil"
+                          aria-label={t("navigation.profile")}
                         >
                           <Image
                             src={user?.avatar}
-                            alt={user?.fullName || "Photo de profil"}
+                            alt={
+                              user?.fullName || t("navigation.profile_picture")
+                            }
                             width={32}
                             height={32}
                             className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
@@ -238,7 +242,7 @@ export default function Header() {
                         <button
                           onClick={() => signOut({ callbackUrl: "/" })}
                           className="p-1.5 sm:p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
-                          aria-label="Déconnexion"
+                          aria-label={t("navigation.logout")}
                         >
                           <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
@@ -250,13 +254,13 @@ export default function Header() {
                         onClick={() => setIsLoginModalOpen(true)}
                         className="inline-flex items-center px-6 py-2.5 border border-blue-600 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
                       >
-                        Se connecter
+                        {t("navigation.login")}
                       </button>
                       <button
                         onClick={() => setIsSignupModalOpen(true)}
                         className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2.5 rounded-md text-sm font-medium transition-all duration-200 hover:shadow-md"
                       >
-                        S'inscrire
+                        {t("navigation.signup")}
                       </button>
                     </>
                   )}

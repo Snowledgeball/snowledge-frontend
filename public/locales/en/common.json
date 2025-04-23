@@ -12,7 +12,8 @@
     "signup": "Sign up",
     "explore": "Explore",
     "create_community": "Create community",
-    "become_creator": "Become creator"
+    "become_creator": "Become creator",
+    "notifications": "Notifications"
   },
   "actions": {
     "save": "Save",
@@ -22,7 +23,7 @@
     "contribute": "Contribute",
     "search": "Search",
     "filter": "Filter",
-    "reset": "Reset"
+    "reset": "Reset all filters"
   },
   "communities": {
     "explore": "Explore communities",
@@ -32,7 +33,9 @@
     "members": "members",
     "contributors": "contributors",
     "join": "Join",
-    "access": "Access"
+    "access": "Access",
+    "access_your_community": "Access your community",
+    "loading": "Loading communities..."
   },
   "filters": {
     "all": "All",
@@ -40,6 +43,8 @@
     "newest": "Newest",
     "active": "Most active",
     "categories": "Categories",
-    "all_categories": "All categories"
+    "all_categories": "All categories",
+    "active_filters": "Active filters",
+    "search": "Search"
   }
 }
