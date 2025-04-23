@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Upload, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { useTranslation } from "react-i18next";
 import Image from "next/image";
 
 // Créer un composant séparé pour le formulaire de catégorie
@@ -21,6 +22,7 @@ const CategoryForm = ({
 }) => {
   const [name, setName] = useState("");
   const [label, setLabel] = useState("");
+  const { t } = useTranslation();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +37,7 @@ const CategoryForm = ({
         <div>
           <input
             type="text"
-            placeholder="Identifiant unique (ex: nft)"
+            placeholder={t("create_community.category_id_placeholder")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
@@ -45,7 +47,7 @@ const CategoryForm = ({
         <div>
           <input
             type="text"
-            placeholder="Nom affiché (ex: NFT & Collections)"
+            placeholder={t("create_community.category_name_placeholder")}
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
@@ -57,13 +59,13 @@ const CategoryForm = ({
             onClick={handleSubmit}
             className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700"
           >
-            Créer la catégorie
+            {t("create_community.create_category")}
           </button>
           <button
             onClick={onCancel}
             className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm hover:bg-gray-300"
           >
-            Annuler
+            {t("actions.cancel")}
           </button>
         </div>
       </div>
@@ -88,6 +90,7 @@ export default function CreateCommunityPage() {
   const [categories, setCategories] = useState<{ id: string; label: string }[]>(
     []
   );
+  const { t } = useTranslation();
 
   useEffect(() => {
     return () => {
@@ -133,7 +136,7 @@ export default function CreateCommunityPage() {
           const data = await uploadResponse.json();
           finalImageUrl = data.url;
         } else {
-          throw new Error("Erreur lors du téléchargement de l'image");
+          throw new Error(t("create_community.image_upload_error"));
         }
       }
 
@@ -151,21 +154,16 @@ export default function CreateCommunityPage() {
 
       if (response.ok) {
         const data = await response.json();
-        toast.success(
-          "Communauté créée avec succès ! Veuillez maintenant configurer les informations importantes qui seront présentées aux futurs membres.",
-          {
-            duration: 6000,
-          }
-        );
+        toast.success(t("create_community.success_message"), {
+          duration: 6000,
+        });
         router.push(`/community/${data.id}/settings#presentation`);
       } else {
         console.log(response);
       }
     } catch (error) {
       console.error("Erreur:", error);
-      toast.error(
-        "Une erreur est survenue lors de la création de la communauté"
-      );
+      toast.error(t("create_community.error_message"));
     } finally {
       setIsSubmitting(false);
     }
@@ -194,10 +192,10 @@ export default function CreateCommunityPage() {
         const newCat = await response.json();
         setCategories((prev) => [...prev, newCat]);
         setShowCategoryForm(false);
-        toast.success("Catégorie créée avec succès");
+        toast.success(t("create_community.category_created"));
       }
     } catch (error) {
-      toast.error("Erreur lors de la création de la catégorie");
+      toast.error(t("create_community.category_error"));
     }
   };
 
@@ -212,7 +210,7 @@ export default function CreateCommunityPage() {
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Connectez-vous pour créer une communauté
+            {t("create_community.login_required")}
           </h1>
         </div>
       </div>
@@ -227,19 +225,19 @@ export default function CreateCommunityPage() {
           className="flex items-center text-gray-600 hover:text-gray-900 mb-8"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
-          Retour
+          {t("actions.back")}
         </button>
 
         <Card className="p-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-8">
-            Créer une nouvelle communauté
+            {t("create_community.title")}
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Nom de la communauté */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nom de la communauté
+                {t("create_community.name_label")}
               </label>
               <Input
                 type="text"
@@ -248,7 +246,7 @@ export default function CreateCommunityPage() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                placeholder="Ex: CryptoMasters France"
+                placeholder={t("create_community.name_placeholder")}
                 className="w-full"
               />
             </div>
@@ -256,7 +254,7 @@ export default function CreateCommunityPage() {
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
+                {t("create_community.description_label")}
               </label>
               <Textarea
                 required
@@ -264,7 +262,7 @@ export default function CreateCommunityPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                placeholder="Décrivez votre communauté..."
+                placeholder={t("create_community.description_placeholder")}
                 className="w-full h-32"
               />
             </div>
@@ -273,7 +271,7 @@ export default function CreateCommunityPage() {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  Catégorie
+                  {t("create_community.category_label")}
                 </label>
 
                 <button
@@ -284,12 +282,12 @@ export default function CreateCommunityPage() {
                   {showCategoryForm ? (
                     <>
                       <X className="w-4 h-4 mr-1" />
-                      Annuler
+                      {t("actions.cancel")}
                     </>
                   ) : (
                     <>
                       <Plus className="w-4 h-4 mr-1" />
-                      Ajouter une catégorie
+                      {t("create_community.add_category")}
                     </>
                   )}
                 </button>
@@ -318,7 +316,7 @@ export default function CreateCommunityPage() {
             {/* Image de la communauté */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Image de la communauté
+                {t("create_community.image_label")}
               </label>
               <div
                 onClick={() => document.getElementById("file-input")?.click()}
@@ -328,20 +326,20 @@ export default function CreateCommunityPage() {
                   <div className="relative">
                     <Image
                       src={previewImage}
-                      alt="Aperçu"
+                      alt={t("create_community.preview")}
                       className="max-h-48 mx-auto rounded-lg"
                       width={192}
                       height={192}
                     />
                     <p className="text-sm text-gray-500 mt-2">
-                      Cliquez pour changer l'image
+                      {t("create_community.click_to_change")}
                     </p>
                   </div>
                 ) : (
                   <>
                     <Upload className="w-8 h-8 text-gray-400 mx-auto mb-4" />
                     <p className="text-sm text-gray-500">
-                      Glissez-déposez une image ou cliquez pour sélectionner
+                      {t("create_community.drag_drop_image")}
                     </p>
                   </>
                 )}
@@ -361,7 +359,9 @@ export default function CreateCommunityPage() {
               disabled={isSubmitting}
               className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-blue-400"
             >
-              {isSubmitting ? "Création en cours..." : "Créer la communauté"}
+              {isSubmitting
+                ? t("create_community.creating")
+                : t("create_community.create_button")}
             </button>
           </form>
         </Card>

@@ -45,6 +45,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from "react-i18next";
 
 // Cache pour stocker les données
 const contributorsCache = new Map<
@@ -223,7 +224,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     if (!memberships) {
       const membershipData = await fetchMemberships();
       if (!membershipData?.isContributor && !membershipData?.isCreator) {
-        console.log("Vous n'êtes pas un contributeur de cette communauté", membershipData);
+        console.log(
+          "Vous n'êtes pas un contributeur de cette communauté",
+          membershipData
+        );
         return;
       }
     } else {
@@ -301,9 +305,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
       setContributions(allContributions);
     } catch (error) {
       console.error("Erreur lors de la récupération des contributions:", error);
-      toast.error(
-        "Impossible de charger les contributions. Veuillez réessayer."
-      );
+      toast.error(t("voting.contributions_load_error"));
     } finally {
       setIsRefreshingContributions(false);
     }
@@ -391,14 +393,17 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
       const data = await response.json();
       toast.success(
-        `Vote ${type === "APPROVED" ? "positif" : "négatif"} enregistré`
+        t("voting.vote_registered", {
+          type:
+            type === "APPROVED" ? t("voting.positive") : t("voting.negative"),
+        })
       );
 
       fetchProposals();
       setSelectedProposal(null);
     } catch (error) {
       console.error("Erreur lors du vote:", error);
-      toast.error("Erreur lors de l'enregistrement du vote");
+      toast.error(t("voting.vote_error"));
     } finally {
       setIsLoading(false);
     }
@@ -410,7 +415,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     vote: "APPROVED" | "REJECTED"
   ) => {
     if (!contributionId || !postId || !voteFeedback.trim()) {
-      toast.error("Veuillez fournir un feedback");
+      toast.error(t("voting.feedback_required"));
       return;
     }
     try {
@@ -434,7 +439,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
         );
       }
 
-      toast.success("Vote sur l'enrichissement soumis avec succès");
+      toast.success(t("voting.enrichment_vote_success"));
       setVoteFeedback("");
       setSelectedContribution(null);
 
@@ -442,7 +447,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
       refreshContributions();
     } catch (error) {
       console.error("Erreur:", error);
-      toast.error("Erreur lors de la soumission du vote sur l'enrichissement");
+      toast.error(t("voting.enrichment_vote_error"));
     } finally {
       setIsApproving(false);
       setIsRejecting(false);
@@ -454,7 +459,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     vote: "APPROVED" | "REJECTED"
   ) => {
     if (!contributionId || !voteFeedback.trim()) {
-      toast.error("Veuillez fournir un feedback");
+      toast.error(t("voting.feedback_required"));
       return;
     }
     try {
@@ -476,7 +481,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
         throw new Error("Erreur lors de la soumission de la révision");
       }
 
-      toast.success("Vote soumis avec succès");
+      toast.success(t("voting.vote_success"));
       setVoteFeedback("");
       setSelectedContribution(null);
 
@@ -484,7 +489,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
       refreshContributions();
     } catch (error) {
       console.error("Erreur:", error);
-      toast.error("Erreur lors de la soumission du vote");
+      toast.error(t("voting.vote_error"));
     } finally {
       setIsApproving(false);
       setIsRejecting(false);
@@ -525,13 +530,13 @@ export function VotingSession({ communityId }: VotingSessionProps) {
       setWillContribute(false);
       setIsProposalFormOpen(false);
 
-      toast.success("Proposition soumise avec succès !");
+      toast.success(t("voting.proposal_submitted"));
     } catch (error) {
       console.error("Erreur lors de la soumission de la proposition:", error);
       toast.error(
         error instanceof Error
           ? error.message
-          : "Erreur lors de la soumission de la proposition"
+          : t("voting.proposal_submission_error")
       );
     } finally {
       setIsLoading(false);
@@ -540,6 +545,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
   const [isContributorDialogOpen, setIsContributorDialogOpen] = useState(false);
 
+  const { t } = useTranslation();
 
   return (
     <div
@@ -549,11 +555,13 @@ export function VotingSession({ communityId }: VotingSessionProps) {
       <div className="border-b border-gray-200 p-4 flex-shrink-0">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold text-gray-800">
-            Sessions de vote
+            {t("voting.sessions")}
           </h2>
           <div className="flex items-center text-sm text-gray-600">
             <Info className="w-4 h-4 mr-1 text-blue-500" />
-            <span>Nombre de contributeurs: {contributorsCount}</span>
+            <span>
+              {t("voting.contributors_count", { count: contributorsCount })}
+            </span>
           </div>
         </div>
       </div>
@@ -563,7 +571,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
           <Loader
             size="md"
             color="gradient"
-            text="Chargement..."
+            text={t("loading.default")}
             variant="spinner"
           />
         </div>
@@ -574,45 +582,58 @@ export function VotingSession({ communityId }: VotingSessionProps) {
             <div className="p-4 border-b border-gray-200 flex-shrink-0">
               <div className="flex space-x-2">
                 <button
-                  className={`px-4 py-2 text-sm font-medium rounded-md flex-1 ${activeTab === "sujets"
-                    ? "bg-primary text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                    }`}
+                  className={`px-4 py-2 text-sm font-medium rounded-md flex-1 ${
+                    activeTab === "sujets"
+                      ? "bg-primary text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
                   onClick={() => handleTabChange("sujets")}
                 >
-                  Sujets
+                  {t("voting.topics")}
                 </button>
                 {memberships?.isContributor || memberships?.isCreator ? (
                   <button
-                    className={`px-4 py-2 text-sm font-medium rounded-md flex-1 ${activeTab === "contributions"
-                      ? "bg-primary text-white"
-                      : "text-gray-700 hover:bg-gray-100"
-                      }`}
+                    className={`px-4 py-2 text-sm font-medium rounded-md flex-1 ${
+                      activeTab === "contributions"
+                        ? "bg-primary text-white"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
                     onClick={() => handleTabChange("contributions")}
                   >
-                    Contributions
+                    {t("voting.contributions")}
                   </button>
                 ) : (
-                  <AlertDialog open={isContributorDialogOpen} onOpenChange={setIsContributorDialogOpen}>
+                  <AlertDialog
+                    open={isContributorDialogOpen}
+                    onOpenChange={setIsContributorDialogOpen}
+                  >
                     <AlertDialogTrigger asChild>
                       <button
                         className={`px-4 py-2 text-sm font-medium rounded-md flex-1 opacity-50 
                           cursor-not-allowed text-gray-500 bg-gray-100`}
                       >
-                        Contributions
+                        {t("voting.contributions")}
                       </button>
                     </AlertDialogTrigger>
                     <AlertDialogContent className="bg-white">
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Accès restreint</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          {t("voting.restricted_access")}
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                          Vous devez être contributeur ou créateur de cette communauté pour accéder à cette section. Souhaitez-vous postuler en tant que contributeur ?
+                          {t("voting.contributor_access_required")}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Fermer</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => window.location.href = `/profile?contributeTo=${memoizedCommunityId}`}>
-                          Postuler
+                        <AlertDialogCancel>
+                          {t("actions.cancel")}
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() =>
+                            (window.location.href = `/profile?contributeTo=${memoizedCommunityId}`)
+                          }
+                        >
+                          {t("voting.apply")}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -625,7 +646,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                 <Loader
                   size="lg"
                   color="gradient"
-                  text="Chargement..."
+                  text={t("loading.default")}
                   variant="spinner"
                 />
               </div>
@@ -633,18 +654,19 @@ export function VotingSession({ communityId }: VotingSessionProps) {
               <ScrollArea className="flex-1">
                 <div className="p-2 space-y-2">
                   {activeTab === "sujets" &&
-                    proposals &&
-                    proposals.length > 0 ? (
+                  proposals &&
+                  proposals.length > 0 ? (
                     proposals.map((proposal) => (
                       <div
                         key={proposal?.id || Math.random()}
                         onClick={() =>
                           proposal && handleSelectProposal(proposal)
                         }
-                        className={`p-4 rounded-md cursor-pointer transition-colors ${selectedProposal?.id === proposal?.id
-                          ? "bg-blue-50 border border-blue-200"
-                          : "bg-white border border-gray-200 hover:border-blue-200 hover:bg-blue-50/30"
-                          }`}
+                        className={`p-4 rounded-md cursor-pointer transition-colors ${
+                          selectedProposal?.id === proposal?.id
+                            ? "bg-blue-50 border border-blue-200"
+                            : "bg-white border border-gray-200 hover:border-blue-200 hover:bg-blue-50/30"
+                        }`}
                       >
                         <div className="flex gap-3">
                           <div className="flex-shrink-0">
@@ -660,7 +682,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           </div>
                           <div className="flex-1">
                             <h3 className="font-medium text-gray-800">
-                              {proposal.title || "Sans titre"}
+                              {proposal.title || t("voting.untitled")}
                             </h3>
                             <p className="text-sm text-gray-600 line-clamp-2">
                               {proposal.description}
@@ -697,7 +719,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                     (!proposals || proposals.length === 0) ? (
                     <div className="flex justify-center items-center py-8 flex-1">
                       <p className="text-gray-500">
-                        Aucune proposition de sujet disponible.
+                        {t("voting.no_topic_proposals")}
                       </p>
                     </div>
                   ) : contributions && contributions.length > 0 ? (
@@ -707,28 +729,30 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         onClick={() =>
                           contribution && handleSelectContribution(contribution)
                         }
-                        className={`rounded-md cursor-pointer overflow-hidden mb-2 border ${selectedContribution?.id === contribution?.id
-                          ? contribution?.tag === "creation"
-                            ? "bg-purple-100 border-purple-300"
-                            : "bg-blue-100 border-blue-300"
-                          : contribution?.tag === "creation"
+                        className={`rounded-md cursor-pointer overflow-hidden mb-2 border ${
+                          selectedContribution?.id === contribution?.id
+                            ? contribution?.tag === "creation"
+                              ? "bg-purple-100 border-purple-300"
+                              : "bg-blue-100 border-blue-300"
+                            : contribution?.tag === "creation"
                             ? "border-l-4 border-l-purple-500 border-gray-200 bg-white"
                             : "border-l-4 border-l-blue-500 border-gray-200 bg-white"
-                          } hover:shadow-sm transition-all`}
+                        } hover:shadow-sm transition-all`}
                       >
                         {/* Section du contenu principal */}
                         <div className="p-3">
                           {/* Badge d'étiquette */}
                           <div className="flex justify-between items-center mb-1.5">
                             <span
-                              className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${contribution.tag === "creation"
-                                ? "bg-purple-100 text-purple-800"
-                                : "bg-blue-100 text-blue-800"
-                                }`}
+                              className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${
+                                contribution.tag === "creation"
+                                  ? "bg-purple-100 text-purple-800"
+                                  : "bg-blue-100 text-blue-800"
+                              }`}
                             >
                               {contribution.tag === "creation"
-                                ? "Création"
-                                : "Enrichissement"}
+                                ? t("voting.creation")
+                                : t("voting.enrichment")}
                             </span>
                           </div>
 
@@ -810,7 +834,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                   ) : (
                     <div className="flex justify-center items-center py-8 flex-1">
                       <p className="text-gray-500">
-                        Aucune contribution disponible.
+                        {t("voting.no_contributions")}
                       </p>
                     </div>
                   )}
@@ -836,7 +860,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       >
                         <SheetTrigger asChild>
                           <Button className="border border-dashed border-gray-300 bg-white hover:bg-gray-50 text-gray-700">
-                            Proposer un sujet
+                            {t("voting.propose_topic")}
                           </Button>
                         </SheetTrigger>
                         <SheetContent
@@ -844,17 +868,18 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           className="sm:max-w-[500px] bg-white"
                         >
                           <SheetHeader>
-                            <SheetTitle>Proposer un nouveau sujet</SheetTitle>
+                            <SheetTitle>
+                              {t("voting.propose_new_topic")}
+                            </SheetTitle>
                             <SheetDescription>
-                              Remplissez le formulaire ci-dessous pour proposer un
-                              nouveau sujet à la communauté.
+                              {t("voting.fill_form_topic")}
                             </SheetDescription>
                           </SheetHeader>
                           <form onSubmit={handleSubmitProposal}>
                             <div className="grid gap-4 py-4">
                               <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="title" className="text-right">
-                                  Titre
+                                  {t("voting.title")}
                                 </Label>
                                 <Input
                                   id="title"
@@ -874,7 +899,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                                   htmlFor="description"
                                   className="text-right self-start"
                                 >
-                                  Description
+                                  {t("voting.description")}
                                 </Label>
                                 <Textarea
                                   id="description"
@@ -899,7 +924,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                                   htmlFor="contribute-new"
                                   className="text-sm text-gray-700"
                                 >
-                                  Je souhaite contribuer à cette proposition
+                                  {t("voting.want_to_contribute")}
                                 </Label>
                               </div>
                             </div>
@@ -907,11 +932,11 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                               <div className="flex space-x-2 sm:justify-end">
                                 <SheetClose asChild>
                                   <Button type="button" variant="outline">
-                                    Annuler
+                                    {t("actions.cancel")}
                                   </Button>
                                 </SheetClose>
                                 <Button type="submit">
-                                  Soumettre la proposition
+                                  {t("voting.submit_proposal")}
                                 </Button>
                               </div>
                             </SheetFooter>
@@ -926,7 +951,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Titre
+                        {t("voting.title")}
                       </label>
                       <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
                         <p className="text-gray-800">
@@ -936,7 +961,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Description
+                        {t("voting.description")}
                       </label>
                       <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
                         <p className="text-gray-800">
@@ -955,7 +980,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         handleProposalVote(selectedProposal.id, "APPROVED")
                       }
                     >
-                      Valider le sujet
+                      {t("voting.approve_topic")}
                     </Button>
                     <Button
                       className="flex-1 bg-red-600 hover:bg-red-700 text-white"
@@ -963,7 +988,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         handleProposalVote(selectedProposal.id, "REJECTED")
                       }
                     >
-                      Refuser
+                      {t("voting.reject")}
                     </Button>
                   </div>
                   {(memberships?.isContributor || memberships?.isCreator) && (
@@ -979,7 +1004,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         htmlFor="contribute"
                         className="text-sm font-medium text-gray-700 cursor-pointer"
                       >
-                        Se proposer pour rédiger ce sujet
+                        {t("voting.volunteer_to_write")}
                       </label>
                     </div>
                   )}
@@ -995,18 +1020,19 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       <h2 className="text-xl font-semibold text-gray-800 truncate">
                         {selectedContribution?.title?.length > 32
                           ? selectedContribution?.title?.substring(0, 32) +
-                          "..."
+                            "..."
                           : selectedContribution?.title || ""}
                       </h2>
                       <span
-                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${selectedContribution.tag === "creation"
-                          ? "bg-purple-100 text-purple-800"
-                          : "bg-blue-100 text-blue-800"
-                          }`}
+                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                          selectedContribution.tag === "creation"
+                            ? "bg-purple-100 text-purple-800"
+                            : "bg-blue-100 text-blue-800"
+                        }`}
                       >
                         {selectedContribution.tag === "creation"
-                          ? "Création"
-                          : "Enrichissement"}
+                          ? t("voting.creation")
+                          : t("voting.enrichment")}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
@@ -1037,14 +1063,15 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           })()}
                         </p>
                         <p className="text-sm text-gray-500 truncate">
-                          Proposé le{" "}
-                          {format(
-                            new Date(
-                              selectedContribution?.created_at || new Date()
+                          {t("voting.proposed_on", {
+                            date: format(
+                              new Date(
+                                selectedContribution?.created_at || new Date()
+                              ),
+                              "d MMMM yyyy",
+                              { locale: fr }
                             ),
-                            "d MMMM yyyy",
-                            { locale: fr }
-                          )}
+                          })}
                         </p>
                       </div>
                     </div>
@@ -1058,7 +1085,7 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       <div className="sticky top-0 z-10 bg-gray-50 py-2 border-b border-gray-200 flex-shrink-0">
                         <div className="px-4 py-1.5 flex items-center space-x-2 justify-start">
                           <span className="text-sm text-gray-500">
-                            Contenu :
+                            {t("voting.content")}:
                           </span>
                         </div>
                       </div>
@@ -1091,11 +1118,11 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                     htmlFor="feedback"
                     className="block text-sm font-medium text-gray-700 mb-2"
                   >
-                    Justification de votre vote
+                    {t("voting.vote_justification")}
                   </label>
                   <Textarea
                     id="feedback"
-                    placeholder="Expliquez en quelques mots votre décision..."
+                    placeholder={t("voting.explain_decision")}
                     className="w-full h-[2.5rem] text-sm mb-4"
                     value={voteFeedback}
                     onChange={(e) => setVoteFeedback(e.target.value)}
@@ -1103,11 +1130,13 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
                   <div className="flex space-x-3">
                     <Button
-                      className={`flex-1 ${selectedContribution.tag === "creation"
-                        ? "bg-purple-600 hover:bg-purple-700"
-                        : "bg-blue-600 hover:bg-blue-700"
-                        } text-white ${isApproving ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                      className={`flex-1 ${
+                        selectedContribution.tag === "creation"
+                          ? "bg-purple-600 hover:bg-purple-700"
+                          : "bg-blue-600 hover:bg-blue-700"
+                      } text-white ${
+                        isApproving ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                       onClick={() => {
                         if (!selectedContribution) return;
                         setIsApproving(true);
@@ -1128,15 +1157,16 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       {isApproving ? (
                         <span className="flex items-center gap-2">
                           <Loader size="sm" color="white" />
-                          Chargement...
+                          {t("loading.default")}
                         </span>
                       ) : (
-                        "Approuver"
+                        t("voting.approve")
                       )}
                     </Button>
                     <Button
-                      className={`flex-1 bg-red-600 hover:bg-red-700 text-white ${isRejecting ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                      className={`flex-1 bg-red-600 hover:bg-red-700 text-white ${
+                        isRejecting ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                       onClick={() => {
                         if (!selectedContribution) return;
                         setIsRejecting(true);
@@ -1157,10 +1187,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       {isRejecting ? (
                         <span className="flex items-center gap-2">
                           <Loader size="sm" color="white" />
-                          Chargement...
+                          {t("loading.default")}
                         </span>
                       ) : (
-                        "Rejeter"
+                        t("voting.reject")
                       )}
                     </Button>
                   </div>
@@ -1171,34 +1201,33 @@ export function VotingSession({ communityId }: VotingSessionProps) {
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xl font-semibold text-gray-800">
-                    Contributions à la communauté
+                    {t("voting.community_contributions")}
                   </h2>
                 </div>
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="w-3 h-3 rounded-full bg-purple-500"></div>
                     <span className="text-sm font-medium">
-                      Création de contenu
+                      {t("voting.content_creation")}
                     </span>
                     <div className="w-3 h-3 rounded-full bg-blue-500 ml-4"></div>
-                    <span className="text-sm font-medium">Enrichissement</span>
+                    <span className="text-sm font-medium">
+                      {t("voting.enrichment")}
+                    </span>
                     <div className="w-3 h-3 rounded-full bg-amber-500 ml-4"></div>
                     <span className="text-sm font-medium">
-                      En attente de révision
+                      {t("voting.pending_review")}
                     </span>
                   </div>
                   <p className="text-gray-600">
-                    Les contributions représentent le contenu créé ou enrichi
-                    par les membres de la communauté. Sélectionnez une
-                    contribution dans la liste à gauche pour voir les détails et
-                    voter.
+                    {t("voting.contributions_explanation")}
                   </p>
                 </div>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Statistiques des contributions</CardTitle>
+                    <CardTitle>{t("voting.contribution_stats")}</CardTitle>
                     <CardDescription>
-                      Aperçu des contributions de la communauté
+                      {t("voting.community_contributions_overview")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -1210,7 +1239,9 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                               .length
                           }
                         </span>
-                        <p className="text-sm text-gray-500">Créations</p>
+                        <p className="text-sm text-gray-500">
+                          {t("voting.creations")}
+                        </p>
                       </div>
                       <div className="text-center">
                         <span className="text-2xl font-bold text-blue-600">
@@ -1219,13 +1250,17 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                               .length
                           }
                         </span>
-                        <p className="text-sm text-gray-500">Enrichissements</p>
+                        <p className="text-sm text-gray-500">
+                          {t("voting.enrichments")}
+                        </p>
                       </div>
                       <div className="text-center">
                         <span className="text-2xl font-bold text-amber-600">
                           {contributions.length}
                         </span>
-                        <p className="text-sm text-gray-500">En attente</p>
+                        <p className="text-sm text-gray-500">
+                          {t("voting.pending")}
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -1235,102 +1270,104 @@ export function VotingSession({ communityId }: VotingSessionProps) {
               // Message par défaut quand rien n'est sélectionné
               <>
                 <div className="flex justify-end m-4">
-                  {activeTab === "sujets" && (memberships?.isContributor || memberships?.isCreator) && (
-                    <Sheet
-                      open={isProposalFormOpen}
-                      onOpenChange={setIsProposalFormOpen}
-                    >
-                      <SheetTrigger asChild>
-                        <Button className="border border-dashed border-gray-300 bg-white hover:bg-gray-50 text-gray-700">
-                          Proposer un sujet
-                        </Button>
-                      </SheetTrigger>
-                      <SheetContent
-                        side="right"
-                        className="sm:max-w-[500px] bg-white"
+                  {activeTab === "sujets" &&
+                    (memberships?.isContributor || memberships?.isCreator) && (
+                      <Sheet
+                        open={isProposalFormOpen}
+                        onOpenChange={setIsProposalFormOpen}
                       >
-                        <SheetHeader>
-                          <SheetTitle>Proposer un nouveau sujet</SheetTitle>
-                          <SheetDescription>
-                            Remplissez le formulaire ci-dessous pour proposer un
-                            nouveau sujet à la communauté.
-                          </SheetDescription>
-                        </SheetHeader>
-                        <form onSubmit={handleSubmitProposal}>
-                          <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="title" className="text-right">
-                                Titre
-                              </Label>
-                              <Input
-                                id="title"
-                                value={newProposal.title}
-                                onChange={(e) =>
-                                  setNewProposal((prev) => ({
-                                    ...prev,
-                                    title: e.target.value,
-                                  }))
-                                }
-                                className="col-span-3"
-                                required
-                              />
+                        <SheetTrigger asChild>
+                          <Button className="border border-dashed border-gray-300 bg-white hover:bg-gray-50 text-gray-700">
+                            {t("voting.propose_topic")}
+                          </Button>
+                        </SheetTrigger>
+                        <SheetContent
+                          side="right"
+                          className="sm:max-w-[500px] bg-white"
+                        >
+                          <SheetHeader>
+                            <SheetTitle>
+                              {t("voting.propose_new_topic")}
+                            </SheetTitle>
+                            <SheetDescription>
+                              {t("voting.fill_form_topic")}
+                            </SheetDescription>
+                          </SheetHeader>
+                          <form onSubmit={handleSubmitProposal}>
+                            <div className="grid gap-4 py-4">
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="title" className="text-right">
+                                  {t("voting.title")}
+                                </Label>
+                                <Input
+                                  id="title"
+                                  value={newProposal.title}
+                                  onChange={(e) =>
+                                    setNewProposal((prev) => ({
+                                      ...prev,
+                                      title: e.target.value,
+                                    }))
+                                  }
+                                  className="col-span-3"
+                                  required
+                                />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label
+                                  htmlFor="description"
+                                  className="text-right self-start"
+                                >
+                                  {t("voting.description")}
+                                </Label>
+                                <Textarea
+                                  id="description"
+                                  value={newProposal.description}
+                                  onChange={(e) =>
+                                    setNewProposal((prev) => ({
+                                      ...prev,
+                                      description: e.target.value,
+                                    }))
+                                  }
+                                  className="col-span-3 min-h-[200px]"
+                                  required
+                                />
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Switch
+                                  id="contribute-new"
+                                  checked={willContribute}
+                                  onCheckedChange={setWillContribute}
+                                />
+                                <Label
+                                  htmlFor="contribute-new"
+                                  className="text-sm text-gray-700"
+                                >
+                                  {t("voting.want_to_contribute")}
+                                </Label>
+                              </div>
                             </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label
-                                htmlFor="description"
-                                className="text-right self-start"
-                              >
-                                Description
-                              </Label>
-                              <Textarea
-                                id="description"
-                                value={newProposal.description}
-                                onChange={(e) =>
-                                  setNewProposal((prev) => ({
-                                    ...prev,
-                                    description: e.target.value,
-                                  }))
-                                }
-                                className="col-span-3 min-h-[200px]"
-                                required
-                              />
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Switch
-                                id="contribute-new"
-                                checked={willContribute}
-                                onCheckedChange={setWillContribute}
-                              />
-                              <Label
-                                htmlFor="contribute-new"
-                                className="text-sm text-gray-700"
-                              >
-                                Je souhaite contribuer à cette proposition
-                              </Label>
-                            </div>
-                          </div>
-                          <SheetFooter className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between w-full">
-                            <div className="flex space-x-2 sm:justify-end">
-                              <SheetClose asChild>
-                                <Button type="button" variant="outline">
-                                  Annuler
+                            <SheetFooter className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between w-full">
+                              <div className="flex space-x-2 sm:justify-end">
+                                <SheetClose asChild>
+                                  <Button type="button" variant="outline">
+                                    {t("actions.cancel")}
+                                  </Button>
+                                </SheetClose>
+                                <Button type="submit">
+                                  {t("voting.submit_proposal")}
                                 </Button>
-                              </SheetClose>
-                              <Button type="submit">
-                                Soumettre la proposition
-                              </Button>
-                            </div>
-                          </SheetFooter>
-                        </form>
-                      </SheetContent>
-                    </Sheet>
-                  )}
+                              </div>
+                            </SheetFooter>
+                          </form>
+                        </SheetContent>
+                      </Sheet>
+                    )}
                 </div>
                 <div className="flex items-center justify-center h-full">
                   <p className="text-gray-500">
                     {activeTab === "sujets"
-                      ? "Sélectionnez un sujet pour voir les détails"
-                      : "Sélectionnez une contribution pour voir les détails"}
+                      ? t("voting.select_topic")
+                      : t("voting.select_contribution")}
                   </p>
                 </div>
               </>

@@ -2,6 +2,7 @@
 
 import { Lock } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface CommunityTabsProps {
   activeTab: string;
@@ -18,76 +19,77 @@ export default function CommunityTabs({
   pendingPostsCount,
   pendingEnrichmentsCount,
 }: CommunityTabsProps) {
+  const { t } = useTranslation("translation");
+
   return (
     <div className="border-b border-gray-200 mb-6" id="community-tabs">
       <nav className="-mb-px flex justify-center space-x-8">
         <button
-          className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "general"
-            ? "border-blue-500 text-blue-600"
-            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
+          className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${
+            activeTab === "general"
+              ? "border-blue-500 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          }`}
           onClick={() => setActiveTab("general")}
           aria-controls="general-section"
           aria-selected={activeTab === "general"}
           role="tab"
           id="tab-general"
         >
-          Général
+          {t("community_tabs.general")}
         </button>
         <button
-          className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${activeTab === "posts"
-            ? "border-blue-500 text-blue-600"
-            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
+          className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors ${
+            activeTab === "posts"
+              ? "border-blue-500 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          }`}
           onClick={() => setActiveTab("posts")}
           aria-controls="posts-section"
           aria-selected={activeTab === "posts"}
           role="tab"
           id="tab-posts"
         >
-          Threads
+          {t("community_tabs.threads")}
         </button>
         {/* Bouton Masterclass verrouillé */}
         <button
           onClick={() =>
-            toast.info(
-              "Les masterclasses ne sont pas encore disponibles. Revenez bientôt !"
-            )
+            toast.info(t("community_tabs.masterclass_not_available"))
           }
           className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors opacity-60 cursor-not-allowed flex items-center gap-2
-            ${activeTab === "masterclass"
-              ? "border-blue-500 text-blue-600"
-              : "border-transparent text-gray-500"
+            ${
+              activeTab === "masterclass"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500"
             }`}
           aria-disabled="true"
           id="tab-masterclass"
         >
-          Masterclass
+          {t("community_tabs.masterclass")}
           <Lock className="w-4 h-4" />
         </button>
         {/* Bouton Cours verrouillé */}
         <button
-          onClick={() =>
-            toast.info(
-              "Les cours ne sont pas encore disponibles. Revenez bientôt !"
-            )
-          }
+          onClick={() => toast.info(t("community_tabs.courses_not_available"))}
           className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors opacity-60 cursor-not-allowed flex items-center gap-2
-            ${activeTab === "courses"
-              ? "border-blue-500 text-blue-600"
-              : "border-transparent text-gray-500"
+            ${
+              activeTab === "courses"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500"
             }`}
           aria-disabled="true"
           id="tab-courses"
         >
-          Cours
+          {t("community_tabs.courses")}
           <Lock className="w-4 h-4" />
         </button>
         <button
-          className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors flex items-center ${activeTab === "voting"
-            ? "border-blue-500 text-blue-600"
-            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
+          className={`border-b-2 py-4 px-6 text-sm font-medium transition-colors flex items-center ${
+            activeTab === "voting"
+              ? "border-blue-500 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          }`}
           onClick={() => setActiveTab("voting")}
           aria-controls="voting-section"
           aria-selected={activeTab === "voting"}
@@ -106,7 +108,7 @@ export default function CommunityTabs({
               clipRule="evenodd"
             />
           </svg>
-          Votes et Contributions
+          {t("community_tabs.votes_contributions")}
           {(pendingPostsCount > 0 || pendingEnrichmentsCount > 0) && (
             <span className="ml-2 px-2 py-1 bg-red-100 text-red-600 text-xs font-medium rounded-full">
               {pendingPostsCount + pendingEnrichmentsCount}

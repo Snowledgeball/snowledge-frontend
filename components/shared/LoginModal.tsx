@@ -14,6 +14,7 @@ import { Mail, Lock } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
 import { toast } from "sonner";
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ const LogInForm = ({ closeModal }: { closeModal: () => void }) => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +41,7 @@ const LogInForm = ({ closeModal }: { closeModal: () => void }) => {
     });
 
     if (result?.error) {
-      setError("Échec de la connexion. Veuillez vérifier vos identifiants.");
+      setError(t("login.credentials_error"));
       setIsLoading(false);
     } else {
       closeModal();
@@ -51,11 +53,9 @@ const LogInForm = ({ closeModal }: { closeModal: () => void }) => {
     <div className="w-full max-w-md space-y-8">
       <div className="text-center">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-          Se connecter
+          {t("login.title")}
         </h2>
-        <p className="mt-2 text-sm text-gray-600">
-          Accédez à votre compte pour profiter de toutes nos fonctionnalités
-        </p>
+        <p className="mt-2 text-sm text-gray-600">{t("login.description")}</p>
       </div>
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -66,7 +66,7 @@ const LogInForm = ({ closeModal }: { closeModal: () => void }) => {
         <div className="space-y-6">
           <div>
             <label className="block text-sm font-medium leading-6 text-gray-900 mb-1">
-              Adresse e-mail
+              {t("login.email")}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -84,7 +84,7 @@ const LogInForm = ({ closeModal }: { closeModal: () => void }) => {
 
           <div>
             <label className="block text-sm font-medium leading-6 text-gray-900 mb-1">
-              Mot de passe
+              {t("login.password")}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -113,10 +113,10 @@ const LogInForm = ({ closeModal }: { closeModal: () => void }) => {
                 variant="pulse"
                 className="mr-2"
               />
-              Connexion en cours...
+              {t("login.logging_in")}
             </>
           ) : (
-            "Se connecter"
+            t("login.login_button")
           )}
         </button>
 
@@ -127,7 +127,7 @@ const LogInForm = ({ closeModal }: { closeModal: () => void }) => {
           </div>
           <div className="relative flex justify-center text-sm">
             <span className="px-2 bg-white text-gray-500">
-              Ou continuer avec
+              {t("login.or_continue_with")}
             </span>
           </div>
         </div>
@@ -135,9 +135,7 @@ const LogInForm = ({ closeModal }: { closeModal: () => void }) => {
         {/* Boutons de connexion sociale */}
         <div className="grid grid-cols-3 gap-4">
           <button
-            onClick={() =>
-              toast.info("La connexion avec Google sera bientôt disponible")
-            }
+            onClick={() => toast.info(t("login.google_coming_soon"))}
             className="flex items-center justify-center p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <Image
@@ -150,9 +148,7 @@ const LogInForm = ({ closeModal }: { closeModal: () => void }) => {
           </button>
 
           <button
-            onClick={() =>
-              toast.info("La connexion avec Facebook sera bientôt disponible")
-            }
+            onClick={() => toast.info(t("login.facebook_coming_soon"))}
             className="flex items-center justify-center p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <Image
@@ -165,9 +161,7 @@ const LogInForm = ({ closeModal }: { closeModal: () => void }) => {
           </button>
 
           <button
-            onClick={() =>
-              toast.info("La connexion avec Twitter sera bientôt disponible")
-            }
+            onClick={() => toast.info(t("login.twitter_coming_soon"))}
             className="flex items-center justify-center p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <Image
@@ -182,7 +176,7 @@ const LogInForm = ({ closeModal }: { closeModal: () => void }) => {
 
         {/* Note en bas */}
         <p className="text-xs text-center text-gray-500 mt-4">
-          D'autres options de connexion seront bientôt disponibles
+          {t("login.other_options_note")}
         </p>
       </form>
     </div>

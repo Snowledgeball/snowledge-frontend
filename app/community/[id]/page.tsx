@@ -19,6 +19,7 @@ import { Loader } from "@/components/ui/loader";
 import React from "react";
 import { usePusher } from "@/contexts/PusherContext";
 import { localCache, CACHE_KEYS } from "@/utils/cache";
+import { useTranslation } from "react-i18next";
 
 // Fonctions utilitaires pour le cache avec localStorage
 const cacheUtils = {
@@ -114,6 +115,7 @@ const CommunityHub = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { client } = usePusher();
+  const { t } = useTranslation();
 
   // Récupérer l'onglet actif depuis l'URL ou utiliser "general" par défaut
   const tabFromUrl = searchParams.get("tab");
@@ -362,8 +364,8 @@ const CommunityHub = () => {
       // Mettre à jour l'état d'adhésion
       setIsMember(
         membershipData.isMember ||
-        membershipData.isCreator ||
-        membershipData.isContributor
+          membershipData.isCreator ||
+          membershipData.isContributor
       );
 
       // Récupérer les Membres bannis
@@ -707,7 +709,7 @@ const CommunityHub = () => {
                         <Loader
                           size="lg"
                           color="gradient"
-                          text="Chargement des données de la communauté..."
+                          text={t("loading.community")}
                           variant="spinner"
                         />
                       </div>
@@ -731,7 +733,7 @@ const CommunityHub = () => {
                           <Loader
                             size="md"
                             color="gradient"
-                            text="Chargement des posts..."
+                            text={t("loading.posts")}
                             textPosition="right"
                           />
                         </div>
@@ -788,20 +790,19 @@ const CommunityHub = () => {
         <div className="max-w-7xl mx-auto px-4 py-12 text-center">
           <div className="bg-white rounded-lg shadow-md p-8 max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              Accès limité
+              {t("community_access.limited_access")}
             </h2>
             <p className="text-gray-600 mb-6">
-              Vous devez rejoindre cette communauté pour accéder à son contenu.
+              {t("community_access.join_required")}
             </p>
             <p className="text-gray-600 mb-6">
-              Consultez la présentation de la communauté et rejoignez-la pour
-              découvrir tous les posts, discussions et activités.
+              {t("community_access.view_presentation")}
             </p>
             <button
               onClick={() => setShowJoinModal(true)}
               className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-md"
             >
-              Voir la présentation
+              {t("community_access.see_presentation")}
             </button>
           </div>
         </div>

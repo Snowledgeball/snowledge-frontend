@@ -135,14 +135,20 @@ const HomePage = () => {
     ? [
         {
           ...stats.communities,
+          label: t("stats.communities.label"),
+          description: t("stats.communities.description"),
           icon: Globe,
         },
         {
           ...stats.members,
+          label: t("stats.members.label"),
+          description: t("stats.members.description"),
           icon: Users,
         },
         {
           ...stats.enrichments,
+          label: t("stats.enrichments.label"),
+          description: t("stats.enrichments.description"),
           icon: Sparkles,
         },
       ]
@@ -183,26 +189,25 @@ const HomePage = () => {
       community_contributors_id.length
     );
 
-    // AAAA REMETTRE
-    // useEffect(() => {
-    //   const fetchContributorsCount = async () => {
-    //     try {
-    //       const response = await fetch(
-    //         `/api/communities/${id}/contributors/count`
-    //       );
-    //       if (response.ok) {
-    //         const data = await response.json();
-    //         setContributorsCount(data.count);
-    //       } else {
-    //         console.log("Impossible de récupérer le nombre de contributeurs");
-    //       }
-    //     } catch (error) {
-    //       console.error("Erreur:", error);
-    //     }
-    //   };
+    useEffect(() => {
+      const fetchContributorsCount = async () => {
+        try {
+          const response = await fetch(
+            `/api/communities/${id}/contributors/count`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            setContributorsCount(data.count);
+          } else {
+            console.log("Impossible de récupérer le nombre de contributeurs");
+          }
+        } catch (error) {
+          console.error("Erreur:", error);
+        }
+      };
 
-    //   fetchContributorsCount();
-    // }, [id, community_contributors_id.length]);
+      fetchContributorsCount();
+    }, [id, community_contributors_id.length]);
 
     // const getTrustScoreColor = (score: number) => {
     //   if (score >= 90) return "text-emerald-500";

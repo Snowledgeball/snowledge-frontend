@@ -1,79 +1,84 @@
-import React from 'react';
+import React from "react";
+import { useTranslation } from "react-i18next";
 import {
-    SentimentMonitor,
-    SignalsDetector,
-    AIAssistant,
-    MonetizationTool,
-    AggregatorTool,
-    TrendScannerTool,
-    CollabEditorTool,
-    TemplatesTools,
-    FactCheckerTool,
-    CustomizerTool,
-    SchedulerTool,
-    AnalyticsTool,
-    MultiChannelTool,
-    AmplifierTool
-} from './factice';
+  SentimentMonitor,
+  SignalsDetector,
+  AIAssistant,
+  MonetizationTool,
+  AggregatorTool,
+  TrendScannerTool,
+  CollabEditorTool,
+  TemplatesTools,
+  FactCheckerTool,
+  CustomizerTool,
+  SchedulerTool,
+  AnalyticsTool,
+  MultiChannelTool,
+  AmplifierTool,
+} from "./factice";
 
 interface ToolSelectorProps {
-    selectedTool: string | null;
+  selectedTool: string | null;
 }
 
 export const ToolSelector: React.FC<ToolSelectorProps> = ({ selectedTool }) => {
-    if (!selectedTool) return null;
+  const { t } = useTranslation();
 
-    // Sélectionner le bon composant en fonction de l'outil
-    switch (selectedTool) {
-        case 'sentiment':
-            return <SentimentMonitor />;
+  if (!selectedTool) return null;
 
-        case 'signals':
-            return <SignalsDetector />;
+  // Sélectionner le bon composant en fonction de l'outil
+  switch (selectedTool) {
+    case "sentiment":
+      return <SentimentMonitor />;
 
-        case 'ai-assistant':
-            return <AIAssistant />;
+    case "signals":
+      return <SignalsDetector />;
 
-        case 'monetization':
-            return <MonetizationTool />;
+    case "ai-assistant":
+      return <AIAssistant />;
 
-        case 'aggregator':
-            return <AggregatorTool />;
+    case "monetization":
+      return <MonetizationTool />;
 
-        case 'trend-scanner':
-            return <TrendScannerTool />;
+    case "aggregator":
+      return <AggregatorTool />;
 
-        case 'collab-editor':
-            return <CollabEditorTool />;
+    case "trend-scanner":
+      return <TrendScannerTool />;
 
-        case 'templates':
-            return <TemplatesTools />;
+    case "collab-editor":
+      return <CollabEditorTool />;
 
-        case 'fact-checker':
-            return <FactCheckerTool />;
+    case "templates":
+      return <TemplatesTools />;
 
-        case 'customizer':
-            return <CustomizerTool />;
+    case "fact-checker":
+      return <FactCheckerTool />;
 
-        case 'scheduler':
-            return <SchedulerTool />;
+    case "customizer":
+      return <CustomizerTool />;
 
-        case 'analytics':
-            return <AnalyticsTool />;
+    case "scheduler":
+      return <SchedulerTool />;
 
-        case 'multi-channel':
-            return <MultiChannelTool />;
+    case "analytics":
+      return <AnalyticsTool />;
 
-        case 'amplifier':
-            return <AmplifierTool />;
+    case "multi-channel":
+      return <MultiChannelTool />;
 
-        default:
-            return (
-                <div className="flex items-center justify-center h-64">
-                    <p className="text-gray-500">
-                        Outil <span className="font-bold">{selectedTool}</span> en cours de développement
-                    </p>
-                </div>
-            );
-    }
-}; 
+    case "amplifier":
+      return <AmplifierTool />;
+
+    default:
+      return (
+        <div className="flex items-center justify-center h-64">
+          <p className="text-gray-500">
+            {t("tools.development", {
+              name: <span className="font-bold">{selectedTool}</span>,
+            })}
+          </p>
+        </div>
+      );
+  }
+};

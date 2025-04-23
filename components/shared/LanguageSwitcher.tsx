@@ -25,11 +25,13 @@ export default function LanguageSwitcher() {
       await i18n.changeLanguage(lng);
       setCurrentLang(lng);
       toast.success(
-        `Langue changée en ${lng === "fr" ? "Français" : "English"}`
+        t("language.changed", {
+          language: lng === "fr" ? "Français" : "English",
+        })
       );
     } catch (error) {
       console.error("Erreur lors du changement de langue:", error);
-      toast.error("Erreur lors du changement de langue");
+      toast.error(t("language.error"));
     }
   };
 
@@ -40,7 +42,7 @@ export default function LanguageSwitcher() {
           variant="ghost"
           size="icon"
           className="relative"
-          aria-label="Changer de langue"
+          aria-label={t("language.change")}
         >
           <Globe className="h-5 w-5" />
           <span className="absolute -bottom-1 -right-1 text-[10px] font-bold bg-blue-500 text-white rounded-full px-1">

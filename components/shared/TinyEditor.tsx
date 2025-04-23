@@ -4,7 +4,7 @@ import { Editor as TinyMCEEditor } from "@tinymce/tinymce-react";
 import { Editor } from "tinymce";
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-
+import { useTranslation } from "react-i18next";
 type tinycomments_fetch = {
   conversations: {
     [conversationUid: string]: {
@@ -95,10 +95,10 @@ const TinyEditor = ({
   const editorRef = useRef<Editor | null>(null);
   const [isReadOnly, setIsReadOnly] = useState(commentMode);
 
+  const { t } = useTranslation();
+
   // Initialiser le contenu une seule fois
-  const [initialContent] = useState(
-    initialValue || ""
-  );
+  const [initialContent] = useState(initialValue || "");
 
   useEffect(() => {
     setMounted(true);
@@ -137,18 +137,17 @@ const TinyEditor = ({
 
   const baseConfig = {
     plugins: commentMode
-      ? ["tinycomments", "quickbars"]
+      ? ["quickbars"]
       : [
-        "quickbars",
-        "advlist",
-        "autolink",
-        "lists",
-        "link",
-        "image",
-        "media",
-        "table",
-        "tinycomments",
-      ].join(" "),
+          "quickbars",
+          "advlist",
+          "autolink",
+          "lists",
+          "link",
+          "image",
+          "media",
+          "table",
+        ].join(" "),
     toolbar: false,
     menubar: false,
     sidebar_show: commentMode ? "showcomments" : undefined,
@@ -168,14 +167,16 @@ const TinyEditor = ({
     automatic_uploads: true,
     images_upload_url: "/api/upload",
     // Configuration pour empêcher la suppression des images
-    ...(protectImages ? {
-      noneditable_class: "protected-image",
-      noneditable_noneditable_class: "protected-image",
-      extended_valid_elements: "img[*]",
-      protect: [
-        /\<img[^>]*\>/g, // Protéger toutes les balises img
-      ],
-    } : {}),
+    ...(protectImages
+      ? {
+          noneditable_class: "protected-image",
+          noneditable_noneditable_class: "protected-image",
+          extended_valid_elements: "img[*]",
+          protect: [
+            /\<img[^>]*\>/g, // Protéger toutes les balises img
+          ],
+        }
+      : {}),
     // Fin de la configuration pour empêcher la suppression des images
     images_upload_handler: async (blobInfo: BlobInfo) => {
       const formData = new FormData();
@@ -250,7 +251,7 @@ const TinyEditor = ({
                         list-style-type: decimal;
                     }
             `,
-    placeholder: placeholder ? placeholder : "Écrivez ici...",
+    placeholder: placeholder ? placeholder : t("actions.save"),
 
     // Callbacks pour les commentaires
     tinycomments_create: async (
@@ -587,9 +588,9 @@ const TinyEditor = ({
         // Protection des images - uniquement si protectImages est true
         if (protectImages) {
           // Empêcher la suppression des images
-          editor.on('PreInit', () => {
+          editor.on("PreInit", () => {
             // Ajouter une classe aux images pour les identifier
-            editor.dom.addClass(editor.dom.select('img'), 'protected-image');
+            editor.dom.addClass(editor.dom.select("img"), "protected-image");
 
             // Ajouter un style pour mettre en évidence les images protégées
             editor.dom.addStyle(`
@@ -601,40 +602,42 @@ const TinyEditor = ({
           });
 
           // Empêcher la suppression des images avec la touche Delete ou Backspace
-          editor.on('keydown', (e) => {
+          editor.on("keydown", (e) => {
             const node = editor.selection.getNode();
-            const isImage = node.nodeName === 'IMG' || node.closest('img') !== null;
+            const isImage =
+              node.nodeName === "IMG" || node.closest("img") !== null;
 
-            if (isImage && (e.keyCode === 8 || e.keyCode === 46)) { // 8 = Backspace, 46 = Delete
+            if (isImage && (e.keyCode === 8 || e.keyCode === 46)) {
+              // 8 = Backspace, 46 = Delete
               e.preventDefault();
               e.stopPropagation();
               // Afficher un message à l'utilisateur
               editor.notificationManager.open({
-                text: 'Les images ne peuvent pas être supprimées',
-                type: 'info',
-                timeout: 2000
+                text: "Les images ne peuvent pas être supprimées",
+                type: "info",
+                timeout: 2000,
               });
               return false;
             }
           });
 
           // Empêcher la suppression des images par d'autres moyens (couper, etc.)
-          editor.on('BeforeSetContent', (e) => {
+          editor.on("BeforeSetContent", (e) => {
             // Sauvegarder les images existantes avant de modifier le contenu
-            const existingImages = editor.dom.select('img');
+            const existingImages = editor.dom.select("img");
 
             // Après la modification du contenu, vérifier si des images ont été supprimées
             setTimeout(() => {
-              const currentImages = editor.dom.select('img');
+              const currentImages = editor.dom.select("img");
               if (existingImages.length > currentImages.length) {
                 // Restaurer le contenu précédent
                 editor.undoManager.undo();
 
                 // Afficher un message à l'utilisateur
                 editor.notificationManager.open({
-                  text: 'Les images ne peuvent pas être supprimées',
-                  type: 'info',
-                  timeout: 2000
+                  text: "Les images ne peuvent pas être supprimées",
+                  type: "info",
+                  timeout: 2000,
                 });
               }
             }, 0);
@@ -644,11 +647,14 @@ const TinyEditor = ({
           const originalExecCommand = editor.execCommand;
           editor.execCommand = function (cmd: string, ui: boolean, value: any) {
             // Vérifier si la commande est liée à la suppression et si une image est sélectionnée
-            if ((cmd === 'Delete' || cmd === 'ForwardDelete') && editor.selection.getNode().nodeName === 'IMG') {
+            if (
+              (cmd === "Delete" || cmd === "ForwardDelete") &&
+              editor.selection.getNode().nodeName === "IMG"
+            ) {
               editor.notificationManager.open({
-                text: 'Les images ne peuvent pas être supprimées',
-                type: 'info',
-                timeout: 2000
+                text: "Les images ne peuvent pas être supprimées",
+                type: "info",
+                timeout: 2000,
               });
               return false;
             }
@@ -662,10 +668,14 @@ const TinyEditor = ({
             let imagesRemoved = false;
 
             mutations.forEach((mutation) => {
-              if (mutation.type === 'childList') {
+              if (mutation.type === "childList") {
                 // Vérifier si des nœuds ont été supprimés
                 mutation.removedNodes.forEach((node) => {
-                  if (node.nodeName === 'IMG' || (node.nodeType === 1 && (node as Element).querySelector('img'))) {
+                  if (
+                    node.nodeName === "IMG" ||
+                    (node.nodeType === 1 &&
+                      (node as Element).querySelector("img"))
+                  ) {
                     imagesRemoved = true;
                   }
                 });
@@ -678,9 +688,9 @@ const TinyEditor = ({
 
               // Informer l'utilisateur
               editor.notificationManager.open({
-                text: 'Les images ne peuvent pas être supprimées',
-                type: 'info',
-                timeout: 2000
+                text: "Les images ne peuvent pas être supprimées",
+                type: "info",
+                timeout: 2000,
               });
             }
           });
@@ -688,7 +698,7 @@ const TinyEditor = ({
           // Démarrer l'observation du contenu de l'éditeur
           observer.observe(editor.getBody(), {
             childList: true,
-            subtree: true
+            subtree: true,
           });
         }
       });

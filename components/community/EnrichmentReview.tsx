@@ -15,6 +15,7 @@ import {
   GitCompare,
   Loader,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface EnrichmentReviewProps {
   enrichmentId: number;
@@ -50,6 +51,7 @@ export default function EnrichmentReview({
   const [comment, setComment] = useState(existingReview?.content || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewMode, setViewMode] = useState("suggestion"); // "suggestion" ou "parallel"
+  const { t } = useTranslation();
 
   const handleSubmit = async () => {
     if (!vote || !comment.trim()) return;
@@ -75,16 +77,14 @@ export default function EnrichmentReview({
       });
 
       if (response.ok) {
-        toast.success("Vote enregistré avec succès");
+        toast.success(t("enrichment_review.vote_success"));
         window.location.href = `/community/${communityId}?tab=voting`;
       } else {
-        toast.error(
-          "Une erreur est survenue lors de l'enregistrement de votre évaluation"
-        );
+        toast.error(t("enrichment_review.vote_error"));
       }
     } catch (error) {
-      console.error("Erreur:", error);
-      toast.error("Une erreur est survenue");
+      console.error(t("enrichment_review.error"), error);
+      toast.error(t("enrichment_review.error_occurred"));
     } finally {
       setIsSubmitting(false);
     }
@@ -96,17 +96,23 @@ export default function EnrichmentReview({
         <Card className="bg-white p-6 shadow-sm rounded-lg">
           <div className="mb-6">
             <h1 className="text-2xl font-bold">
-              Revue de contribution : {enrichmentTitle}
+              {t("enrichment_review.title")} : {enrichmentTitle}
             </h1>
-            <div className="text-gray-500 mt-1">Proposée par {authorName}</div>
+            <div className="text-gray-500 mt-1">
+              {t("enrichment_review.proposed_by")} {authorName}
+            </div>
           </div>
 
           <div className="mb-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Comparaison du contenu</h2>
+              <h2 className="text-xl font-semibold">
+                {t("enrichment_review.content_comparison")}
+              </h2>
 
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-500">Mode d'affichage:</span>
+                <span className="text-sm text-gray-500">
+                  {t("enrichment_compare.display_mode")}:
+                </span>
                 <button
                   onClick={() => setViewMode("suggestion")}
                   className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 text-sm ${
@@ -116,7 +122,7 @@ export default function EnrichmentReview({
                   }`}
                 >
                   <GitCompare className="w-4 h-4" />
-                  <span>Suggestion</span>
+                  <span>{t("enrichment_compare.suggestion")}</span>
                 </button>
                 <button
                   onClick={() => setViewMode("parallel")}
@@ -127,7 +133,7 @@ export default function EnrichmentReview({
                   }`}
                 >
                   <Columns className="w-4 h-4" />
-                  <span>Côte à côte</span>
+                  <span>{t("enrichment_compare.side_by_side")}</span>
                 </button>
               </div>
             </div>
@@ -139,7 +145,7 @@ export default function EnrichmentReview({
                   newHtml={modifiedContent}
                   showControls={false}
                   readOnly={true}
-                  description="Modifications proposées"
+                  description={t("enrichment_compare.proposed_changes")}
                 />
               </div>
             )}
@@ -148,7 +154,7 @@ export default function EnrichmentReview({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="border rounded-lg p-4 bg-gray-50">
                   <h3 className="text-lg font-medium mb-2 text-gray-700">
-                    Contenu original
+                    {t("enrichment.original_content")}
                   </h3>
                   <div
                     className="prose max-w-none"
@@ -158,7 +164,7 @@ export default function EnrichmentReview({
 
                 <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
                   <h3 className="text-lg font-medium mb-2 text-blue-700">
-                    Contenu modifié
+                    {t("enrichment.modified_content")}
                   </h3>
                   <div
                     className="prose max-w-none"
@@ -170,7 +176,9 @@ export default function EnrichmentReview({
           </div>
 
           <div className="p-6 bg-gray-50 border-t">
-            <h2 className="text-xl font-semibold mb-4">Votre évaluation</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {t("enrichment_review.your_evaluation")}
+            </h2>
 
             <div className="flex flex-col md:flex-row gap-4 mb-6">
               <button
@@ -186,7 +194,9 @@ export default function EnrichmentReview({
                     vote === "APPROVED" ? "text-green-600" : "text-gray-500"
                   }`}
                 />
-                <span className="font-medium">Approuver l'enrichissement</span>
+                <span className="font-medium">
+                  {t("enrichment_review.approve_enrichment")}
+                </span>
               </button>
 
               <button
@@ -202,7 +212,9 @@ export default function EnrichmentReview({
                     vote === "REJECTED" ? "text-red-600" : "text-gray-500"
                   }`}
                 />
-                <span className="font-medium">Rejeter l'enrichissement</span>
+                <span className="font-medium">
+                  {t("enrichment_review.reject_enrichment")}
+                </span>
               </button>
             </div>
 
@@ -211,14 +223,14 @@ export default function EnrichmentReview({
                 htmlFor="comment"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Commentaire (obligatoire) - Expliquez votre décision
+                {t("enrichment_review.comment_required")}
               </label>
               <textarea
                 id="comment"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[120px]"
-                placeholder="Expliquez pourquoi vous approuvez ou rejetez cet enrichissement..."
+                placeholder={t("enrichment_review.comment_placeholder")}
                 required
               />
             </div>
@@ -232,12 +244,12 @@ export default function EnrichmentReview({
                 {isSubmitting ? (
                   <>
                     <Loader className="w-5 h-5 animate-spin" />
-                    <span>Envoi en cours...</span>
+                    <span>{t("enrichment_review.submitting")}</span>
                   </>
                 ) : (
                   <>
                     <CheckCircle className="w-5 h-5" />
-                    <span>Soumettre mon évaluation</span>
+                    <span>{t("enrichment_review.submit_evaluation")}</span>
                   </>
                 )}
               </button>
@@ -251,7 +263,7 @@ export default function EnrichmentReview({
                 router.push(`/community/${communityId}/posts/${postId}`)
               }
             >
-              Retour au post
+              {t("enrichment_edit.back_to_post")}
             </Button>
           </div>
         </Card>
