@@ -7,6 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronDown, Edit, FileText, PlusCircle, Users } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
+import { useTranslation } from "react-i18next";
 
 interface Post {
   id: number;
@@ -53,6 +54,7 @@ export default function CommunityPosts({
   const router = useRouter();
   const searchParams = useSearchParams();
   const categoryFromUrl = searchParams.get("category");
+  const { t } = useTranslation();
 
   const [isLoading, setIsLoading] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<string[]>(
@@ -168,7 +170,7 @@ export default function CommunityPosts({
                 id="create-post-button"
               >
                 <PlusCircle className="w-4 h-4" />
-                <span>Proposer un post</span>
+                <span>{t("community_posts.propose_post")}</span>
               </button>
             )}
             {isCreator && (
@@ -182,15 +184,13 @@ export default function CommunityPosts({
                 id="create-post-button"
               >
                 <PlusCircle className="w-4 h-4" />
-                <span>Créer un post</span>
+                <span>{t("community_posts.create_post")}</span>
               </button>
             )}
           </>
         </div>
         <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-          <p className="text-gray-500">
-            Aucun post disponible dans cette communauté.
-          </p>
+          <p className="text-gray-500">{t("community_posts.no_posts")}</p>
         </div>
       </div>
     );
@@ -207,7 +207,9 @@ export default function CommunityPosts({
             id="create-post-button"
           >
             <PlusCircle className="w-5 h-5" />
-            <span className="font-medium">Proposer un post</span>
+            <span className="font-medium">
+              {t("community_posts.propose_post")}
+            </span>
           </button>
         )}
         {isCreator && (
@@ -219,7 +221,7 @@ export default function CommunityPosts({
             id="create-post-button"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>Créer un post</span>
+            <span>{t("community_posts.create_post")}</span>
           </button>
         )}
       </div>
@@ -302,8 +304,13 @@ export default function CommunityPosts({
                           {category.label}
                         </h3>
                         <p className="text-xs text-gray-500 mt-0.5">
-                          {categoryPosts.length}{" "}
-                          {categoryPosts.length > 1 ? "articles" : "article"}
+                          {categoryPosts.length === 1
+                            ? t("community_posts.articles", {
+                                count: categoryPosts.length,
+                              })
+                            : t("community_posts.articles_plural", {
+                                count: categoryPosts.length,
+                              })}
                         </p>
                       </div>
                     </div>
@@ -313,7 +320,9 @@ export default function CommunityPosts({
                           isExpanded ? "text-blue-600" : "text-gray-500"
                         }`}
                       >
-                        {isExpanded ? "Masquer" : "Afficher"}
+                        {isExpanded
+                          ? t("community_posts.hide")
+                          : t("community_posts.show")}
                       </span>
                       <div
                         className={`p-1 rounded-full transition-colors ${
@@ -385,7 +394,7 @@ export default function CommunityPosts({
                                   );
                                 }}
                                 className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
-                                aria-label="Modifier le post"
+                                aria-label={t("community_posts.edit_post")}
                                 disabled={isLoading}
                               >
                                 <Edit className="w-4 h-4" />
@@ -478,12 +487,12 @@ export default function CommunityPosts({
                             {post.accept_contributions ? (
                               <span className="text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full flex items-center">
                                 <Users className="w-4 h-4 mr-1" />
-                                Contributions activées
+                                {t("community_posts.contributions_enabled")}
                               </span>
                             ) : (
                               <span className="text-sm text-red-600 bg-red-50 px-3 py-1 rounded-full flex items-center">
                                 <Users className="w-4 h-4 mr-1" />
-                                Contributions désactivées
+                                {t("community_posts.contributions_disabled")}
                               </span>
                             )}
                             <button
@@ -491,7 +500,7 @@ export default function CommunityPosts({
                               className="text-blue-600 hover:text-blue-800 text-sm font-medium bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg transition-colors flex items-center"
                               disabled={isLoading}
                             >
-                              Lire la suite
+                              {t("community_posts.read_more")}
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 className="h-4 w-4 ml-1"

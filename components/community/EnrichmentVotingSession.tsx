@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import { Loader } from "@/components/ui/loader";
+import { useTranslation } from "react-i18next";
 
 // Cache pour stocker les données
 const pendingContributionsCache = new Map<
@@ -76,6 +77,7 @@ export default function EnrichmentVotingSession({
   const [loading, setLoading] = useState(true);
   const [community, setCommunity] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
 
   // Mémoriser les IDs pour éviter les re-rendus inutiles
   const memoizedCommunityId = useMemo(() => communityId, [communityId]);
@@ -358,7 +360,7 @@ export default function EnrichmentVotingSession({
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-8">
-        <Loader size="md" color="gradient" text="Chargement..." />
+        <Loader size="md" color="gradient" text={t("loading.default")} />
       </div>
     );
   }

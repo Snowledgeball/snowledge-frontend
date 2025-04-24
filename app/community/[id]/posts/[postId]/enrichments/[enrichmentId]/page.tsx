@@ -19,6 +19,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useTranslation } from "react-i18next";
 
 interface Contribution {
   id: number;
@@ -60,6 +61,7 @@ export default function ContributionDetailPage() {
     "diff"
   );
   const [showEditConfirmation, setShowEditConfirmation] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -100,21 +102,21 @@ export default function ContributionDetailPage() {
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
             <Clock className="w-3 h-3 mr-1" />
-            En attente
+            {t("status.pending")}
           </span>
         );
       case "approved":
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
             <Check className="w-3 h-3 mr-1" />
-            Approuvée
+            {t("status.approved")}
           </span>
         );
       case "rejected":
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
             <X className="w-3 h-3 mr-1" />
-            Rejetée
+            {t("status.rejected")}
           </span>
         );
       default:
@@ -130,11 +132,7 @@ export default function ContributionDetailPage() {
     return (
       <div className="container mx-auto py-8 px-4">
         <div className="flex justify-center items-center h-64">
-          <Loader
-            size="md"
-            color="gradient"
-            text="Chargement de la contribution..."
-          />
+          <Loader size="md" color="gradient" text={t("loading.contribution")} />
         </div>
       </div>
     );
@@ -144,7 +142,7 @@ export default function ContributionDetailPage() {
     return (
       <div className="container mx-auto py-8 px-4">
         <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-500">Contribution non trouvée</p>
+          <p className="text-gray-500">{t("contribution.not_found")}</p>
           <Button
             variant="outline"
             className="mt-4"
@@ -152,7 +150,7 @@ export default function ContributionDetailPage() {
               router.push("/community/" + params.id + "/posts/" + params.postId)
             }
           >
-            Retour à mes contributions
+            {t("navigation.back_to_contributions")}
           </Button>
         </div>
       </div>
@@ -167,7 +165,7 @@ export default function ContributionDetailPage() {
           className="inline-flex items-center text-blue-600 hover:underline"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Retour aux votes
+          {t("navigation.back_to_votes")}
         </Link>
       </div>
 
@@ -176,11 +174,14 @@ export default function ContributionDetailPage() {
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-2xl font-bold mb-1">
-                Contribution à "{contribution.community_posts.title}"
+                {t("contribution.to_post", {
+                  title: contribution.community_posts.title,
+                })}
               </h1>
               <p className="text-sm text-gray-500 mb-2">
-                Communauté: {contribution.community_posts.community.name} •
-                Soumise le{" "}
+                {t("contribution.community")}:{" "}
+                {contribution.community_posts.community.name} •
+                {t("contribution.submitted_on")}{" "}
                 {format(new Date(contribution.created_at), "d MMMM yyyy", {
                   locale: fr,
                 })}
@@ -192,14 +193,14 @@ export default function ContributionDetailPage() {
                 href={`/community/${contribution.community_posts.community.id}/posts/${contribution.community_posts.id}`}
                 className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200"
               >
-                Voir le post
+                {t("posts.view_post")}
               </Link>
             </div>
           </div>
 
           <div className="mb-4">
             <h3 className="text-md font-medium mb-2">
-              Description de votre contribution:
+              {t("contribution.description_label")}:
             </h3>
             <p className="text-gray-700 bg-gray-50 p-3 rounded-md">
               {contribution.description}
@@ -208,7 +209,9 @@ export default function ContributionDetailPage() {
         </div>
 
         <div className="mb-6">
-          <h3 className="text-lg font-medium mb-4">Modifications proposées</h3>
+          <h3 className="text-lg font-medium mb-4">
+            {t("contribution.proposed_changes")}
+          </h3>
 
           <GoogleDocsStyleDiff
             oldHtml={contribution.original_content}
@@ -222,13 +225,13 @@ export default function ContributionDetailPage() {
 
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4">
-          Feedbacks reçus (
+          {t("contribution.received_feedback")} (
           {contribution.community_posts_enrichment_reviews.length})
         </h2>
 
         {contribution.community_posts_enrichment_reviews.length === 0 ? (
           <p className="text-gray-500 italic">
-            Aucun feedback reçu pour le moment
+            {t("contribution.no_feedback_yet")}
           </p>
         ) : (
           <div className="space-y-6">

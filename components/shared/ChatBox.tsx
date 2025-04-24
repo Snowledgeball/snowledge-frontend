@@ -21,6 +21,7 @@ import {
 import Image from "next/image";
 import { Trash2, Pencil, Check, X } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
+import { useTranslation } from "react-i18next";
 
 interface Channel {
   id: number;
@@ -101,6 +102,7 @@ export default function ChatBox({
   className,
   variant = "community",
 }: ChatBoxProps) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -650,9 +652,11 @@ export default function ChatBox({
                       messages.find((m) => m.id === msg.replyTo)?.username
                     }`
                   }
-                  alt={
-                    messages.find((m) => m.id === msg.replyTo)?.username || ""
-                  }
+                  alt={t("chat.reply_from", {
+                    username:
+                      messages.find((m) => m.id === msg.replyTo)?.username ||
+                      "",
+                  })}
                   width={16}
                   height={16}
                   className="rounded-full"
@@ -684,7 +688,7 @@ export default function ChatBox({
                     msg.userImage ||
                     `https://ui-avatars.com/api/?name=${msg.username}`
                   }
-                  alt={msg.username}
+                  alt={t("chat.user_avatar", { username: msg.username })}
                   width={variant === "post" ? 20 : 40}
                   height={variant === "post" ? 20 : 40}
                   className="rounded-full"
@@ -739,11 +743,13 @@ export default function ChatBox({
                         }
                       }}
                       autoFocus
+                      aria-label={t("chat.edit_message_input")}
                     />
                     <div className="flex items-center space-x-1">
                       <button
                         onClick={() => handleEditMessage(msg.id)}
                         className="p-1 hover:bg-green-100 rounded-md text-green-600 hover:text-green-700"
+                        aria-label={t("chat.save_edit")}
                       >
                         <Check className="w-4 h-4" />
                       </button>
@@ -753,6 +759,7 @@ export default function ChatBox({
                           setEditedMessageText("");
                         }}
                         className="p-1 hover:bg-gray-100 rounded-md text-gray-500 hover:text-gray-700"
+                        aria-label={t("chat.cancel_edit")}
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -807,11 +814,12 @@ export default function ChatBox({
                       )
                     }
                     className="text-gray-500 hover:text-gray-700 p-0.5 hover:bg-gray-100 rounded-md text-lg"
+                    aria-label={t("chat.add_reaction")}
                   >
                     😊
                   </button>
                   <span className="absolute bottom-full right-0 mb-2 hidden group-hover/emoji:block pointer-events-none px-2 py-1 text-xs text-gray-700 bg-white border border-gray-200 rounded whitespace-nowrap shadow-sm z-30">
-                    Ajouter une réaction
+                    {t("chat.add_reaction")}
                   </span>
                   {showEmojiPicker === msg.id && (
                     <div
@@ -839,11 +847,12 @@ export default function ChatBox({
                   <button
                     onClick={() => setReplyingTo(msg)}
                     className="text-gray-500 hover:text-gray-700 p-0.5 hover:bg-gray-100 rounded-md text-lg"
+                    aria-label={t("chat.reply")}
                   >
                     ↩️
                   </button>
                   <span className="absolute bottom-full right-0 mb-2 hidden group-hover/reply:block pointer-events-none px-2 py-1 text-xs text-gray-700 bg-white border border-gray-200 rounded whitespace-nowrap shadow-sm z-30">
-                    Répondre
+                    {t("chat.reply")}
                   </span>
                 </div>
                 {msg.userId === user.id && !editingMessageId && (
@@ -854,11 +863,12 @@ export default function ChatBox({
                         setEditedMessageText(msg.text);
                       }}
                       className="text-gray-500 hover:text-blue-600 p-0.5 hover:bg-gray-100 rounded-md"
+                      aria-label={t("chat.edit_message")}
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <span className="absolute bottom-full right-0 mb-2 hidden group-hover/edit:block pointer-events-none px-2 py-1 text-xs text-gray-700 bg-white border border-gray-200 rounded whitespace-nowrap shadow-sm z-30">
-                      Modifier le message
+                      {t("chat.edit_message")}
                     </span>
                   </div>
                 )}
@@ -870,11 +880,12 @@ export default function ChatBox({
                         setIsDeleteMessageModalOpen(true);
                       }}
                       className="text-gray-500 hover:text-red-600 p-0.5 hover:bg-gray-100 rounded-md"
+                      aria-label={t("chat.delete_message")}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                     <span className="absolute bottom-full right-0 mb-2 hidden group-hover/delete:block pointer-events-none px-2 py-1 text-xs text-gray-700 bg-white border border-gray-200 rounded whitespace-nowrap shadow-sm z-30">
-                      Supprimer le message
+                      {t("chat.delete_message")}
                     </span>
                   </div>
                 )}
@@ -905,11 +916,14 @@ export default function ChatBox({
       {variant === "community" && (
         <div className="w-64 bg-gray-100 border-r border-gray-200 flex flex-col">
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="text-gray-800 font-semibold">Canaux</h2>
+            <h2 className="text-gray-800 font-semibold">
+              {t("chat.channels")}
+            </h2>
             {isCreator && (
               <button
                 onClick={() => setIsCreateChannelModalOpen(true)}
                 className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50 transition-colors"
+                aria-label={t("chat.create_channel")}
               >
                 <span className="text-xl">+</span>
               </button>
@@ -922,7 +936,7 @@ export default function ChatBox({
               </div>
             ) : channels.length === 0 ? (
               <div className="p-4 text-gray-500 text-center">
-                Aucun canal disponible
+                {t("chat.no_channels")}
               </div>
             ) : (
               channels.map((channel) => (
@@ -973,13 +987,13 @@ export default function ChatBox({
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
               <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
                 <h3 className="text-gray-800 text-lg font-semibold mb-4">
-                  Créer un nouveau canal
+                  {t("chat.create_new_channel")}
                 </h3>
 
                 <div className="space-y-4">
                   <div>
                     <label className="block text-gray-600 mb-1 text-sm font-medium">
-                      Nom du canal
+                      {t("chat.channel_name")}
                     </label>
                     <input
                       type="text"
@@ -988,12 +1002,14 @@ export default function ChatBox({
                         setNewChannel({ ...newChannel, name: e.target.value })
                       }
                       className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder={t("chat.channel_name_placeholder")}
+                      aria-label={t("chat.channel_name")}
                     />
                   </div>
 
                   <div>
                     <label className="block text-gray-600 mb-1 text-sm font-medium">
-                      Description
+                      {t("chat.description")}
                     </label>
                     <textarea
                       value={newChannel.description}
@@ -1005,12 +1021,14 @@ export default function ChatBox({
                       }
                       className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       rows={3}
+                      placeholder={t("chat.description_placeholder")}
+                      aria-label={t("chat.description")}
                     />
                   </div>
 
                   <div>
                     <label className="block text-gray-600 mb-1 text-sm font-medium">
-                      Icône (emoji)
+                      {t("chat.icon")}
                     </label>
                     <input
                       type="text"
@@ -1020,6 +1038,7 @@ export default function ChatBox({
                       }
                       className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="💬"
+                      aria-label={t("chat.icon")}
                     />
                   </div>
                 </div>
@@ -1029,13 +1048,13 @@ export default function ChatBox({
                     onClick={() => setIsCreateChannelModalOpen(false)}
                     className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
                   >
-                    Annuler
+                    {t("chat.cancel")}
                   </button>
                   <button
                     onClick={createChannel}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                   >
-                    Créer
+                    {t("chat.create")}
                   </button>
                 </div>
               </div>
@@ -1047,11 +1066,10 @@ export default function ChatBox({
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
               <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
                 <h3 className="text-gray-800 text-lg font-semibold mb-4">
-                  Supprimer le canal
+                  {t("chat.delete_channel")}
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  Êtes-vous sûr de vouloir supprimer ce canal ? Cette action est
-                  irréversible.
+                  {t("chat.delete_channel_confirm")}
                 </p>
                 {error && <p className="text-red-500 mb-4 text-sm">{error}</p>}
                 <div className="flex justify-end space-x-3">
@@ -1063,13 +1081,13 @@ export default function ChatBox({
                     }}
                     className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
                   >
-                    Annuler
+                    {t("chat.cancel")}
                   </button>
                   <button
                     onClick={handleDeleteChannel}
                     className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
                   >
-                    Supprimer
+                    {t("chat.delete")}
                   </button>
                 </div>
               </div>
@@ -1115,8 +1133,8 @@ export default function ChatBox({
                 </div>
               ) : messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                  <p>Aucun message pour le moment</p>
-                  <p className="text-sm mt-2">Soyez le premier à écrire !</p>
+                  <p>{t("chat.no_messages")}</p>
+                  <p className="text-sm mt-2">{t("chat.be_first")}</p>
                 </div>
               ) : (
                 <>
@@ -1126,7 +1144,7 @@ export default function ChatBox({
                         onClick={() => setMessageLimit((prev) => prev + 50)}
                         className="px-4 py-2 text-sm bg-blue-100 hover:bg-blue-200 rounded-md text-blue-700 font-medium transition-colors"
                       >
-                        Charger plus de messages
+                        {t("chat.load_more")}
                       </button>
                     </div>
                   )}
@@ -1142,11 +1160,12 @@ export default function ChatBox({
                 <div className="mb-2 flex flex-col bg-blue-50 p-2 rounded-lg border-l-4 border-blue-400">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-gray-700 text-sm font-medium">
-                      Réponse à {replyingTo.username}
+                      {t("chat.replying_to", { username: replyingTo.username })}
                     </span>
                     <button
                       onClick={() => setReplyingTo(null)}
                       className="text-gray-500 hover:text-gray-700"
+                      aria-label={t("chat.cancel_reply")}
                     >
                       ✕
                     </button>
@@ -1170,7 +1189,9 @@ export default function ChatBox({
                       }
                     }}
                     maxLength={MAX_MESSAGE_LENGTH}
-                    placeholder={`Message dans ${selectedChannel.name}`}
+                    placeholder={t("chat.message_placeholder", {
+                      channel: selectedChannel.name,
+                    })}
                     rows={1}
                     className="w-full bg-gray-50 text-gray-800 px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
                     style={{ minHeight: "44px", height: "auto" }}
@@ -1179,6 +1200,7 @@ export default function ChatBox({
                         adjustTextareaHeight(textarea);
                       }
                     }}
+                    aria-label={t("chat.message_input")}
                   />
                   <span className="absolute right-3 bottom-2 text-xs text-gray-400">
                     {newMessage.length}/{MAX_MESSAGE_LENGTH}
@@ -1188,14 +1210,14 @@ export default function ChatBox({
                   onClick={sendMessage}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors self-end font-medium"
                 >
-                  Envoyer
+                  {t("chat.send")}
                 </button>
               </div>
             </div>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">
-            Sélectionnez un canal pour commencer à discuter
+            {t("chat.select_channel")}
           </div>
         )}
       </div>
@@ -1205,11 +1227,10 @@ export default function ChatBox({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
             <h3 className="text-gray-800 text-lg font-semibold mb-4">
-              Supprimer le message
+              {t("chat.delete_message")}
             </h3>
             <p className="text-gray-600 mb-6">
-              Êtes-vous sûr de vouloir supprimer ce message ? Cette action est
-              irréversible.
+              {t("chat.delete_message_confirm")}
             </p>
             <div className="flex justify-end space-x-3">
               <button
@@ -1219,13 +1240,13 @@ export default function ChatBox({
                 }}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
               >
-                Annuler
+                {t("chat.cancel")}
               </button>
               <button
                 onClick={handleDeleteMessage}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
               >
-                Supprimer
+                {t("chat.delete")}
               </button>
             </div>
           </div>
@@ -1237,13 +1258,13 @@ export default function ChatBox({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
             <h3 className="text-gray-800 text-lg font-semibold mb-4">
-              Modifier le canal
+              {t("chat.edit_channel")}
             </h3>
 
             <div className="space-y-4">
               <div>
                 <label className="block text-gray-600 mb-1 text-sm font-medium">
-                  Nom du canal
+                  {t("chat.channel_name")}
                 </label>
                 <input
                   type="text"
@@ -1255,12 +1276,13 @@ export default function ChatBox({
                     })
                   }
                   className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  aria-label={t("chat.channel_name")}
                 />
               </div>
 
               <div>
                 <label className="block text-gray-600 mb-1 text-sm font-medium">
-                  Description
+                  {t("chat.description")}
                 </label>
                 <textarea
                   value={editingChannel.description}
@@ -1272,12 +1294,13 @@ export default function ChatBox({
                   }
                   className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   rows={3}
+                  aria-label={t("chat.description")}
                 />
               </div>
 
               <div>
                 <label className="block text-gray-600 mb-1 text-sm font-medium">
-                  Icône (emoji)
+                  {t("chat.icon")}
                 </label>
                 <input
                   type="text"
@@ -1289,6 +1312,7 @@ export default function ChatBox({
                     })
                   }
                   className="w-full bg-gray-50 text-gray-800 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  aria-label={t("chat.icon")}
                 />
               </div>
             </div>
@@ -1301,13 +1325,13 @@ export default function ChatBox({
                 }}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
               >
-                Annuler
+                {t("chat.cancel")}
               </button>
               <button
                 onClick={handleEditChannel}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
-                Enregistrer
+                {t("chat.save")}
               </button>
             </div>
           </div>

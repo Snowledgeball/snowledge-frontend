@@ -27,6 +27,7 @@ import {
 import { Loader } from "@/components/ui/loader";
 import Image from "next/image";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface SignUpModalProps {
   isOpen: boolean;
@@ -43,16 +44,69 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const { t } = useTranslation();
   const [progressSteps, setProgressSteps] = useState([
-    { name: "Création du wallet", completed: false, current: true },
-    { name: "Approvisionnement du wallet", completed: false, current: false },
-    { name: "Déploiement du wallet", completed: false, current: false },
-    { name: "Enregistrement des données", completed: false, current: false },
-    { name: "Création du SBT", completed: false, current: false },
-    { name: "Finalisation", completed: false, current: false },
+    {
+      name: t("signup.steps.wallet_creation"),
+      completed: false,
+      current: true,
+    },
+    {
+      name: t("signup.steps.wallet_funding"),
+      completed: false,
+      current: false,
+    },
+    {
+      name: t("signup.steps.wallet_deployment"),
+      completed: false,
+      current: false,
+    },
+    {
+      name: t("signup.steps.data_registration"),
+      completed: false,
+      current: false,
+    },
+    { name: t("signup.steps.sbt_creation"), completed: false, current: false },
+    { name: t("signup.steps.finalization"), completed: false, current: false },
   ]);
   const [profilePictureError, setProfilePictureError] = useState(false);
   const router = useRouter();
+
+  // Mettre à jour les progressSteps quand la langue change
+  useEffect(() => {
+    setProgressSteps([
+      {
+        name: t("signup.steps.wallet_creation"),
+        completed: currentStep > 0,
+        current: currentStep === 0,
+      },
+      {
+        name: t("signup.steps.wallet_funding"),
+        completed: currentStep > 1,
+        current: currentStep === 1,
+      },
+      {
+        name: t("signup.steps.wallet_deployment"),
+        completed: currentStep > 2,
+        current: currentStep === 2,
+      },
+      {
+        name: t("signup.steps.data_registration"),
+        completed: currentStep > 3,
+        current: currentStep === 3,
+      },
+      {
+        name: t("signup.steps.sbt_creation"),
+        completed: currentStep > 4,
+        current: currentStep === 4,
+      },
+      {
+        name: t("signup.steps.finalization"),
+        completed: currentStep > 5,
+        current: currentStep === 5,
+      },
+    ]);
+  }, [t, currentStep]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -98,12 +152,12 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
       });
 
       if (!response.ok) {
-        throw new Error("Erreur lors du déploiement du compte");
+        throw new Error(t("signup.errors.account_deployment"));
       }
 
       await response.json();
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error(t("signup.errors.error"), error);
       // Gérer l'erreur
     }
   };
@@ -115,7 +169,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
 
     // Vérifier si l'email contient un +
     if (email.includes("+")) {
-      setError("Le caractère '+' n'est pas autorisé dans l'adresse email");
+      setError(t("signup.errors.email_plus_char"));
       return;
     }
 
@@ -179,7 +233,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
         });
 
         if (!responseUpload.ok) {
-          console.error("Error uploading file");
+          console.error(t("signup.errors.file_upload"));
         }
 
         const dataUploaded = await responseUpload.json();
@@ -203,15 +257,11 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
         closeModal();
       } else {
         const data = await response.json();
-        setError(
-          data.error || "Une erreur est survenue lors de l'inscription."
-        );
+        setError(data.error || t("signup.errors.registration"));
         setIsLoading(false);
       }
     } catch (err) {
-      setError(
-        "Une erreur est survenue lors de l'inscription. Veuillez réessayer."
-      );
+      setError(t("signup.errors.try_again"));
       console.error(err);
       setIsLoading(false);
     }
@@ -221,7 +271,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value.includes("+")) {
-      setError("Le caractère '+' n'est pas autorisé dans l'adresse email");
+      setError(t("signup.errors.email_plus_char"));
     } else {
       setError("");
     }
@@ -231,10 +281,10 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
   return (
     <div className="w-full max-w-md space-y-6">
       <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
-        Créer un compte
+        {t("signup.create_account")}
       </h2>
       <p className="text-center text-gray-600 text-sm mb-6">
-        Rejoignez notre communauté et commencez à contribuer
+        {t("signup.join_community")}
       </p>
 
       {error && (
@@ -291,7 +341,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
               <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-blue-100 shadow-md">
                 <img
                   src={previewUrl}
-                  alt="Aperçu"
+                  alt={t("signup.profile_picture_preview")}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -326,11 +376,13 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
             }}
             className="hidden"
           />
-          <span className="text-sm text-gray-600">Photo de profil</span>
+          <span className="text-sm text-gray-600">
+            {t("signup.profile_picture")}
+          </span>
           <span className="text-xs text-gray-500 mt-1 text-center">
             {previewUrl
-              ? "Cliquez sur l'icône pour modifier votre photo"
-              : "Vous pourrez modifier votre photo plus tard"}
+              ? t("signup.click_to_change")
+              : t("signup.can_change_later")}
           </span>
         </div>
 
@@ -341,7 +393,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
             </div>
             <input
               type="text"
-              placeholder="Nom complet"
+              placeholder={t("signup.full_name")}
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
@@ -356,7 +408,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
             </div>
             <input
               type="text"
-              placeholder="Nom d'utilisateur"
+              placeholder={t("signup.username")}
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
@@ -372,7 +424,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
             </div>
             <input
               type="email"
-              placeholder="Email"
+              placeholder={t("signup.email")}
               value={email}
               onChange={handleEmailChange}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
@@ -388,7 +440,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
             </div>
             <input
               type="password"
-              placeholder="Mot de passe"
+              placeholder={t("signup.password")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
@@ -401,7 +453,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
 
         {profilePictureError && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm text-center">
-            Veuillez ajouter une photo de profil pour continuer
+            {t("signup.errors.profile_picture_required")}
           </div>
         )}
 
@@ -410,7 +462,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
           disabled={isLoading}
           className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          {isLoading ? "Inscription en cours..." : "S'inscrire"}
+          {isLoading ? t("signup.registering") : t("signup.register")}
         </button>
 
         {/* Séparateur */}
@@ -420,7 +472,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
           </div>
           <div className="relative flex justify-center text-sm">
             <span className="px-2 bg-white text-gray-500">
-              Ou s'inscrire avec
+              {t("signup.or_signup_with")}
             </span>
           </div>
         </div>
@@ -429,9 +481,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
         <div className="grid grid-cols-3 gap-4">
           <button
             type="button"
-            onClick={() =>
-              toast.info("L'inscription avec Google sera bientôt disponible")
-            }
+            onClick={() => toast.info(t("signup.google_coming_soon"))}
             className="flex items-center justify-center p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <Image
@@ -445,9 +495,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
 
           <button
             type="button"
-            onClick={() =>
-              toast.info("L'inscription avec Facebook sera bientôt disponible")
-            }
+            onClick={() => toast.info(t("signup.facebook_coming_soon"))}
             className="flex items-center justify-center p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <Image
@@ -461,9 +509,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
 
           <button
             type="button"
-            onClick={() =>
-              toast.info("L'inscription avec Twitter sera bientôt disponible")
-            }
+            onClick={() => toast.info(t("signup.twitter_coming_soon"))}
             className="flex items-center justify-center p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <Image
@@ -478,7 +524,7 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
 
         {/* Note en bas */}
         <p className="text-xs text-center text-gray-500 mt-4">
-          D'autres options d'inscription seront bientôt disponibles
+          {t("signup.other_options_note")}
         </p>
       </form>
     </div>

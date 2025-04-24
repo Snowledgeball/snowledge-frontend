@@ -13,9 +13,10 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS } from "date-fns/locale";
 import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { useTranslation } from "react-i18next";
 
 // Cache pour stocker les questions et réponses
 const questionsCache = new Map<string, { data: any[]; timestamp: number }>();
@@ -397,13 +398,15 @@ export default function QASection({
     [memoizedCommunityId, fetchQuestions, getCacheKey]
   );
 
+  const { t, i18n } = useTranslation();
+
   return (
     <Card className="overflow-hidden mb-8">
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center">
             <HelpCircle className="w-5 h-5 mr-2 text-blue-600" />
-            Questions & Réponses
+            {t("qa.section_title")}
           </h2>
           {!showNewQuestionInput && (
             <button
@@ -411,7 +414,7 @@ export default function QASection({
               className="flex items-center space-x-2 text-blue-600 hover:text-blue-700"
             >
               <PlusCircle className="w-5 h-5" />
-              <span>Poser une question</span>
+              <span>{t("qa.ask_question")}</span>
             </button>
           )}
         </div>
@@ -422,7 +425,7 @@ export default function QASection({
           <textarea
             value={newQuestionText}
             onChange={(e) => setNewQuestionText(e.target.value)}
-            placeholder="Posez votre question..."
+            placeholder={t("qa.question_placeholder")}
             className="w-full p-3 border rounded-lg"
             rows={3}
           />
@@ -431,14 +434,14 @@ export default function QASection({
               onClick={() => setShowNewQuestionInput(false)}
               className="px-4 py-2 text-gray-600 hover:text-gray-800"
             >
-              Annuler
+              {t("actions.cancel")}
             </button>
             <button
               onClick={handleCreateQuestion}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               disabled={!newQuestionText.trim()}
             >
-              Publier
+              {t("actions.publish")}
             </button>
           </div>
         </div>
@@ -469,14 +472,14 @@ export default function QASection({
                             onChange={(e) => setNewQuestionText(e.target.value)}
                             rows={3}
                             className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                            placeholder="Modifiez votre question..."
+                            placeholder={t("qa.edit_question_placeholder")}
                           />
                           <div className="flex justify-end space-x-2">
                             <span
                               onClick={() => setEditingQuestionId(null)}
                               className="px-3 py-1 text-gray-600 hover:text-gray-800 text-sm cursor-pointer"
                             >
-                              Annuler
+                              {t("actions.cancel")}
                             </span>
                             <span
                               onClick={(e) => {
@@ -485,7 +488,7 @@ export default function QASection({
                               }}
                               className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm cursor-pointer"
                             >
-                              Enregistrer
+                              {t("actions.save")}
                             </span>
                           </div>
                         </div>
@@ -610,14 +613,14 @@ export default function QASection({
                                 }
                                 rows={3}
                                 className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                                placeholder="Modifiez votre réponse..."
+                                placeholder={t("qa.edit_answer_placeholder")}
                               />
                               <div className="flex justify-end space-x-2">
                                 <button
                                   onClick={() => setEditingAnswerId(null)}
                                   className="px-3 py-1 text-gray-600 hover:text-gray-800 text-sm"
                                 >
-                                  Annuler
+                                  {t("actions.cancel")}
                                 </button>
                                 <button
                                   onClick={() =>
@@ -629,7 +632,7 @@ export default function QASection({
                                   }
                                   className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
                                 >
-                                  Enregistrer
+                                  {t("actions.save")}
                                 </button>
                               </div>
                             </div>
@@ -650,7 +653,7 @@ export default function QASection({
                             onChange={(e) => setNewAnswerText(e.target.value)}
                             rows={3}
                             className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white"
-                            placeholder="Rédigez votre réponse ici..."
+                            placeholder={t("qa.answer_placeholder")}
                           />
                           <div className="flex justify-end space-x-2">
                             <button
@@ -660,14 +663,14 @@ export default function QASection({
                               }}
                               className="px-3 py-1.5 text-gray-600 hover:text-gray-800"
                             >
-                              Annuler
+                              {t("actions.cancel")}
                             </button>
                             <button
                               onClick={() => handleCreateAnswer(item.id)}
                               className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                               disabled={!newAnswerText.trim()}
                             >
-                              Publier
+                              {t("actions.publish")}
                             </button>
                           </div>
                         </div>
@@ -677,7 +680,7 @@ export default function QASection({
                           className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
                         >
                           <MessageCircle className="w-4 h-4 mr-1" />
-                          Répondre à cette question
+                          {t("qa.reply")}
                         </button>
                       )}
                     </div>
@@ -699,10 +702,10 @@ export default function QASection({
             handleDeleteQuestion(deleteQuestionDialog.questionId);
           }
         }}
-        title="Supprimer la question"
-        description="Êtes-vous sûr de vouloir supprimer cette question ? Cette action est irréversible."
-        confirmText="Supprimer"
-        cancelText="Annuler"
+        title={t("qa.delete_question_title")}
+        description={t("qa.delete_question_description")}
+        confirmText={t("actions.delete")}
+        cancelText={t("actions.cancel")}
         variant="destructive"
       />
 
@@ -723,10 +726,10 @@ export default function QASection({
             );
           }
         }}
-        title="Supprimer la réponse"
-        description="Êtes-vous sûr de vouloir supprimer cette réponse ? Cette action est irréversible."
-        confirmText="Supprimer"
-        cancelText="Annuler"
+        title={t("qa.delete_answer_title")}
+        description={t("qa.delete_answer_description")}
+        confirmText={t("actions.delete")}
+        cancelText={t("actions.cancel")}
         variant="destructive"
       />
     </Card>

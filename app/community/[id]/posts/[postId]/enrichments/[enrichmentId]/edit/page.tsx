@@ -9,196 +9,227 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import EnrichmentEditor from "@/components/community/EnrichmentEditor";
+import { useTranslation } from "react-i18next";
 
 interface Contribution {
+  id: number;
+  title: string;
+  content: string;
+  original_content: string;
+  description: string;
+  status: string;
+  created_at: string;
+  user_id: number;
+  community_posts: {
     id: number;
     title: string;
-    content: string;
-    original_content: string;
-    description: string;
-    status: string;
-    created_at: string;
-    user_id: number;
-    community_posts: {
-        id: number;
-        title: string;
-        community: {
-            id: number;
-            name: string;
-        }
+    community: {
+      id: number;
+      name: string;
     };
+  };
 }
 
 export default function EditContributionPage() {
-    const params = useParams();
-    const router = useRouter();
-    const { data: session, status } = useSession();
-    const [contribution, setContribution] = useState<Contribution | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-    const [modifiedContent, setModifiedContent] = useState("");
-    const [description, setDescription] = useState("");
+  const params = useParams();
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  const { t } = useTranslation();
 
-    useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("/login");
-            return;
-        }
+  const [contribution, setContribution] = useState<Contribution | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [modifiedContent, setModifiedContent] = useState("");
+  const [description, setDescription] = useState("");
 
-        if (session) {
-            fetchContribution();
-        }
-    }, [session, status, router, params.id, params.postId, params.enrichmentId]);
-
-    const fetchContribution = async () => {
-        try {
-            setLoading(true);
-            const response = await fetch(`/api/communities/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`);
-
-            if (!response.ok) {
-                throw new Error("Erreur lors de la récupération de la contribution");
-            }
-
-            const data = await response.json();
-
-            // Vérifier que l'utilisateur est bien l'auteur de la contribution
-            if (data.user_id !== parseInt(session?.user?.id || "0")) {
-                toast.error("Vous n'êtes pas autorisé à modifier cette contribution");
-                router.push(`/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`);
-                return;
-            }
-
-            // Vérifier que la contribution est toujours en attente
-            if (data.status !== "PENDING") {
-                toast.error("Vous ne pouvez plus modifier cette contribution car elle a déjà été traitée");
-                router.push(`/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`);
-                return;
-            }
-
-            setContribution(data);
-            setModifiedContent(data.content);
-            setDescription(data.description);
-        } catch (error) {
-            console.error("Erreur:", error);
-            toast.error("Erreur lors de la récupération de la contribution");
-            router.push(`/community/${params.id}/posts/${params.postId}`);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleSubmit = async () => {
-        if (!contribution) return;
-
-        if (modifiedContent === contribution.original_content) {
-            toast.error("Vous n'avez apporté aucune modification au contenu");
-            return;
-        }
-
-        if (!description) {
-            toast.error("Veuillez fournir une description de vos modifications");
-            return;
-        }
-
-        setSubmitting(true);
-
-        try {
-            const response = await fetch(`/api/communities/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    content: modifiedContent,
-                    description,
-                }),
-            });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || "Erreur lors de la mise à jour de la contribution");
-            }
-
-            toast.success("Contribution mise à jour avec succès");
-            router.push(`/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`);
-        } catch (error) {
-            console.error("Erreur:", error);
-            toast.error(error instanceof Error ? error.message : "Une erreur est survenue");
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="container mx-auto py-8 px-4">
-                <div className="flex justify-center items-center h-64">
-                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-                    <p className="ml-2">Chargement de la contribution...</p>
-                </div>
-            </div>
-        );
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+      return;
     }
 
-    if (!contribution) {
-        return (
-            <div className="container mx-auto py-8 px-4">
-                <div className="text-center py-12 bg-gray-50 rounded-lg">
-                    <p className="text-gray-500">Contribution non trouvée</p>
-                    <Button
-                        variant="outline"
-                        className="mt-4"
-                        onClick={() => router.push(`/community/${params.id}/posts/${params.postId}`)}
-                    >
-                        Retour au post
-                    </Button>
-                </div>
-            </div>
+    if (session) {
+      fetchContribution();
+    }
+  }, [session, status, router, params.id, params.postId, params.enrichmentId]);
+
+  const fetchContribution = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `/api/communities/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`
+      );
+
+      if (!response.ok) {
+        throw new Error(t("enrichment_edit.fetch_error"));
+      }
+
+      const data = await response.json();
+
+      // Vérifier que l'utilisateur est bien l'auteur de la contribution
+      if (data.user_id !== parseInt(session?.user?.id || "0")) {
+        toast.error(t("enrichment_edit.not_authorized"));
+        router.push(
+          `/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`
         );
+        return;
+      }
+
+      // Vérifier que la contribution est toujours en attente
+      if (data.status !== "PENDING") {
+        toast.error(t("enrichment_edit.already_processed"));
+        router.push(
+          `/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`
+        );
+        return;
+      }
+
+      setContribution(data);
+      setModifiedContent(data.content);
+      setDescription(data.description);
+    } catch (error) {
+      console.error("Erreur:", error);
+      toast.error(t("enrichment_edit.fetch_error"));
+      router.push(`/community/${params.id}/posts/${params.postId}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!contribution) return;
+
+    if (modifiedContent === contribution.original_content) {
+      toast.error(t("enrichment.no_changes"));
+      return;
     }
 
+    if (!description) {
+      toast.error(t("enrichment.description_required"));
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const response = await fetch(
+        `/api/communities/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content: modifiedContent,
+            description,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || t("enrichment_edit.update_error"));
+      }
+
+      toast.success(t("enrichment_edit.update_success"));
+      router.push(
+        `/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`
+      );
+    } catch (error) {
+      console.error("Erreur:", error);
+      toast.error(
+        error instanceof Error ? error.message : t("enrichment.general_error")
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
     return (
-        <div className="container mx-auto py-8 px-4">
-            <div className="mb-6">
-                <Link
-                    href={`/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`}
-                    className="inline-flex items-center text-blue-600 hover:underline"
-                >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Retour à la contribution
-                </Link>
-            </div>
-
-            <Card className="p-6 mb-6">
-                <div className="mb-6">
-                    <h1 className="text-2xl font-bold mb-4">
-                        Modifier votre contribution à "{contribution.community_posts.title}"
-                    </h1>
-
-                    <EnrichmentEditor
-                        originalContent={contribution.original_content}
-                        initialModifiedContent={modifiedContent}
-                        description={description}
-                        onDescriptionChange={setDescription}
-                        onContentChange={setModifiedContent}
-                    />
-
-                    <div className="flex justify-end space-x-3 mt-6">
-                        <Button
-                            variant="outline"
-                            onClick={() => router.push(`/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`)}
-                        >
-                            Annuler
-                        </Button>
-                        <Button
-                            onClick={handleSubmit}
-                            disabled={submitting || modifiedContent === contribution.original_content || !description}
-                        >
-                            {submitting ? "Mise à jour..." : "Mettre à jour la contribution"}
-                        </Button>
-                    </div>
-                </div>
-            </Card>
+      <div className="container mx-auto py-8 px-4">
+        <div className="flex justify-center items-center h-64">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+          <p className="ml-2">{t("loading.contribution")}</p>
         </div>
+      </div>
     );
-} 
+  }
+
+  if (!contribution) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <p className="text-gray-500">
+            {t("enrichment_edit.contribution_not_found")}
+          </p>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() =>
+              router.push(`/community/${params.id}/posts/${params.postId}`)
+            }
+          >
+            {t("enrichment_edit.back_to_post")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto py-8 px-4">
+      <div className="mb-6">
+        <Link
+          href={`/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`}
+          className="inline-flex items-center text-blue-600 hover:underline"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          {t("enrichment_edit.back_to_contribution")}
+        </Link>
+      </div>
+
+      <Card className="p-6 mb-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold mb-4">
+            {t("enrichment_edit.edit_contribution_for")} "
+            {contribution.community_posts.title}"
+          </h1>
+
+          <EnrichmentEditor
+            originalContent={contribution.original_content}
+            initialModifiedContent={modifiedContent}
+            description={description}
+            onDescriptionChange={setDescription}
+            onContentChange={setModifiedContent}
+          />
+
+          <div className="flex justify-end space-x-3 mt-6">
+            <Button
+              variant="outline"
+              onClick={() =>
+                router.push(
+                  `/community/${params.id}/posts/${params.postId}/enrichments/${params.enrichmentId}`
+                )
+              }
+            >
+              {t("actions.cancel")}
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={
+                submitting ||
+                modifiedContent === contribution.original_content ||
+                !description
+              }
+            >
+              {submitting
+                ? t("enrichment_edit.updating")
+                : t("enrichment_edit.update_contribution")}
+            </Button>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}

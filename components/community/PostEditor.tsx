@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { useSearchParams } from "next/navigation";
 import TinyMCEStyledText from "../shared/TinyMCEStyledText";
+import { useTranslation } from "react-i18next";
 
 export interface PostData {
   created_at?: string;
@@ -48,9 +49,10 @@ export default function PostEditor({
   communityId,
   onSubmit,
   onSaveDraft,
-  submitButtonText = "Soumettre le post",
+  submitButtonText,
   isDraft = false,
 }: PostEditorProps) {
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const [postTitle, setPostTitle] = useState(initialData?.title || "");
   const [editorContent, setEditorContent] = useState(
@@ -67,6 +69,8 @@ export default function PostEditor({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+
+  const buttonText = submitButtonText || t("post_editor.submit_post");
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -108,13 +112,13 @@ export default function PostEditor({
         body: formData,
       });
 
-      if (!response.ok) throw new Error("Erreur lors de l'upload");
+      if (!response.ok) throw new Error(t("post_editor.upload_error"));
 
       const data = await response.json();
       setCoverImage(data.url);
-      toast.success("Image uploadée avec succès");
+      toast.success(t("post_editor.image_uploaded"));
     } catch (error) {
-      toast.error("Erreur lors de l'upload de l'image");
+      toast.error(t("post_editor.image_upload_error"));
     } finally {
       setIsUploading(false);
     }
@@ -122,12 +126,12 @@ export default function PostEditor({
 
   const handleSubmit = async () => {
     if (!postTitle || !editorContent || !selectedTag) {
-      toast.error("Veuillez remplir tous les champs");
+      toast.error(t("post_editor.fill_all_fields"));
       return;
     }
 
     if (editorContent.length < 100) {
-      toast.error("Le contenu doit contenir au moins 100 caractères");
+      toast.error(t("post_editor.content_too_short"));
       return;
     }
 
@@ -146,7 +150,7 @@ export default function PostEditor({
         was_rejected: undefined,
       });
     } catch (error) {
-      console.error("Erreur lors de la soumission:", error);
+      console.error(t("post_editor.submission_error"), error);
     } finally {
       setIsSaving(false);
     }
@@ -156,9 +160,7 @@ export default function PostEditor({
     if (!onSaveDraft) return;
 
     if (!postTitle && !editorContent && !selectedTag) {
-      toast.error(
-        "Veuillez remplir au moins un champ pour sauvegarder un brouillon"
-      );
+      toast.error(t("post_editor.fill_one_field"));
       return;
     }
 
@@ -176,10 +178,10 @@ export default function PostEditor({
         created_at: "",
         was_rejected: undefined,
       });
-      toast.success("Brouillon sauvegardé");
+      toast.success(t("community_posts.draft_saved"));
     } catch (error) {
-      console.error("Erreur lors de la sauvegarde:", error);
-      toast.error("Erreur lors de la sauvegarde du brouillon");
+      console.error(t("post_editor.save_error"), error);
+      toast.error(t("community_posts.error_save_draft"));
     } finally {
       setIsSaving(false);
     }
@@ -191,9 +193,13 @@ export default function PostEditor({
         <Card className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold">
-              {initialData?.id ? "Modifier le post" : "Créer un post"}
+              {initialData?.id
+                ? t("post_editor.edit_post")
+                : t("post_editor.create_post")}
               {isDraft && (
-                <span className="ml-2 text-sm text-gray-500">(Brouillon)</span>
+                <span className="ml-2 text-sm text-gray-500">
+                  ({t("post_editor.draft")})
+                </span>
               )}
             </h1>
             <div className="flex items-center space-x-4">
@@ -203,7 +209,9 @@ export default function PostEditor({
                   onCheckedChange={setContributionsEnabled}
                   className="data-[state=checked]:bg-green-600"
                 />
-                <label className="text-gray-600">Contributions</label>
+                <label className="text-gray-600">
+                  {t("post_editor.contributions")}
+                </label>
               </div>
 
               <button
@@ -211,7 +219,7 @@ export default function PostEditor({
                 className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <Eye className="w-4 h-4 mr-2 inline-block" />
-                Prévisualiser
+                {t("post_editor.preview")}
               </button>
 
               {onSaveDraft && (
@@ -221,7 +229,7 @@ export default function PostEditor({
                   className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
                 >
                   <Save className="w-4 h-4 mr-2 inline-block" />
-                  Sauvegarder
+                  {t("actions.save")}
                 </button>
               )}
 
@@ -230,7 +238,7 @@ export default function PostEditor({
                 disabled={isSaving}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
               >
-                {isSaving ? "Traitement..." : submitButtonText}
+                {isSaving ? t("post_editor.processing") : buttonText}
               </button>
             </div>
           </div>
@@ -249,7 +257,7 @@ export default function PostEditor({
                   <div className="relative">
                     <Image
                       src={`https://${coverImage}`}
-                      alt="Cover Image"
+                      alt={t("post_editor.cover_image")}
                       width={75}
                       height={75}
                       className="rounded-lg"
@@ -267,8 +275,8 @@ export default function PostEditor({
                     className="w-full px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors text-center"
                   >
                     {isUploading
-                      ? "Upload..."
-                      : "Ajouter une image de couverture"}
+                      ? t("post_editor.uploading")
+                      : t("post_editor.add_cover_image")}
                   </label>
                 )}
               </div>
@@ -277,7 +285,7 @@ export default function PostEditor({
                 onChange={(e) => setSelectedTag(e.target.value)}
                 className="flex-1 px-3 py-2 border rounded-lg bg-white"
               >
-                <option value="">Choisir une catégorie</option>
+                <option value="">{t("post_editor.choose_category")}</option>
                 {categories.map((tag) => (
                   <option key={tag.id} value={tag.id}>
                     {tag.name}
@@ -290,7 +298,7 @@ export default function PostEditor({
               type="text"
               value={postTitle}
               onChange={(e) => setPostTitle(e.target.value)}
-              placeholder="Titre de l'article"
+              placeholder={t("post_editor.article_title")}
               className="mt-8 w-full text-2xl font-bold border border-gray-200 mb-4 px-4 py-2 rounded-lg"
             />
 
@@ -306,7 +314,7 @@ export default function PostEditor({
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
-            <DialogTitle>Prévisualisation du post</DialogTitle>
+            <DialogTitle>{t("post_editor.post_preview")}</DialogTitle>
           </DialogHeader>
 
           <div className="py-4">
@@ -315,7 +323,7 @@ export default function PostEditor({
               <div className="w-full h-48 relative mb-6 rounded-lg overflow-hidden">
                 <Image
                   src={`https://${coverImage}`}
-                  alt="Cover"
+                  alt={t("post_editor.cover")}
                   fill
                   className="object-cover"
                 />
@@ -331,7 +339,7 @@ export default function PostEditor({
 
             {/* Titre */}
             <h1 className="text-3xl font-bold text-gray-900 mb-6">
-              {postTitle || "Sans titre"}
+              {postTitle || t("post_editor.untitled")}
             </h1>
 
             {/* Contenu */}
@@ -342,8 +350,8 @@ export default function PostEditor({
               <div className="flex items-center justify-between text-sm text-gray-500">
                 <span>
                   {contributionsEnabled
-                    ? "✅ Contributions activées"
-                    : "❌ Contributions désactivées"}
+                    ? `✅ ${t("community_posts.contributions_enabled")}`
+                    : `❌ ${t("community_posts.contributions_disabled")}`}
                 </span>
                 <span>
                   {new Date().toLocaleDateString("fr-FR", {

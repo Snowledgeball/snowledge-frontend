@@ -9,11 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 export default function ContributePage() {
   const params = useParams();
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { t } = useTranslation();
 
   const [originalContent, setOriginalContent] = useState("");
   const [modifiedContent, setModifiedContent] = useState("");
@@ -25,7 +27,7 @@ export default function ContributePage() {
   useEffect(() => {
     // Vérifier si l'utilisateur est authentifié
     if (status === "unauthenticated") {
-      toast.error("Vous devez être connecté pour contribuer");
+      toast.error(t("enrichment.login_required"));
       router.push(`/community/${params.id}/posts/${params.postId}`);
       return;
     }
@@ -40,16 +42,14 @@ export default function ContributePage() {
           `/api/communities/${params.id}/membership`
         );
         if (!membershipResponse.ok) {
-          toast.error("Erreur lors de la vérification de votre adhésion");
+          toast.error(t("enrichment.membership_verification_error"));
           router.push(`/community/${params.id}/posts/${params.postId}`);
           return;
         }
 
         const membershipData = await membershipResponse.json();
         if (!membershipData.isMember) {
-          toast.error(
-            "Vous devez être membre de cette communauté pour contribuer"
-          );
+          toast.error(t("enrichment.member_required"));
           router.push(`/community/${params.id}/posts/${params.postId}`);
           return;
         }
@@ -59,7 +59,7 @@ export default function ContributePage() {
           `/api/communities/${params.id}/posts/${params.postId}`
         );
         if (!postResponse.ok) {
-          toast.error("Impossible de récupérer le post");
+          toast.error(t("enrichment.post_fetch_error"));
           router.push(`/community/${params.id}/posts/${params.postId}`);
           return;
         }
@@ -68,14 +68,14 @@ export default function ContributePage() {
 
         // Vérifier que le post accepte les contributions
         if (!post.accept_contributions) {
-          toast.error("Ce post n'accepte pas les contributions");
+          toast.error(t("enrichment.contributions_not_accepted"));
           router.push(`/community/${params.id}/posts/${params.postId}`);
           return;
         }
 
         // Vérifier que l'utilisateur n'est pas l'auteur du post
         if (post.author_id === parseInt(session?.user?.id || "0")) {
-          toast.error("Vous ne pouvez pas contribuer à votre propre post");
+          toast.error(t("enrichment.cannot_contribute_own_post"));
           router.push(`/community/${params.id}/posts/${params.postId}`);
           return;
         }
@@ -86,7 +86,7 @@ export default function ContributePage() {
         setLoading(false);
       } catch (error) {
         console.error("Erreur:", error);
-        toast.error("Une erreur est survenue");
+        toast.error(t("enrichment.general_error"));
         router.push(`/community/${params.id}/posts/${params.postId}`);
       }
     };
@@ -94,16 +94,16 @@ export default function ContributePage() {
     if (session) {
       fetchPost();
     }
-  }, [session, status, params.id, params.postId, router]);
+  }, [session, status, params.id, params.postId, router, t]);
 
   const handleSubmit = async () => {
     if (originalContent === modifiedContent) {
-      toast.error("Vous n'avez apporté aucune modification");
+      toast.error(t("enrichment.no_changes"));
       return;
     }
 
     if (!description) {
-      toast.error("Veuillez ajouter une description de vos modifications");
+      toast.error(t("enrichment.description_required"));
       return;
     }
 
@@ -131,12 +131,12 @@ export default function ContributePage() {
         throw new Error(data.error);
       }
 
-      toast.success("Votre contribution a été soumise avec succès");
+      toast.success(t("enrichment.contribution_submitted"));
       router.push(`/community/${params.id}/posts/${params.postId}`);
     } catch (error) {
       console.error("Erreur:", error);
       toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue"
+        error instanceof Error ? error.message : t("enrichment.general_error")
       );
     } finally {
       setIsSubmitting(false);
@@ -147,7 +147,7 @@ export default function ContributePage() {
     return (
       <div className="max-w-5xl mx-auto p-6 flex justify-center items-center min-h-[70vh]">
         <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-        <p className="ml-2">Chargement du contenu...</p>
+        <p className="ml-2">{t("loading.post")}</p>
       </div>
     );
   }
@@ -160,12 +160,14 @@ export default function ContributePage() {
           className="inline-flex items-center text-blue-600 hover:underline"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Retour au post
+          {t("actions.back")}
         </Link>
       </div>
 
       <Card className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Contribuer à : {postTitle}</h1>
+        <h1 className="text-2xl font-bold mb-6">
+          {t("enrichment.contribute_to")}: {postTitle}
+        </h1>
 
         <EnrichmentEditor
           originalContent={originalContent}
@@ -182,7 +184,7 @@ export default function ContributePage() {
               router.push(`/community/${params.id}/posts/${params.postId}`)
             }
           >
-            Annuler
+            {t("actions.cancel")}
           </Button>
           <Button
             onClick={handleSubmit}
@@ -192,7 +194,7 @@ export default function ContributePage() {
               !description
             }
           >
-            {isSubmitting ? "Soumission..." : "Soumettre ma contribution"}
+            {isSubmitting ? t("enrichment.submitting") : t("actions.submit")}
           </Button>
         </div>
       </Card>

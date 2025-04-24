@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ThumbsUp, ThumbsDown, MessageCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Loader } from "@/components/ui/loader";
+import { useTranslation } from "react-i18next";
 
 interface Review {
   id: number;
@@ -45,6 +46,7 @@ export default function ReviewsSidebar({
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -57,22 +59,22 @@ export default function ReviewsSidebar({
         );
 
         if (!response.ok) {
-          throw new Error("Erreur lors de la récupération des reviews");
+          throw new Error(t("reviews_sidebar.fetch_error"));
         }
 
         const data = await response.json();
         setReviews(data.reviews);
         setStats(data.stats);
       } catch (error) {
-        console.error("Erreur:", error);
-        setError("Impossible de charger les reviews");
+        console.error(t("enrichment_review.error"), error);
+        setError(t("reviews_sidebar.load_error"));
       } finally {
         setLoading(false);
       }
     };
 
     fetchReviews();
-  }, [communityId, postId, enrichmentId]);
+  }, [communityId, postId, enrichmentId, t]);
 
   if (loading) {
     return (
@@ -92,12 +94,16 @@ export default function ReviewsSidebar({
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4 h-full overflow-y-auto">
-      <h3 className="text-lg font-semibold mb-4">Feedback des contributeurs</h3>
+      <h3 className="text-lg font-semibold mb-4">
+        {t("reviews_sidebar.contributor_feedback")}
+      </h3>
 
       {/* Statistiques */}
       <div className="bg-gray-50 p-3 rounded-lg mb-4">
         <div className="flex justify-between mb-2">
-          <span className="text-sm text-gray-600">Taux d'approbation</span>
+          <span className="text-sm text-gray-600">
+            {t("reviews_sidebar.approval_rate")}
+          </span>
           <span className="text-sm font-medium">
             {stats.approvalRate.toFixed(0)}%
           </span>
@@ -107,19 +113,25 @@ export default function ReviewsSidebar({
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="bg-white p-2 rounded">
             <div className="text-lg font-semibold">{stats.total}</div>
-            <div className="text-xs text-gray-500">Total</div>
+            <div className="text-xs text-gray-500">
+              {t("reviews_sidebar.total")}
+            </div>
           </div>
           <div className="bg-green-50 p-2 rounded">
             <div className="text-lg font-semibold text-green-600">
               {stats.approved}
             </div>
-            <div className="text-xs text-gray-500">Approuvés</div>
+            <div className="text-xs text-gray-500">
+              {t("reviews_sidebar.approved")}
+            </div>
           </div>
           <div className="bg-red-50 p-2 rounded">
             <div className="text-lg font-semibold text-red-600">
               {stats.rejected}
             </div>
-            <div className="text-xs text-gray-500">Rejetés</div>
+            <div className="text-xs text-gray-500">
+              {t("reviews_sidebar.rejected")}
+            </div>
           </div>
         </div>
       </div>
@@ -127,7 +139,7 @@ export default function ReviewsSidebar({
       {/* Liste des reviews */}
       {reviews.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
-          Aucun vote pour le moment
+          {t("reviews_sidebar.no_votes")}
         </div>
       ) : (
         <div className="space-y-4">
