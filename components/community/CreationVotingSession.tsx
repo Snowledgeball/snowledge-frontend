@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import { Loader } from "@/components/ui/loader";
 import { EyeIcon, PencilIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 // Cache pour stocker les données
 const pendingPostsCache = new Map<string, { data: any[]; timestamp: number }>();
@@ -71,6 +72,7 @@ export default function CreationVotingSession({
   const [publishError, setPublishError] = useState<string | null>(null);
 
   const router = useRouter();
+  const { t } = useTranslation();
 
   // Mémoriser l'ID de la communauté pour éviter les re-rendus inutiles
   const memoizedCommunityId = useMemo(() => communityId, [communityId]);
@@ -337,7 +339,7 @@ export default function CreationVotingSession({
         <Loader
           size="md"
           color="gradient"
-          text="Chargement..."
+          text={t("loading.default")}
           variant="spinner"
         />
       </div>

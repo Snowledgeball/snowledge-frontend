@@ -25,7 +25,7 @@ import {
   FileEdit,
   ThumbsUp,
   ThumbsDown,
-  Info
+  Info,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Notification, NotificationType } from "@/types/notification";
@@ -44,8 +44,10 @@ import {
   doc,
   writeBatch,
 } from "firebase/firestore";
+import { useTranslation } from "react-i18next";
 
 export default function NotificationBell() {
+  const { t } = useTranslation();
   const { data: session } = useSession();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -93,7 +95,7 @@ export default function NotificationBell() {
       const notifRef = doc(db, "notifications", notificationId);
       await updateDoc(notifRef, { read: true });
     } catch (error) {
-      console.error("Erreur lors du marquage de la notification:", error);
+      console.error(t("notifications.error_marking"), error);
     }
   };
 
@@ -108,10 +110,7 @@ export default function NotificationBell() {
         });
       await batch.commit();
     } catch (error) {
-      console.error(
-        "Erreur lors du marquage de toutes les notifications:",
-        error
-      );
+      console.error(t("notifications.error_marking_all"), error);
     }
   };
 
@@ -183,7 +182,7 @@ export default function NotificationBell() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
-        aria-label="Notifications"
+        aria-label={t("notifications.aria_label")}
       >
         <Bell className="h-6 w-6 text-gray-700" />
         {unreadCount > 0 && (
@@ -197,14 +196,14 @@ export default function NotificationBell() {
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 max-h-[80vh] overflow-y-auto">
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
             <h3 className="text-lg font-semibold text-gray-900">
-              Notifications
+              {t("notifications.title")}
             </h3>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
                 className="text-sm text-blue-600 hover:text-blue-800"
               >
-                Tout marquer comme lu
+                {t("notifications.mark_all_read")}
               </button>
             )}
           </div>
@@ -212,7 +211,7 @@ export default function NotificationBell() {
           <div className="divide-y divide-gray-200">
             {notifications.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
-                Aucune notification
+                {t("notifications.empty")}
               </div>
             ) : (
               notifications.map((notification) => (
@@ -222,8 +221,9 @@ export default function NotificationBell() {
                   onClick={() => markAsRead(notification.id)}
                 >
                   <div
-                    className={`p-4 hover:bg-gray-50 transition-colors flex items-start space-x-3 ${!notification.read ? "bg-blue-50" : ""
-                      }`}
+                    className={`p-4 hover:bg-gray-50 transition-colors flex items-start space-x-3 ${
+                      !notification.read ? "bg-blue-50" : ""
+                    }`}
                   >
                     <div className="flex-shrink-0 text-2xl">
                       {getNotificationIcon(notification.type)}
@@ -238,16 +238,16 @@ export default function NotificationBell() {
                       <p className="text-xs text-gray-400 mt-1">
                         {typeof notification.createdAt === "string"
                           ? formatDistanceToNow(
-                            new Date(notification.createdAt),
-                            {
-                              addSuffix: true,
-                              locale: fr,
-                            }
-                          )
+                              new Date(notification.createdAt),
+                              {
+                                addSuffix: true,
+                                locale: fr,
+                              }
+                            )
                           : formatDistanceToNow(
-                            (notification.createdAt as any).toDate(),
-                            { addSuffix: true, locale: fr }
-                          )}
+                              (notification.createdAt as any).toDate(),
+                              { addSuffix: true, locale: fr }
+                            )}
                       </p>
                     </div>
                     {!notification.read && (

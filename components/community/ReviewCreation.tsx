@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import Image from "next/image";
 import { CheckCircle, XCircle, AlertCircle, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ReviewCreationProps {
   postId: number;
@@ -35,6 +36,7 @@ export default function ReviewCreation({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contributorsCount, setContributorsCount] = useState(0);
   const [votesCount, setVotesCount] = useState(0);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -57,24 +59,21 @@ export default function ReviewCreation({
           setVotesCount(votesData.count);
         }
       } catch (error) {
-        console.error(
-          "Erreur lors de la récupération des statistiques:",
-          error
-        );
+        console.error(t("review_creation.stats_fetch_error"), error);
       }
     };
 
     fetchStats();
-  }, [communityId, postId]);
+  }, [communityId, postId, t]);
 
   const handleSubmitReview = async () => {
     if (!decision) {
-      toast.error("Veuillez choisir d'approuver ou de rejeter le post");
+      toast.error(t("review_creation.select_decision_error"));
       return;
     }
 
     if (!feedback.trim()) {
-      toast.error("Veuillez fournir un feedback");
+      toast.error(t("review_creation.feedback_required"));
       return;
     }
 
@@ -96,14 +95,14 @@ export default function ReviewCreation({
       );
 
       if (!response.ok) {
-        throw new Error("Erreur lors de la soumission de la révision");
+        throw new Error(t("review_creation.submission_error"));
       }
 
-      toast.success("Vote soumis avec succès");
+      toast.success(t("review_creation.vote_success"));
       window.location.href = `/community/${communityId}?tab=voting`;
     } catch (error) {
-      console.error("Erreur:", error);
-      toast.error("Erreur lors de la soumission du vote");
+      console.error(t("review_creation.error"), error);
+      toast.error(t("review_creation.vote_error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -125,8 +124,12 @@ export default function ReviewCreation({
       <div className="max-w-5xl mx-auto px-4">
         <Card className="p-6 mb-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Voter sur ce post</h1>
-            <span className="text-sm text-gray-500">Auteur: {authorName}</span>
+            <h1 className="text-2xl font-bold">
+              {t("review_creation.vote_on_post")}
+            </h1>
+            <span className="text-sm text-gray-500">
+              {t("review_creation.author")}: {authorName}
+            </span>
           </div>
 
           {/* Statistiques de vote */}
@@ -134,11 +137,12 @@ export default function ReviewCreation({
             <div className="flex items-center mb-2">
               <Users className="w-5 h-5 text-blue-600 mr-2" />
               <h3 className="font-medium text-blue-800">
-                Statistiques de vote
+                {t("review_creation.vote_statistics")}
               </h3>
             </div>
             <p className="text-sm text-blue-700 mb-2">
-              {votesCount} votes sur {contributorsCount} contributeurs (
+              {votesCount} {t("review_creation.votes_out_of")}{" "}
+              {contributorsCount} {t("review_creation.contributors")} (
               {votesPercentage}%)
             </p>
             <div className="w-full bg-blue-200 rounded-full h-2.5 mb-2">
@@ -150,7 +154,7 @@ export default function ReviewCreation({
             {isCrucialVote && (
               <div className="flex items-center mt-2 text-sm text-orange-700 bg-orange-50 p-2 rounded-lg border border-orange-200">
                 <AlertCircle className="w-4 h-4 mr-2 text-orange-600" />
-                Votre vote est crucial ! Il pourrait faire basculer la décision.
+                {t("review_creation.crucial_vote")}
               </div>
             )}
           </div>
@@ -178,7 +182,7 @@ export default function ReviewCreation({
           {/* Section de décision */}
           <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
             <h3 className="text-lg font-semibold mb-4">
-              Votre décision globale
+              {t("review_creation.your_decision")}
             </h3>
 
             <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -195,7 +199,7 @@ export default function ReviewCreation({
                     decision === "APPROVED" ? "text-green-600" : "text-gray-400"
                   }`}
                 />
-                <span className="font-medium">Approuver</span>
+                <span className="font-medium">{t("voting.approve")}</span>
               </button>
 
               <button
@@ -211,18 +215,18 @@ export default function ReviewCreation({
                     decision === "REJECTED" ? "text-red-600" : "text-gray-400"
                   }`}
                 />
-                <span className="font-medium">Rejeter</span>
+                <span className="font-medium">{t("voting.reject")}</span>
               </button>
             </div>
 
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Feedback pour l'auteur
+                {t("review_creation.author_feedback")}
               </label>
               <Textarea
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
-                placeholder="Expliquez votre décision et donnez des suggestions d'amélioration, que vous ayez approuvé ou rejeté le post"
+                placeholder={t("review_creation.feedback_placeholder")}
                 className="min-h-[150px]"
               />
             </div>
@@ -232,14 +236,16 @@ export default function ReviewCreation({
                 onClick={() => router.push(`/community/${communityId}`)}
                 className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors mr-4"
               >
-                Annuler
+                {t("actions.cancel")}
               </button>
               <button
                 onClick={handleSubmitReview}
                 disabled={!decision || !feedback.trim() || isSubmitting}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? "Soumission..." : "Soumettre mon vote"}
+                {isSubmitting
+                  ? t("review_creation.submitting")
+                  : t("review_creation.submit_vote")}
               </button>
             </div>
           </div>

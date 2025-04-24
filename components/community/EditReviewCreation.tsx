@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import Image from "next/image";
 import { CheckCircle, XCircle, AlertCircle, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface EditReviewCreationProps {
   postId: number;
@@ -34,6 +35,7 @@ export default function EditReviewCreation({
   existingReview,
 }: EditReviewCreationProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [feedback, setFeedback] = useState(existingReview.content || "");
   const [decision, setDecision] = useState<"APPROVED" | "REJECTED">(
     existingReview.status as "APPROVED" | "REJECTED"
@@ -85,12 +87,12 @@ export default function EditReviewCreation({
 
   const handleUpdateReview = async () => {
     if (!decision) {
-      toast.error("Veuillez choisir d'approuver ou de rejeter le post");
+      toast.error(t("edit_review.select_decision"));
       return;
     }
 
     if (!feedback.trim()) {
-      toast.error("Veuillez fournir un feedback");
+      toast.error(t("edit_review.provide_feedback"));
       return;
     }
 
@@ -112,14 +114,14 @@ export default function EditReviewCreation({
       );
 
       if (!response.ok) {
-        throw new Error("Erreur lors de la modification du vote");
+        throw new Error(t("edit_review.update_error"));
       }
 
-      toast.success("Vote modifié avec succès");
+      toast.success(t("edit_review.update_success"));
       window.location.href = `/community/${communityId}?tab=voting`;
     } catch (error) {
       console.error("Erreur:", error);
-      toast.error("Erreur lors de la modification du vote");
+      toast.error(t("edit_review.update_error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -136,8 +138,10 @@ export default function EditReviewCreation({
       <div className="max-w-5xl mx-auto px-4">
         <Card className="p-6 mb-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Modifier votre vote</h1>
-            <span className="text-sm text-gray-500">Auteur: {authorName}</span>
+            <h1 className="text-2xl font-bold">{t("edit_review.edit_vote")}</h1>
+            <span className="text-sm text-gray-500">
+              {t("edit_review.author")}: {authorName}
+            </span>
           </div>
 
           {/* Statistiques de vote */}
@@ -145,12 +149,15 @@ export default function EditReviewCreation({
             <div className="flex items-center mb-2">
               <Users className="w-5 h-5 text-blue-600 mr-2" />
               <h3 className="font-medium text-blue-800">
-                Statistiques de vote
+                {t("edit_review.vote_statistics")}
               </h3>
             </div>
             <p className="text-sm text-blue-700 mb-2">
-              {votesCount} votes sur {contributorsCount} contributeurs (
-              {votesPercentage}%)
+              {t("edit_review.votes_count", {
+                votes: votesCount,
+                total: contributorsCount,
+                percentage: votesPercentage,
+              })}
             </p>
             <div className="w-full bg-blue-200 rounded-full h-2.5 mb-2">
               <div
@@ -160,16 +167,22 @@ export default function EditReviewCreation({
             </div>
 
             <div className="mt-4 text-sm text-blue-700">
-              <p className="font-medium">Règles de vote :</p>
+              <p className="font-medium">{t("edit_review.voting_rules")}:</p>
               <ul className="list-disc list-inside mt-1">
                 <li>
-                  Au moins {Math.ceil(contributorsCount / 2)} contributeurs
-                  doivent voter
+                  {t("edit_review.min_voters_required", {
+                    count: Math.ceil(contributorsCount / 2),
+                  })}
                 </li>
                 <li>
                   {isContributorsCountEven
-                    ? `Comme il y a ${contributorsCount} contributeurs (nombre pair), il faut au moins ${requiredApprovals} votes positifs pour publier`
-                    : `Il faut au moins ${requiredApprovals} votes positifs pour publier`}
+                    ? t("edit_review.approval_rule_even", {
+                        total: contributorsCount,
+                        required: requiredApprovals,
+                      })
+                    : t("edit_review.approval_rule_odd", {
+                        required: requiredApprovals,
+                      })}
                 </li>
               </ul>
             </div>
@@ -197,7 +210,9 @@ export default function EditReviewCreation({
 
           {/* Section de décision */}
           <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-            <h3 className="text-lg font-semibold mb-4">Votre décision</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              {t("edit_review.your_decision")}
+            </h3>
 
             <div className="flex flex-col md:flex-row gap-4 mb-6">
               <button
@@ -213,7 +228,7 @@ export default function EditReviewCreation({
                     decision === "APPROVED" ? "text-green-600" : "text-gray-400"
                   }`}
                 />
-                <span className="font-medium">Approuver</span>
+                <span className="font-medium">{t("edit_review.approve")}</span>
               </button>
 
               <button
@@ -229,18 +244,18 @@ export default function EditReviewCreation({
                     decision === "REJECTED" ? "text-red-600" : "text-gray-400"
                   }`}
                 />
-                <span className="font-medium">Rejeter</span>
+                <span className="font-medium">{t("edit_review.reject")}</span>
               </button>
             </div>
 
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Feedback pour l'auteur
+                {t("edit_review.author_feedback")}
               </label>
               <Textarea
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
-                placeholder="Expliquez votre décision et donnez des suggestions d'amélioration..."
+                placeholder={t("edit_review.feedback_placeholder")}
                 className="min-h-[150px]"
               />
             </div>
@@ -250,14 +265,16 @@ export default function EditReviewCreation({
                 onClick={() => router.push(`/community/${communityId}`)}
                 className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors mr-4"
               >
-                Annuler
+                {t("actions.cancel")}
               </button>
               <button
                 onClick={handleUpdateReview}
                 disabled={!decision || !feedback.trim() || isSubmitting}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? "Modification..." : "Modifier mon vote"}
+                {isSubmitting
+                  ? t("edit_review.updating")
+                  : t("edit_review.update_vote")}
               </button>
             </div>
           </div>

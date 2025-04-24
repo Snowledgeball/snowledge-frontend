@@ -31,6 +31,7 @@ import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Loader } from "@/components/ui/loader";
+import { useTranslation } from "react-i18next";
 
 // Système de cache pour les données du profil
 const profileCache = {
@@ -149,8 +150,9 @@ interface Message {
 
 // Composant principal avec Suspense
 const ProfilePage = () => {
+  const { t } = useTranslation();
   return (
-    <Suspense fallback={<div>Chargement...</div>}>
+    <Suspense fallback={<div>{t("loading.default")}</div>}>
       <ProfileContent />
     </Suspense>
   );
@@ -162,7 +164,7 @@ function ProfileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const contributeTo = searchParams.get("contributeTo");
-
+  const { t } = useTranslation();
 
   const {
     isLoading: isLoadingAuth,
@@ -276,10 +278,7 @@ function ProfileContent() {
         },
       });
 
-      if (!response.ok)
-        throw new Error(
-          "Erreur lors de la récupération des données utilisateur"
-        );
+      if (!response.ok) throw new Error(t("profile.error_fetching_user_data"));
 
       const data = await response.json();
 
@@ -291,9 +290,9 @@ function ProfileContent() {
 
       setUserData(data);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error(t("profile.error"), error);
     }
-  }, [userId]);
+  }, [userId, t]);
 
   useEffect(() => {
     if (userId) {
@@ -331,9 +330,7 @@ function ProfileContent() {
       });
 
       if (!response.ok)
-        throw new Error(
-          "Erreur lors de la récupération des communautés rejointes"
-        );
+        throw new Error(t("profile.error_fetching_joined_communities"));
 
       const data = await response.json();
 
@@ -346,11 +343,11 @@ function ProfileContent() {
       setJoinedCommunities(data.communities);
       setSelectedCommunity(data.communities[0] as unknown as UserCommunity);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error(t("profile.error"), error);
     } finally {
       setIsLoadingJoined(false);
     }
-  }, [userId, joinedCommunities.length]);
+  }, [userId, joinedCommunities.length, t]);
 
   // Fonction pour récupérer les communautés créées par l'utilisateur avec cache
   const fetchUserCommunities = useCallback(async () => {
@@ -381,7 +378,7 @@ function ProfileContent() {
       });
 
       if (!response.ok)
-        throw new Error("Erreur lors de la récupération des communautés");
+        throw new Error(t("profile.error_fetching_communities"));
 
       const data = await response.json();
 
@@ -393,11 +390,11 @@ function ProfileContent() {
 
       setUserOwnedCommunities(data.communities);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error(t("profile.error"), error);
     } finally {
       setIsLoading(false);
     }
-  }, [userId, userOwnedCommunities.length]);
+  }, [userId, userOwnedCommunities.length, t]);
 
   // Fonction pour récupérer les posts avec cache
   const fetchPosts = useCallback(async () => {
@@ -420,8 +417,7 @@ function ProfileContent() {
         },
       });
 
-      if (!response.ok)
-        throw new Error("Erreur lors de la récupération des posts");
+      if (!response.ok) throw new Error(t("profile.error_fetching_posts"));
 
       const data = await response.json();
 
@@ -429,8 +425,8 @@ function ProfileContent() {
       const postsData = Array.isArray(data.posts)
         ? data.posts
         : Array.isArray(data)
-          ? data
-          : [];
+        ? data
+        : [];
 
       // Mettre à jour le cache
       profileCache.posts.set(cacheKey, {
@@ -440,11 +436,11 @@ function ProfileContent() {
 
       setPosts(postsData);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error(t("profile.error"), error);
       // En cas d'erreur, définir un tableau vide pour éviter les erreurs d'undefined
       setPosts([]);
     }
-  }, [userId]);
+  }, [userId, t]);
 
   // Fonction pour récupérer les enrichissements avec cache
   const fetchEnrichments = useCallback(async () => {
@@ -468,7 +464,7 @@ function ProfileContent() {
       });
 
       if (!response.ok)
-        throw new Error("Erreur lors de la récupération des enrichissements");
+        throw new Error(t("profile.error_fetching_enrichments"));
 
       const data = await response.json();
 
@@ -476,8 +472,8 @@ function ProfileContent() {
       const enrichmentsData = Array.isArray(data.enrichments)
         ? data.enrichments
         : Array.isArray(data)
-          ? data
-          : [];
+        ? data
+        : [];
 
       // Mettre à jour le cache
       profileCache.enrichments.set(cacheKey, {
@@ -487,11 +483,11 @@ function ProfileContent() {
 
       setEnrichments(enrichmentsData);
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error(t("profile.error"), error);
       // En cas d'erreur, définir un tableau vide pour éviter les erreurs d'undefined
       setEnrichments([]);
     }
-  }, [userId]);
+  }, [userId, t]);
 
   // Fonction pour récupérer les reviews avec cache
   const fetchReviews = useCallback(async () => {
@@ -514,8 +510,7 @@ function ProfileContent() {
         },
       });
 
-      if (!response.ok)
-        throw new Error("Erreur lors de la récupération des reviews");
+      if (!response.ok) throw new Error(t("profile.error_fetching_reviews"));
 
       const data = await response.json();
 
@@ -523,8 +518,8 @@ function ProfileContent() {
       const reviewsData = Array.isArray(data.reviews)
         ? data.reviews
         : Array.isArray(data)
-          ? data
-          : [];
+        ? data
+        : [];
 
       // Mettre à jour le cache
       if (!profileCache.reviews) {
@@ -540,10 +535,10 @@ function ProfileContent() {
 
       setReviews(reviewsData);
     } catch (error) {
-      console.error("Erreur lors de la récupération des reviews:", error);
+      console.error(t("profile.error_fetching_reviews"), error);
       setReviews([]);
     }
-  }, [userId]);
+  }, [userId, t]);
 
   // Fonction pour récupérer les propositions de création avec cache
   const fetchContentProposals = useCallback(async () => {
@@ -570,9 +565,7 @@ function ProfileContent() {
       });
 
       if (!response.ok)
-        throw new Error(
-          "Erreur lors de la récupération des propositions de création"
-        );
+        throw new Error(t("profile.error_fetching_content_proposals"));
 
       const data = await response.json();
 
@@ -580,8 +573,8 @@ function ProfileContent() {
       const proposalsData = Array.isArray(data.contentProposals)
         ? data.contentProposals
         : Array.isArray(data)
-          ? data
-          : [];
+        ? data
+        : [];
 
       // Mettre à jour le cache
       if (!profileCache.contentProposals) {
@@ -597,13 +590,10 @@ function ProfileContent() {
 
       setContentProposals(proposalsData);
     } catch (error) {
-      console.error(
-        "Erreur lors de la récupération des propositions de création:",
-        error
-      );
+      console.error(t("profile.error_fetching_content_proposals"), error);
       setContentProposals([]);
     }
-  }, [userId]);
+  }, [userId, t]);
 
   // Fonction pour récupérer les messages avec cache
   const fetchMessages = useCallback(async () => {
@@ -636,8 +626,7 @@ function ProfileContent() {
         },
       });
 
-      if (!response.ok)
-        throw new Error("Erreur lors de la récupération des messages");
+      if (!response.ok) throw new Error(t("profile.error_fetching_messages"));
 
       const data = await response.json();
 
@@ -645,8 +634,8 @@ function ProfileContent() {
       const messagesData = Array.isArray(data.messages)
         ? data.messages
         : Array.isArray(data)
-          ? data
-          : [];
+        ? data
+        : [];
 
       // Mettre à jour le cache
       if (!profileCache.messages) {
@@ -674,10 +663,10 @@ function ProfileContent() {
         };
       });
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error(t("profile.error"), error);
       setMessages([]);
     }
-  }, [userId]);
+  }, [userId, t]);
 
   // Fonction pour calculer le nombre total de contributions
   const calculateTotalContributions = useCallback(() => {
@@ -796,17 +785,15 @@ function ProfileContent() {
           );
 
           if (!response.ok)
-            throw new Error(
-              "Erreur lors de la récupération des posts de la communauté"
-            );
+            throw new Error(t("profile.error_fetching_community_posts"));
 
           const data = await response.json();
           // S'assurer que data.posts existe, sinon utiliser data directement si c'est un tableau
           const postsData = Array.isArray(data.posts)
             ? data.posts
             : Array.isArray(data)
-              ? data
-              : [];
+            ? data
+            : [];
 
           // Mettre à jour le cache
           profileCache.communityPosts.set(cacheKey, {
@@ -816,7 +803,7 @@ function ProfileContent() {
 
           setSelectedCommunityPosts(postsData);
         } catch (error) {
-          console.error("Erreur:", error);
+          console.error(t("profile.error"), error);
           // En cas d'erreur, définir un tableau vide pour éviter les erreurs d'undefined
           setSelectedCommunityPosts([]);
         }
@@ -832,7 +819,7 @@ function ProfileContent() {
       // Si aucune communauté n'est sélectionnée, définir un tableau vide
       setSelectedCommunityPosts([]);
     }
-  }, [selectedCommunity]);
+  }, [selectedCommunity, userId, t]);
 
   // Fonction pour invalider le cache après une modification
   const invalidateCache = useCallback((cacheType: string, key: string) => {
@@ -885,7 +872,7 @@ function ProfileContent() {
       !justification ||
       !expertiseDomain
     ) {
-      setSubmitError("Veuillez remplir tous les champs");
+      setSubmitError(t("profile.fill_all_fields"));
       return;
     }
 
@@ -899,7 +886,7 @@ function ProfileContent() {
       );
 
       if (!community) {
-        throw new Error("Communauté non trouvée");
+        throw new Error(t("profile.community_not_found"));
       }
 
       const response = await fetch(
@@ -918,7 +905,7 @@ function ProfileContent() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Une erreur est survenue");
+        throw new Error(error.message || t("profile.an_error_occurred"));
       }
 
       // Réinitialiser les champs et fermer le modal
@@ -926,10 +913,10 @@ function ProfileContent() {
       setExpertiseDomain("");
       setIsContributorModalOpen(false);
 
-      toast.success("Votre candidature a été envoyée avec succès");
+      toast.success(t("profile.application_sent_successfully"));
     } catch (error) {
       setSubmitError(
-        error instanceof Error ? error.message : "Une erreur est survenue"
+        error instanceof Error ? error.message : t("profile.an_error_occurred")
       );
     } finally {
       setIsSubmitting(false);
@@ -971,16 +958,18 @@ function ProfileContent() {
         body: formDataToSend,
       });
 
-      if (!response.ok) throw new Error("Erreur lors de la mise à jour");
+      if (!response.ok) throw new Error(t("profile.error_updating"));
 
-      toast.success("Mise à jour effectuée avec succès");
+      toast.success(t("profile.update_successful"));
       setIsEditing(null);
       // Rafraîchir les données utilisateur
       fetchUserData();
     } catch (error) {
-      toast.error("Erreur lors de la mise à jour", {
+      toast.error(t("profile.error_updating"), {
         description:
-          error instanceof Error ? error.message : "Une erreur est survenue",
+          error instanceof Error
+            ? error.message
+            : t("profile.an_error_occurred"),
       });
     }
   };
@@ -1040,7 +1029,7 @@ function ProfileContent() {
             <div className="w-24 h-24 bg-white rounded-full mr-6 flex items-center justify-center p-1 ring-4 ring-white/30">
               <Image
                 src={userData.avatar}
-                alt="Avatar"
+                alt={t("profile.avatar")}
                 className="w-full h-full object-cover rounded-full"
                 width={96}
                 height={96}
@@ -1057,7 +1046,7 @@ function ProfileContent() {
                                 </span> */}
                 <span className="flex items-center bg-white/10 px-3 py-1 rounded-full">
                   <Award className="w-4 h-4 mr-1" />
-                  Membre depuis {userData.memberSince}
+                  {t("profile.member_since")} {userData.memberSince}
                 </span>
               </div>
             </div>
@@ -1068,25 +1057,25 @@ function ProfileContent() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[
             {
-              label: "Communautés rejointes",
+              label: t("profile.joined_communities"),
               value: userData.stats.communitiesCount,
               icon: Users,
               color: "text-blue-500",
             },
             {
-              label: "Posts",
+              label: t("profile.posts"),
               value: userData.stats.postsCount,
               icon: MessageCircle,
               color: "text-green-500",
             },
             {
-              label: "Contributions",
+              label: t("profile.contributions"),
               value: userData.stats.contributionsCount,
               icon: Activity,
               color: "text-purple-500",
             },
             {
-              label: "Messages envoyés",
+              label: t("profile.sent_messages"),
               value: userData.stats.messagesCount,
               icon: MessageSquare,
               color: "text-amber-500",
@@ -1120,33 +1109,36 @@ function ProfileContent() {
           <nav className="-mb-px flex space-x-8">
             <button
               className={`border-b-2 py-4 px-1 text-sm font-medium transition-all duration-200 
-                                ${activeTab === "communities"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500"
-                }`}
+                                ${
+                                  activeTab === "communities"
+                                    ? "border-blue-500 text-blue-600"
+                                    : "border-transparent text-gray-500"
+                                }`}
               onClick={() => setActiveTab("communities")}
             >
-              Communautés rejointes
+              {t("profile.joined_communities")}
             </button>
             <button
               className={`border-b-2 py-4 px-1 text-sm font-medium transition-all duration-200 
-                                ${activeTab === "my-community"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500"
-                }`}
+                                ${
+                                  activeTab === "my-community"
+                                    ? "border-blue-500 text-blue-600"
+                                    : "border-transparent text-gray-500"
+                                }`}
               onClick={() => setActiveTab("my-community")}
             >
-              Communautés créées
+              {t("profile.created_communities")}
             </button>
             <button
               className={`border-b-2 py-4 px-1 text-sm font-medium transition-all duration-200 
-                                ${activeTab === "settings"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500"
-                }`}
+                                ${
+                                  activeTab === "settings"
+                                    ? "border-blue-500 text-blue-600"
+                                    : "border-transparent text-gray-500"
+                                }`}
               onClick={() => setActiveTab("settings")}
             >
-              Paramètres
+              {t("profile.settings")}
             </button>
             {/* <button
                             className={`border-b-2 py-4 px-1 text-sm font-medium transition-all duration-200 
@@ -1169,7 +1161,7 @@ function ProfileContent() {
                     <Loader
                       size="lg"
                       color="gradient"
-                      text="Chargement des communautés..."
+                      text={t("loading.communities")}
                       variant="spinner"
                     />
                   </div>
@@ -1177,10 +1169,11 @@ function ProfileContent() {
                   joinedCommunities.map((community, index) => (
                     <div
                       key={index}
-                      className={`w-full bg-white rounded-lg p-4 hover:bg-gray-50 transition-all duration-200 ${selectedCommunity?.name === community.name
-                        ? "ring-2 ring-blue-500 shadow-md"
-                        : "border border-gray-200"
-                        }`}
+                      className={`w-full bg-white rounded-lg p-4 hover:bg-gray-50 transition-all duration-200 ${
+                        selectedCommunity?.name === community.name
+                          ? "ring-2 ring-blue-500 shadow-md"
+                          : "border border-gray-200"
+                      }`}
                     >
                       <div className="flex flex-col space-y-4">
                         <div className="flex justify-between items-start">
@@ -1197,9 +1190,9 @@ function ProfileContent() {
                             </div>
                             <div className="text-sm text-gray-500 mt-1">
                               {community.role === "contributor"
-                                ? "Contributeur"
-                                : "Apprennant"}{" "}
-                              • Depuis {community.createdAt}
+                                ? t("community_header.contributor")
+                                : t("community_header.learner")}{" "}
+                              • {t("profile.since")} {community.createdAt}
                             </div>
                           </div>
                         </div>
@@ -1210,7 +1203,7 @@ function ProfileContent() {
                             }
                             className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                           >
-                            Accéder
+                            {t("communities.access")}
                           </button>
                           {community.role === "learner" && (
                             <button
@@ -1222,7 +1215,7 @@ function ProfileContent() {
                               }}
                               className="flex-1 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 transition-all duration-200"
                             >
-                              Devenir contributeur
+                              {t("profile.become_contributor")}
                             </button>
                           )}
                         </div>
@@ -1235,19 +1228,19 @@ function ProfileContent() {
                   className="w-full p-4 rounded-lg bg-white hover:bg-gray-50 text-gray-700 flex items-center gap-2 group"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Rejoindre une nouvelle communauté</span>
+                  <span>{t("profile.join_new_community")}</span>
                 </button>
               </div>
 
               {/* Contenu de la communauté sélectionnée (colonne centrale) */}
               <div className="col-span-2 space-y-6">
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Mon activité dans {selectedCommunity?.name}
+                  {t("profile.my_activity_in")} {selectedCommunity?.name}
                 </h1>
                 {/* Mes enrichissements */}
                 <Card className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
                   <h3 className="text-xl font-semibold text-gray-900 mb-6">
-                    Mes enrichissements
+                    {t("profile.my_enrichments")}
                   </h3>
                   {enrichments && enrichments.length > 0 ? (
                     <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
@@ -1259,21 +1252,22 @@ function ProfileContent() {
                           <div className="flex items-center justify-between">
                             <div>
                               <span
-                                className={`px-3 py-1 rounded-full text-xs font-medium ${enrichment.status === "APPROVED"
-                                  ? "bg-green-100 text-green-700"
-                                  : enrichment.status === "PENDING"
+                                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                  enrichment.status === "APPROVED"
+                                    ? "bg-green-100 text-green-700"
+                                    : enrichment.status === "PENDING"
                                     ? "bg-yellow-100 text-yellow-700"
                                     : "bg-red-100 text-red-700"
-                                  }`}
+                                }`}
                               >
                                 {enrichment.status === "APPROVED"
-                                  ? "Approuvé"
+                                  ? t("profile.approved")
                                   : enrichment.status === "PENDING"
-                                    ? "En attente"
-                                    : "Rejeté"}
+                                  ? t("profile.pending")
+                                  : t("profile.rejected")}
                               </span>
                               <h4 className="mt-2 font-medium text-gray-900">
-                                Enrichissement pour:{" "}
+                                {t("profile.enrichment_for")}:{" "}
                                 {enrichment.community_posts.title}
                               </h4>
                               <p className="mt-1 text-sm text-gray-600 line-clamp-2">
@@ -1291,7 +1285,7 @@ function ProfileContent() {
                                 </span>
                                 <span className="mx-2">•</span>
                                 <span>
-                                  Communauté:{" "}
+                                  {t("profile.community")}:{" "}
                                   {enrichment.community_posts.community.name}
                                 </span>
                               </div>
@@ -1304,7 +1298,7 @@ function ProfileContent() {
                               }
                               className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                             >
-                              Voir le post
+                              {t("profile.view_post")}
                             </button>
                           </div>
                         </div>
@@ -1312,7 +1306,7 @@ function ProfileContent() {
                     </div>
                   ) : (
                     <p className="text-gray-500 italic">
-                      Aucun enrichissement réalisé.
+                      {t("profile.no_enrichments")}
                     </p>
                   )}
                 </Card>
@@ -1320,10 +1314,10 @@ function ProfileContent() {
                 {/* Mes posts */}
                 <Card className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
                   <h3 className="text-xl font-semibold text-gray-900 mb-6">
-                    Mes posts
+                    {t("profile.my_posts")}
                   </h3>
                   {selectedCommunityPosts &&
-                    selectedCommunityPosts.length > 0 ? (
+                  selectedCommunityPosts.length > 0 ? (
                     <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                       {selectedCommunityPosts.map((post, idx) => (
                         <div
@@ -1355,14 +1349,16 @@ function ProfileContent() {
                               }
                               className="text-blue-600 hover:text-blue-700 text-xs font-medium"
                             >
-                              Voir le post
+                              {t("profile.view_post")}
                             </button>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500 italic">Aucun post réalisé.</p>
+                    <p className="text-gray-500 italic">
+                      {t("profile.no_posts")}
+                    </p>
                   )}
                 </Card>
 
@@ -1385,7 +1381,7 @@ function ProfileContent() {
                   <Loader
                     size="lg"
                     color="gradient"
-                    text="Chargement..."
+                    text={t("loading.default")}
                     variant="spinner"
                   />
                 </div>
@@ -1410,7 +1406,7 @@ function ProfileContent() {
                               }
                               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                             >
-                              Tableau de bord
+                              {t("profile.dashboard")}
                             </button>
                             <button
                               onClick={() =>
@@ -1418,7 +1414,7 @@ function ProfileContent() {
                               }
                               className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
                             >
-                              Accéder à la communauté
+                              {t("profile.access_community")}
                             </button>
                           </div>
                         </div>
@@ -1430,16 +1426,16 @@ function ProfileContent() {
                           <div className="mt-6 space-y-4">
                             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                               <h4 className="font-medium text-amber-800 mb-2">
-                                Actions recommandées
+                                {t("profile.recommended_actions")}
                               </h4>
                               <ul className="space-y-2">
                                 <li className="flex items-center text-amber-700">
                                   <ArrowRight className="w-4 h-4 mr-2" />
-                                  Complétez la description de votre communauté
+                                  {t("profile.complete_community_description")}
                                 </li>
                                 <li className="flex items-center text-amber-700">
                                   <ArrowRight className="w-4 h-4 mr-2" />
-                                  Ajoutez une vidéo de présentation YouTube
+                                  {t("profile.add_youtube_video")}
                                 </li>
                               </ul>
                             </div>
@@ -1452,14 +1448,18 @@ function ProfileContent() {
                             <p className="text-2xl font-bold text-gray-900">
                               {community.stats.membersCount}
                             </p>
-                            <p className="text-sm text-gray-600">Membres</p>
+                            <p className="text-sm text-gray-600">
+                              {t("profile.members")}
+                            </p>
                           </div>
                           <div className="bg-gray-50 p-4 rounded-lg">
                             <MessageCircle className="w-6 h-6 text-green-500 mb-2" />
                             <p className="text-2xl font-bold text-gray-900">
                               {community.stats.postsCount}
                             </p>
-                            <p className="text-sm text-gray-600">Posts</p>
+                            <p className="text-sm text-gray-600">
+                              {t("profile.posts")}
+                            </p>
                           </div>
                           <div className="bg-gray-50 p-4 rounded-lg">
                             <Activity className="w-6 h-6 text-purple-500 mb-2" />
@@ -1467,7 +1467,7 @@ function ProfileContent() {
                               {community.stats.postsCount * 2}
                             </p>
                             <p className="text-sm text-gray-600">
-                              Contributions
+                              {t("profile.contributions")}
                             </p>
                           </div>
                         </div>
@@ -1477,16 +1477,16 @@ function ProfileContent() {
                   <Card className="p-6 bg-white rounded-xl shadow-md">
                     <div className="text-center">
                       <h3 className="text-xl font-bold text-gray-900 mb-4">
-                        Créer une autre communauté
+                        {t("profile.create_another_community")}
                       </h3>
                       <p className="text-gray-600 mb-6">
-                        Développez votre présence avec une nouvelle communauté
+                        {t("profile.develop_presence")}
                       </p>
                       <button
                         onClick={() => router.push("/create-community")}
                         className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
                       >
-                        Créer une communauté
+                        {t("navigation.create_community")}
                       </button>
                     </div>
                   </Card>
@@ -1494,56 +1494,55 @@ function ProfileContent() {
               ) : (
                 <div className="text-center py-12">
                   <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Créez votre propre communauté
+                    {t("profile.create_your_community")}
                   </h3>
                   <p className="text-gray-600 mb-8">
-                    Lancez votre communauté et commencez à partager votre
-                    expertise
+                    {t("profile.launch_community")}
                   </p>
                   <button
                     onClick={() => router.push("/create-community")}
                     className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
                   >
-                    Créer une communauté
+                    {t("navigation.create_community")}
                   </button>
                 </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
                 <Card className="p-6 bg-white rounded-xl shadow-md">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                    Avantages
+                    {t("profile.benefits")}
                   </h4>
                   <ul className="space-y-3">
                     <li className="flex items-center gap-2 text-gray-600">
                       <Check className="w-5 h-5 text-green-500" />
-                      Créez votre propre espace d&apos;échange
+                      {t("profile.create_exchange_space")}
                     </li>
                     <li className="flex items-center gap-2 text-gray-600">
                       <Check className="w-5 h-5 text-green-500" />
-                      Monétisez votre expertise
+                      {t("profile.monetize_expertise")}
                     </li>
                     <li className="flex items-center gap-2 text-gray-600">
                       <Check className="w-5 h-5 text-green-500" />
-                      Construisez une communauté active
+                      {t("profile.build_active_community")}
                     </li>
                   </ul>
                 </Card>
                 <Card className="p-6 bg-white rounded-xl shadow-md">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                    Fonctionnalités
+                    {t("profile.features")}
                   </h4>
                   <ul className="space-y-3">
                     <li className="flex items-center gap-2 text-gray-600">
                       <Check className="w-5 h-5 text-green-500" />
-                      Outils de modération avancés
+                      {t("profile.advanced_moderation")}
                     </li>
                     <li className="flex items-center gap-2 text-gray-600">
                       <Check className="w-5 h-5 text-green-500" />
-                      Analyses et statistiques
+                      {t("profile.analytics")}
                     </li>
                     <li className="flex items-center gap-2 text-gray-600">
                       <Check className="w-5 h-5 text-green-500" />
-                      Personnalisation complète
+                      {t("profile.full_customization")}
                     </li>
                   </ul>
                 </Card>
@@ -1556,7 +1555,7 @@ function ProfileContent() {
               <Card className="p-6 bg-white rounded-xl shadow-md">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-semibold text-gray-900">
-                    Informations du compte
+                    {t("profile.account_information")}
                   </h3>
                 </div>
                 <div className="space-y-4">
@@ -1566,7 +1565,7 @@ function ProfileContent() {
                       <div className="w-12 h-12 rounded-full overflow-hidden">
                         <Image
                           src={previewUrl || userData.avatar}
-                          alt="Profile"
+                          alt={t("navigation.profile_picture")}
                           className="w-full h-full object-cover"
                           width={48}
                           height={48}
@@ -1574,7 +1573,7 @@ function ProfileContent() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          Photo de profil
+                          {t("navigation.profile_picture")}
                         </p>
                       </div>
                     </div>
@@ -1590,13 +1589,13 @@ function ProfileContent() {
                           onClick={() => handleSubmit("avatar")}
                           className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm"
                         >
-                          Enregistrer
+                          {t("actions.save")}
                         </button>
                         <button
                           onClick={() => setIsEditing(null)}
                           className="px-3 py-1 text-gray-600 text-sm"
                         >
-                          Annuler
+                          {t("actions.cancel")}
                         </button>
                       </div>
                     ) : (
@@ -1604,7 +1603,7 @@ function ProfileContent() {
                         onClick={() => setIsEditing("avatar")}
                         className="text-blue-600 text-sm hover:text-blue-700"
                       >
-                        Modifier
+                        {t("actions.edit")}
                       </button>
                     )}
                   </div>
@@ -1615,7 +1614,7 @@ function ProfileContent() {
                       <User className="w-5 h-5 text-gray-500" />
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          Nom complet
+                          {t("profile.full_name")}
                         </p>
                         <p className="text-sm text-gray-500">
                           {userData.fullName}
@@ -1635,13 +1634,13 @@ function ProfileContent() {
                           onClick={() => handleSubmit("fullName")}
                           className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm"
                         >
-                          Enregistrer
+                          {t("actions.save")}
                         </button>
                         <button
                           onClick={() => setIsEditing(null)}
                           className="px-3 py-1 text-gray-600 text-sm"
                         >
-                          Annuler
+                          {t("actions.cancel")}
                         </button>
                       </div>
                     ) : (
@@ -1649,7 +1648,7 @@ function ProfileContent() {
                         onClick={() => setIsEditing("fullName")}
                         className="text-blue-600 text-sm hover:text-blue-700"
                       >
-                        Modifier
+                        {t("actions.edit")}
                       </button>
                     )}
                   </div>
@@ -1660,7 +1659,7 @@ function ProfileContent() {
                       <AtSign className="w-5 h-5 text-gray-500" />
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          Nom d&apos;utilisateur
+                          {t("profile.username")}
                         </p>
                         <p className="text-sm text-gray-500">
                           {userData.userName}
@@ -1680,13 +1679,13 @@ function ProfileContent() {
                           onClick={() => handleSubmit("userName")}
                           className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm"
                         >
-                          Enregistrer
+                          {t("actions.save")}
                         </button>
                         <button
                           onClick={() => setIsEditing(null)}
                           className="px-3 py-1 text-gray-600 text-sm"
                         >
-                          Annuler
+                          {t("actions.cancel")}
                         </button>
                       </div>
                     ) : (
@@ -1694,7 +1693,7 @@ function ProfileContent() {
                         onClick={() => setIsEditing("userName")}
                         className="text-blue-600 text-sm hover:text-blue-700"
                       >
-                        Modifier
+                        {t("actions.edit")}
                       </button>
                     )}
                   </div>
@@ -1725,13 +1724,13 @@ function ProfileContent() {
                           onClick={() => handleSubmit("email")}
                           className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm"
                         >
-                          Enregistrer
+                          {t("actions.save")}
                         </button>
                         <button
                           onClick={() => setIsEditing(null)}
                           className="px-3 py-1 text-gray-600 text-sm"
                         >
-                          Annuler
+                          {t("actions.cancel")}
                         </button>
                       </div>
                     ) : (
@@ -1739,7 +1738,7 @@ function ProfileContent() {
                         onClick={() => setIsEditing("email")}
                         className="text-blue-600 text-sm hover:text-blue-700"
                       >
-                        Modifier
+                        {t("actions.edit")}
                       </button>
                     )}
                   </div>
@@ -1750,7 +1749,7 @@ function ProfileContent() {
                       <Lock className="w-5 h-5 text-gray-500" />
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          Mot de passe
+                          {t("profile.password")}
                         </p>
                         <p className="text-sm text-gray-500">••••••••</p>
                       </div>
@@ -1760,7 +1759,7 @@ function ProfileContent() {
                         <input
                           type="password"
                           name="currentPassword"
-                          placeholder="Mot de passe actuel"
+                          placeholder={t("profile.current_password")}
                           value={formData.currentPassword}
                           onChange={handleInputChange}
                           className="px-2 py-1 border rounded text-sm"
@@ -1768,7 +1767,7 @@ function ProfileContent() {
                         <input
                           type="password"
                           name="newPassword"
-                          placeholder="Nouveau mot de passe"
+                          placeholder={t("profile.new_password")}
                           value={formData.newPassword}
                           onChange={handleInputChange}
                           className="px-2 py-1 border rounded text-sm"
@@ -1776,7 +1775,7 @@ function ProfileContent() {
                         <input
                           type="password"
                           name="confirmPassword"
-                          placeholder="Confirmer le mot de passe"
+                          placeholder={t("profile.confirm_password")}
                           value={formData.confirmPassword}
                           onChange={handleInputChange}
                           className="px-2 py-1 border rounded text-sm"
@@ -1786,13 +1785,13 @@ function ProfileContent() {
                             onClick={() => handleSubmit("password")}
                             className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm"
                           >
-                            Enregistrer
+                            {t("actions.save")}
                           </button>
                           <button
                             onClick={() => setIsEditing(null)}
                             className="px-3 py-1 text-gray-600 text-sm"
                           >
-                            Annuler
+                            {t("actions.cancel")}
                           </button>
                         </div>
                       </div>
@@ -1801,7 +1800,7 @@ function ProfileContent() {
                         onClick={() => setIsEditing("password")}
                         className="text-blue-600 text-sm hover:text-blue-700"
                       >
-                        Modifier
+                        {t("actions.edit")}
                       </button>
                     )}
                   </div>
@@ -1942,12 +1941,11 @@ function ProfileContent() {
                 <div className="flex justify-between items-start">
                   <div className="text-white">
                     <h3 className="text-xl font-bold">
-                      Devenir contributeur pour{" "}
+                      {t("profile.become_contributor_for")}{" "}
                       {selectedCommunityForContribution}
                     </h3>
                     <p className="mt-2 text-white/80">
-                      Partagez votre expertise et gagnez des récompenses en
-                      contribuant à la communauté
+                      {t("profile.share_expertise")}
                     </p>
                   </div>
                   <button
@@ -1967,10 +1965,10 @@ function ProfileContent() {
                       <Trophy className="w-6 h-6 text-amber-600" />
                     </div>
                     <h4 className="font-medium text-amber-900 mb-1">
-                      Expertise Reconnue
+                      {t("profile.recognized_expertise")}
                     </h4>
                     <p className="text-xs text-amber-700">
-                      Gagnez en visibilité dans la communauté
+                      {t("profile.gain_visibility")}
                     </p>
                   </div>
                   <div className="p-4 bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl text-center">
@@ -1978,10 +1976,10 @@ function ProfileContent() {
                       <DollarSign className="w-6 h-6 text-green-600" />
                     </div>
                     <h4 className="font-medium text-green-900 mb-1">
-                      Récompenses
+                      {t("profile.rewards")}
                     </h4>
                     <p className="text-xs text-green-700">
-                      Monétisez vos contributions
+                      {t("profile.monetize_contributions")}
                     </p>
                   </div>
                   <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl text-center">
@@ -1989,10 +1987,10 @@ function ProfileContent() {
                       <Users className="w-6 h-6 text-blue-600" />
                     </div>
                     <h4 className="font-medium text-blue-900 mb-1">
-                      Communauté
+                      {t("profile.community")}
                     </h4>
                     <p className="text-xs text-blue-700">
-                      Rejoignez un réseau d&apos;experts
+                      {t("profile.join_expert_network")}
                     </p>
                   </div>
                 </div>
@@ -2001,24 +1999,24 @@ function ProfileContent() {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Pourquoi souhaitez-vous devenir contributeur ?
+                      {t("profile.why_become_contributor")}
                     </label>
                     <textarea
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
                       rows={4}
-                      placeholder="Partagez votre motivation et votre expertise..."
+                      placeholder={t("profile.share_motivation")}
                       value={justification}
                       onChange={(e) => setJustification(e.target.value)}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Vos domaines d&apos;expertise
+                      {t("profile.expertise_domains")}
                     </label>
                     <input
                       type="text"
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                      placeholder="Ex: Trading, Analyse technique, DeFi..."
+                      placeholder={t("profile.expertise_domains_placeholder")}
                       value={expertiseDomain}
                       onChange={(e) => setExpertiseDomain(e.target.value)}
                     />
@@ -2036,7 +2034,7 @@ function ProfileContent() {
                   className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-800 transition-colors"
                   disabled={isSubmitting}
                 >
-                  Annuler
+                  {t("actions.cancel")}
                 </button>
                 <button
                   onClick={handleContributorRequest}
@@ -2044,8 +2042,8 @@ function ProfileContent() {
                   className="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting
-                    ? "Envoi en cours..."
-                    : "Envoyer ma candidature"}
+                    ? t("profile.sending")
+                    : t("profile.send_application")}
                 </button>
               </div>
             </Dialog.Panel>

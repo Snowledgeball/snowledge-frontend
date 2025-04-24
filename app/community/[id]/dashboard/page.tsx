@@ -87,7 +87,8 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import TinyMCEStyledText from "@/components/shared/TinyMCEStyledText";
-import { ToolSelector } from '@/components/dashboard/ToolSelector';
+import { ToolSelector } from "@/components/dashboard/ToolSelector";
+import { useTranslation } from "react-i18next";
 
 // Système de cache pour les données du dashboard
 const dashboardCache = {
@@ -286,6 +287,8 @@ export default function CommunityDashboard() {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryLabel, setNewCategoryLabel] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -919,11 +922,11 @@ export default function CommunityDashboard() {
   }, [tabParam]);
 
   if (loading) {
-    return <Loader text="Chargement des données..." fullScreen />;
+    return <Loader text={t("loading.data")} fullScreen />;
   }
 
   if (!dashboardData && !isLoading) {
-    return <div>Erreur lors du chargement des données</div>;
+    return <div>{t("settings.error_loading_settings")}</div>;
   }
 
   if (isLoading) {
@@ -960,7 +963,7 @@ export default function CommunityDashboard() {
                 onClick={() => router.push(`/community/${communityId}`)}
                 className="text-xs text-gray-400 hover:underline cursor-pointer"
               >
-                Voir la communauté
+                {t("dashboard.view_community")}
               </p>
             </div>
           </div>
@@ -970,31 +973,33 @@ export default function CommunityDashboard() {
         <div className="p-4 space-y-6">
           <div>
             <h3 className="text-purple-400 text-xs font-medium mb-2">
-              Surveillance
+              {t("dashboard.monitoring")}
             </h3>
             <div className="space-y-1">
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "overview" ? "bg-gray-800" : "hover:bg-gray-800"
-                  }`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${
+                  activeTab === "overview" ? "bg-gray-800" : "hover:bg-gray-800"
+                }`}
                 onClick={() => {
                   handleTabChange("overview");
                   setSelectedTool(null);
                 }}
               >
-                📊 Tableau de bord
+                📊 {t("dashboard.dashboard")}
                 <ChevronRight className="ml-auto w-4 h-4" />
               </button>
             </div>
             <div className="space-y-1">
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "members" ? "bg-gray-800" : "hover:bg-gray-800"
-                  }`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${
+                  activeTab === "members" ? "bg-gray-800" : "hover:bg-gray-800"
+                }`}
                 onClick={() => {
                   handleTabChange("members");
                   setSelectedTool(null);
                 }}
               >
-                👥 Membres
+                👥 {t("profile.members")}
                 <ChevronRight className="ml-auto w-4 h-4" />
               </button>
             </div>
@@ -1002,28 +1007,31 @@ export default function CommunityDashboard() {
 
           <div>
             <h3 className="text-purple-400 text-xs font-medium mb-2">
-              Création
+              {t("dashboard.creation")}
             </h3>
             <div className="space-y-1">
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "veille" ? "bg-gray-800" : "hover:bg-gray-800"}`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${
+                  activeTab === "veille" ? "bg-gray-800" : "hover:bg-gray-800"
+                }`}
                 onClick={() => {
                   setActiveTab("veille");
                   setSelectedTool(null);
                 }}
               >
-                📡 Collecte et veille
+                📡 {t("dashboard.monitoring_collection")}
                 <ChevronRight className="ml-auto w-4 h-4" />
               </button>
               <button
-                className={`w-full flex items-center text-white p-2 rounded-lg ${activeTab === "creation" ? "bg-gray-800" : "hover:bg-gray-800"
-                  }`}
+                className={`w-full flex items-center text-white p-2 rounded-lg ${
+                  activeTab === "creation" ? "bg-gray-800" : "hover:bg-gray-800"
+                }`}
                 onClick={() => {
                   handleTabChange("creation");
                   setSelectedTool(null);
                 }}
               >
-                ✍️ Création de posts
+                ✍️ {t("dashboard.post_creation")}
                 <ChevronRight className="ml-auto w-4 h-4" />
               </button>
             </div>
@@ -1031,175 +1039,223 @@ export default function CommunityDashboard() {
 
           <div>
             <h3 className="text-purple-400 text-xs font-medium mb-2">
-              Boîte à outils
+              {t("dashboard.toolbox")}
             </h3>
             <div className="space-y-1">
               {/* Outils de collecte */}
               <div className="mb-2">
-                <p className="text-gray-500 text-xs pl-2 mb-1">COLLECTE</p>
+                <p className="text-gray-500 text-xs pl-2 mb-1">
+                  {t("dashboard.collection")}
+                </p>
                 <button
                   onClick={() => {
                     setActiveTab("tools");
                     setSelectedTool("aggregator");
                   }}
-                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "aggregator" ? "bg-gray-800" : "hover:bg-gray-800"
-                    }`}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${
+                    selectedTool === "aggregator"
+                      ? "bg-gray-800"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
                   <Database className="w-4 h-4 mr-2 text-blue-500" />
-                  Agrégateur de sources
+                  {t("dashboard.tools.source_aggregator")}
                 </button>
                 <button
                   onClick={() => {
                     setActiveTab("tools");
                     setSelectedTool("trend-scanner");
                   }}
-                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "trend-scanner" ? "bg-gray-800" : "hover:bg-gray-800"
-                    }`}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${
+                    selectedTool === "trend-scanner"
+                      ? "bg-gray-800"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
                   <Gauge className="w-4 h-4 mr-2 text-green-500" />
-                  Scanner de tendances
+                  {t("dashboard.tools.trend_scanner")}
                 </button>
                 <button
                   onClick={() => {
                     setActiveTab("tools");
                     setSelectedTool("sentiment");
                   }}
-                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "sentiment" ? "bg-gray-800" : "hover:bg-gray-800"
-                    }`}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${
+                    selectedTool === "sentiment"
+                      ? "bg-gray-800"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
                   <ThumbsUp className="w-4 h-4 mr-2 text-yellow-500" />
-                  Moniteur de sentiments
+                  {t("dashboard.tools.sentiment_monitor")}
                 </button>
                 <button
                   onClick={() => {
                     setActiveTab("tools");
                     setSelectedTool("signals");
                   }}
-                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "signals" ? "bg-gray-800" : "hover:bg-gray-800"
-                    }`}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${
+                    selectedTool === "signals"
+                      ? "bg-gray-800"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
                   <Signal className="w-4 h-4 mr-2 text-red-500" />
-                  Détecteur de signaux
+                  {t("dashboard.tools.signal_detector")}
                 </button>
               </div>
 
               {/* Outils d'édition */}
               <div className="mb-2">
-                <p className="text-gray-500 text-xs pl-2 mb-1">ÉDITION</p>
+                <p className="text-gray-500 text-xs pl-2 mb-1">
+                  {t("dashboard.edition")}
+                </p>
                 <button
                   onClick={() => {
                     setActiveTab("tools");
                     setSelectedTool("collab-editor");
                   }}
-                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "collab-editor" ? "bg-gray-800" : "hover:bg-gray-800"
-                    }`}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${
+                    selectedTool === "collab-editor"
+                      ? "bg-gray-800"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
                   <Workflow className="w-4 h-4 mr-2 text-indigo-500" />
-                  Éditeur collaboratif
+                  {t("dashboard.tools.collaborative_editor")}
                 </button>
                 <button
                   onClick={() => {
                     setActiveTab("tools");
                     setSelectedTool("ai-assistant");
                   }}
-                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "ai-assistant" ? "bg-gray-800" : "hover:bg-gray-800"
-                    }`}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${
+                    selectedTool === "ai-assistant"
+                      ? "bg-gray-800"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
                   <BrainCircuit className="w-4 h-4 mr-2 text-purple-500" />
-                  AI Assistant rédaction
+                  {t("dashboard.tools.ai_writing_assistant")}
                 </button>
                 <button
                   onClick={() => {
                     setActiveTab("tools");
                     setSelectedTool("templates");
                   }}
-                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "templates" ? "bg-gray-800" : "hover:bg-gray-800"
-                    }`}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${
+                    selectedTool === "templates"
+                      ? "bg-gray-800"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
                   <FileCode className="w-4 h-4 mr-2 text-amber-500" />
-                  Bibliothèque de templates
+                  {t("dashboard.tools.template_library")}
                 </button>
                 <button
                   onClick={() => {
                     setActiveTab("tools");
                     setSelectedTool("fact-checker");
                   }}
-                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "fact-checker" ? "bg-gray-800" : "hover:bg-gray-800"
-                    }`}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${
+                    selectedTool === "fact-checker"
+                      ? "bg-gray-800"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
                   <CheckCircle className="w-4 h-4 mr-2 text-emerald-500" />
-                  Vérificateur de faits
+                  {t("dashboard.tools.fact_checker")}
                 </button>
                 <button
                   onClick={() => {
                     setActiveTab("tools");
                     setSelectedTool("customizer");
                   }}
-                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "customizer" ? "bg-gray-800" : "hover:bg-gray-800"
-                    }`}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${
+                    selectedTool === "customizer"
+                      ? "bg-gray-800"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
                   <PaintBucket className="w-4 h-4 mr-2 text-pink-500" />
-                  Customisation visuelle
+                  {t("dashboard.tools.visual_customization")}
                 </button>
               </div>
 
               {/* Outils de diffusion */}
               <div>
-                <p className="text-gray-500 text-xs pl-2 mb-1">DIFFUSION</p>
+                <p className="text-gray-500 text-xs pl-2 mb-1">
+                  {t("dashboard.distribution")}
+                </p>
                 <button
                   onClick={() => {
                     setActiveTab("tools");
                     setSelectedTool("scheduler");
                   }}
-                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "scheduler" ? "bg-gray-800" : "hover:bg-gray-800"
-                    }`}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${
+                    selectedTool === "scheduler"
+                      ? "bg-gray-800"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
                   <Calendar className="w-4 h-4 mr-2 text-orange-500" />
-                  Planificateur de publication
+                  {t("dashboard.tools.publication_scheduler")}
                 </button>
                 <button
                   onClick={() => {
                     setActiveTab("tools");
                     setSelectedTool("analytics");
                   }}
-                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "analytics" ? "bg-gray-800" : "hover:bg-gray-800"
-                    }`}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${
+                    selectedTool === "analytics"
+                      ? "bg-gray-800"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
                   <BarChart className="w-4 h-4 mr-2 text-cyan-500" />
-                  Analytics en temps réel
+                  {t("dashboard.tools.realtime_analytics")}
                 </button>
                 <button
                   onClick={() => {
                     setActiveTab("tools");
                     setSelectedTool("multi-channel");
                   }}
-                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "multi-channel" ? "bg-gray-800" : "hover:bg-gray-800"
-                    }`}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${
+                    selectedTool === "multi-channel"
+                      ? "bg-gray-800"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
                   <Share2 className="w-4 h-4 mr-2 text-teal-500" />
-                  Diffusion multi-canaux
+                  {t("dashboard.tools.multichannel_distribution")}
                 </button>
                 <button
                   onClick={() => {
                     setActiveTab("tools");
                     setSelectedTool("amplifier");
                   }}
-                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "amplifier" ? "bg-gray-800" : "hover:bg-gray-800"
-                    }`}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${
+                    selectedTool === "amplifier"
+                      ? "bg-gray-800"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
                   <Rocket className="w-4 h-4 mr-2 text-rose-500" />
-                  Amplificateur de contenu
+                  {t("dashboard.tools.content_amplifier")}
                 </button>
                 <button
                   onClick={() => {
                     setActiveTab("tools");
                     setSelectedTool("monetization");
                   }}
-                  className={`w-full flex items-center text-white p-2 rounded-lg ${selectedTool === "monetization" ? "bg-gray-800" : "hover:bg-gray-800"
-                    }`}
+                  className={`w-full flex items-center text-white p-2 rounded-lg ${
+                    selectedTool === "monetization"
+                      ? "bg-gray-800"
+                      : "hover:bg-gray-800"
+                  }`}
                 >
                   <Coins className="w-4 h-4 mr-2 text-amber-500" />
-                  Monétisation automatique
+                  {t("dashboard.tools.automatic_monetization")}
                 </button>
               </div>
             </div>
@@ -1224,15 +1280,17 @@ export default function CommunityDashboard() {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold mb-6">
-                Bienvenue {session?.user?.name} 👋
+                {t("dashboard.welcome", { name: session?.user?.name })} 👋
               </h1>
               {/* Titre et nom de la communauté plus petit */}
               <div>
                 <h2 className="text-xl font-medium">
-                  Tableau de bord - {dashboardData?.community?.name}
+                  {t("dashboard.dashboard_title", {
+                    name: dashboardData?.community?.name,
+                  })}
                 </h2>
                 <p className="text-gray-600 pr-2">
-                  Aujourd'hui est un bon jour pour partager ton savoir !
+                  {t("dashboard.good_day_message")}
                 </p>
               </div>
             </div>
@@ -1241,7 +1299,7 @@ export default function CommunityDashboard() {
               className="flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
             >
               <Settings className="w-4 h-4 mr-2" />
-              Paramètres
+              {t("profile.settings")}
             </button>
           </div>
 
@@ -1253,68 +1311,70 @@ export default function CommunityDashboard() {
                 {/* Revenus générés */}
                 <Card className="p-6 rounded-3xl">
                   <h3 className="text-lg font-semibold mb-4">
-                    Revenus générés
+                    {t("dashboard.generated_revenue")}
                   </h3>
                   <div className="grid grid-cols-3 gap-4 mb-4">
                     <div className="p-4 bg-gray-800 rounded-lg text-white">
-                      <p className="text-sm">Revenus totaux</p>
+                      <p className="text-sm">{t("dashboard.total_revenue")}</p>
                       <p className="text-xl font-bold">
                         {dashboardData?.stats?.revenue}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-800 rounded-lg text-white">
-                      <p className="text-sm">Rev. mensuel</p>
+                      <p className="text-sm">
+                        {t("dashboard.monthly_revenue")}
+                      </p>
                       <p className="text-xl font-bold">1,250€</p>
                     </div>
                     <div className="p-4 bg-gray-800 rounded-lg text-white">
-                      <p className="text-sm">Rev. par membre</p>
+                      <p className="text-sm">
+                        {t("dashboard.revenue_per_member")}
+                      </p>
                       <p className="text-xl font-bold">8.50€</p>
                     </div>
                   </div>
                   <button
                     onClick={() =>
-                      toast.info(
-                        "Cette fonctionnalité n'est pas encore définie"
-                      )
+                      toast.info(t("dashboard.feature_not_defined"))
                     }
                     className="w-full py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
                   >
-                    Analyser mes statistiques
+                    {t("dashboard.analyze_stats")}
                   </button>
                 </Card>
 
                 {/* Audience et engagement */}
                 <Card className="p-6 rounded-3xl">
                   <h3 className="text-lg font-semibold mb-4">
-                    Audience et engagement
+                    {t("dashboard.audience_engagement")}
                   </h3>
                   <div className="grid grid-cols-3 gap-4 mb-4">
                     <div className="p-4 bg-gray-800 rounded-lg text-white">
-                      <p className="text-sm">Total membres</p>
+                      <p className="text-sm">{t("dashboard.total_members")}</p>
                       <p className="text-xl font-bold">
                         {dashboardData?.stats?.totalMembers}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-800 rounded-lg text-white">
-                      <p className="text-sm">Taux d'engagement</p>
+                      <p className="text-sm">
+                        {t("dashboard.engagement_rate")}
+                      </p>
                       <p className="text-xl font-bold">
                         {dashboardData?.stats?.engagementRate}%
                       </p>
                     </div>
                     <div className="p-4 bg-gray-800 rounded-lg text-white">
-                      <p className="text-sm">Posts/semaine</p>
+                      <p className="text-sm">{t("dashboard.posts_per_week")}</p>
                       <p className="text-xl font-bold">12</p>
                     </div>
                   </div>
                   <button
                     onClick={() =>
-                      toast.info(
-                        "Cette fonctionnalité n'est pas encore définie"
-                      )
+                      toast.info(t("dashboard.feature_not_defined"))
                     }
                     className="w-full py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
                   >
-                    Analyser mes posts
+                    {t("dashboard.analyze_posts")}
                   </button>
                 </Card>
               </div>
@@ -1322,26 +1382,26 @@ export default function CommunityDashboard() {
               {/* Statistiques détaillées par contenu */}
               <Card className="p-6 rounded-3xl">
                 <h3 className="text-lg font-semibold mb-4">
-                  Statistiques détaillées par contenu
+                  {t("dashboard.detailed_content_stats")}
                 </h3>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="text-left border-b">
                         <th className="pb-3 font-semibold text-gray-600">
-                          Titre du contenu
+                          {t("dashboard.content_title")}
                         </th>
                         <th className="pb-3 font-semibold text-gray-600">
-                          Type
+                          {t("dashboard.type")}
                         </th>
                         <th className="pb-3 font-semibold text-gray-600">
-                          Vues
+                          {t("dashboard.views")}
                         </th>
                         <th className="pb-3 font-semibold text-gray-600">
-                          Engagement
+                          {t("dashboard.engagement")}
                         </th>
                         <th className="pb-3 font-semibold text-gray-600">
-                          Revenus
+                          {t("dashboard.revenue")}
                         </th>
                       </tr>
                     </thead>
@@ -1390,30 +1450,32 @@ export default function CommunityDashboard() {
               <div className="grid grid-cols-2 gap-6">
                 {/* Graphique Contributions */}
                 <Card className="p-6 rounded-3xl">
-                  <h3 className="text-lg font-semibold mb-4">Contributions</h3>
+                  <h3 className="text-lg font-semibold mb-4">
+                    {t("voting.contributions")}
+                  </h3>
                   <ContributionsChart data={{ active: 65, pending: 35 }} />
                 </Card>
 
                 {/* Graphique Évolution des abonnés */}
                 <Card className="p-6 rounded-3xl">
                   <h3 className="text-lg font-semibold mb-4">
-                    Évolution des abonnés
+                    {t("dashboard.subscriber_evolution")}
                   </h3>
                   <SubscribersChart
                     data={{
                       labels: [
-                        "Jan",
-                        "Fév",
-                        "Mar",
-                        "Avr",
-                        "Mai",
-                        "Juin",
-                        "Juil",
-                        "Août",
-                        "Sep",
-                        "Oct",
-                        "Nov",
-                        "Déc",
+                        t("dashboard.months.jan"),
+                        t("dashboard.months.feb"),
+                        t("dashboard.months.mar"),
+                        t("dashboard.months.apr"),
+                        t("dashboard.months.may"),
+                        t("dashboard.months.jun"),
+                        t("dashboard.months.jul"),
+                        t("dashboard.months.aug"),
+                        t("dashboard.months.sep"),
+                        t("dashboard.months.oct"),
+                        t("dashboard.months.nov"),
+                        t("dashboard.months.dec"),
                       ],
                       values: [
                         120, 450, 280, 190, 300, 250, 180, 220, 350, 200, 150,
@@ -1426,12 +1488,12 @@ export default function CommunityDashboard() {
 
               {/* Section des posts récents */}
               <h2 className="text-xl font-bold text-gray-900 mb-4">
-                Posts récents
+                {t("dashboard.recent_posts")}
               </h2>
               <div className="grid gap-6">
                 {posts.length === 0 ? (
                   <Card className="p-6 text-center text-gray-500">
-                    Aucun post pour le moment
+                    {t("community_posts.no_posts")}
                   </Card>
                 ) : (
                   posts.map((post) => (
@@ -1503,12 +1565,12 @@ export default function CommunityDashboard() {
                               {post.accept_contributions ? (
                                 <span className="text-sm text-green-600 flex items-center">
                                   <Users className="w-4 h-4 mr-1" />
-                                  Contributions activées
+                                  {t("community_posts.contributions_enabled")}
                                 </span>
                               ) : (
                                 <span className="text-sm text-red-600 flex items-center">
                                   <Users className="w-4 h-4 mr-1" />
-                                  Contributions désactivées
+                                  {t("community_posts.contributions_disabled")}
                                 </span>
                               )}
                               <button
@@ -1519,7 +1581,7 @@ export default function CommunityDashboard() {
                                 }
                                 className="text-blue-600 hover:text-blue-700"
                               >
-                                Voir le post
+                                {t("dashboard.view_post")}
                               </button>
                             </div>
                           </div>
@@ -1538,7 +1600,7 @@ export default function CommunityDashboard() {
               {contributorRequests.length > 0 && (
                 <Card className="p-4 lg:p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Demandes de contributeurs en attente
+                    {t("dashboard.pending_contributor_requests")}
                   </h3>
                   <div className="space-y-4">
                     {contributorRequests.map((request) => (
@@ -1580,10 +1642,10 @@ export default function CommunityDashboard() {
                                   size="sm"
                                   className="w-4 h-4 mr-2 animate-spin"
                                 />
-                                <span>En cours...</span>
+                                <span>{t("loading.default")}</span>
                               </>
                             ) : (
-                              "Approuver"
+                              t("voting.approve")
                             )}
                           </button>
                           <button
@@ -1594,16 +1656,16 @@ export default function CommunityDashboard() {
                             }
                           >
                             {loadingRejection &&
-                              selectedRequestId === request.id ? (
+                            selectedRequestId === request.id ? (
                               <>
                                 <Loader
                                   size="sm"
                                   className="w-4 h-4 mr-2 animate-spin"
                                 />
-                                <span>En cours...</span>
+                                <span>{t("loading.default")}</span>
                               </>
                             ) : (
-                              "Refuser"
+                              t("voting.reject")
                             )}
                           </button>
                         </div>
@@ -1617,13 +1679,13 @@ export default function CommunityDashboard() {
               <Card className="p-4 lg:p-6 bg-white shadow-sm rounded-3xl overflow-x-auto">
                 {members && members.length === 0 ? (
                   <div className="text-center text-gray-500">
-                    Aucun membre trouvé
+                    {t("dashboard.no_members_found")}
                   </div>
                 ) : (
                   <>
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-lg font-semibold text-gray-900">
-                        Membres de la communauté
+                        {t("dashboard.community_members")}
                       </h3>
                     </div>
 
@@ -1633,21 +1695,25 @@ export default function CommunityDashboard() {
                         <thead>
                           <tr className="text-left text-gray-500 border-b">
                             <th className="p-4 font-medium w-[300px]">
-                              Membre
+                              {t("dashboard.member")}
                             </th>
-                            <th className="p-4 font-medium">Statut</th>
+                            <th className="p-4 font-medium">
+                              {t("dashboard.status")}
+                            </th>
                             <th className="p-4 font-medium hidden lg:table-cell">
-                              Date d'inscription
+                              {t("dashboard.registration_date")}
                             </th>
                             <th className="p-4 font-medium hidden sm:table-cell">
-                              Révisions
+                              {t("dashboard.revisions")}
                             </th>
                             <th className="p-4 font-medium hidden sm:table-cell">
-                              Posts
+                              {t("profile.posts")}
                             </th>
-                            <th className="p-4 font-medium">Gains</th>
+                            <th className="p-4 font-medium">
+                              {t("dashboard.earnings")}
+                            </th>
                             <th className="p-4 font-medium text-right">
-                              Actions
+                              {t("dashboard.actions")}
                             </th>
                           </tr>
                         </thead>
@@ -1676,10 +1742,11 @@ export default function CommunityDashboard() {
                                 </td>
                                 <td className="p-4">
                                   <span
-                                    className={`px-3 py-1.5 rounded-full text-sm font-medium ${member.status === "Contributeur"
-                                      ? "bg-blue-100 text-blue-700"
-                                      : "bg-green-100 text-green-700"
-                                      }`}
+                                    className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                                      member.status === "Contributeur"
+                                        ? "bg-blue-100 text-blue-700"
+                                        : "bg-green-100 text-green-700"
+                                    }`}
                                   >
                                     {member.status}
                                   </span>
@@ -1687,8 +1754,8 @@ export default function CommunityDashboard() {
                                 <td className="p-4 hidden lg:table-cell">
                                   {member.joinedAt
                                     ? new Date(
-                                      member.joinedAt
-                                    ).toLocaleDateString("fr-FR")
+                                        member.joinedAt
+                                      ).toLocaleDateString("fr-FR")
                                     : "Date inconnue"}
                                 </td>
                                 <td className="p-4 hidden sm:table-cell">
@@ -1731,13 +1798,17 @@ export default function CommunityDashboard() {
                                                 size="sm"
                                                 className="w-4 h-4 animate-spin"
                                               />
-                                              <span>Promotion...</span>
+                                              <span>
+                                                {t("dashboard.promoting")}
+                                              </span>
                                             </>
                                           ) : (
                                             <>
                                               <UserPlus className="w-4 h-4" />
                                               <span>
-                                                Promouvoir contributeur
+                                                {t(
+                                                  "dashboard.promote_to_contributor"
+                                                )}
                                               </span>
                                             </>
                                           )}
@@ -1762,12 +1833,18 @@ export default function CommunityDashboard() {
                                                 size="sm"
                                                 className="w-4 h-4 animate-spin"
                                               />
-                                              <span>Rétrogradation...</span>
+                                              <span>
+                                                {t("dashboard.demoting")}
+                                              </span>
                                             </>
                                           ) : (
                                             <>
                                               <UserMinus className="w-4 h-4" />
-                                              <span>Retirer contributeur</span>
+                                              <span>
+                                                {t(
+                                                  "dashboard.remove_contributor"
+                                                )}
+                                              </span>
                                             </>
                                           )}
                                         </button>
@@ -1787,7 +1864,7 @@ export default function CommunityDashboard() {
                                         }
                                       >
                                         <UserX className="w-4 h-4" />
-                                        <span>Bannir</span>
+                                        <span>{t("dashboard.ban")}</span>
                                       </button>
                                     </PopoverContent>
                                   </Popover>
@@ -1807,15 +1884,17 @@ export default function CommunityDashboard() {
             <div className="p-4 lg:p-8">
               {/* En-tête */}
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
-                <h1 className="text-2xl font-bold">Collecte et veille</h1>
+                <h1 className="text-2xl font-bold">
+                  {t("dashboard.monitoring_collection")}
+                </h1>
                 <div className="flex flex-wrap gap-4">
                   <button className="flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200">
                     <Rss className="w-4 h-4 mr-2" />
-                    Ajouter un flux RSS
+                    {t("chat.create_channel")}
                   </button>
                   <button className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
                     <Link2 className="w-4 h-4 mr-2" />
-                    Nouvelle source
+                    {t("communities.new_source")}
                   </button>
                 </div>
               </div>
@@ -1827,7 +1906,7 @@ export default function CommunityDashboard() {
                   <div className="bg-white rounded-xl p-4 shadow-sm">
                     <h3 className="font-medium mb-4 flex items-center">
                       <Search className="w-4 h-4 mr-2" />
-                      Outils de veille
+                      {t("dashboard.monitoring_tools")}
                     </h3>
                     <div className="flex flex-col gap-2">
                       <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center text-gray-700">
@@ -1849,7 +1928,7 @@ export default function CommunityDashboard() {
                   <div className="bg-white rounded-xl p-4 shadow-sm">
                     <h3 className="font-medium mb-4 flex items-center">
                       <BookMarked className="w-4 h-4 mr-2" />
-                      Organisation
+                      {t("dashboard.organization")}
                     </h3>
                     <div className="flex flex-col gap-2">
                       <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center text-gray-700">
@@ -1872,18 +1951,20 @@ export default function CommunityDashboard() {
                 <main className="flex-1">
                   <div className="bg-white rounded-xl p-4 lg:p-6 shadow-sm">
                     <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
-                      <h2 className="text-xl font-semibold">Flux RSS</h2>
+                      <h2 className="text-xl font-semibold">
+                        {t("dashboard.rss_feeds")}
+                      </h2>
                       <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
                         <select className="px-3 py-2 border rounded-lg text-sm">
-                          <option>Tous les flux</option>
+                          <option>{t("dashboard.all_feeds")}</option>
                           <option>Crypto</option>
                           <option>Macro</option>
                           <option>Tech</option>
                         </select>
                         <select className="px-3 py-2 border rounded-lg text-sm">
-                          <option>Plus récents</option>
-                          <option>Plus pertinents</option>
-                          <option>Plus commentés</option>
+                          <option>{t("dashboard.most_recent")}</option>
+                          <option>{t("dashboard.most_relevant")}</option>
+                          <option>{t("dashboard.most_commented")}</option>
                         </select>
                       </div>
                     </div>
@@ -1949,7 +2030,7 @@ export default function CommunityDashboard() {
                       className="data-[state=checked]:bg-green-600"
                     />
                     <label className="text-gray-600 flex items-center">
-                      Contributions
+                      {t("voting.contributions")}
                     </label>
                   </div>
 
@@ -1958,14 +2039,14 @@ export default function CommunityDashboard() {
                     className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
                   >
                     <Eye className="w-4 h-4 mr-2 inline-block" />
-                    Prévisualiser
+                    {t("post_editor.preview")}
                   </button>
 
                   <button
                     onClick={handleSubmitPost}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                   >
-                    Publier
+                    {t("actions.publish")}
                   </button>
                 </div>
               </div>
@@ -2002,14 +2083,15 @@ export default function CommunityDashboard() {
                       >
                         {isUploading
                           ? "Upload..."
-                          : "Ajouter une image de couverture"}
+                          : t("post_editor.add_cover_image")}
                       </label>
                     )}
                     {coverImage && (
                       <label
                         htmlFor="cover-image"
-                        className={`px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors ${isUploading ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
+                        className={`px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors ${
+                          isUploading ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       >
                         Modifier
                       </label>
@@ -2023,7 +2105,9 @@ export default function CommunityDashboard() {
                       }}
                       className="flex-1 px-3 py-2 border rounded-lg bg-white"
                     >
-                      <option value="">Choisir une catégorie</option>
+                      <option value="">
+                        {t("post_editor.choose_category")}
+                      </option>
                       {categories.map((tag) => (
                         <option key={tag.id} value={tag.id}>
                           {tag.label}
@@ -2042,7 +2126,7 @@ export default function CommunityDashboard() {
                   type="text"
                   value={postTitle}
                   onChange={(e) => setPostTitle(e.target.value)}
-                  placeholder="Titre de l'article"
+                  placeholder={t("post_editor.article_title")}
                   className="mt-8 w-full text-2xl font-bold border border-gray-200 mb-4 px-4 py-2 rounded-lg"
                 />
 
@@ -2051,20 +2135,18 @@ export default function CommunityDashboard() {
             </div>
           )}
 
-          {activeTab === "tools" && (
-            <ToolInterface />
-          )}
+          {activeTab === "tools" && <ToolInterface />}
         </div>
       </div>
 
       <Dialog open={isRejectModalOpen} onOpenChange={setIsRejectModalOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
-            <DialogTitle>Justification du refus</DialogTitle>
+            <DialogTitle>{t("dashboard.rejection_justification")}</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <Textarea
-              placeholder="Veuillez expliquer la raison du refus..."
+              placeholder={t("dashboard.explain_rejection_reason")}
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               className="min-h-[100px]"
@@ -2076,7 +2158,7 @@ export default function CommunityDashboard() {
               className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
               disabled={loadingRejection}
             >
-              Annuler
+              {t("actions.cancel")}
             </button>
             <button
               onClick={handleRejectRequest}
@@ -2086,10 +2168,10 @@ export default function CommunityDashboard() {
               {loadingRejection ? (
                 <>
                   <Loader className="w-4 h-4 mr-2 animate-spin" />
-                  <span>En cours...</span>
+                  <span>{t("loading.default")}</span>
                 </>
               ) : (
-                "Confirmer le rejet"
+                t("dashboard.confirm_rejection")
               )}
             </button>
           </DialogFooter>
@@ -2099,7 +2181,7 @@ export default function CommunityDashboard() {
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
-            <DialogTitle>Prévisualisation du post</DialogTitle>
+            <DialogTitle>{t("post_editor.post_preview")}</DialogTitle>
           </DialogHeader>
 
           <div className="py-4">
@@ -2124,7 +2206,7 @@ export default function CommunityDashboard() {
 
             {/* Titre */}
             <h1 className="text-3xl font-bold text-gray-900 mb-6">
-              {postTitle || "Sans titre"}
+              {postTitle || t("post_editor.untitled")}
             </h1>
 
             {/* Contenu */}
@@ -2135,8 +2217,8 @@ export default function CommunityDashboard() {
               <div className="flex items-center justify-between text-sm text-gray-500">
                 <span>
                   {contributionsEnabled
-                    ? "✅ Contributions activées"
-                    : "❌ Contributions désactivées"}
+                    ? t("community_posts.contributions_enabled")
+                    : t("community_posts.contributions_disabled")}
                 </span>
                 <span>
                   {new Date().toLocaleDateString("fr-FR", {
@@ -2154,16 +2236,19 @@ export default function CommunityDashboard() {
       <Dialog open={isBanModalOpen} onOpenChange={setIsBanModalOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
-            <DialogTitle>Bannir {selectedMemberToBan?.fullName}</DialogTitle>
+            <DialogTitle>
+              {t("dashboard.ban_member", {
+                name: selectedMemberToBan?.fullName,
+              })}
+            </DialogTitle>
           </DialogHeader>
           <div className="py-4 ">
             <p className="text-sm text-gray-500 mb-4">
-              Cette action est irréversible. Le membre ne pourra plus rejoindre
-              la communauté.
+              {t("dashboard.ban_irreversible")}
             </p>
             <Input
               type="text"
-              placeholder="Veuillez expliquer la raison du bannissement..."
+              placeholder={t("dashboard.explain_ban_reason")}
               value={banReason}
               onChange={(e) => setBanReason(e.target.value)}
             />
@@ -2178,7 +2263,7 @@ export default function CommunityDashboard() {
               className="px-4 py-2 text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               disabled={loadingBan}
             >
-              Annuler
+              {t("actions.cancel")}
             </button>
             <button
               onClick={handleBanMember}
@@ -2188,10 +2273,10 @@ export default function CommunityDashboard() {
               {loadingBan ? (
                 <>
                   <Loader size="sm" className="w-4 h-4 mr-2 animate-spin" />
-                  <span>Bannissement...</span>
+                  <span>{t("dashboard.banning")}</span>
                 </>
               ) : (
-                "Confirmer le bannissement"
+                t("dashboard.confirm_ban")
               )}
             </button>
           </DialogFooter>
@@ -2201,12 +2286,14 @@ export default function CommunityDashboard() {
       {showCategoryForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-96">
-            <h3 className="text-lg font-semibold mb-4">Nouvelle catégorie</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              {t("dashboard.new_category")}
+            </h3>
             <form onSubmit={handleCreateCategory} className="space-y-4">
               <div>
                 <input
                   type="text"
-                  placeholder="Identifiant unique (ex: defi)"
+                  placeholder={t("create_community.category_id_placeholder")}
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
                   className="w-full px-3 py-2 border rounded-lg"
@@ -2216,7 +2303,7 @@ export default function CommunityDashboard() {
               <div>
                 <input
                   type="text"
-                  placeholder="Nom affiché (ex: DeFi)"
+                  placeholder={t("create_community.category_name_placeholder")}
                   value={newCategoryLabel}
                   onChange={(e) => setNewCategoryLabel(e.target.value)}
                   className="w-full px-3 py-2 border rounded-lg"
@@ -2229,13 +2316,13 @@ export default function CommunityDashboard() {
                   onClick={() => setShowCategoryForm(false)}
                   className="px-4 py-2 bg-gray-200 rounded-lg"
                 >
-                  Annuler
+                  {t("actions.cancel")}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg"
                 >
-                  Créer
+                  {t("actions.create")}
                 </button>
               </div>
             </form>

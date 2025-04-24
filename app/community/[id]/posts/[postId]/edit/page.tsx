@@ -19,6 +19,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { useMemo } from "react";
 import { Loader } from "@/components/ui/loader";
 import TinyMCEStyledText from "@/components/shared/TinyMCEStyledText";
+import { useTranslation } from "react-i18next";
 
 interface Post {
   id: number;
@@ -51,6 +52,7 @@ export default function EditPost() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
 
   const [post, setPost] = useState<Post | null>(null);
   const [postTitle, setPostTitle] = useState("");
@@ -174,48 +176,6 @@ export default function EditPost() {
     }
   };
 
-  // Fonction debounce pour sauvegarder automatiquement desactivé pour le moment
-  // const debouncedSave = useCallback(async () => {
-  //     if (!hasUnsavedChanges || isSaving) return;
-
-  //     setIsSaving(true);
-  //     try {
-  //         const response = await fetch(`/api/communities/${params.id}/posts/pending/${params.postId}/autosave`, {
-  //             method: 'PUT',
-  //             headers: {
-  //                 'Content-Type': 'application/json',
-  //             },
-  //             body: JSON.stringify({
-  //                 title: postTitle,
-  //                 content: editorContent,
-  //                 cover_image_url: coverImage,
-  //                 tag: selectedTag,
-  //                 accept_contributions: contributionsEnabled
-  //             }),
-  //         });
-
-  //         if (response.ok) {
-  //             setLastSavedAt(new Date());
-  //             setHasUnsavedChanges(false);
-  //         }
-  //     } catch (error) {
-  //         console.error("Erreur lors de la sauvegarde automatique", error);
-  //     } finally {
-  //         setIsSaving(false);
-  //     }
-  // }, [postTitle, editorContent, coverImage, selectedTag, contributionsEnabled, hasUnsavedChanges, isSaving, params.id, params.postId]);
-
-  // Effet pour la sauvegarde automatique desactivé pour le moment
-  // useEffect(() => {
-  //     if (hasUnsavedChanges) {
-  //         const timer = setTimeout(() => {
-  //             debouncedSave();
-  //         }, 5000); // Sauvegarde après 5 secondes d'inactivité
-
-  //         return () => clearTimeout(timer);
-  //     }
-  // }, [hasUnsavedChanges, debouncedSave]);
-
   // Marquer les changements non sauvegardés
   useEffect(() => {
     setHasUnsavedChanges(true);
@@ -327,7 +287,7 @@ export default function EditPost() {
   if (isLoading) return <LoadingComponent />;
   if (!isAuthenticated) return null;
   if (!post)
-    return <Loader fullScreen text="Chargement du post..." variant="spinner" />;
+    return <Loader fullScreen text={t("loading.post")} variant="spinner" />;
 
   return (
     <div>

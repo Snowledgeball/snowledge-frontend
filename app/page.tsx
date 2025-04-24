@@ -27,6 +27,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader } from "@/components/ui/loader";
+import { useTranslation } from "react-i18next";
 
 // Cache pour stocker les données des communautés
 const communitiesCache = {
@@ -108,6 +109,7 @@ const HomePage = () => {
   const [communities, setCommunities] = useState<Community[]>([]);
   const [stats, setStats] = useState<any>(null);
   const hasFetched = useRef(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -133,14 +135,20 @@ const HomePage = () => {
     ? [
         {
           ...stats.communities,
+          label: t("stats.communities.label"),
+          description: t("stats.communities.description"),
           icon: Globe,
         },
         {
           ...stats.members,
+          label: t("stats.members.label"),
+          description: t("stats.members.description"),
           icon: Users,
         },
         {
           ...stats.enrichments,
+          label: t("stats.enrichments.label"),
+          description: t("stats.enrichments.description"),
           icon: Sparkles,
         },
       ]
@@ -277,14 +285,15 @@ const HomePage = () => {
             <div className="flex items-center text-gray-600">
               <Users className="w-5 h-5 text-blue-500 mr-3" />
               <span className="font-medium">
-                {new Intl.NumberFormat("fr-FR").format(members)} membres
+                {new Intl.NumberFormat("fr-FR").format(members)}{" "}
+                {t("communities.members")}
               </span>
             </div>
             <div className="flex items-center text-gray-600">
               <Shield className="w-5 h-5 text-green-500 mr-3" />
               <span className="font-medium">
                 {new Intl.NumberFormat("fr-FR").format(contributorsCount)}{" "}
-                contributeurs
+                {t("communities.contributors")}
               </span>
             </div>
             {/* <div className="flex items-center text-gray-600">
@@ -311,12 +320,12 @@ const HomePage = () => {
           <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
             {userId
               ? creator.id === parseInt(userId)
-                ? "Accéder à votre communauté"
+                ? t("communities.access_your_community")
                 : community_learners_id.includes(parseInt(userId)) ||
                   community_contributors_id.includes(parseInt(userId))
-                ? "Accéder"
-                : "Rejoindre"
-              : "Rejoindre"}
+                ? t("communities.access")
+                : t("communities.join")
+              : t("communities.join")}
           </button>
         </CardContent>
       </Card>
@@ -333,7 +342,7 @@ const HomePage = () => {
     );
     const [categories, setCategories] = useState<
       { id: string; label: string }[]
-    >([{ id: "all", label: "Toutes les catégories" }]);
+    >([{ id: "all", label: t("filters.all_categories") }]);
 
     useEffect(() => {
       const fetchCategories = async () => {
@@ -434,10 +443,10 @@ const HomePage = () => {
     }, []); // Pas besoin de dépendances
 
     const filters = [
-      { id: "all", label: "Toutes" },
-      { id: "largest", label: "Plus grandes" },
-      { id: "new", label: "Nouveautés" },
-      // { id: "active", label: "Plus actives" },
+      { id: "all", label: t("filters.all") },
+      { id: "largest", label: t("filters.largest") },
+      { id: "new", label: t("filters.newest") },
+      // { id: "active", label: t("filters.active") },
     ];
 
     // Modifier la fonction de filtrage pour prendre en compte les catégories et les filtres
@@ -498,13 +507,8 @@ const HomePage = () => {
       <div className="min-h-screen">
         <header className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold text-gray-900">
-              Explorez les communautés
-            </h1>
-            <p className="mt-2 text-gray-600">
-              Découvrez des communautés passionnantes et rejoignez celles qui
-              vous correspondent
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900">{t("explore")}</h1>
+            <p className="mt-2 text-gray-600">{t("description")}</p>
           </div>
         </header>
 
@@ -534,28 +538,18 @@ const HomePage = () => {
             ))}
           </div>
 
-          {/* Section En vedette */}
-          {/* <section className="mb-16">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">Communautés en vedette</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {communities.map((community, index) => (
-                <CommunityCard key={index} {...community} />
-              ))}
-            </div>
-          </section> */}
-
           {/* Section Explorer */}
           <section>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">
-                Explorer les communautés
+                {t("communities.explore")}
               </h2>
 
               <div className="relative w-full sm:w-72">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Rechercher une communauté..."
+                  placeholder={t("communities.search_placeholder")}
                   className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -602,7 +596,9 @@ const HomePage = () => {
               selectedFilter !== "all" ||
               searchTerm) && (
               <div className="mb-4 flex items-center gap-2">
-                <span className="text-sm text-gray-500">Filtres actifs:</span>
+                <span className="text-sm text-gray-500">
+                  {t("filters.active_filters")}:
+                </span>
                 <div className="flex gap-2">
                   {selectedCategory !== "all" && (
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
@@ -628,7 +624,7 @@ const HomePage = () => {
                   )}
                   {searchTerm && (
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
-                      Recherche: {searchTerm}
+                      {t("filters.search")}: {searchTerm}
                       <button
                         onClick={() => setSearchTerm("")}
                         className="ml-2 text-blue-500 hover:text-blue-700"
@@ -645,7 +641,7 @@ const HomePage = () => {
                     }}
                     className="text-sm text-gray-500 hover:text-gray-700"
                   >
-                    Réinitialiser tous les filtres
+                    {t("actions.reset")}
                   </button>
                 </div>
               </div>
@@ -657,7 +653,7 @@ const HomePage = () => {
                 <Loader
                   size="lg"
                   color="gradient"
-                  text="Chargement des communautés..."
+                  text={t("communities.loading")}
                   variant="spinner"
                 />
               </div>
@@ -665,7 +661,7 @@ const HomePage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {filteredCommunities.length === 0 ? (
                   <div className="col-span-full text-center py-8 text-gray-500">
-                    Aucune communauté ne correspond à votre recherche
+                    {t("communities.no_results")}
                   </div>
                 ) : (
                   filteredCommunities.map((community, index) => (

@@ -2,119 +2,100 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import TinyEditor from "@/components/shared/TinyEditor";
-import GoogleDocsStyleDiff from "@/components/shared/GoogleDocsStyleDiff";
-import { Button } from "@/components/ui/button";
+import dynamic from "next/dynamic";
+import TinyMCEStyledText from "../shared/TinyMCEStyledText";
+import { useTranslation } from "react-i18next";
+
+const TinyEditor = dynamic(() => import("../shared/TinyEditor"), {
+  ssr: false,
+});
 
 interface EnrichmentEditorProps {
-    originalContent: string;
-    initialModifiedContent?: string;
-    description: string;
-    onDescriptionChange: (description: string) => void;
-    onContentChange: (content: string) => void;
-    readOnly?: boolean;
+  originalContent: string;
+  initialModifiedContent?: string;
+  description: string;
+  onDescriptionChange: (desc: string) => void;
+  onContentChange: (content: string) => void;
+  readOnly?: boolean;
 }
 
 export default function EnrichmentEditor({
-    originalContent,
-    initialModifiedContent,
-    description,
-    onDescriptionChange,
-    onContentChange,
-    readOnly = false
+  originalContent,
+  initialModifiedContent,
+  description,
+  onDescriptionChange,
+  onContentChange,
+  readOnly = false,
 }: EnrichmentEditorProps) {
-    const [modifiedContent, setModifiedContent] = useState(initialModifiedContent || originalContent);
-    const [previewMode, setPreviewMode] = useState(false);
-    const [hasChanges, setHasChanges] = useState(false);
+  const [modifiedContent, setModifiedContent] = useState(
+    initialModifiedContent || originalContent
+  );
+  const { t } = useTranslation();
 
-    useEffect(() => {
-        // Vérifier s'il y a des changements
-        setHasChanges(originalContent !== modifiedContent);
+  useEffect(() => {
+    if (initialModifiedContent) {
+      setModifiedContent(initialModifiedContent);
+    }
+  }, [initialModifiedContent]);
 
-        // Notifier le parent des changements
-        onContentChange(modifiedContent);
-    }, [modifiedContent, originalContent, onContentChange]);
+  const handleContentChange = (content: string) => {
+    setModifiedContent(content);
+    onContentChange(content);
+  };
 
-    const handleEditorChange = (content: string) => {
-        setModifiedContent(content);
-    };
-
-    return (
-        <div className="enrichment-editor">
-            <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-2">Description de vos modifications</h2>
-                <div className="mb-2 text-sm text-gray-600">
-                    <p className="mb-1">Décrivez brièvement les modifications que vous proposez et leur raison.</p>
-                    <p className="mb-1">Exemple de format :</p>
-                    <ul className="list-disc pl-5 mb-2">
-                        <li>Correction de faute d'orthographe</li>
-                        <li>Ajout d'information sur...</li>
-                        <li>Restructuration de la section...</li>
-                    </ul>
-                </div>
-                <textarea
-                    value={description}
-                    onChange={(e) => onDescriptionChange(e.target.value)}
-                    placeholder="Décrivez vos modifications ici..."
-                    className="w-full p-3 border rounded-md"
-                    rows={3}
-                    disabled={readOnly}
-                />
-                {!description && (
-                    <p className="text-sm text-red-500 mt-1">
-                        Une description de vos modifications est requise
-                    </p>
-                )}
-            </div>
-
-            <div className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                    <h2 className="text-lg font-semibold">Éditeur de contenu</h2>
-                    {!readOnly && (
-                        <div className="flex space-x-2">
-                            <Button
-                                variant={previewMode ? "outline" : "default"}
-                                size="sm"
-                                onClick={() => setPreviewMode(false)}
-                            >
-                                Éditer
-                            </Button>
-                            <Button
-                                variant={previewMode ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => setPreviewMode(true)}
-                                disabled={!hasChanges}
-                            >
-                                Prévisualiser les changements
-                            </Button>
-                        </div>
-                    )}
-                </div>
-
-                {previewMode || readOnly ? (
-                    <div className="border rounded-md p-4">
-                        <GoogleDocsStyleDiff
-                            oldHtml={originalContent}
-                            newHtml={modifiedContent}
-                            showControls={!readOnly}
-                            readOnly={true}
-                            description={description}
-                        />
-                    </div>
-                ) : (
-                    <TinyEditor
-                        initialValue={modifiedContent}
-                        onChange={handleEditorChange}
-                        protectImages={true}
-                    />
-                )}
-
-                {!hasChanges && !readOnly && (
-                    <p className="text-sm text-red-500 mt-1">
-                        Vous n'avez pas encore apporté de modifications au contenu
-                    </p>
-                )}
-            </div>
+  return (
+    <div className="enrichment-editor">
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold mb-2">
+          {t("enrichment.description_title")}
+        </h2>
+        <div className="mb-2 text-sm text-gray-600">
+          <p className="mb-1">{t("enrichment.description_instruction")}</p>
+          <p className="mb-1">{t("enrichment.format_example")}</p>
+          <ul className="list-disc pl-5 mb-2">
+            <li>{t("enrichment.example1")}</li>
+            <li>{t("enrichment.example2")}</li>
+            <li>{t("enrichment.example3")}</li>
+          </ul>
         </div>
-    );
-} 
+        <textarea
+          value={description}
+          onChange={(e) => onDescriptionChange(e.target.value)}
+          placeholder={t("enrichment.description_placeholder")}
+          className="w-full p-3 border rounded-md"
+          rows={3}
+          disabled={readOnly}
+        />
+        {!description && (
+          <p className="text-sm text-red-500 mt-1">
+            {t("enrichment.description_required")}
+          </p>
+        )}
+      </div>
+
+      <div className="grid gap-8 md:grid-cols-2">
+        <div>
+          <h2 className="text-lg font-semibold mb-4">
+            {t("enrichment.original_content")}
+          </h2>
+          <TinyMCEStyledText content={originalContent} />
+        </div>
+
+        <div>
+          <h2 className="text-lg font-semibold mb-4">
+            {t("enrichment.modified_content")}
+          </h2>
+          {readOnly ? (
+            <TinyMCEStyledText content={modifiedContent} />
+          ) : (
+            <TinyEditor
+              initialValue={modifiedContent}
+              onChange={handleContentChange}
+              protectImages={true}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

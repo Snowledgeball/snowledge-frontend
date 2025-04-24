@@ -10,8 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import DraftFeedbacks from "@/components/community/DraftFeedbacks";
 import { ThumbsDown } from "lucide-react";
-
-
+import { useTranslation } from "react-i18next";
 
 export default function CreatePost() {
   const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
@@ -22,6 +21,7 @@ export default function CreatePost() {
   const [activeTab, setActiveTab] = useState("new");
   const [selectedDraft, setSelectedDraft] = useState<PostData | null>(null);
   const [postData, setPostData] = useState<PostData | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -34,7 +34,9 @@ export default function CreatePost() {
     const draftId = searchParams.get("draft_id");
 
     if (draftId && drafts.length > 0) {
-      const draftToEdit = drafts.find(draft => draft.id === parseInt(draftId));
+      const draftToEdit = drafts.find(
+        (draft) => draft.id === parseInt(draftId)
+      );
 
       if (draftToEdit) {
         setSelectedDraft(draftToEdit);
@@ -45,51 +47,52 @@ export default function CreatePost() {
 
   useEffect(() => {
     // Récupérer les données du post original
-    const originalTitle = searchParams.get('title');
-    const originalContent = searchParams.get('content');
-    const originalCoverImage = searchParams.get('coverImageUrl');
-    const originalTag = searchParams.get('tag');
+    const originalTitle = searchParams.get("title");
+    const originalContent = searchParams.get("content");
+    const originalCoverImage = searchParams.get("coverImageUrl");
+    const originalTag = searchParams.get("tag");
 
     if (originalTitle && originalContent) {
       // Pré-remplir le formulaire
       const postData: PostData = {
         title: originalTitle,
         content: originalContent,
-        cover_image_url: originalCoverImage || '',
-        tag: originalTag || '',
+        cover_image_url: originalCoverImage || "",
+        tag: originalTag || "",
       };
 
-      setPostData(postData);
+      console.log(postData);
 
+      setPostData(postData);
     }
   }, [searchParams]);
 
   const checkContributorStatus = async () => {
     try {
-      const response = await fetch(
-        `/api/communities/${params.id}/membership`
-      );
+      const response = await fetch(`/api/communities/${params.id}/membership`);
       const data = await response.json();
 
       if (!data.isContributor) {
-        toast.error("Vous devez être contributeur pour créer un post");
+        toast.error(t("community_posts.contributor_required"));
         router.push(`/community/${params.id}`);
       }
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error(t("community_posts.error"), error);
       router.push(`/community/${params.id}`);
     }
   };
 
   const fetchDrafts = async () => {
     try {
-      const response = await fetch(`/api/communities/${params.id}/posts/drafts`);
+      const response = await fetch(
+        `/api/communities/${params.id}/posts/drafts`
+      );
       if (response.ok) {
         const data = await response.json();
         setDrafts(data);
       }
     } catch (error) {
-      console.error("Erreur lors de la récupération des brouillons:", error);
+      console.error(t("community_posts.error_drafts"), error);
     }
   };
 
@@ -106,19 +109,22 @@ export default function CreatePost() {
         }
       );
 
-      if (!response.ok) throw new Error("Erreur lors de la création");
+      if (!response.ok) throw new Error(t("community_posts.error_create"));
 
-      toast.success("Post soumis pour révision");
+      toast.success(t("community_posts.post_submitted"));
 
       if (selectedDraft?.id) {
-        await fetch(`/api/communities/${params.id}/posts/drafts/${selectedDraft.id}`, {
-          method: "DELETE",
-        });
+        await fetch(
+          `/api/communities/${params.id}/posts/drafts/${selectedDraft.id}`,
+          {
+            method: "DELETE",
+          }
+        );
       }
 
       router.push(`/community/${params.id}`);
     } catch (error) {
-      toast.error("Erreur lors de la création du post");
+      toast.error(t("community_posts.error_create_post"));
     }
   };
 
@@ -137,9 +143,9 @@ export default function CreatePost() {
         body: JSON.stringify(postData),
       });
 
-      if (!response.ok) throw new Error("Erreur lors de la sauvegarde");
+      if (!response.ok) throw new Error(t("community_posts.error_save"));
 
-      toast.success("Brouillon sauvegardé");
+      toast.success(t("community_posts.draft_saved"));
       fetchDrafts();
 
       if (!selectedDraft?.id) {
@@ -147,7 +153,7 @@ export default function CreatePost() {
         setSelectedDraft({ ...postData, id: data.id });
       }
     } catch (error) {
-      toast.error("Erreur lors de la sauvegarde du brouillon");
+      toast.error(t("community_posts.error_save_draft"));
     }
   };
 
@@ -160,9 +166,9 @@ export default function CreatePost() {
         }
       );
 
-      if (!response.ok) throw new Error("Erreur lors de la suppression");
+      if (!response.ok) throw new Error(t("community_posts.error_delete"));
 
-      toast.success("Brouillon supprimé");
+      toast.success(t("community_posts.draft_deleted"));
       fetchDrafts();
 
       if (selectedDraft?.id === draftId) {
@@ -170,7 +176,7 @@ export default function CreatePost() {
         setActiveTab("new");
       }
     } catch (error) {
-      toast.error("Erreur lors de la suppression du brouillon");
+      toast.error(t("community_posts.error_delete_draft"));
     }
   };
 
@@ -187,13 +193,20 @@ export default function CreatePost() {
       <div className="max-w-[85rem] mx-auto px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
-            <TabsTrigger value="new" onClick={() => router.push(`/community/${params.id}/posts/create`)}>Nouveau post</TabsTrigger>
+            <TabsTrigger
+              value="new"
+              onClick={() =>
+                router.push(`/community/${params.id}/posts/create`)
+              }
+            >
+              {t("community_posts.new_post")}
+            </TabsTrigger>
             <TabsTrigger value="drafts">
-              Brouillons ({drafts.length})
+              {t("community_posts.drafts")} ({drafts.length})
             </TabsTrigger>
             {selectedDraft && (
               <TabsTrigger value="edit">
-                Modifier le brouillon
+                {t("community_posts.edit_draft")}
               </TabsTrigger>
             )}
           </TabsList>
@@ -204,16 +217,18 @@ export default function CreatePost() {
               communityId={params.id as string}
               onSubmit={handleSubmitPost}
               onSaveDraft={handleSaveDraft}
-              submitButtonText="Soumettre pour révision"
+              submitButtonText={t("actions.submit")}
             />
           </TabsContent>
 
           <TabsContent value="drafts">
             <Card className="p-6">
-              <h2 className="text-xl font-bold mb-4">Mes brouillons</h2>
+              <h2 className="text-xl font-bold mb-4">
+                {t("community_posts.my_drafts")}
+              </h2>
               {drafts.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">
-                  Vous n'avez pas de brouillons enregistrés
+                  {t("community_posts.no_drafts")}
                 </p>
               ) : (
                 <div className="space-y-6">
@@ -224,9 +239,14 @@ export default function CreatePost() {
                     >
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="font-semibold text-lg">{draft.title}</h3>
+                          <h3 className="font-semibold text-lg">
+                            {draft.title}
+                          </h3>
                           <p className="text-sm text-gray-500 mt-1">
-                            Dernière modification: {new Date(draft.updated_at || draft.created_at || '').toLocaleDateString()}
+                            {t("community_posts.last_modified")}:{" "}
+                            {new Date(
+                              draft.updated_at || draft.created_at || ""
+                            ).toLocaleDateString()}
                           </p>
                         </div>
                         <div className="flex space-x-2">
@@ -235,7 +255,7 @@ export default function CreatePost() {
                             size="sm"
                             onClick={() => handleEditDraft(draft)}
                           >
-                            Modifier
+                            {t("actions.edit")}
                           </Button>
                           <Button
                             variant="outline"
@@ -243,7 +263,7 @@ export default function CreatePost() {
                             onClick={() => handleDeleteDraft(draft.id!)}
                             className="text-red-600 border-red-200 hover:bg-red-50"
                           >
-                            Supprimer
+                            {t("actions.delete")}
                           </Button>
                         </div>
                       </div>
@@ -271,7 +291,7 @@ export default function CreatePost() {
                     initialData={selectedDraft}
                     onSubmit={handleSubmitPost}
                     onSaveDraft={(data) => handleSaveDraft(data)}
-                    submitButtonText="Soumettre pour révision"
+                    submitButtonText={t("actions.submit")}
                   />
                 </div>
 
@@ -279,9 +299,11 @@ export default function CreatePost() {
                   <div className="w-80">
                     <div className="sticky top-6">
                       <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-                        <h3 className="text-lg font-medium mb-2">Feedbacks reçus</h3>
+                        <h3 className="text-lg font-medium mb-2">
+                          {t("community_posts.feedbacks_received")}
+                        </h3>
                         <p className="text-sm text-gray-600 mb-3">
-                          Consultez ces feedbacks pour améliorer votre post et augmenter vos chances d'approbation.
+                          {t("community_posts.feedback_description")}
                         </p>
                       </div>
 

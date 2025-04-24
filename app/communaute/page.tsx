@@ -13,6 +13,7 @@ import {
 import Image from "next/image";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { Loader } from "@/components/ui/loader";
+import { useTranslation } from "react-i18next";
 
 interface Community {
   id: string;
@@ -28,6 +29,8 @@ export default function CommunautePage() {
     isAuthenticated: isAuthenticatedAuth,
     LoadingComponent,
   } = useAuthGuard();
+
+  const { t } = useTranslation();
 
   if (isLoadingAuth) {
     return <LoadingComponent />;
@@ -70,7 +73,7 @@ export default function CommunautePage() {
       <Loader
         size="lg"
         color="gradient"
-        text="Chargement..."
+        text={t("loading.default")}
         variant="spinner"
       />
       <div className="flex items-center justify-center bg-blue-500">
@@ -78,7 +81,7 @@ export default function CommunautePage() {
         <Loader
           size="lg"
           color="white"
-          text="Chargement..."
+          text={t("loading.default")}
           variant="spinner"
           className="mr-2"
         />

@@ -11,6 +11,7 @@ import ReviewsSidebar from "@/components/community/ReviewsSidebar";
 import { Columns, GitCompare } from "lucide-react";
 import GoogleDocsStyleDiff from "@/components/shared/GoogleDocsStyleDiff";
 import TinyMCEStyledText from "@/components/shared/TinyMCEStyledText";
+import { useTranslation } from "react-i18next";
 
 interface Enrichment {
   id: number;
@@ -37,6 +38,7 @@ export default function ReviewContribution() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreatorMode, setIsCreatorMode] = useState(false);
   const [viewMode, setViewMode] = useState("suggestion"); // "suggestion" ou "parallel"
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Rediriger si l'utilisateur n'est pas connecté
@@ -180,7 +182,7 @@ export default function ReviewContribution() {
         <Loader
           size="lg"
           color="gradient"
-          text="Chargement..."
+          text={t("loading.default")}
           variant="spinner"
         />
       </div>

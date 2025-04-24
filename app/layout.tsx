@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { PusherProvider } from "@/contexts/PusherContext";
+import I18nProvider from "@/components/shared/I18nProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,16 +34,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Toaster position="top-center" />
-        <SessionProvider>
-          <PusherProvider>
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Analytics />
-            <SpeedInsights />
-            {/* <Footer /> */}
-          </PusherProvider>
-        </SessionProvider>
+        <I18nProvider>
+          <Toaster position="top-center" />
+          <SessionProvider>
+            <PusherProvider>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Analytics />
+              <SpeedInsights />
+              {/* <Footer /> */}
+            </PusherProvider>
+          </SessionProvider>
+        </I18nProvider>
       </body>
     </html>
   );

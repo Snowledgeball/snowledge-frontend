@@ -3,6 +3,7 @@
 import { Columns, GitCompare } from "lucide-react";
 import { useState } from "react";
 import GoogleDocsStyleDiff from "@/components/shared/GoogleDocsStyleDiff";
+import { useTranslation } from "react-i18next";
 
 interface EnrichmentCompareProps {
   originalContent: string;
@@ -13,6 +14,7 @@ export default function EnrichmentCompare({
   originalContent,
   modifiedContent,
 }: EnrichmentCompareProps) {
+  const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<"suggestion" | "parallel">(
     "suggestion"
   );
@@ -22,7 +24,7 @@ export default function EnrichmentCompare({
       <div className="sticky top-0 z-10 bg-gray-50 py-2 px-4 border-b border-gray-200">
         <div className="flex items-center space-x-2 justify-end">
           <span className="text-sm text-gray-500 whitespace-nowrap">
-            Mode d'affichage:
+            {t("enrichment_compare.display_mode")}:
           </span>
           <button
             onClick={() => setViewMode("suggestion")}
@@ -33,7 +35,7 @@ export default function EnrichmentCompare({
             }`}
           >
             <GitCompare className="w-4 h-4 flex-shrink-0" />
-            <span>Suggestion</span>
+            <span>{t("enrichment_compare.suggestion")}</span>
           </button>
           <button
             onClick={() => setViewMode("parallel")}
@@ -44,7 +46,7 @@ export default function EnrichmentCompare({
             }`}
           >
             <Columns className="w-4 h-4 flex-shrink-0" />
-            <span>Côte à côte</span>
+            <span>{t("enrichment_compare.side_by_side")}</span>
           </button>
         </div>
       </div>
@@ -58,7 +60,7 @@ export default function EnrichmentCompare({
               newHtml={modifiedContent}
               showControls={false}
               readOnly={true}
-              description="Modifications proposées"
+              description={t("enrichment_compare.proposed_changes")}
             />
           </div>
         )}
@@ -68,7 +70,7 @@ export default function EnrichmentCompare({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="border rounded-lg p-4 bg-gray-50">
                 <h3 className="text-lg font-medium mb-2 text-gray-700 truncate">
-                  Contenu original
+                  {t("enrichment.original_content")}
                 </h3>
                 <div
                   className="tinymce-content prose max-w-none"
@@ -78,7 +80,7 @@ export default function EnrichmentCompare({
 
               <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
                 <h3 className="text-lg font-medium mb-2 text-blue-700 truncate">
-                  Contenu modifié
+                  {t("enrichment.modified_content")}
                 </h3>
                 <div
                   className="tinymce-content prose max-w-none"

@@ -13,6 +13,7 @@ import QASection from "@/components/shared/QASection";
 import ChatBox from "@/components/shared/ChatBox";
 import Link from "next/link";
 import { Loader } from "@/components/ui/loader";
+import { useTranslation } from "react-i18next";
 
 interface Post {
   id: number;
@@ -44,6 +45,7 @@ export default function PostPage() {
   const { data: session } = useSession();
   const [isAuthor, setIsAuthor] = useState(false);
   const [isContributorOrCreator, setIsContributorOrCreator] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -51,18 +53,18 @@ export default function PostPage() {
         const response = await fetch(
           `/api/communities/${params.id}/posts/${params.postId}?status=PUBLISHED`
         );
-        if (!response.ok) throw new Error("Post non trouvé");
+        if (!response.ok) throw new Error(t("community_posts.post_not_found"));
         const data = await response.json();
         console.log("data", data);
         setPost(data);
       } catch (error) {
-        toast.error("Erreur lors du chargement du post");
+        toast.error(t("community_posts.error_loading_post"));
         router.push(`/community/${params.id}`);
       }
     };
 
     fetchPost();
-  }, [params.id, params.postId, router]);
+  }, [params.id, params.postId, router, t]);
 
   useEffect(() => {
     // Vérifier si l'utilisateur est l'auteur du post
@@ -80,15 +82,15 @@ export default function PostPage() {
             setIsContributorOrCreator(data.isContributor || data.isCreator);
           }
         } catch (error) {
-          console.error("Erreur lors de la vérification de l'adhésion:", error);
+          console.error(t("community_posts.membership_check_error"), error);
         }
       };
 
       checkMembership();
     }
-  }, [post, session, params.id]);
+  }, [post, session, params.id, t]);
 
-  if (!post) return <Loader fullScreen text="Chargement du post..." />;
+  if (!post) return <Loader fullScreen text={t("loading.post")} />;
 
   return (
     <div className="min-h-screen bg-gray-50" id="post-page">
@@ -99,7 +101,7 @@ export default function PostPage() {
             className="flex items-center text-white hover:text-gray-200"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour à la communauté
+            {t("navigation.back_to_community")}
           </button>
         </div>
       </div>
@@ -155,7 +157,7 @@ export default function PostPage() {
                         className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                       >
                         <Edit className="h-4 w-4 mr-2" />
-                        Contribuer
+                        {t("actions.contribute")}
                       </Link>
                     )}
 
@@ -174,7 +176,7 @@ export default function PostPage() {
                       className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                     >
                       <Copy className="h-4 w-4 mr-2" />
-                      Reprendre le post
+                      {t("community_posts.duplicate_post")}
                     </Link>
                   )}
 
@@ -188,7 +190,7 @@ export default function PostPage() {
                       className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                       <Edit className="w-4 h-4" />
-                      <span>Modifier</span>
+                      <span>{t("actions.edit")}</span>
                     </button>
                   )}
                 </div>
@@ -289,17 +291,19 @@ export default function PostPage() {
                 </div>
 
                 {/* Si le post accepte les contributions on l'indique */}
-                {post.accept_contributions ? (
-                  <span className="text-sm text-green-600 flex items-center">
-                    <Users className="w-4 h-4 mr-1" />
-                    Contributions activées
-                  </span>
-                ) : (
-                  <span className="text-sm text-red-600 flex items-center">
-                    <Users className="w-4 h-4 mr-1" />
-                    Contributions désactivées
-                  </span>
-                )}
+                <div className="text-sm my-4 flex items-center">
+                  {post.accept_contributions ? (
+                    <span className="text-sm text-green-600 flex items-center">
+                      <Users className="w-4 h-4 mr-1" />
+                      {t("community_posts.contributions_enabled")}
+                    </span>
+                  ) : (
+                    <span className="text-sm text-red-600 flex items-center">
+                      <Users className="w-4 h-4 mr-1" />
+                      {t("community_posts.contributions_disabled")}
+                    </span>
+                  )}
+                </div>
               </div>
             </Card>
 
@@ -323,7 +327,7 @@ export default function PostPage() {
               <div className="p-4 border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900 flex items-center">
                   <MessageCircle className="w-5 h-5 mr-2 text-blue-600" />
-                  Discussion
+                  {t("community_posts.discussion")}
                 </h2>
               </div>
 
