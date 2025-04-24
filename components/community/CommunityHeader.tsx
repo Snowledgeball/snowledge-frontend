@@ -120,16 +120,16 @@ export default function CommunityHeader({
                         </div>
                     ) : ( */}
           <div className="flex-1 flex justify-end h-full">
-            <div className="bg-[#000333] w-64 py-1 px-3">
+            <div className="bg-gray-100 border border-gray-200 rounded-lg w-64 py-1 px-3">
               <div className="flex items-center justify-between">
-                <span className="text-white text-sm">
+                <span className="text-gray-700 text-sm">
                   {t("community_header.prizepool")}
                 </span>
                 <span className="bg-green-500/20 text-green-500 text-sm py-0.5 px-1">
                   + 28.8 %
                 </span>
               </div>
-              <p className="text-white text-xl font-bold">2097 pts</p>
+              <p className="text-gray-700 text-xl font-bold">2097 pts</p>
             </div>
           </div>
           {/* )} */}
