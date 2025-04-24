@@ -48,12 +48,12 @@ export default function CommunitySettings() {
   const [userId, setUserId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Initialiser userId depuis la session, uniquement quand elle change réellement
   useEffect(() => {
-    const userId = session?.user?.id;
-    if (userId) {
-      setUserId(userId);
+    if (session?.user?.id) {
+      setUserId(session.user.id);
     }
-  }, [session]);
+  }, [session?.user?.id]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -73,20 +73,28 @@ export default function CommunitySettings() {
       }
     };
 
-    fetchDashboardData();
+    if (userId) {
+      fetchDashboardData();
+    }
   }, [userId, communityId, router, t]);
 
   useEffect(() => {
     const fetchSettings = async () => {
+      if (!session?.user) return;
+
       try {
         const response = await fetch(
           `/api/communities/${communityId}/settings`
         );
         if (response.ok) {
           const data = await response.json();
-          setSettings(data);
-          if (data.image_url) {
-            setPreviewImage("https://" + data.image_url);
+
+          // Ne réinitialiser les données que lors du chargement initial (quand settings est null)
+          if (!settings) {
+            setSettings(data);
+            if (data.image_url) {
+              setPreviewImage("https://" + data.image_url);
+            }
           }
         }
       } catch (error) {
@@ -97,10 +105,9 @@ export default function CommunitySettings() {
       }
     };
 
-    if (session?.user) {
-      fetchSettings();
-    }
-  }, [communityId, session, t]);
+    fetchSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [communityId]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
