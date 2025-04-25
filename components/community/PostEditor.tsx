@@ -15,6 +15,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { TextEditor } from "@/components/shared/TextEditor";
+import { useCreateBlockNote } from "@blocknote/react";
 
 export interface PostData {
   created_at?: string;
@@ -73,10 +74,10 @@ export default function PostEditor({
   const buttonText = submitButtonText || t("post_editor.submit_post");
 
   // Fonction pour obtenir le HTML complet pour la prévisualisation
-  const handleGetFullHTML = (html: string) => {
-    setPreviewHTML(html);
-    setIsPreviewOpen(true);
-  };
+  // const handleGetFullHTML = (html: string) => {
+  //   setPreviewHTML(html);
+  //   setIsPreviewOpen(true);
+  // };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -199,13 +200,22 @@ export default function PostEditor({
     }
   };
 
+  useEffect(() => {
+    const renderHtml = async () => {
+      const tempEditor = useCreateBlockNote();
+      const blocks = JSON.parse(editorContent);
+      const fullHtml = await tempEditor.blocksToFullHTML(blocks);
+      setPreviewHTML(fullHtml);
+    };
+
+    if (isPreviewOpen && editorContent) {
+      renderHtml();
+    }
+  }, [isPreviewOpen, editorContent]);
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <TextEditor
-        value={editorContent}
-        onChange={setEditorContent}
-        onGetFullHTML={handleGetFullHTML}
-      />
+      <TextEditor value={editorContent} onChange={setEditorContent} />
 
       {/* Modal de prévisualisation */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>

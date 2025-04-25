@@ -17,52 +17,25 @@ interface TextEditorProps {
 }
 
 export function TextEditor({ value, onChange }: TextEditorProps) {
-  const [initialContentSet, setInitialContentSet] = useState(false);
   const [editorContent, setEditorContent] = useState<string>("");
 
   // Creates a new editor instance
-  const editor = useCreateBlockNote({});
-
-  // Initialisation du contenu HTML
-  useEffect(() => {
-    if (!initialContentSet && value) {
-      const initEditor = async () => {
-        try {
-          // Parser le HTML pour obtenir des blocs
-          const blocks = await editor.tryParseHTMLToBlocks(value);
-          editor.replaceBlocks(editor.document, blocks);
-          setInitialContentSet(true);
-        } catch (error) {
-          console.error("Erreur lors du parsing HTML:", error);
-
-          // En cas d'erreur, créer un bloc texte simple
-          if (typeof value === "string") {
-            editor.insertBlocks(
-              [{ type: "paragraph", content: value }],
-              editor.document[0],
-              "after"
-            );
-          }
-          setInitialContentSet(true);
-        }
-      };
-
-      initEditor();
-    }
-  }, [editor, value, initialContentSet]);
+  const editor = useCreateBlockNote({
+    initialContent: value ? JSON.parse(value) : undefined,
+  });
 
   // Synchroniser l'éditeur avec le state externe
   useEffect(() => {
     // Fonction pour mettre à jour le state parent avec du HTML
     const updateHTMLContent = async () => {
       try {
-        // Convertir les blocs en HTML
-        const html = await editor.blocksToFullHTML(editor.document);
+        const text = JSON.stringify(editor.document);
 
         // Ne mettre à jour que si le contenu a changé
-        if (html !== editorContent) {
-          setEditorContent(html);
-          onChange(html);
+        if (text !== editorContent) {
+          setEditorContent(text);
+          onChange(text);
+          console.log("texteeee", text);
         }
       } catch (error) {
         console.error("Erreur lors de la conversion en HTML:", error);
