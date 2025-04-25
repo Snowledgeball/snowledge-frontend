@@ -3,12 +3,8 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
-import TinyMCEStyledText from "../shared/TinyMCEStyledText";
 import { useTranslation } from "react-i18next";
-
-const TinyEditor = dynamic(() => import("../shared/TinyEditor"), {
-  ssr: false,
-});
+import PostEditor from "@/components/community/PostEditor";
 
 interface EnrichmentEditorProps {
   originalContent: string;
@@ -17,6 +13,7 @@ interface EnrichmentEditorProps {
   onDescriptionChange: (desc: string) => void;
   onContentChange: (content: string) => void;
   readOnly?: boolean;
+  communityId: string;
 }
 
 export default function EnrichmentEditor({
@@ -26,6 +23,7 @@ export default function EnrichmentEditor({
   onDescriptionChange,
   onContentChange,
   readOnly = false,
+  communityId,
 }: EnrichmentEditorProps) {
   const [modifiedContent, setModifiedContent] = useState(
     initialModifiedContent || originalContent
@@ -78,7 +76,7 @@ export default function EnrichmentEditor({
           <h2 className="text-lg font-semibold mb-4">
             {t("enrichment.original_content")}
           </h2>
-          <TinyMCEStyledText content={originalContent} />
+          <div dangerouslySetInnerHTML={{ __html: originalContent }} />
         </div>
 
         <div>
@@ -86,12 +84,22 @@ export default function EnrichmentEditor({
             {t("enrichment.modified_content")}
           </h2>
           {readOnly ? (
-            <TinyMCEStyledText content={modifiedContent} />
+            <div dangerouslySetInnerHTML={{ __html: modifiedContent }} />
           ) : (
-            <TinyEditor
-              initialValue={modifiedContent}
-              onChange={handleContentChange}
-              protectImages={true}
+            <PostEditor
+              initialData={{
+                content: modifiedContent,
+                title: "",
+                cover_image_url: "",
+                tag: "",
+                accept_contributions: false,
+              }}
+              communityId={communityId}
+              onSubmit={async (data) => {
+                console.log("Enrichissement modifié:", data);
+                toast.success("Modifications enregistrées");
+              }}
+              submitButtonText="Enregistrer les modifications"
             />
           )}
         </div>

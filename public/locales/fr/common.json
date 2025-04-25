@@ -27,7 +27,8 @@
     "reset": "Réinitialiser tous les filtres",
     "submit": "Soumettre pour révision",
     "publish": "Publier",
-    "back": "Retour"
+    "back": "Retour",
+    "create": "Créer"
   },
   "communities": {
     "explore": "Explorer les communautés",

@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import DiffMatchPatch from "diff-match-patch";
 import parse from "html-react-parser";
-import TinyMCEStyledText from "./TinyMCEStyledText";
 
 // Types pour diff-match-patch
 type DiffOperation = -1 | 0 | 1;
@@ -332,7 +331,7 @@ export default function GoogleDocsStyleDiff({
           {/* Contenu avec défilement */}
           <div className="h-full">
             <div className="bg-white rounded-lg overflow-x-hidden h-full">
-              <TinyMCEStyledText content={processedHtml} />
+              <div dangerouslySetInnerHTML={{ __html: processedHtml }} />
             </div>
           </div>
         </div>

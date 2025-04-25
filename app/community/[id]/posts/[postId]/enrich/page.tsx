@@ -170,6 +170,7 @@ export default function ContributePage() {
         </h1>
 
         <EnrichmentEditor
+          communityId={params.id as string}
           originalContent={originalContent}
           initialModifiedContent={modifiedContent}
           description={description}

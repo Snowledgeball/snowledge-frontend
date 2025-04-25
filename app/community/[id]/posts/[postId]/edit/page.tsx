@@ -5,7 +5,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Eye, ImageIcon, Save } from "lucide-react";
-import TinyEditor from "@/components/shared/TinyEditor";
 import { toast } from "sonner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import Image from "next/image";
@@ -18,8 +17,8 @@ import {
 import { Dialog } from "@/components/ui/dialog";
 import { useMemo } from "react";
 import { Loader } from "@/components/ui/loader";
-import TinyMCEStyledText from "@/components/shared/TinyMCEStyledText";
 import { useTranslation } from "react-i18next";
+import PostEditor from "@/components/community/PostEditor";
 
 interface Post {
   id: number;
@@ -261,7 +260,7 @@ export default function EditPost() {
         </h1>
 
         {/* Contenu */}
-        <TinyMCEStyledText content={editorContent} />
+        <div dangerouslySetInnerHTML={{ __html: editorContent }} />
 
         {/* Footer */}
         <div className="mt-6 pt-4 border-t border-gray-200">
@@ -406,10 +405,15 @@ export default function EditPost() {
                   className="mt-8 w-full text-2xl font-bold border border-gray-200 mb-4 px-4 py-2 rounded-lg"
                 />
 
-                <TinyEditor
-                  onChange={setEditorContent}
-                  initialValue={post.content}
-                  className="h-full"
+                <PostEditor
+                  initialData={{
+                    content: post.content,
+                    title: post.title,
+                    cover_image_url: post.cover_image_url || "",
+                    tag: post.tag,
+                  }}
+                  communityId={params.id as string}
+                  onSubmit={handleSubmit}
                 />
               </div>
             </div>

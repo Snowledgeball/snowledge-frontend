@@ -27,7 +27,8 @@
     "reset": "Reset all filters",
     "submit": "Submit for review",
     "publish": "Publish",
-    "back": "Back"
+    "back": "Back",
+    "create": "Create"
   },
   "communities": {
     "explore": "Explore communities",

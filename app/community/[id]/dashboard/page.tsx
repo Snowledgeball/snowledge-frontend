@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
@@ -76,7 +76,6 @@ import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { ContributionsChart } from "@/components/shared/ContributionsChart";
 import { SubscribersChart } from "@/components/shared/SubscribersChart";
-import TinyEditor from "@/components/shared/TinyEditor";
 import { Switch } from "@/components/ui/switch";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -86,9 +85,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import TinyMCEStyledText from "@/components/shared/TinyMCEStyledText";
 import { ToolSelector } from "@/components/dashboard/ToolSelector";
 import { useTranslation } from "react-i18next";
+import { TextEditor, TextEditorRef } from "@/components/shared/TextEditor";
 
 // Système de cache pour les données du dashboard
 const dashboardCache = {
@@ -268,6 +267,7 @@ export default function CommunityDashboard() {
   const [isUploading, setIsUploading] = useState(false);
   const [coverImage, setCoverImage] = useState("");
   const [selectedTag, setSelectedTag] = useState("");
+  const [selectedTagLabel, setSelectedTagLabel] = useState("");
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isBanModalOpen, setIsBanModalOpen] = useState(false);
   const [banReason, setBanReason] = useState("");
@@ -287,6 +287,10 @@ export default function CommunityDashboard() {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryLabel, setNewCategoryLabel] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [previewHTML, setPreviewHTML] = useState("");
+
+  // Référence pour accéder aux méthodes de l'éditeur
+  const editorRef = useRef<TextEditorRef>(null);
 
   const { t } = useTranslation();
 
@@ -296,6 +300,14 @@ export default function CommunityDashboard() {
       setUserId(userId);
     }
   }, [session]);
+
+  // const fetchTagNames = async (tagId: string) => {
+  //   const response = await fetch(
+  //     `/api/communities/${params.id}/categories/${tagId}`
+  //   );
+  //   const data = await response.json();
+  //   setSelectedTag(data.name);
+  // };
 
   // Fetch des catégories
   useEffect(() => {
@@ -711,8 +723,12 @@ export default function CommunityDashboard() {
       return;
     }
 
-    // Vérification du contenu
-    if (!editorContent.trim()) {
+    // Vérification du contenu - TextEditor renvoie un objet, pas une chaîne
+    if (
+      !editorContent ||
+      (typeof editorContent === "object" &&
+        Object.keys(editorContent).length === 0)
+    ) {
       setError("Le contenu du post ne peut pas être vide");
       return;
     }
@@ -733,6 +749,20 @@ export default function CommunityDashboard() {
     setError(null);
 
     try {
+      // Récupérer le HTML complet si la référence de l'éditeur est disponible
+      let contentToSave = editorContent;
+
+      if (editorRef.current) {
+        try {
+          // Récupérer le HTML complet
+          const htmlContent = await editorRef.current.getFullHTML();
+          contentToSave = htmlContent;
+          console.log("HTML complet généré avec succès");
+        } catch (genError) {
+          console.error("Erreur lors de la génération du HTML:", genError);
+        }
+      }
+
       const response = await fetch(`/api/communities/${communityId}/posts`, {
         method: "POST",
         headers: {
@@ -740,7 +770,7 @@ export default function CommunityDashboard() {
         },
         body: JSON.stringify({
           title: postTitle,
-          content: editorContent,
+          content: contentToSave,
           coverImageUrl: coverImage,
           tag: Number(selectedTag),
           acceptContributions: contributionsEnabled,
@@ -1269,6 +1299,12 @@ export default function CommunityDashboard() {
   const ToolInterface = () => {
     if (!selectedTool) return null;
     return <ToolSelector selectedTool={selectedTool} />;
+  };
+
+  // Fonction pour obtenir le HTML complet pour la prévisualisation
+  const handleGetFullHTML = (html: string) => {
+    setPreviewHTML(html);
+    setIsPreviewOpen(true);
   };
 
   return (
@@ -2035,7 +2071,26 @@ export default function CommunityDashboard() {
                   </div>
 
                   <button
-                    onClick={() => setIsPreviewOpen(true)}
+                    onClick={async () => {
+                      try {
+                        if (editorRef.current) {
+                          // Récupérer le HTML complet
+                          const htmlContent =
+                            await editorRef.current.getFullHTML();
+                          setPreviewHTML(htmlContent);
+                        } else {
+                          setPreviewHTML(editorContent);
+                        }
+                        setIsPreviewOpen(true);
+                      } catch (error) {
+                        console.error(
+                          "Erreur lors de la génération du HTML pour la prévisualisation:",
+                          error
+                        );
+                        setPreviewHTML(editorContent);
+                        setIsPreviewOpen(true);
+                      }
+                    }}
                     className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
                   >
                     <Eye className="w-4 h-4 mr-2 inline-block" />
@@ -2101,7 +2156,15 @@ export default function CommunityDashboard() {
                     <select
                       value={selectedTag}
                       onChange={(e) => {
-                        setSelectedTag(e.target.value);
+                        const id = e.target.value;
+                        setSelectedTag(id);
+                        // Récupérer le label correspondant à l'ID sélectionné
+                        const selectedCategory = categories.find(
+                          (cat) => cat.id.toString() === id
+                        );
+                        if (selectedCategory) {
+                          setSelectedTagLabel(selectedCategory.label);
+                        }
                       }}
                       className="flex-1 px-3 py-2 border rounded-lg bg-white"
                     >
@@ -2129,8 +2192,12 @@ export default function CommunityDashboard() {
                   placeholder={t("post_editor.article_title")}
                   className="mt-8 w-full text-2xl font-bold border border-gray-200 mb-4 px-4 py-2 rounded-lg"
                 />
-
-                <TinyEditor onChange={setEditorContent} />
+                <TextEditor
+                  ref={editorRef}
+                  value={editorContent}
+                  onChange={setEditorContent}
+                  onGetFullHTML={handleGetFullHTML}
+                />
               </div>
             </div>
           )}
@@ -2200,7 +2267,7 @@ export default function CommunityDashboard() {
             {/* Tag */}
             {selectedTag && (
               <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm mb-4">
-                {selectedTag}
+                {selectedTagLabel || selectedTag}
               </span>
             )}
 
@@ -2210,7 +2277,7 @@ export default function CommunityDashboard() {
             </h1>
 
             {/* Contenu */}
-            <TinyMCEStyledText content={editorContent} />
+            <div dangerouslySetInnerHTML={{ __html: previewHTML }} />
 
             {/* Footer */}
             <div className="mt-6 pt-4 border-t border-gray-200">

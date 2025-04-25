@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Eye, ImageIcon, Save } from "lucide-react";
-import TinyEditor from "@/components/shared/TinyEditor";
 import { toast } from "sonner";
 import Image from "next/image";
 import {
@@ -14,8 +13,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useSearchParams } from "next/navigation";
-import TinyMCEStyledText from "../shared/TinyMCEStyledText";
 import { useTranslation } from "react-i18next";
+import { TextEditor } from "@/components/shared/TextEditor";
 
 export interface PostData {
   created_at?: string;
@@ -69,8 +68,15 @@ export default function PostEditor({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [previewHTML, setPreviewHTML] = useState("");
 
   const buttonText = submitButtonText || t("post_editor.submit_post");
+
+  // Fonction pour obtenir le HTML complet pour la prévisualisation
+  const handleGetFullHTML = (html: string) => {
+    setPreviewHTML(html);
+    setIsPreviewOpen(true);
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -130,7 +136,7 @@ export default function PostEditor({
       return;
     }
 
-    if (editorContent.length < 100) {
+    if (typeof editorContent === "string" && editorContent.length < 100) {
       toast.error(t("post_editor.content_too_short"));
       return;
     }
@@ -140,7 +146,10 @@ export default function PostEditor({
       await onSubmit({
         id: initialData?.id,
         title: postTitle,
-        content: editorContent,
+        content:
+          typeof editorContent === "string"
+            ? editorContent
+            : JSON.stringify(editorContent),
         cover_image_url: coverImage,
         tag: selectedTag,
         accept_contributions: contributionsEnabled,
@@ -169,7 +178,10 @@ export default function PostEditor({
       await onSaveDraft({
         id: initialData?.id,
         title: postTitle,
-        content: editorContent,
+        content:
+          typeof editorContent === "string"
+            ? editorContent
+            : JSON.stringify(editorContent),
         cover_image_url: coverImage,
         tag: selectedTag,
         accept_contributions: contributionsEnabled,
@@ -188,127 +200,12 @@ export default function PostEditor({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold">
-              {initialData?.id
-                ? t("post_editor.edit_post")
-                : t("post_editor.create_post")}
-              {isDraft && (
-                <span className="ml-2 text-sm text-gray-500">
-                  ({t("post_editor.draft")})
-                </span>
-              )}
-            </h1>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-2">
-                <Switch
-                  checked={contributionsEnabled}
-                  onCheckedChange={setContributionsEnabled}
-                  className="data-[state=checked]:bg-green-600"
-                />
-                <label className="text-gray-600">
-                  {t("post_editor.contributions")}
-                </label>
-              </div>
-
-              <button
-                onClick={() => setIsPreviewOpen(true)}
-                className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                <Eye className="w-4 h-4 mr-2 inline-block" />
-                {t("post_editor.preview")}
-              </button>
-
-              {onSaveDraft && (
-                <button
-                  onClick={handleSaveDraft}
-                  disabled={isSaving}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4 mr-2 inline-block" />
-                  {t("actions.save")}
-                </button>
-              )}
-
-              <button
-                onClick={handleSubmit}
-                disabled={isSaving}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-              >
-                {isSaving ? t("post_editor.processing") : buttonText}
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6">
-            <div className="flex w-full space-x-4">
-              <div className="flex items-center space-x-2 flex-1">
-                <input
-                  type="file"
-                  id="cover-image"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
-                {coverImage ? (
-                  <div className="relative">
-                    <Image
-                      src={`https://${coverImage}`}
-                      alt={t("post_editor.cover_image")}
-                      width={75}
-                      height={75}
-                      className="rounded-lg"
-                    />
-                    <label
-                      htmlFor="cover-image"
-                      className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow-md cursor-pointer hover:bg-gray-50"
-                    >
-                      <ImageIcon className="w-4 h-4 text-gray-600" />
-                    </label>
-                  </div>
-                ) : (
-                  <label
-                    htmlFor="cover-image"
-                    className="w-full px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors text-center"
-                  >
-                    {isUploading
-                      ? t("post_editor.uploading")
-                      : t("post_editor.add_cover_image")}
-                  </label>
-                )}
-              </div>
-              <select
-                value={selectedTag}
-                onChange={(e) => setSelectedTag(e.target.value)}
-                className="flex-1 px-3 py-2 border rounded-lg bg-white"
-              >
-                <option value="">{t("post_editor.choose_category")}</option>
-                {categories.map((tag) => (
-                  <option key={tag.id} value={tag.id}>
-                    {tag.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <input
-              type="text"
-              value={postTitle}
-              onChange={(e) => setPostTitle(e.target.value)}
-              placeholder={t("post_editor.article_title")}
-              className="mt-8 w-full text-2xl font-bold border border-gray-200 mb-4 px-4 py-2 rounded-lg"
-            />
-
-            <TinyEditor
-              initialValue={editorContent}
-              onChange={setEditorContent}
-            />
-          </div>
-        </Card>
-      </div>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <TextEditor
+        value={editorContent}
+        onChange={setEditorContent}
+        onGetFullHTML={handleGetFullHTML}
+      />
 
       {/* Modal de prévisualisation */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
@@ -343,7 +240,7 @@ export default function PostEditor({
             </h1>
 
             {/* Contenu */}
-            <TinyMCEStyledText content={editorContent} />
+            <div dangerouslySetInnerHTML={{ __html: previewHTML }} />
 
             {/* Footer */}
             <div className="mt-6 pt-4 border-t border-gray-200">
