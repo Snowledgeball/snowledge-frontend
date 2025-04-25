@@ -230,6 +230,7 @@
     "post_submitted": "Post soumis pour révision",
     "error_create_post": "Erreur lors de la création du post",
     "error_save": "Erreur lors de la sauvegarde",
+    "save_draft": "Enregistrer comme brouillon",
     "draft_saved": "Brouillon sauvegardé",
     "error_save_draft": "Erreur lors de la sauvegarde du brouillon",
     "error_delete": "Erreur lors de la suppression",

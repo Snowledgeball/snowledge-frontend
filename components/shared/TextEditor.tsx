@@ -12,8 +12,6 @@ type EditorContent = string; // Contenu HTML
 interface TextEditorProps {
   value: EditorContent | null; // Contenu HTML initial
   onChange: (value: EditorContent) => void; // Fonction pour mettre à jour le contenu HTML
-  onGetFullHTML?: (html: string) => void; // Callback pour récupérer le HTML complet
-  onGetHTML?: (html: string) => void; // Callback pour récupérer le HTML simple
 }
 
 export function TextEditor({ value, onChange }: TextEditorProps) {

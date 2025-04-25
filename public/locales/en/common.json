@@ -190,6 +190,7 @@
     "post_submitted": "Post submitted for review",
     "error_create_post": "Error creating post",
     "error_save": "Error saving",
+    "save_draft": "Save draft",
     "draft_saved": "Draft saved",
     "error_save_draft": "Error saving draft",
     "error_delete": "Error deleting",
