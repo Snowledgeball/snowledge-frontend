@@ -35,7 +35,6 @@ export function TextEditor({ value, onChange }: TextEditorProps) {
         if (text !== editorContent) {
           setEditorContent(text);
           onChange(text);
-          console.log("texteeee", text);
         }
       } catch (error) {
         console.error("Erreur lors de la conversion en HTML:", error);

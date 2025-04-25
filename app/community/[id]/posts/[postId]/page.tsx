@@ -14,6 +14,7 @@ import ChatBox from "@/components/shared/ChatBox";
 import Link from "next/link";
 import { Loader } from "@/components/ui/loader";
 import { useTranslation } from "react-i18next";
+import { useCreateBlockNote } from "@blocknote/react";
 
 interface Post {
   id: number;
@@ -47,6 +48,9 @@ export default function PostPage() {
   const [isContributorOrCreator, setIsContributorOrCreator] = useState(false);
   const { t } = useTranslation();
 
+  // Créer l'éditeur au niveau racine du composant
+  const previewEditor = useCreateBlockNote();
+
   useEffect(() => {
     const fetchPost = async () => {
       try {
@@ -55,7 +59,21 @@ export default function PostPage() {
         );
         if (!response.ok) throw new Error(t("community_posts.post_not_found"));
         const data = await response.json();
-        console.log("data", data);
+
+        // Utiliser l'éditeur créé au niveau racine
+        try {
+          if (
+            typeof data.content === "string" &&
+            data.content.trim().startsWith("[")
+          ) {
+            const blocks = JSON.parse(data.content);
+            const fullHtml = await previewEditor.blocksToFullHTML(blocks);
+            data.content = fullHtml;
+          }
+        } catch (error) {
+          console.error("Erreur lors de la conversion du contenu:", error);
+        }
+
         setPost(data);
       } catch (error) {
         toast.error(t("community_posts.error_loading_post"));
@@ -64,7 +82,7 @@ export default function PostPage() {
     };
 
     fetchPost();
-  }, [params.id, params.postId, router, t]);
+  }, [params.id, params.postId, previewEditor, router, t]);
 
   useEffect(() => {
     // Vérifier si l'utilisateur est l'auteur du post

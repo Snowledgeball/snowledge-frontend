@@ -8,7 +8,6 @@ import { Eye, ImageIcon, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import Image from "next/image";
-import ReviewsSidebar from "@/components/community/ReviewsSidebar";
 import {
   DialogContent,
   DialogTitle,
@@ -18,8 +17,8 @@ import { Dialog } from "@/components/ui/dialog";
 import { useMemo } from "react";
 import { Loader } from "@/components/ui/loader";
 import { useTranslation } from "react-i18next";
-import PostEditor from "@/components/community/PostEditor";
-
+import { useCreateBlockNote } from "@blocknote/react";
+import { TextEditor } from "@/components/shared/TextEditor";
 interface Post {
   id: number;
   title: string;
@@ -65,9 +64,13 @@ export default function EditPost() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [previewHTML, setPreviewHTML] = useState("");
 
   const status = searchParams.get("status");
   const cacheKey = `${params.id}-${params.postId}-${status}`;
+
+  // Créer l'éditeur au niveau racine du composant
+  const previewEditor = useCreateBlockNote();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -186,11 +189,11 @@ export default function EditPost() {
       toast.error("Veuillez remplir tous les champs");
       return;
     }
-
+    console.log("editorContent", editorContent);
     setIsSaving(true);
     try {
       const response = await fetch(
-        `/api/communities/${params.id}/posts/pending/${params.postId}`,
+        `/api/communities/${params.id}/posts/${params.postId}`,
         {
           method: "PUT",
           headers: {
@@ -205,7 +208,6 @@ export default function EditPost() {
           }),
         }
       );
-
       if (!response.ok) throw new Error("Erreur lors de la modification");
 
       // Mettre à jour le cache
@@ -230,6 +232,34 @@ export default function EditPost() {
       setIsSaving(false);
     }
   };
+
+  // Utiliser useEffect pour convertir le contenu JSON en HTML pour la prévisualisation
+  useEffect(() => {
+    const convertContentToHtml = async () => {
+      try {
+        // Vérifier si le contenu est au format JSON
+        if (
+          editorContent &&
+          typeof editorContent === "string" &&
+          editorContent.trim().startsWith("[")
+        ) {
+          const blocks = JSON.parse(editorContent);
+          const fullHtml = await previewEditor.blocksToFullHTML(blocks);
+          setPreviewHTML(fullHtml);
+        } else {
+          // Si ce n'est pas au format JSON, utiliser directement
+          setPreviewHTML(editorContent);
+        }
+      } catch (error) {
+        console.error("Erreur lors de la conversion du contenu:", error);
+        setPreviewHTML(editorContent); // En cas d'erreur, utiliser le contenu brut
+      }
+    };
+
+    if (isPreviewOpen) {
+      convertContentToHtml();
+    }
+  }, [isPreviewOpen, editorContent, previewEditor]);
 
   // Mémoriser le contenu de prévisualisation pour éviter les re-rendus inutiles
   const previewContent = useMemo(() => {
@@ -260,7 +290,7 @@ export default function EditPost() {
         </h1>
 
         {/* Contenu */}
-        <div dangerouslySetInnerHTML={{ __html: editorContent }} />
+        <div dangerouslySetInnerHTML={{ __html: previewHTML }} />
 
         {/* Footer */}
         <div className="mt-6 pt-4 border-t border-gray-200">
@@ -281,7 +311,7 @@ export default function EditPost() {
         </div>
       </div>
     );
-  }, [coverImage, selectedTag, postTitle, editorContent, contributionsEnabled]);
+  }, [coverImage, selectedTag, postTitle, previewHTML, contributionsEnabled]);
 
   if (isLoading) return <LoadingComponent />;
   if (!isAuthenticated) return null;
@@ -405,16 +435,7 @@ export default function EditPost() {
                   className="mt-8 w-full text-2xl font-bold border border-gray-200 mb-4 px-4 py-2 rounded-lg"
                 />
 
-                <PostEditor
-                  initialData={{
-                    content: post.content,
-                    title: post.title,
-                    cover_image_url: post.cover_image_url || "",
-                    tag: post.tag,
-                  }}
-                  communityId={params.id as string}
-                  onSubmit={handleSubmit}
-                />
+                <TextEditor value={editorContent} onChange={setEditorContent} />
               </div>
             </div>
           </Card>

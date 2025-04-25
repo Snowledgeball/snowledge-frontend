@@ -6,8 +6,8 @@ import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronDown, Edit, FileText, PlusCircle, Users } from "lucide-react";
-import { Loader } from "@/components/ui/loader";
 import { useTranslation } from "react-i18next";
+import { useCreateBlockNote } from "@blocknote/react";
 
 interface Post {
   id: number;
@@ -63,6 +63,59 @@ export default function CommunityPosts({
   const [categories, setCategories] = useState<Category[]>(
     categoriesCache.get(communityId) || []
   );
+
+  // Créer l'éditeur au niveau racine du composant
+  const contentEditor = useCreateBlockNote();
+
+  // Cache pour stocker le contenu HTML convertis
+  const [contentCache, setContentCache] = useState<Map<number, string>>(
+    new Map()
+  );
+
+  // Fonction pour récupérer ou générer le contenu HTML
+  const getCachedContent = useCallback(
+    async (post: Post) => {
+      // Si déjà dans le cache, on le retourne directement
+      if (contentCache.has(post.id)) {
+        return contentCache.get(post.id);
+      }
+
+      // Sinon, on convertit le contenu JSON en HTML
+      try {
+        if (
+          typeof post.content === "string" &&
+          post.content.trim().startsWith("[")
+        ) {
+          const blocks = JSON.parse(post.content);
+          const fullHtml = await contentEditor.blocksToFullHTML(blocks);
+
+          // Mettre à jour le cache
+          setContentCache((prev) => new Map(prev).set(post.id, fullHtml));
+
+          return fullHtml;
+        }
+        // Si ce n'est pas du JSON valide, on retourne le contenu tel quel
+        return post.content;
+      } catch (error) {
+        console.error("Erreur lors de la conversion du contenu:", error);
+        return post.content;
+      }
+    },
+    [contentCache, contentEditor]
+  );
+
+  // Précharger le contenu de tous les posts visibles
+  useEffect(() => {
+    const preloadContent = async () => {
+      for (const post of posts) {
+        await getCachedContent(post);
+      }
+    };
+
+    if (posts.length > 0) {
+      preloadContent();
+    }
+  }, [posts, getCachedContent]);
 
   // Modifier la logique de fetch des catégories
   useEffect(() => {
@@ -134,22 +187,6 @@ export default function CommunityPosts({
   const handleCreatePost = useCallback(() => {
     router.push(`/community/${communityId}/posts/create`);
   }, [router, communityId]);
-
-  // Fonction pour obtenir le contenu HTML mis en cache ou le mettre en cache
-  const getCachedContent = useCallback((post: Post) => {
-    if (contentCache.has(post.id)) {
-      return contentCache.get(post.id) || "";
-    }
-
-    // Limiter le contenu à 500 caractères pour l'aperçu
-    const truncatedContent =
-      post.content.length > 500
-        ? post.content.substring(0, 500) + "..."
-        : post.content;
-
-    contentCache.set(post.id, truncatedContent);
-    return truncatedContent;
-  }, []);
 
   // Réinitialiser l'état de chargement lorsque les posts changent
   useEffect(() => {
@@ -405,7 +442,7 @@ export default function CommunityPosts({
                           {/* Contenu principal du post */}
                           <div className="space-y-4">
                             {/* Titre du post */}
-                            <h4 className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors">
+                            <h4 className="text-xl font-bold text-gray-900">
                               {post.title}
                             </h4>
 
@@ -416,8 +453,8 @@ export default function CommunityPosts({
                                   src={`https://${post.cover_image_url}`}
                                   alt={post.title}
                                   width={800}
-                                  height={400}
-                                  className="w-full h-[240px] object-cover transform hover:scale-105 transition-transform duration-300"
+                                  height={200}
+                                  className="w-full h-[150px] object-cover"
                                   loading="lazy"
                                   sizes="(max-width: 768px) 100vw, 800px"
                                 />
@@ -425,57 +462,12 @@ export default function CommunityPosts({
                             )}
 
                             {/* Contenu du post */}
-                            <div className="mb-3 max-h-[200px] overflow-hidden relative rounded-lg bg-gray-50">
-                              <style jsx global>{`
-                                .post-preview h2 {
-                                  font-size: 1.25rem;
-                                  font-weight: 700;
-                                  margin-top: 0.75rem;
-                                  margin-bottom: 0.5rem;
-                                  color: #1f2937;
-                                }
-                                .post-preview h3 {
-                                  font-size: 1.125rem;
-                                  font-weight: 600;
-                                  margin-top: 0.75rem;
-                                  margin-bottom: 0.5rem;
-                                  color: #1f2937;
-                                }
-                                .post-preview p {
-                                  margin-bottom: 0.75rem;
-                                  color: #4b5563;
-                                }
-                                .post-preview ul,
-                                .post-preview ol {
-                                  margin-left: 1.5rem;
-                                  margin-bottom: 0.75rem;
-                                }
-                                .post-preview ul {
-                                  list-style-type: disc;
-                                }
-                                .post-preview ol {
-                                  list-style-type: decimal;
-                                }
-                                .post-preview a {
-                                  color: #2563eb;
-                                  text-decoration: underline;
-                                }
-                                .post-preview img {
-                                  max-width: 100%;
-                                  height: auto;
-                                  border-radius: 0.25rem;
-                                  margin: 0.75rem 0;
-                                }
-                              `}</style>
+                            <div className="mb-3 overflow-hidden relative rounded-lg">
                               <div
+                                className="mt-2 text-sm text-gray-600 line-clamp-5"
                                 dangerouslySetInnerHTML={{
-                                  __html: getCachedContent(post),
-                                }}
-                                className="post-preview p-4 overflow-hidden"
-                                style={{
-                                  display: "-webkit-box",
-                                  WebkitLineClamp: 8,
-                                  WebkitBoxOrient: "vertical",
+                                  __html:
+                                    contentCache.get(post.id) || post.content,
                                 }}
                               />
                               <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent" />
