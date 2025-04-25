@@ -721,6 +721,56 @@ export default function CommunityDashboard() {
     selectedRequestId,
   ]);
 
+  // Corriger la fonction fetchDrafts avec une approche simplifiée
+  const fetchDrafts = useCallback(async () => {
+    try {
+      console.log(
+        `Récupération des brouillons pour la communauté ${communityId}...`
+      );
+
+      const response = await fetch(
+        `/api/communities/${communityId}/posts/drafts`
+      );
+
+      if (!response.ok) {
+        console.error(`Erreur HTTP ${response.status}: ${response.statusText}`);
+        toast.error(t("community_posts.error_drafts"));
+        return;
+      }
+
+      const data = await response.json();
+      console.log("Données de brouillons reçues:", data);
+
+      // Approche simplifiée pour traiter plusieurs formats possibles
+      let draftsData: PostData[] = [];
+
+      if (Array.isArray(data)) {
+        // L'API renvoie directement un tableau
+        console.log("Format: tableau direct");
+        draftsData = data as PostData[];
+      } else if (
+        data &&
+        typeof data === "object" &&
+        "drafts" in data &&
+        Array.isArray(data.drafts)
+      ) {
+        // L'API renvoie un objet avec une propriété "drafts"
+        console.log("Format: objet avec propriété drafts");
+        draftsData = data.drafts as PostData[];
+      } else {
+        // Aucun format reconnu
+        console.error("Format de données non reconnu:", data);
+        toast.error("Format de données de brouillons non reconnu");
+      }
+
+      console.log(`${draftsData.length} brouillons récupérés`);
+      setDrafts(draftsData);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des brouillons:", error);
+      toast.error(t("community_posts.error_drafts"));
+    }
+  }, [communityId, t]);
+
   // Fonction pour soumettre un post avec invalidation du cache
   const handleSubmitPost = useCallback(
     async (postData: PostData) => {
@@ -1021,22 +1071,6 @@ export default function CommunityDashboard() {
     fetchDashboardData,
     invalidateCache,
   ]);
-
-  // Déplacer la déclaration de fetchDrafts avant son utilisation dans useEffect
-  // Récupérer les brouillons
-  const fetchDrafts = useCallback(async () => {
-    try {
-      const response = await fetch(
-        `/api/communities/${communityId}/posts/drafts`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setDrafts(data);
-      }
-    } catch (error) {
-      console.error(t("community_posts.error_drafts"), error);
-    }
-  }, [communityId, t]);
 
   useEffect(() => {
     if (communityId && userId) {

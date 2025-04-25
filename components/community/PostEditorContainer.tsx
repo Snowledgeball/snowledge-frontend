@@ -18,6 +18,7 @@ import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DraftFeedbacks from "@/components/community/DraftFeedbacks";
+import { Loader } from "@/components/ui/loader";
 
 // Import avec rendu côté client uniquement sans SSR
 const PreviewRenderer = dynamic(
@@ -95,7 +96,9 @@ export default function PostEditorContainer({
   );
   const [isUploading, setIsUploading] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<number | null>(null); // ID du brouillon en cours de suppression
   const [categories, setCategories] = useState<Category[]>([]);
   const [previewHTML, setPreviewHTML] = useState("");
   const [activeTab, setActiveTab] = useState(selectedDraft ? "edit" : "new");
@@ -170,7 +173,7 @@ export default function PostEditorContainer({
       return;
     }
 
-    setIsSaving(true);
+    setIsSubmitting(true);
 
     const postData = {
       id: initialData?.id || selectedDraft?.id,
@@ -187,8 +190,7 @@ export default function PostEditorContainer({
     } catch (error) {
       console.error("Error submitting post:", error);
       toast.info(t("post_editor.submission_error"));
-    } finally {
-      setIsSaving(false);
+      setIsSubmitting(false); // Assurer que isSubmitting est remis à false en cas d'erreur
     }
   };
 
@@ -225,7 +227,7 @@ export default function PostEditorContainer({
       return;
     }
 
-    setIsSaving(true);
+    setIsSavingDraft(true);
 
     const draftData = {
       id: selectedDraft?.id,
@@ -243,7 +245,7 @@ export default function PostEditorContainer({
       console.error("Error saving draft:", error);
       toast.info(t("post_editor.save_error"));
     } finally {
-      setIsSaving(false);
+      setIsSavingDraft(false);
     }
   };
 
@@ -415,48 +417,58 @@ export default function PostEditorContainer({
             {onSaveDraft && (
               <button
                 onClick={handleSaveDraft}
-                disabled={isSaving || readOnly}
+                disabled={isSavingDraft || isSubmitting || readOnly}
                 className="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 font-medium shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                  <polyline points="17 21 17 13 7 13 7 21" />
-                  <polyline points="7 3 7 8 15 8" />
-                </svg>
-                {t("community_posts.save_draft")}
+                {isSavingDraft ? (
+                  <Loader size="sm" color="gradient" variant="spinner" />
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                    <polyline points="17 21 17 13 7 13 7 21" />
+                    <polyline points="7 3 7 8 15 8" />
+                  </svg>
+                )}
+                {isSavingDraft
+                  ? t("post_editor.saving")
+                  : t("community_posts.save_draft")}
               </button>
             )}
 
             {onSubmit && (
               <button
                 onClick={handleSubmit}
-                disabled={isSaving || readOnly}
+                disabled={isSavingDraft || isSubmitting || readOnly}
                 className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 font-medium shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-                {buttonText}
+                {isSubmitting ? (
+                  <Loader size="sm" color="gradient" variant="spinner" />
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                )}
+                {isSubmitting ? t("post_editor.processing") : buttonText}
               </button>
             )}
           </div>
@@ -494,7 +506,18 @@ export default function PostEditorContainer({
                         isUploading ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                     >
-                      {t("post_editor.modify")}
+                      {isUploading ? (
+                        <span className="flex items-center gap-2">
+                          <Loader
+                            size="sm"
+                            color="gradient"
+                            variant="spinner"
+                          />
+                          {t("post_editor.uploading")}
+                        </span>
+                      ) : (
+                        t("post_editor.modify")
+                      )}
                     </label>
                   )}
                 </div>
@@ -505,10 +528,17 @@ export default function PostEditorContainer({
                     readOnly ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
-                  <ImageIcon className="w-8 h-8 mb-2 text-blue-400" />
-                  {isUploading
-                    ? t("post_editor.uploading")
-                    : t("post_editor.add_cover_image")}
+                  {isUploading ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <Loader size="md" color="gradient" variant="spinner" />
+                      <span>{t("post_editor.uploading")}</span>
+                    </div>
+                  ) : (
+                    <>
+                      <ImageIcon className="w-8 h-8 mb-2 text-blue-400" />
+                      {t("post_editor.add_cover_image")}
+                    </>
+                  )}
                 </label>
               )}
             </div>
@@ -564,6 +594,16 @@ export default function PostEditorContainer({
               {t("post_editor.post_preview")}
             </DialogTitle>
           </DialogHeader>
+          {isPreviewOpen && !previewHTML && (
+            <div className="flex justify-center py-12">
+              <Loader
+                size="lg"
+                color="gradient"
+                variant="spinner"
+                text={t("post_editor.generating_preview")}
+              />
+            </div>
+          )}
           {isPreviewOpen && (
             <PreviewRenderer
               editorContent={editorContent}
@@ -582,7 +622,16 @@ export default function PostEditorContainer({
       <h2 className="text-2xl font-bold mb-6 text-gray-800">
         {t("community_posts.my_drafts")}
       </h2>
-      {drafts.length === 0 ? (
+      {drafts === undefined ? (
+        <div className="flex justify-center py-16">
+          <Loader
+            size="lg"
+            color="gradient"
+            variant="spinner"
+            text={t("community_posts.loading_drafts")}
+          />
+        </div>
+      ) : drafts.length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
           <div className="mb-3 text-gray-400">
             <svg
@@ -640,11 +689,18 @@ export default function PostEditorContainer({
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      onDeleteDraft && draft.id && onDeleteDraft(draft.id)
+                      onDeleteDraft &&
+                      draft.id &&
+                      handleDeleteDraftClick(draft.id)
                     }
                     className="text-red-600 border-red-200 hover:bg-red-50 font-medium"
+                    disabled={isDeleting === draft.id}
                   >
-                    {t("actions.delete")}
+                    {isDeleting === draft.id ? (
+                      <Loader size="sm" color="gradient" variant="spinner" />
+                    ) : (
+                      t("actions.delete")
+                    )}
                   </Button>
                 </div>
               </div>
@@ -662,6 +718,21 @@ export default function PostEditorContainer({
       )}
     </Card>
   );
+
+  // Fonction pour gérer la suppression d'un brouillon
+  const handleDeleteDraftClick = async (draftId: number) => {
+    if (!onDeleteDraft) return;
+
+    setIsDeleting(draftId);
+    try {
+      await onDeleteDraft(draftId);
+    } catch (error) {
+      console.error("Error deleting draft:", error);
+      toast.error(t("post_editor.delete_error"));
+    } finally {
+      setIsDeleting(null);
+    }
+  };
 
   // Si on n'affiche pas les brouillons, on montre uniquement l'éditeur
   if (!showDrafts) {
