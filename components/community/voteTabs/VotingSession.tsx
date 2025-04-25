@@ -46,6 +46,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useTranslation } from "react-i18next";
+import dynamic from "next/dynamic";
+
+// Import avec rendu côté client uniquement sans SSR
+const PreviewRenderer = dynamic(
+  () => import("@/components/shared/PreviewRenderer"),
+  { ssr: false }
+);
 
 // Cache pour stocker les données
 const contributorsCache = new Map<
@@ -1090,6 +1097,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                         </div>
                       </div>
                       <div className="flex-1 overflow-y-auto">
+                        <PreviewRenderer
+                          editorContent={selectedContribution?.content || ""}
+                          onHtmlGenerated={(html) => {}}
+                        />
                         <div
                           className="contribution-content tinymce-content p-4"
                           dangerouslySetInnerHTML={{

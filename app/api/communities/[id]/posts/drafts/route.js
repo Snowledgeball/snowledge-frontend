@@ -23,9 +23,17 @@ export async function GET(request, { params }) {
       },
     });
 
-    if (!membership) {
+    const isCreator = await prisma.community.findUnique({
+      where: {
+        id: parseInt(communityId),
+        creator_id: parseInt(session.user.id),
+      },
+    });
+    if (!membership && !isCreator) {
       return NextResponse.json(
-        { error: "Vous n'êtes pas contributeur de cette communauté" },
+        {
+          error: "Vous n'êtes pas contributeur ou créateur de cette communauté",
+        },
         { status: 403 }
       );
     }
@@ -127,9 +135,17 @@ export async function POST(request, { params }) {
       },
     });
 
-    if (!membership) {
+    const isCreator = await prisma.community.findUnique({
+      where: {
+        id: parseInt(communityId),
+        creator_id: parseInt(session.user.id),
+      },
+    });
+    if (!membership && !isCreator) {
       return NextResponse.json(
-        { error: "Vous n'êtes pas contributeur de cette communauté" },
+        {
+          error: "Vous n'êtes pas contributeur ou créateur de cette communauté",
+        },
         { status: 403 }
       );
     }

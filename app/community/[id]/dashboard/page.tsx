@@ -90,6 +90,9 @@ import { useTranslation } from "react-i18next";
 import { TextEditor } from "@/components/shared/TextEditor";
 import { useCreateBlockNote } from "@blocknote/react";
 import dynamic from "next/dynamic";
+import PostEditorContainer, {
+  PostData,
+} from "@/components/community/PostEditorContainer";
 
 // Import avec rendu côté client uniquement sans SSR
 const PreviewRenderer = dynamic(
@@ -296,6 +299,10 @@ export default function CommunityDashboard() {
   const [newCategoryLabel, setNewCategoryLabel] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [previewHTML, setPreviewHTML] = useState("");
+  const [draftTitle, setDraftTitle] = useState("");
+  const [draftContent, setDraftContent] = useState("");
+  const [drafts, setDrafts] = useState<PostData[]>([]);
+  const [selectedDraft, setSelectedDraft] = useState<PostData | null>(null);
 
   // Référence pour accéder aux méthodes de l'éditeur
 
@@ -715,87 +722,186 @@ export default function CommunityDashboard() {
   ]);
 
   // Fonction pour soumettre un post avec invalidation du cache
-  const handleSubmitPost = useCallback(async () => {
-    // Vérification du titre
-    if (!postTitle.trim()) {
-      setError("Le titre du post est obligatoire");
-      return;
-    }
-
-    // Vérification du contenu - TextEditor renvoie un objet, pas une chaîne
-    if (
-      !editorContent ||
-      (typeof editorContent === "object" &&
-        Object.keys(editorContent).length === 0)
-    ) {
-      setError("Le contenu du post ne peut pas être vide");
-      return;
-    }
-
-    // Vérification de l'image
-    if (!coverImage) {
-      setError("Une image de couverture est requise");
-      return;
-    }
-
-    // Vérification du tag
-    if (!selectedTag) {
-      setError("Veuillez sélectionner une catégorie pour votre post");
-      return;
-    }
-
-    // Si on arrive ici, tout est valide
-    setError(null);
-
-    try {
-      // Récupérer le HTML complet si la référence de l'éditeur est disponible
-      let contentToSave = editorContent;
-
-      const response = await fetch(`/api/communities/${communityId}/posts`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: postTitle,
-          content: contentToSave,
-          coverImageUrl: coverImage,
-          tag: Number(selectedTag),
-          acceptContributions: contributionsEnabled,
-        }),
-      });
-
-      if (response.ok) {
-        toast.success("Post créé avec succès");
-        setPostTitle("");
-        setEditorContent("");
-        setCoverImage("");
-        setSelectedTag("");
-        setContributionsEnabled(false);
-        // Invalider le cache des posts
-        invalidateCache("posts", `posts-${communityId}`);
-        invalidateCache("dashboardData", `dashboard-${communityId}`);
-        // Recharger les données
-        fetchPosts();
-        fetchDashboardData();
-      } else {
-        toast.error("Erreur lors de la création du post");
+  const handleSubmitPost = useCallback(
+    async (postData: PostData) => {
+      if (
+        typeof postData.content === "string" &&
+        postData.content.length < 100
+      ) {
+        toast.error(t("post_editor.content_too_short"));
+        return;
       }
-    } catch (error) {
-      console.error("Erreur:", error);
-      toast.error("Une erreur est survenue");
-    }
+
+      try {
+        // Ajout d'un timeout pour la requête fetch
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 secondes de timeout
+
+        const response = await fetch(`/api/communities/${communityId}/posts`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: postData.title,
+            content: postData.content,
+            coverImageUrl: postData.cover_image_url,
+            tag: Number(postData.tag),
+            acceptContributions: postData.accept_contributions,
+          }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          toast.success("Post créé avec succès");
+
+          // Supprimer le brouillon si on en avait édité un
+          if (selectedDraft?.id) {
+            await fetch(
+              `/api/communities/${communityId}/posts/drafts/${selectedDraft.id}`,
+              {
+                method: "DELETE",
+              }
+            );
+          }
+
+          // Invalider le cache des posts
+          invalidateCache("posts", `posts-${communityId}`);
+          invalidateCache("dashboardData", `dashboard-${communityId}`);
+
+          // Recharger les données
+          fetchPosts();
+          fetchDashboardData();
+          fetchDrafts();
+
+          // Réinitialiser le brouillon sélectionné
+          setSelectedDraft(null);
+        } else {
+          const errorData = await response
+            .json()
+            .catch(() => ({ message: "Erreur inconnue" }));
+          console.error("Erreur API:", errorData);
+          toast.error(
+            `Erreur lors de la création du post: ${
+              errorData.message || response.statusText
+            }`
+          );
+        }
+      } catch (error: any) {
+        console.error("Erreur:", error);
+
+        // Gérer les différents types d'erreurs
+        if (error.name === "AbortError") {
+          toast.error(
+            "La requête a pris trop de temps à répondre. Veuillez réessayer."
+          );
+        } else if (error.message === "Failed to fetch") {
+          toast.error(
+            "Impossible de communiquer avec le serveur. Vérifiez votre connexion internet."
+          );
+        } else {
+          toast.error("Une erreur est survenue lors de la création du post");
+        }
+      }
+    },
+    [
+      communityId,
+      selectedDraft,
+      invalidateCache,
+      fetchPosts,
+      fetchDashboardData,
+      fetchDrafts,
+      t,
+    ]
+  );
+
+  // Version pour l'événement onClick
+  const handleSubmitPostEvent = useCallback(() => {
+    // Créer un objet PostData à partir des états actuels
+    const postData: PostData = {
+      title: postTitle,
+      content: editorContent,
+      cover_image_url: coverImage,
+      tag: selectedTag,
+      accept_contributions: contributionsEnabled,
+    };
+
+    handleSubmitPost(postData);
   }, [
     postTitle,
     editorContent,
     coverImage,
     selectedTag,
     contributionsEnabled,
-    communityId,
-    fetchPosts,
-    fetchDashboardData,
-    invalidateCache,
+    handleSubmitPost,
   ]);
+
+  // Sauvegarder un brouillon
+  const handleSaveDraft = async (draftData: PostData) => {
+    try {
+      const url = draftData.id
+        ? `/api/communities/${communityId}/posts/drafts/${draftData.id}`
+        : `/api/communities/${communityId}/posts/drafts`;
+
+      const method = draftData.id ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(draftData),
+      });
+
+      if (!response.ok) throw new Error(t("community_posts.error_save_draft"));
+
+      toast.success(t("community_posts.draft_saved"));
+      fetchDrafts();
+
+      // Si c'était un nouveau brouillon, réinitialiser la sélection
+      if (!draftData.id) {
+        setSelectedDraft(null);
+      }
+    } catch (error) {
+      toast.error(t("community_posts.error_save_draft"));
+    }
+  };
+
+  // Supprimer un brouillon
+  const handleDeleteDraft = async (draftId: number) => {
+    try {
+      const response = await fetch(
+        `/api/communities/${communityId}/posts/drafts/${draftId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok)
+        throw new Error(t("community_posts.error_delete_draft"));
+
+      toast.success(t("community_posts.draft_deleted"));
+      fetchDrafts();
+
+      if (selectedDraft?.id === draftId) {
+        setSelectedDraft(null);
+      }
+    } catch (error) {
+      toast.error(t("community_posts.error_delete_draft"));
+    }
+  };
+
+  // Éditer un brouillon
+  const handleEditDraft = (draft: PostData) => {
+    setSelectedDraft(draft);
+  };
+
+  // Créer un nouveau brouillon
+  const handleNewDraft = () => {
+    setSelectedDraft(null);
+  };
 
   // Fonction pour promouvoir un membre avec invalidation du cache
   const handlePromoteMember = useCallback(
@@ -916,12 +1022,29 @@ export default function CommunityDashboard() {
     invalidateCache,
   ]);
 
+  // Déplacer la déclaration de fetchDrafts avant son utilisation dans useEffect
+  // Récupérer les brouillons
+  const fetchDrafts = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `/api/communities/${communityId}/posts/drafts`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setDrafts(data);
+      }
+    } catch (error) {
+      console.error(t("community_posts.error_drafts"), error);
+    }
+  }, [communityId, t]);
+
   useEffect(() => {
     if (communityId && userId) {
       fetchDashboardData();
       fetchMembers();
       fetchContributorRequests();
       fetchPosts();
+      fetchDrafts(); // Ajout dans l'useEffect existant
     }
   }, [
     communityId,
@@ -930,6 +1053,7 @@ export default function CommunityDashboard() {
     fetchMembers,
     fetchContributorRequests,
     fetchPosts,
+    fetchDrafts, // Ajouté aux dépendances
   ]);
 
   // Mettre à jour l'onglet actif si le paramètre d'URL change
@@ -2040,126 +2164,20 @@ export default function CommunityDashboard() {
           )}
 
           {activeTab === "creation" && (
-            <div className="flex-1 p-6">
-              <div className="flex justify-end items-center mb-4">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-2">
-                    <Switch
-                      checked={contributionsEnabled}
-                      onCheckedChange={setContributionsEnabled}
-                      className="data-[state=checked]:bg-green-600"
-                    />
-                    <label className="text-gray-600 flex items-center">
-                      {t("voting.contributions")}
-                    </label>
-                  </div>
-
-                  <button
-                    onClick={() => setIsPreviewOpen(true)}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md flex items-center gap-2"
-                  >
-                    <Eye size={18} />
-                    {t("post_editor.preview")}
-                  </button>
-
-                  <button
-                    onClick={handleSubmitPost}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    {t("actions.publish")}
-                  </button>
-                </div>
-              </div>
-
-              {/* Affichage de l'erreur */}
-              {error && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
-                  {error}
-                </div>
-              )}
-
-              <div className="bg-white rounded-xl p-6">
-                <div className="flex w-full space-x-4">
-                  <div className="flex items-center space-x-2 flex-1">
-                    <input
-                      type="file"
-                      id="cover-image"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                    {coverImage ? (
-                      <Image
-                        src={`https://${coverImage}`}
-                        alt="Cover Image"
-                        width={75}
-                        height={75}
-                        className="rounded-lg"
-                      />
-                    ) : (
-                      <label
-                        htmlFor="cover-image"
-                        className="w-full px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors text-center"
-                      >
-                        {isUploading
-                          ? "Upload..."
-                          : t("post_editor.add_cover_image")}
-                      </label>
-                    )}
-                    {coverImage && (
-                      <label
-                        htmlFor="cover-image"
-                        className={`px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors ${
-                          isUploading ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
-                      >
-                        Modifier
-                      </label>
-                    )}
-                  </div>
-                  <div className="flex gap-2 items-start">
-                    <select
-                      value={selectedTag}
-                      onChange={(e) => {
-                        const id = e.target.value;
-                        setSelectedTag(id);
-                        // Récupérer le label correspondant à l'ID sélectionné
-                        const selectedCategory = categories.find(
-                          (cat) => cat.id.toString() === id
-                        );
-                        if (selectedCategory) {
-                          setSelectedTagLabel(selectedCategory.label);
-                        }
-                      }}
-                      className="flex-1 px-3 py-2 border rounded-lg bg-white"
-                    >
-                      <option value="">
-                        {t("post_editor.choose_category")}
-                      </option>
-                      {categories.map((tag) => (
-                        <option key={tag.id} value={tag.id}>
-                          {tag.label}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={() => setShowCategoryForm(true)}
-                      className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  value={postTitle}
-                  onChange={(e) => setPostTitle(e.target.value)}
-                  placeholder={t("post_editor.article_title")}
-                  className="mt-8 w-full text-2xl font-bold border border-gray-200 mb-4 px-4 py-2 rounded-lg"
-                />
-                <TextEditor value={editorContent} onChange={setEditorContent} />
-              </div>
-            </div>
+            <PostEditorContainer
+              initialData={selectedDraft || undefined}
+              communityId={communityId as string}
+              onSubmit={handleSubmitPost}
+              onSaveDraft={handleSaveDraft}
+              submitButtonText={t("actions.publish")}
+              showDrafts={true}
+              drafts={drafts}
+              onNewDraft={handleNewDraft}
+              onEditDraft={handleEditDraft}
+              onDeleteDraft={handleDeleteDraft}
+              selectedDraft={selectedDraft}
+              showFeedbacks={true}
+            />
           )}
 
           {activeTab === "tools" && <ToolInterface />}
