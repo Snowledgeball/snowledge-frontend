@@ -89,6 +89,13 @@ import { ToolSelector } from "@/components/dashboard/ToolSelector";
 import { useTranslation } from "react-i18next";
 import { TextEditor } from "@/components/shared/TextEditor";
 import { useCreateBlockNote } from "@blocknote/react";
+import dynamic from "next/dynamic";
+
+// Import avec rendu côté client uniquement sans SSR
+const PreviewRenderer = dynamic(
+  () => import("@/components/shared/PreviewRenderer"),
+  { ssr: false }
+);
 
 // Système de cache pour les données du dashboard
 const dashboardCache = {
@@ -300,14 +307,6 @@ export default function CommunityDashboard() {
       setUserId(userId);
     }
   }, [session]);
-
-  // const fetchTagNames = async (tagId: string) => {
-  //   const response = await fetch(
-  //     `/api/communities/${params.id}/categories/${tagId}`
-  //   );
-  //   const data = await response.json();
-  //   setSelectedTag(data.name);
-  // };
 
   // Fetch des catégories
   useEffect(() => {
@@ -941,37 +940,6 @@ export default function CommunityDashboard() {
   }, [tabParam]);
 
   // Créer l'éditeur de prévisualisation au niveau racine du composant
-  const previewEditor = useCreateBlockNote();
-
-  // Générer le HTML pour la prévisualisation lors de l'ouverture de la modal
-  useEffect(() => {
-    const renderPreviewHtml = async () => {
-      try {
-        // Vérifier que le contenu est valide et au format JSON
-        if (editorContent && typeof editorContent === "string") {
-          // Détecter si c'est déjà du JSON ou juste du HTML
-          if (editorContent.trim().startsWith("[")) {
-            const blocks = JSON.parse(editorContent);
-            const fullHtml = await previewEditor.blocksToFullHTML(blocks);
-            setPreviewHTML(fullHtml);
-          } else {
-            // Si ce n'est pas du JSON, on considère que c'est déjà du HTML
-            setPreviewHTML(editorContent);
-          }
-        }
-      } catch (error) {
-        console.error(
-          "Erreur lors de la génération du HTML pour la prévisualisation:",
-          error
-        );
-        toast.error("Impossible de générer la prévisualisation");
-      }
-    };
-
-    if (isPreviewOpen) {
-      renderPreviewHtml();
-    }
-  }, [isPreviewOpen, editorContent, previewEditor]);
 
   if (loading) {
     return <Loader text={t("loading.data")} fullScreen />;
@@ -2243,13 +2211,20 @@ export default function CommunityDashboard() {
             <DialogTitle>{t("post_editor.post_preview")}</DialogTitle>
           </DialogHeader>
 
+          {isPreviewOpen && (
+            <PreviewRenderer
+              editorContent={editorContent}
+              onHtmlGenerated={setPreviewHTML}
+            />
+          )}
+
           <div className="py-4">
             {/* Image de couverture */}
             {coverImage && (
               <div className="w-full h-48 relative mb-6 rounded-lg overflow-hidden">
                 <Image
                   src={`https://${coverImage}`}
-                  alt="Cover"
+                  alt={t("post_editor.cover")}
                   fill
                   className="object-cover"
                 />

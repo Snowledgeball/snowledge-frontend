@@ -275,7 +275,8 @@
     "post_preview": "Prévisualisation du post",
     "cover": "Couverture",
     "untitled": "Sans titre",
-    "submit_post": "Soumettre le post"
+    "submit_post": "Soumettre le post",
+    "modify": "Modifier"
   },
   "settings": {
     "no_permissions": "Vous n'avez pas les permissions pour accéder à cette page",

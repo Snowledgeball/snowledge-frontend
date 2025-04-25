@@ -236,7 +236,8 @@
     "cover": "Cover",
     "untitled": "Untitled",
     "submit_post": "Submit post",
-    "write_here": "Write here..."
+    "write_here": "Write here...",
+    "modify": "Modify"
   },
   "settings": {
     "no_permissions": "You don't have permission to access this page",

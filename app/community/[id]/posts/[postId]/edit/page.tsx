@@ -17,8 +17,15 @@ import { Dialog } from "@/components/ui/dialog";
 import { useMemo } from "react";
 import { Loader } from "@/components/ui/loader";
 import { useTranslation } from "react-i18next";
-import { useCreateBlockNote } from "@blocknote/react";
 import { TextEditor } from "@/components/shared/TextEditor";
+import dynamic from "next/dynamic";
+
+// Import avec rendu côté client uniquement sans SSR
+const PreviewRenderer = dynamic(
+  () => import("@/components/shared/PreviewRenderer"),
+  { ssr: false }
+);
+
 interface Post {
   id: number;
   title: string;
@@ -63,14 +70,13 @@ export default function EditPost() {
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<
+    { id: string; name: string; label?: string }[]
+  >([]);
   const [previewHTML, setPreviewHTML] = useState("");
 
   const status = searchParams.get("status");
   const cacheKey = `${params.id}-${params.postId}-${status}`;
-
-  // Créer l'éditeur au niveau racine du composant
-  const previewEditor = useCreateBlockNote();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -233,35 +239,7 @@ export default function EditPost() {
     }
   };
 
-  // Utiliser useEffect pour convertir le contenu JSON en HTML pour la prévisualisation
-  useEffect(() => {
-    const convertContentToHtml = async () => {
-      try {
-        // Vérifier si le contenu est au format JSON
-        if (
-          editorContent &&
-          typeof editorContent === "string" &&
-          editorContent.trim().startsWith("[")
-        ) {
-          const blocks = JSON.parse(editorContent);
-          const fullHtml = await previewEditor.blocksToFullHTML(blocks);
-          setPreviewHTML(fullHtml);
-        } else {
-          // Si ce n'est pas au format JSON, utiliser directement
-          setPreviewHTML(editorContent);
-        }
-      } catch (error) {
-        console.error("Erreur lors de la conversion du contenu:", error);
-        setPreviewHTML(editorContent); // En cas d'erreur, utiliser le contenu brut
-      }
-    };
-
-    if (isPreviewOpen) {
-      convertContentToHtml();
-    }
-  }, [isPreviewOpen, editorContent, previewEditor]);
-
-  // Mémoriser le contenu de prévisualisation pour éviter les re-rendus inutiles
+  // Contenu de la prévisualisation mémorisé
   const previewContent = useMemo(() => {
     return (
       <div className="py-4">
@@ -270,7 +248,7 @@ export default function EditPost() {
           <div className="w-full h-48 relative mb-6 rounded-lg overflow-hidden">
             <Image
               src={`https://${coverImage}`}
-              alt="Cover"
+              alt={t("post_editor.cover")}
               fill
               className="object-cover"
             />
@@ -280,13 +258,15 @@ export default function EditPost() {
         {/* Tag */}
         {selectedTag && (
           <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm mb-4">
-            {categories.find((t) => t.id === selectedTag)?.label}
+            {categories.find((t) => t.id === selectedTag)?.label ||
+              categories.find((t) => t.id === selectedTag)?.name ||
+              selectedTag}
           </span>
         )}
 
         {/* Titre */}
         <h1 className="text-3xl font-bold text-gray-900 mb-6">
-          {postTitle || "Sans titre"}
+          {postTitle || t("post_editor.untitled")}
         </h1>
 
         {/* Contenu */}
@@ -297,8 +277,8 @@ export default function EditPost() {
           <div className="flex items-center justify-between text-sm text-gray-500">
             <span>
               {contributionsEnabled
-                ? "✅ Contributions activées"
-                : "❌ Contributions désactivées"}
+                ? `✅ ${t("community_posts.contributions_enabled")}`
+                : `❌ ${t("community_posts.contributions_disabled")}`}
             </span>
             <span>
               {new Date().toLocaleDateString("fr-FR", {
@@ -311,7 +291,15 @@ export default function EditPost() {
         </div>
       </div>
     );
-  }, [coverImage, selectedTag, postTitle, previewHTML, contributionsEnabled]);
+  }, [
+    coverImage,
+    selectedTag,
+    postTitle,
+    previewHTML,
+    contributionsEnabled,
+    categories,
+    t,
+  ]);
 
   if (isLoading) return <LoadingComponent />;
   if (!isAuthenticated) return null;
@@ -319,137 +307,127 @@ export default function EditPost() {
     return <Loader fullScreen text={t("loading.post")} variant="spinner" />;
 
   return (
-    <div>
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4">
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h1 className="text-2xl font-bold">Modifier le post</h1>
-              <div className="flex items-center space-x-4">
-                {lastSavedAt && (
-                  <span className="text-sm text-gray-500">
-                    Dernière sauvegarde: {lastSavedAt.toLocaleTimeString()}
-                  </span>
-                )}
-                {hasUnsavedChanges && (
-                  <span className="text-sm text-amber-500">
-                    Modifications non sauvegardées
-                  </span>
-                )}
-                <button
-                  onClick={() => setIsPreviewOpen(true)}
-                  className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  <Eye className="w-4 h-4 mr-2 inline-block" />
-                  Prévisualiser
-                </button>
-                <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-2">
-                  <Switch
-                    checked={contributionsEnabled}
-                    onCheckedChange={setContributionsEnabled}
-                    className="data-[state=checked]:bg-green-600"
-                  />
-                  <label className="text-gray-600">Contributions</label>
-                </div>
-
-                <button
-                  onClick={handleSubmit}
-                  disabled={isSaving}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
-                >
-                  {isSaving ? (
-                    <>
-                      <Loader size="sm" color="white" className="mr-2" />
-                      Sauvegarde...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4 mr-2" />
-                      Sauvegarder
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex gap-6">
-              <div className="flex-1 bg-white rounded-xl p-6">
-                <div className="flex w-full space-x-4">
-                  <div className="flex items-center space-x-2 flex-1">
-                    <input
-                      type="file"
-                      id="cover-image"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                    {coverImage ? (
-                      <div className="relative">
-                        <Image
-                          src={`https://${coverImage}`}
-                          alt="Cover Image"
-                          width={75}
-                          height={75}
-                          className="rounded-lg"
-                        />
-                        <label
-                          htmlFor="cover-image"
-                          className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow-md cursor-pointer hover:bg-gray-50"
-                        >
-                          <ImageIcon className="w-4 h-4 text-gray-600" />
-                        </label>
-                      </div>
-                    ) : (
-                      <label
-                        htmlFor="cover-image"
-                        className="w-full px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors text-center"
-                      >
-                        {isUploading
-                          ? "Upload..."
-                          : "Ajouter une image de couverture"}
-                      </label>
-                    )}
-                  </div>
-                  <select
-                    value={selectedTag}
-                    onChange={(e) => {
-                      setSelectedTag(e.target.value);
-                      console.log(e.target.value);
-                    }}
-                    className="flex-1 px-3 py-2 border rounded-lg bg-white"
-                  >
-                    <option value="">Choisir une catégorie</option>
-                    {categories.map((tag) => (
-                      <option key={tag.id} value={tag.id}>
-                        {tag.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <input
-                  type="text"
-                  value={postTitle}
-                  onChange={(e) => setPostTitle(e.target.value)}
-                  placeholder="Titre de l'article"
-                  className="mt-8 w-full text-2xl font-bold border border-gray-200 mb-4 px-4 py-2 rounded-lg"
-                />
-
-                <TextEditor value={editorContent} onChange={setEditorContent} />
-              </div>
-            </div>
-          </Card>
+    <div className="min-h-screen bg-gray-50 p-6">
+      {isLoading || !post ? (
+        <div className="flex items-center justify-center h-96">
+          <Loader size="lg" />
         </div>
-      </div>
+      ) : (
+        <>
+          <div className="flex justify-end items-center mb-4">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-2">
+                <Switch
+                  checked={contributionsEnabled}
+                  onCheckedChange={setContributionsEnabled}
+                  className="data-[state=checked]:bg-green-600"
+                />
+                <label className="text-gray-600 flex items-center">
+                  {t("voting.contributions")}
+                </label>
+              </div>
 
-      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-white">
-          <DialogHeader>
-            <DialogTitle>Prévisualisation du post</DialogTitle>
-          </DialogHeader>
-          {previewContent}
-        </DialogContent>
-      </Dialog>
+              <button
+                onClick={() => setIsPreviewOpen(true)}
+                className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <Eye className="w-4 h-4 mr-2 inline-block" />
+                {t("post_editor.preview")}
+              </button>
+
+              <button
+                onClick={handleSubmit}
+                disabled={isSaving}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <Save className="w-4 h-4 mr-2 inline-block" />
+                {t("actions.save")}
+              </button>
+            </div>
+          </div>
+
+          <Card className="p-8">
+            <div className="flex w-full space-x-4">
+              <div className="flex items-center space-x-2 flex-1">
+                <input
+                  type="file"
+                  id="cover-image"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+                {coverImage ? (
+                  <Image
+                    src={`https://${coverImage}`}
+                    alt="Cover Image"
+                    width={75}
+                    height={75}
+                    className="rounded-lg"
+                  />
+                ) : (
+                  <label
+                    htmlFor="cover-image"
+                    className="w-full px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors text-center"
+                  >
+                    {isUploading
+                      ? t("post_editor.uploading")
+                      : t("post_editor.add_cover_image")}
+                  </label>
+                )}
+                {coverImage && (
+                  <label
+                    htmlFor="cover-image"
+                    className={`px-4 py-2 text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors ${
+                      isUploading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    {t("post_editor.modify")}
+                  </label>
+                )}
+              </div>
+
+              <select
+                value={selectedTag}
+                onChange={(e) => setSelectedTag(e.target.value)}
+                className="flex-1 px-3 py-2 border rounded-lg bg-white"
+              >
+                <option value="">{t("post_editor.choose_category")}</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.label || category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <input
+              type="text"
+              value={postTitle}
+              onChange={(e) => setPostTitle(e.target.value)}
+              placeholder={t("post_editor.article_title")}
+              className="mt-8 w-full text-2xl font-bold border-none focus:outline-none mb-4"
+            />
+
+            <TextEditor value={editorContent} onChange={setEditorContent} />
+          </Card>
+
+          {/* Modal de prévisualisation avec composant client-side uniquement */}
+          <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+            <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-white">
+              <DialogHeader>
+                <DialogTitle>{t("post_editor.post_preview")}</DialogTitle>
+              </DialogHeader>
+              {isPreviewOpen && (
+                <PreviewRenderer
+                  editorContent={editorContent}
+                  onHtmlGenerated={setPreviewHTML}
+                />
+              )}
+              {previewContent}
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </div>
   );
 }
