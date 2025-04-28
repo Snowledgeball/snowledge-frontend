@@ -28,7 +28,8 @@
     "submit": "Soumettre pour révision",
     "publish": "Publier",
     "back": "Retour",
-    "create": "Créer"
+    "create": "Créer",
+    "update": "Mettre à jour"
   },
   "communities": {
     "explore": "Explorer les communautés",

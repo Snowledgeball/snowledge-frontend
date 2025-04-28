@@ -579,7 +579,7 @@ export default function PostEditorContainer({
         <label className="text-sm font-medium text-gray-700 mb-2 block">
           {t("voting.content")}
         </label>
-        <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <div className="border border-gray-200 rounded-lg overflow-hidden mb-12">
           <TextEditor value={editorContent} onChange={setEditorContent} />
         </div>
       </div>

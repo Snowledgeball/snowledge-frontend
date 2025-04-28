@@ -28,7 +28,8 @@
     "submit": "Submit for review",
     "publish": "Publish",
     "back": "Back",
-    "create": "Create"
+    "create": "Create",
+    "update": "Update"
   },
   "communities": {
     "explore": "Explore communities",
