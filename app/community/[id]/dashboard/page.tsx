@@ -1691,12 +1691,13 @@ export default function CommunityDashboard() {
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
                             <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">
-                              {selectedTag === post.tag ? (
+                              {selectedTag ===
+                              post.community_posts_category.label ? (
                                 <span className="text-green-600">
-                                  {post.tag}
+                                  {post.community_posts_category.label}
                                 </span>
                               ) : (
-                                post.tag
+                                post.community_posts_category.label
                               )}
                             </span>
                             <div className="flex items-center space-x-2">

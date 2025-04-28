@@ -40,7 +40,7 @@ export interface PostData {
 }
 
 interface Category {
-  id: string;
+  id: number;
   name: string;
   label?: string;
 }
@@ -297,9 +297,7 @@ export default function PostEditorContainer({
         {/* Tag */}
         {selectedTag && (
           <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm mb-4">
-            {categories.find((t) => t.id === selectedTag)?.label ||
-              categories.find((t) => t.id === selectedTag)?.name ||
-              selectedTag}
+            {categories.find((t) => t.id === Number(selectedTag))?.label}
           </span>
         )}
 
