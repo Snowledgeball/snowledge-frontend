@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import EnrichmentEditor from "@/components/community/EnrichmentEditor";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
@@ -168,16 +167,6 @@ export default function ContributePage() {
         <h1 className="text-2xl font-bold mb-6">
           {t("enrichment.contribute_to")}: {postTitle}
         </h1>
-
-        <EnrichmentEditor
-          communityId={params.id as string}
-          originalContent={originalContent}
-          initialModifiedContent={modifiedContent}
-          description={description}
-          onDescriptionChange={setDescription}
-          onContentChange={setModifiedContent}
-        />
-
         <div className="flex justify-end space-x-4">
           <Button
             variant="outline"
