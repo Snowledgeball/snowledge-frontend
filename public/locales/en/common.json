@@ -91,7 +91,8 @@
     "no_changes": "You haven't made any changes to the content",
     "contribution_submitted": "Your contribution was successfully submitted",
     "contribute_to": "Contribute to",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+    "save_modifications": "Save modifications"
   },
   "enrichment_compare": {
     "display_mode": "Display mode",

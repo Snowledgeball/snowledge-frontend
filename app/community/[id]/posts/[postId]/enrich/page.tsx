@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import EnrichmentEditor from "@/components/community/EnrichmentEditor";
 
 export default function ContributePage() {
   const params = useParams();
@@ -167,6 +168,15 @@ export default function ContributePage() {
         <h1 className="text-2xl font-bold mb-6">
           {t("enrichment.contribute_to")}: {postTitle}
         </h1>
+
+        <EnrichmentEditor
+          communityId={params.id as string}
+          originalContent={originalContent}
+          initialModifiedContent={modifiedContent}
+          description={description}
+          onDescriptionChange={setDescription}
+          onContentChange={setModifiedContent}
+        />
         <div className="flex justify-end space-x-4">
           <Button
             variant="outline"
@@ -177,7 +187,10 @@ export default function ContributePage() {
             {t("actions.cancel")}
           </Button>
           <Button
-            onClick={handleSubmit}
+            onClick={() => {
+              handleSubmit();
+              console.log("submit");
+            }}
             disabled={
               isSubmitting ||
               originalContent === modifiedContent ||

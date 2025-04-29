@@ -49,6 +49,7 @@ export interface PostEditorContainerProps {
   initialData?: PostData;
   communityId: string;
   onSubmit?: (data: PostData) => void;
+  onContentChange?: (content: string) => void;
   onSaveDraft?: (data: PostData) => void;
   submitButtonText?: string;
   showDrafts?: boolean;
@@ -60,13 +61,14 @@ export interface PostEditorContainerProps {
   showFeedbacks?: boolean;
   showPreview?: boolean;
   readOnly?: boolean;
-  onBackToDrafts?: () => void;
+  onlyContent?: boolean;
 }
 
 export default function PostEditorContainer({
   initialData,
   communityId,
   onSubmit,
+  onContentChange,
   onSaveDraft,
   submitButtonText,
   showDrafts = false,
@@ -78,7 +80,7 @@ export default function PostEditorContainer({
   showFeedbacks = false,
   showPreview = true,
   readOnly = false,
-  onBackToDrafts,
+  onlyContent = false,
 }: PostEditorContainerProps) {
   const { t } = useTranslation();
 
@@ -340,257 +342,275 @@ export default function PostEditorContainer({
 
   // Fonction pour rendre l'éditeur
   const renderEditor = () => (
-    <div className="min-h-screen bg-gray-50 p-6 rounded-xl">
-      {!readOnly && (
-        <div className="flex justify-end items-center mb-6 gap-3">
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-2 shadow-sm">
-              <Switch
-                checked={contributionsEnabled}
-                onCheckedChange={setContributionsEnabled}
-                className="data-[state=checked]:bg-green-600"
-                disabled={readOnly}
-              />
-              <label className="text-gray-700 flex items-center font-medium">
-                {t("voting.contributions")}
-              </label>
-            </div>
-
-            {showPreview && (
-              <button
-                onClick={() => {
-                  // Vérifier que des contenus sont disponibles pour la prévisualisation
-                  if (
-                    !postTitle.trim() &&
-                    !editorContent &&
-                    !selectedTag &&
-                    !coverImage
-                  ) {
-                    toast.info(t("post_editor.preview_needs_content"));
-                    return;
-                  }
-                  setIsPreviewOpen(true);
-                }}
-                className="px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg flex items-center gap-2 font-medium shadow-sm transition-colors"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-                {t("post_editor.preview")}
-              </button>
-            )}
-
-            {onSaveDraft && (
-              <button
-                onClick={handleSaveDraft}
-                disabled={isSavingDraft || isSubmitting || readOnly}
-                className="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 font-medium shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {isSavingDraft ? (
-                  <Loader size="sm" color="gradient" variant="spinner" />
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                    <polyline points="17 21 17 13 7 13 7 21" />
-                    <polyline points="7 3 7 8 15 8" />
-                  </svg>
-                )}
-                {isSavingDraft
-                  ? t("post_editor.saving")
-                  : t("community_posts.save_draft")}
-              </button>
-            )}
-
-            {onSubmit && (
-              <button
-                onClick={handleSubmit}
-                disabled={isSavingDraft || isSubmitting || readOnly}
-                className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 font-medium shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? (
-                  <Loader size="sm" color="gradient" variant="spinner" />
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M5 12h14M12 5l7 7-7 7" />
-                  </svg>
-                )}
-                {isSubmitting ? t("post_editor.processing") : buttonText}
-              </button>
-            )}
-          </div>
+    <>
+      {onlyContent ? (
+        <div>
+          <TextEditor
+            value={editorContent}
+            onChange={(value) => {
+              setEditorContent(value);
+              onContentChange?.(value);
+            }}
+          />
         </div>
-      )}
-
-      <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200">
-        <div className="flex w-full flex-col md:flex-row gap-4 mb-6">
+      ) : (
+        <div className="min-h-screen bg-gray-50 p-6 rounded-xl">
           {!readOnly && (
-            <div className="flex flex-col space-y-2 flex-1">
-              <label className="text-sm font-medium text-gray-700">
-                {t("post_editor.cover_image")}
-              </label>
-              <input
-                type="file"
-                id="cover-image"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-                disabled={readOnly}
-              />
-              {coverImage ? (
-                <div className="relative">
-                  <Image
-                    src={`https://${coverImage}`}
-                    alt="Cover Image"
-                    width={150}
-                    height={100}
-                    className="rounded-lg object-cover mb-2 border border-gray-200"
+            <div className="flex justify-end items-center mb-6 gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-2 shadow-sm">
+                  <Switch
+                    checked={contributionsEnabled}
+                    onCheckedChange={setContributionsEnabled}
+                    className="data-[state=checked]:bg-green-600"
+                    disabled={readOnly}
                   />
-                  {!readOnly && (
+                  <label className="text-gray-700 flex items-center font-medium">
+                    {t("voting.contributions")}
+                  </label>
+                </div>
+
+                {showPreview && (
+                  <button
+                    onClick={() => {
+                      // Vérifier que des contenus sont disponibles pour la prévisualisation
+                      if (
+                        !postTitle.trim() &&
+                        !editorContent &&
+                        !selectedTag &&
+                        !coverImage
+                      ) {
+                        toast.info(t("post_editor.preview_needs_content"));
+                        return;
+                      }
+                      setIsPreviewOpen(true);
+                    }}
+                    className="px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg flex items-center gap-2 font-medium shadow-sm transition-colors"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    {t("post_editor.preview")}
+                  </button>
+                )}
+
+                {onSaveDraft && (
+                  <button
+                    onClick={handleSaveDraft}
+                    disabled={isSavingDraft || isSubmitting || readOnly}
+                    className="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 font-medium shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {isSavingDraft ? (
+                      <Loader size="sm" color="gradient" variant="spinner" />
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                        <polyline points="17 21 17 13 7 13 7 21" />
+                        <polyline points="7 3 7 8 15 8" />
+                      </svg>
+                    )}
+                    {isSavingDraft
+                      ? t("post_editor.saving")
+                      : t("community_posts.save_draft")}
+                  </button>
+                )}
+
+                {onSubmit && (
+                  <button
+                    onClick={handleSubmit}
+                    disabled={isSavingDraft || isSubmitting || readOnly}
+                    className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 font-medium shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <Loader size="sm" color="gradient" variant="spinner" />
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    )}
+                    {isSubmitting ? t("post_editor.processing") : buttonText}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200">
+            <div className="flex w-full flex-col md:flex-row gap-4 mb-6">
+              {!readOnly && (
+                <div className="flex flex-col space-y-2 flex-1">
+                  <label className="text-sm font-medium text-gray-700">
+                    {t("post_editor.cover_image")}
+                  </label>
+                  <input
+                    type="file"
+                    id="cover-image"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    disabled={readOnly}
+                  />
+                  {coverImage ? (
+                    <div className="relative">
+                      <Image
+                        src={`https://${coverImage}`}
+                        alt="Cover Image"
+                        width={150}
+                        height={100}
+                        className="rounded-lg object-cover mb-2 border border-gray-200"
+                      />
+                      {!readOnly && (
+                        <label
+                          htmlFor="cover-image"
+                          className={`px-4 py-2 text-sm text-blue-600 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors border border-blue-200 inline-block ${
+                            isUploading ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                        >
+                          {isUploading ? (
+                            <span className="flex items-center gap-2">
+                              <Loader
+                                size="sm"
+                                color="gradient"
+                                variant="spinner"
+                              />
+                              {t("post_editor.uploading")}
+                            </span>
+                          ) : (
+                            t("post_editor.modify")
+                          )}
+                        </label>
+                      )}
+                    </div>
+                  ) : (
                     <label
                       htmlFor="cover-image"
-                      className={`px-4 py-2 text-sm text-blue-600 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors border border-blue-200 inline-block ${
-                        isUploading ? "opacity-50 cursor-not-allowed" : ""
+                      className={`w-full h-32 px-4 py-2 flex flex-col items-center justify-center text-blue-600 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors border-2 border-dashed border-blue-200 ${
+                        readOnly ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                     >
                       {isUploading ? (
-                        <span className="flex items-center gap-2">
+                        <div className="flex flex-col items-center gap-2">
                           <Loader
-                            size="sm"
+                            size="md"
                             color="gradient"
                             variant="spinner"
                           />
-                          {t("post_editor.uploading")}
-                        </span>
+                          <span>{t("post_editor.uploading")}</span>
+                        </div>
                       ) : (
-                        t("post_editor.modify")
+                        <>
+                          <ImageIcon className="w-8 h-8 mb-2 text-blue-400" />
+                          {t("post_editor.add_cover_image")}
+                        </>
                       )}
                     </label>
                   )}
                 </div>
-              ) : (
-                <label
-                  htmlFor="cover-image"
-                  className={`w-full h-32 px-4 py-2 flex flex-col items-center justify-center text-blue-600 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors border-2 border-dashed border-blue-200 ${
-                    readOnly ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                >
-                  {isUploading ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <Loader size="md" color="gradient" variant="spinner" />
-                      <span>{t("post_editor.uploading")}</span>
-                    </div>
-                  ) : (
-                    <>
-                      <ImageIcon className="w-8 h-8 mb-2 text-blue-400" />
-                      {t("post_editor.add_cover_image")}
-                    </>
-                  )}
-                </label>
+              )}
+
+              {!readOnly && (
+                <div className="flex flex-col space-y-2 flex-1">
+                  <label className="text-sm font-medium text-gray-700">
+                    {t("community_posts.drafts")}
+                  </label>
+                  <select
+                    value={selectedTag}
+                    onChange={(e) => setSelectedTag(e.target.value)}
+                    className="px-4 py-2.5 border border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    disabled={readOnly}
+                  >
+                    <option value="">{t("post_editor.choose_category")}</option>
+                    {categories.map((tag) => (
+                      <option key={tag.id} value={tag.id}>
+                        {tag.label || tag.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               )}
             </div>
-          )}
 
-          {!readOnly && (
-            <div className="flex flex-col space-y-2 flex-1">
-              <label className="text-sm font-medium text-gray-700">
-                {t("community_posts.drafts")}
-              </label>
-              <select
-                value={selectedTag}
-                onChange={(e) => setSelectedTag(e.target.value)}
-                className="px-4 py-2.5 border border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                disabled={readOnly}
-              >
-                <option value="">{t("post_editor.choose_category")}</option>
-                {categories.map((tag) => (
-                  <option key={tag.id} value={tag.id}>
-                    {tag.label || tag.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
-
-        <label className="text-sm font-medium text-gray-700 mb-2 block">
-          {t("voting.title")}
-        </label>
-        <input
-          type="text"
-          value={postTitle}
-          onChange={(e) => setPostTitle(e.target.value)}
-          placeholder={t("post_editor.article_title")}
-          className="w-full text-2xl font-bold border border-gray-200 shadow-sm mb-6 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-          disabled={readOnly}
-        />
-
-        <label className="text-sm font-medium text-gray-700 mb-2 block">
-          {t("voting.content")}
-        </label>
-        <div className="border border-gray-200 rounded-lg overflow-hidden mb-12">
-          <TextEditor value={editorContent} onChange={setEditorContent} />
-        </div>
-      </div>
-
-      {/* Modal de prévisualisation avec composant client-side uniquement */}
-      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-white">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">
-              {t("post_editor.post_preview")}
-            </DialogTitle>
-          </DialogHeader>
-          {isPreviewOpen && !previewHTML && (
-            <div className="flex justify-center py-12">
-              <Loader
-                size="lg"
-                color="gradient"
-                variant="spinner"
-                text={t("post_editor.generating_preview")}
-              />
-            </div>
-          )}
-          {isPreviewOpen && (
-            <PreviewRenderer
-              editorContent={editorContent}
-              onHtmlGenerated={setPreviewHTML}
+            <label className="text-sm font-medium text-gray-700 mb-2 block">
+              {t("voting.title")}
+            </label>
+            <input
+              type="text"
+              value={postTitle}
+              onChange={(e) => setPostTitle(e.target.value)}
+              placeholder={t("post_editor.article_title")}
+              className="w-full text-2xl font-bold border border-gray-200 shadow-sm mb-6 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              disabled={readOnly}
             />
-          )}
-          {previewContent}
-        </DialogContent>
-      </Dialog>
-    </div>
+
+            <label className="text-sm font-medium text-gray-700 mb-2 block">
+              {t("voting.content")}
+            </label>
+            <div className="border border-gray-200 rounded-lg overflow-hidden mb-12">
+              <TextEditor value={editorContent} onChange={setEditorContent} />
+            </div>
+          </div>
+
+          {/* Modal de prévisualisation avec composant client-side uniquement */}
+          <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+            <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-white">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold">
+                  {t("post_editor.post_preview")}
+                </DialogTitle>
+              </DialogHeader>
+              {isPreviewOpen && !previewHTML && (
+                <div className="flex justify-center py-12">
+                  <Loader
+                    size="lg"
+                    color="gradient"
+                    variant="spinner"
+                    text={t("post_editor.generating_preview")}
+                  />
+                </div>
+              )}
+              {isPreviewOpen && (
+                <PreviewRenderer
+                  editorContent={editorContent}
+                  onHtmlGenerated={setPreviewHTML}
+                />
+              )}
+              {previewContent}
+            </DialogContent>
+          </Dialog>
+        </div>
+      )}
+    </>
   );
 
   // Afficher la liste des brouillons

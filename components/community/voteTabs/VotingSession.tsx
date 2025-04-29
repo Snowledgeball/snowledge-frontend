@@ -135,6 +135,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
   const [selectedContributionContent, setSelectedContributionContent] =
     useState("");
 
+  // Ajout d'états pour stocker le contenu parsé
+  const [parsedOriginalContent, setParsedOriginalContent] = useState("");
+  const [parsedModifiedContent, setParsedModifiedContent] = useState("");
+
   // Mémoriser l'ID de la communauté pour éviter les re-rendus inutiles
   const memoizedCommunityId = useMemo(() => communityId, [communityId]);
 
@@ -580,6 +584,25 @@ export function VotingSession({ communityId }: VotingSessionProps) {
     }
   };
 
+  // Utilisation d'un effet pour parser le contenu lorsqu'il change
+  useEffect(() => {
+    const parseContents = async () => {
+      if (selectedContribution?.original_content) {
+        const original = await parseContent(
+          selectedContribution.original_content
+        );
+        setParsedOriginalContent(original || "");
+      }
+
+      if (selectedContribution?.content) {
+        const modified = await parseContent(selectedContribution.content);
+        setParsedModifiedContent(modified || "");
+      }
+    };
+
+    parseContents();
+  }, [selectedContribution?.original_content, selectedContribution?.content]);
+
   return (
     <div
       className="bg-white rounded-lg shadow-sm h-full flex flex-col"
@@ -812,20 +835,14 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                             {(() => {
                               const tempDiv = document.createElement("div");
                               const safeContent =
-                                contribution.tag === "creation"
-                                  ? parseContent(contribution.content || "")
-                                  : contribution.content || "";
-                              // Garder juste le HTML mais supprimer les tags pour l'aperçu
-                              tempDiv.innerHTML =
-                                safeContent instanceof Promise
-                                  ? "" // Handle Promise case by showing empty string initially
-                                  : typeof safeContent === "string"
-                                  ? safeContent.replace(/<\/?[^>]+(>|$)/g, "")
-                                  : String(safeContent);
-
+                                selectedContributionContent || "";
+                              tempDiv.innerHTML = safeContent.replace(
+                                /<\/?[^>]+(>|$)/g,
+                                ""
+                              );
                               const text =
                                 tempDiv.textContent || tempDiv.innerText || "";
-                              // Limiter à 35 caractères pour le contenu
+                              // Limiter à 50 caractères pour le contenu
                               return text.length > 35
                                 ? text.substring(0, 35) + "..."
                                 : text;
@@ -1146,10 +1163,8 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                     <div className="h-full flex flex-col">
                       <div className="flex-1 overflow-y-auto">
                         <EnrichmentCompare
-                          originalContent={
-                            selectedContribution?.original_content || ""
-                          }
-                          modifiedContent={selectedContribution?.content || ""}
+                          originalContent={parsedOriginalContent}
+                          modifiedContent={parsedModifiedContent}
                         />
                       </div>
                     </div>

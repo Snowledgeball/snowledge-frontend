@@ -91,7 +91,8 @@
     "no_changes": "Vous n'avez apporté aucune modification au contenu",
     "contribution_submitted": "Votre contribution a été soumise avec succès",
     "contribute_to": "Contribuer à",
-    "submitting": "Soumission en cours..."
+    "submitting": "Soumission en cours...",
+    "save_modifications": "Enregistrer les modifications"
   },
   "enrichment_compare": {
     "display_mode": "Mode d'affichage",

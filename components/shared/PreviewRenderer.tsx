@@ -42,9 +42,3 @@ export default function PreviewRenderer({
   // Ce composant ne rend rien visuellement, il ne fait que traiter le contenu
   return null;
 }
-
-export function parseHtml(html: string) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
-  return doc.body.innerHTML;
-}
