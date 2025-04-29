@@ -47,6 +47,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useTranslation } from "react-i18next";
 import dynamic from "next/dynamic";
+import { useCreateBlockNote } from "@blocknote/react";
 
 // Import avec rendu côté client uniquement sans SSR
 const PreviewRenderer = dynamic(
@@ -130,6 +131,9 @@ export function VotingSession({ communityId }: VotingSessionProps) {
   // Ajouter un nouvel état pour la contribution sélectionnée
   const [selectedContribution, setSelectedContribution] =
     useState<Contribution | null>(null);
+
+  const [selectedContributionContent, setSelectedContributionContent] =
+    useState("");
 
   // Mémoriser l'ID de la communauté pour éviter les re-rendus inutiles
   const memoizedCommunityId = useMemo(() => communityId, [communityId]);
@@ -554,6 +558,28 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
   const { t } = useTranslation();
 
+  const editor = useCreateBlockNote();
+
+  const parseContent = async (content: string) => {
+    try {
+      // Vérifier si le contenu est au format JSON (BlockNote)
+      if (
+        content &&
+        typeof content === "string" &&
+        content.trim().startsWith("[")
+      ) {
+        const blocks = JSON.parse(content);
+        return await editor.blocksToFullHTML(blocks);
+      } else {
+        // Si ce n'est pas du JSON, renvoyer le contenu tel quel
+        return content;
+      }
+    } catch (error) {
+      console.error("Erreur lors du parsing du contenu:", error);
+      return content;
+    }
+  };
+
   return (
     <div
       className="bg-white rounded-lg shadow-sm h-full flex flex-col"
@@ -785,14 +811,21 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           <p className="text-xs sm:text-sm text-gray-600 mt-1">
                             {(() => {
                               const tempDiv = document.createElement("div");
-                              const safeContent = contribution.content || "";
-                              tempDiv.innerHTML = safeContent.replace(
-                                /<\/?[^>]+(>|$)/g,
-                                ""
-                              );
+                              const safeContent =
+                                contribution.tag === "creation"
+                                  ? parseContent(contribution.content || "")
+                                  : contribution.content || "";
+                              // Garder juste le HTML mais supprimer les tags pour l'aperçu
+                              tempDiv.innerHTML =
+                                safeContent instanceof Promise
+                                  ? "" // Handle Promise case by showing empty string initially
+                                  : typeof safeContent === "string"
+                                  ? safeContent.replace(/<\/?[^>]+(>|$)/g, "")
+                                  : String(safeContent);
+
                               const text =
                                 tempDiv.textContent || tempDiv.innerText || "";
-                              // Limiter à 50 caractères pour le contenu
+                              // Limiter à 35 caractères pour le contenu
                               return text.length > 35
                                 ? text.substring(0, 35) + "..."
                                 : text;
@@ -1099,12 +1132,12 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                       <div className="flex-1 overflow-y-auto">
                         <PreviewRenderer
                           editorContent={selectedContribution?.content || ""}
-                          onHtmlGenerated={(html) => {}}
+                          onHtmlGenerated={setSelectedContributionContent}
                         />
                         <div
                           className="contribution-content tinymce-content p-4"
                           dangerouslySetInnerHTML={{
-                            __html: selectedContribution?.content || "",
+                            __html: selectedContributionContent || "",
                           }}
                         />
                       </div>
