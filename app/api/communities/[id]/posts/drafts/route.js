@@ -49,6 +49,7 @@ export async function GET(request, { params }) {
         updated_at: "desc",
       },
       include: {
+        community_posts_category: true,
         // Inclure les reviews pour déterminer si le post a été rejeté
         community_posts_reviews: {
           select: {
@@ -87,6 +88,8 @@ export async function GET(request, { params }) {
         content: draft.content,
         cover_image_url: draft.cover_image_url,
         tag: draft.tag,
+        accept_contributions: draft.accept_contributions,
+        category: draft.community_posts_category.name,
         created_at: draft.created_at,
         updated_at: draft.updated_at,
         status: draft.status,
@@ -100,6 +103,8 @@ export async function GET(request, { params }) {
         },
       };
     });
+
+    console.log("transformedDrafts", transformedDrafts);
 
     return NextResponse.json(transformedDrafts);
   } catch (error) {

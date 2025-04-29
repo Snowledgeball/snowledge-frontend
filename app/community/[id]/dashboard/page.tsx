@@ -897,6 +897,8 @@ export default function CommunityDashboard() {
 
       const method = draftData.id ? "PUT" : "POST";
 
+      console.log("draftData", draftData);
+
       const response = await fetch(url, {
         method: method,
         headers: {
