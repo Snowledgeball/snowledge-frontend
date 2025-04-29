@@ -343,27 +343,6 @@ export default function PostEditorContainer({
     <div className="min-h-screen bg-gray-50 p-6 rounded-xl">
       {!readOnly && (
         <div className="flex justify-end items-center mb-6 gap-3">
-          {activeTab === "edit" && onBackToDrafts && (
-            <button
-              onClick={onBackToDrafts}
-              className="mr-auto px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-2 font-medium"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-              {t("community_posts.back_to_drafts")}
-            </button>
-          )}
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-2 shadow-sm">
               <Switch
