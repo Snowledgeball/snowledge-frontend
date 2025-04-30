@@ -299,8 +299,10 @@ export default function PostEditorContainer({
         {/* Tag */}
         {selectedTag && (
           <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm mb-4">
-            {categories.find((t) => t.id.toString() === selectedTag)?.label ||
-              categories.find((t) => t.id.toString() === selectedTag)?.name ||
+            {categories.find((t) => String(t.id) === String(selectedTag))
+              ?.label ||
+              categories.find((t) => String(t.id) === String(selectedTag))
+                ?.name ||
               selectedTag}
           </span>
         )}
