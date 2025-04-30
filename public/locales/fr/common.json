@@ -27,7 +27,9 @@
     "reset": "Réinitialiser tous les filtres",
     "submit": "Soumettre pour révision",
     "publish": "Publier",
-    "back": "Retour"
+    "back": "Retour",
+    "create": "Créer",
+    "update": "Mettre à jour"
   },
   "communities": {
     "explore": "Explorer les communautés",
@@ -89,7 +91,8 @@
     "no_changes": "Vous n'avez apporté aucune modification au contenu",
     "contribution_submitted": "Votre contribution a été soumise avec succès",
     "contribute_to": "Contribuer à",
-    "submitting": "Soumission en cours..."
+    "submitting": "Soumission en cours...",
+    "save_modifications": "Enregistrer les modifications"
   },
   "enrichment_compare": {
     "display_mode": "Mode d'affichage",
@@ -229,6 +232,7 @@
     "post_submitted": "Post soumis pour révision",
     "error_create_post": "Erreur lors de la création du post",
     "error_save": "Erreur lors de la sauvegarde",
+    "save_draft": "Enregistrer comme brouillon",
     "draft_saved": "Brouillon sauvegardé",
     "error_save_draft": "Erreur lors de la sauvegarde du brouillon",
     "error_delete": "Erreur lors de la suppression",
@@ -236,6 +240,7 @@
     "error_delete_draft": "Erreur lors de la suppression du brouillon",
     "new_post": "Nouveau post",
     "drafts": "Brouillons",
+    "loading_drafts": "Chargement des brouillons...",
     "edit_draft": "Modifier le brouillon",
     "my_drafts": "Mes brouillons",
     "no_drafts": "Vous n'avez pas de brouillons enregistrés",
@@ -248,7 +253,8 @@
     "error_loading_post": "Erreur lors du chargement du post",
     "membership_check_error": "Erreur lors de la vérification de l'adhésion:",
     "duplicate_post": "Reprendre le post",
-    "discussion": "Discussion"
+    "discussion": "Discussion",
+    "back_to_drafts": "Retour aux brouillons"
   },
   "post_editor": {
     "upload_error": "Erreur lors de l'upload",
@@ -265,6 +271,8 @@
     "contributions": "Contributions",
     "preview": "Prévisualiser",
     "processing": "Traitement...",
+    "saving": "Enregistrement...",
+    "generating_preview": "Génération de l'aperçu...",
     "cover_image": "Image de couverture",
     "uploading": "Upload...",
     "add_cover_image": "Ajouter une image de couverture",
@@ -273,7 +281,18 @@
     "post_preview": "Prévisualisation du post",
     "cover": "Couverture",
     "untitled": "Sans titre",
-    "submit_post": "Soumettre le post"
+    "submit_post": "Soumettre le post",
+    "modify": "Modifier",
+    "field_title": "Titre",
+    "field_content": "Contenu",
+    "field_category": "Catégorie",
+    "field_cover_image": "Image de couverture",
+    "all_fields_empty": "Tous les champs sont vides",
+    "missing_fields": "Champs manquants",
+    "preview_needs_content": "Veuillez ajouter du contenu avant de prévisualiser",
+    "title_required": "Le titre est requis",
+    "category_required": "La catégorie est requise",
+    "cover_image_required": "L'image de couverture est requise"
   },
   "settings": {
     "no_permissions": "Vous n'avez pas les permissions pour accéder à cette page",
@@ -318,7 +337,6 @@
     "code_of_conduct_placeholder": "Code de conduite...",
     "disclaimers": "Avertissements",
     "disclaimers_placeholder": "Avertissements...",
-    "saving": "Enregistrement...",
     "save_changes": "Enregistrer les modifications"
   },
   "stats": {

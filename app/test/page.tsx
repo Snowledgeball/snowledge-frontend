@@ -1,9 +1,7 @@
-import TinyEditor from "@/components/shared/TinyEditor";
-
 const TestPage = () => {
   return (
     <div>
-      <TinyEditor />
+      <p>Hello</p>
     </div>
   );
 };

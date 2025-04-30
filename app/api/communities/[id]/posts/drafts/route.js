@@ -23,9 +23,17 @@ export async function GET(request, { params }) {
       },
     });
 
-    if (!membership) {
+    const isCreator = await prisma.community.findUnique({
+      where: {
+        id: parseInt(communityId),
+        creator_id: parseInt(session.user.id),
+      },
+    });
+    if (!membership && !isCreator) {
       return NextResponse.json(
-        { error: "Vous n'êtes pas contributeur de cette communauté" },
+        {
+          error: "Vous n'êtes pas contributeur ou créateur de cette communauté",
+        },
         { status: 403 }
       );
     }
@@ -41,6 +49,7 @@ export async function GET(request, { params }) {
         updated_at: "desc",
       },
       include: {
+        community_posts_category: true,
         // Inclure les reviews pour déterminer si le post a été rejeté
         community_posts_reviews: {
           select: {
@@ -79,6 +88,8 @@ export async function GET(request, { params }) {
         content: draft.content,
         cover_image_url: draft.cover_image_url,
         tag: draft.tag,
+        accept_contributions: draft.accept_contributions,
+        category: draft.community_posts_category.name,
         created_at: draft.created_at,
         updated_at: draft.updated_at,
         status: draft.status,
@@ -92,6 +103,8 @@ export async function GET(request, { params }) {
         },
       };
     });
+
+    console.log("transformedDrafts", transformedDrafts);
 
     return NextResponse.json(transformedDrafts);
   } catch (error) {
@@ -127,9 +140,17 @@ export async function POST(request, { params }) {
       },
     });
 
-    if (!membership) {
+    const isCreator = await prisma.community.findUnique({
+      where: {
+        id: parseInt(communityId),
+        creator_id: parseInt(session.user.id),
+      },
+    });
+    if (!membership && !isCreator) {
       return NextResponse.json(
-        { error: "Vous n'êtes pas contributeur de cette communauté" },
+        {
+          error: "Vous n'êtes pas contributeur ou créateur de cette communauté",
+        },
         { status: 403 }
       );
     }

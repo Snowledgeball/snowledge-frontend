@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import dynamic from "next/dynamic";
-import TinyMCEStyledText from "../shared/TinyMCEStyledText";
 import { useTranslation } from "react-i18next";
-
-const TinyEditor = dynamic(() => import("../shared/TinyEditor"), {
-  ssr: false,
-});
+import PostEditorContainer from "./PostEditorContainer";
+import PreviewRenderer from "../shared/PreviewRenderer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 interface EnrichmentEditorProps {
   originalContent: string;
@@ -16,7 +14,7 @@ interface EnrichmentEditorProps {
   description: string;
   onDescriptionChange: (desc: string) => void;
   onContentChange: (content: string) => void;
-  readOnly?: boolean;
+  communityId: string;
 }
 
 export default function EnrichmentEditor({
@@ -25,12 +23,13 @@ export default function EnrichmentEditor({
   description,
   onDescriptionChange,
   onContentChange,
-  readOnly = false,
+  communityId,
 }: EnrichmentEditorProps) {
   const [modifiedContent, setModifiedContent] = useState(
     initialModifiedContent || originalContent
   );
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<string>("modification");
 
   useEffect(() => {
     if (initialModifiedContent) {
@@ -44,7 +43,7 @@ export default function EnrichmentEditor({
   };
 
   return (
-    <div className="enrichment-editor">
+    <div className="enrichment-editor space-y-6">
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-2">
           {t("enrichment.description_title")}
@@ -64,7 +63,6 @@ export default function EnrichmentEditor({
           placeholder={t("enrichment.description_placeholder")}
           className="w-full p-3 border rounded-md"
           rows={3}
-          disabled={readOnly}
         />
         {!description && (
           <p className="text-sm text-red-500 mt-1">
@@ -73,28 +71,52 @@ export default function EnrichmentEditor({
         )}
       </div>
 
-      <div className="grid gap-8 md:grid-cols-2">
-        <div>
-          <h2 className="text-lg font-semibold mb-4">
-            {t("enrichment.original_content")}
-          </h2>
-          <TinyMCEStyledText content={originalContent} />
-        </div>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <Tabs
+          defaultValue="modification"
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full"
+        >
+          <div className="border-b border-gray-200">
+            <TabsList className="w-full flex h-auto bg-gray-50">
+              <TabsTrigger
+                value="original"
+                className="flex-1 py-3 text-base font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:bg-white data-[state=active]:text-blue-600"
+              >
+                {t("enrichment.original_content")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="modification"
+                className="flex-1 py-3 text-base font-medium border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:bg-white data-[state=active]:text-blue-600"
+              >
+                {t("enrichment.modified_content")}
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-        <div>
-          <h2 className="text-lg font-semibold mb-4">
-            {t("enrichment.modified_content")}
-          </h2>
-          {readOnly ? (
-            <TinyMCEStyledText content={modifiedContent} />
-          ) : (
-            <TinyEditor
-              initialValue={modifiedContent}
-              onChange={handleContentChange}
-              protectImages={true}
+          <TabsContent value="original" className="p-6 min-h-[400px]">
+            <PreviewRenderer
+              editorContent={originalContent}
+              className="prose max-w-none"
             />
-          )}
-        </div>
+          </TabsContent>
+
+          <TabsContent value="modification" className="p-6 min-h-[400px]">
+            <PostEditorContainer
+              onlyContent={true}
+              onContentChange={handleContentChange}
+              initialData={{
+                content: modifiedContent,
+                title: "",
+                cover_image_url: "",
+                tag: "",
+                accept_contributions: false,
+              }}
+              communityId={communityId}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

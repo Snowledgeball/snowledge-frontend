@@ -27,7 +27,9 @@
     "reset": "Reset all filters",
     "submit": "Submit for review",
     "publish": "Publish",
-    "back": "Back"
+    "back": "Back",
+    "create": "Create",
+    "update": "Update"
   },
   "communities": {
     "explore": "Explore communities",
@@ -89,7 +91,8 @@
     "no_changes": "You haven't made any changes to the content",
     "contribution_submitted": "Your contribution was successfully submitted",
     "contribute_to": "Contribute to",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+    "save_modifications": "Save modifications"
   },
   "enrichment_compare": {
     "display_mode": "Display mode",
@@ -189,6 +192,7 @@
     "post_submitted": "Post submitted for review",
     "error_create_post": "Error creating post",
     "error_save": "Error saving",
+    "save_draft": "Save draft",
     "draft_saved": "Draft saved",
     "error_save_draft": "Error saving draft",
     "error_delete": "Error deleting",
@@ -196,6 +200,7 @@
     "error_delete_draft": "Error deleting draft",
     "new_post": "New post",
     "drafts": "Drafts",
+    "loading_drafts": "Loading drafts...",
     "edit_draft": "Edit draft",
     "my_drafts": "My drafts",
     "no_drafts": "You don't have any saved drafts",
@@ -208,7 +213,8 @@
     "error_loading_post": "Error loading post",
     "membership_check_error": "Error checking membership:",
     "duplicate_post": "Duplicate this post",
-    "discussion": "Discussion"
+    "discussion": "Discussion",
+    "back_to_drafts": "Back to drafts"
   },
   "post_editor": {
     "upload_error": "Error during upload",
@@ -225,6 +231,8 @@
     "contributions": "Contributions",
     "preview": "Preview",
     "processing": "Processing...",
+    "saving": "Saving...",
+    "generating_preview": "Generating preview...",
     "cover_image": "Cover image",
     "uploading": "Uploading...",
     "add_cover_image": "Add cover image",
@@ -234,7 +242,18 @@
     "cover": "Cover",
     "untitled": "Untitled",
     "submit_post": "Submit post",
-    "write_here": "Write here..."
+    "write_here": "Write here...",
+    "modify": "Modify",
+    "field_title": "Title",
+    "field_content": "Content",
+    "field_category": "Category",
+    "field_cover_image": "Cover image",
+    "all_fields_empty": "All fields are empty",
+    "missing_fields": "Missing fields",
+    "preview_needs_content": "Please add content before previewing",
+    "title_required": "Title is required",
+    "category_required": "Category is required",
+    "cover_image_required": "Cover image is required"
   },
   "settings": {
     "no_permissions": "You don't have permission to access this page",
@@ -279,7 +298,6 @@
     "code_of_conduct_placeholder": "Code of conduct...",
     "disclaimers": "Disclaimers",
     "disclaimers_placeholder": "Disclaimers...",
-    "saving": "Saving...",
     "save_changes": "Save changes"
   },
   "stats": {

@@ -32,6 +32,7 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Loader } from "@/components/ui/loader";
 import { useTranslation } from "react-i18next";
+import dynamic from "next/dynamic";
 
 // Système de cache pour les données du profil
 const profileCache = {
@@ -196,6 +197,8 @@ function ProfileContent() {
   const [selectedCommunityPosts, setSelectedCommunityPosts] = useState<Post[]>(
     []
   );
+  const [selectedCommunityPostsContent, setSelectedCommunityPostsContent] =
+    useState<string | null>(null);
   const [enrichments, setEnrichments] = useState<Enrichment[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [contentProposals, setContentProposals] = useState<ContentProposal[]>(
@@ -235,6 +238,12 @@ function ProfileContent() {
 
   // Ajout d'un état pour les messages
   const [messages, setMessages] = useState<Message[]>([]);
+
+  // Import avec rendu côté client uniquement sans SSR
+  const PreviewRenderer = dynamic(
+    () => import("@/components/shared/PreviewRenderer"),
+    { ssr: false }
+  );
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -427,6 +436,8 @@ function ProfileContent() {
         : Array.isArray(data)
         ? data
         : [];
+
+      //On parse le contenu des posts
 
       // Mettre à jour le cache
       profileCache.posts.set(cacheKey, {
@@ -1328,10 +1339,10 @@ function ProfileContent() {
                             {post.title}
                           </h4>
                           <div className="mt-2 text-sm text-gray-600 line-clamp-3">
-                            <div
-                              dangerouslySetInnerHTML={{
-                                __html: post.content.slice(0, 200) + "...",
-                              }}
+                            <PreviewRenderer
+                              editorContent={post.content}
+                              className="prose max-w-none line-clamp-3"
+                              showLoading={false}
                             />
                           </div>
                           <div className="flex items-center justify-between mt-3">

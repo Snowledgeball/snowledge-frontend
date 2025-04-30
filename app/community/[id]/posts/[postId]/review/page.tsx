@@ -13,7 +13,6 @@ import ReviewCreation from "@/components/community/ReviewCreation";
 import EditReviewCreation from "@/components/community/EditReviewCreation";
 import { useSession } from "next-auth/react";
 import ReviewsSidebar from "@/components/community/ReviewsSidebar";
-import TinyMCEStyledText from "@/components/shared/TinyMCEStyledText";
 
 export default function ReviewPost() {
   const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
@@ -190,7 +189,7 @@ export default function ReviewPost() {
           <div className="max-w-5xl mx-auto px-4">
             <h2 className="text-2xl font-bold mb-4">{post.title}</h2>
             {/* Contenu */}
-            <TinyMCEStyledText content={post.content} />
+            <div dangerouslySetInnerHTML={{ __html: post.content }} />
           </div>
         </div>
 

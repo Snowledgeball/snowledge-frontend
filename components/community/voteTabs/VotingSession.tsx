@@ -46,6 +46,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useTranslation } from "react-i18next";
+import dynamic from "next/dynamic";
+
+// Import avec rendu côté client uniquement sans SSR
+const PreviewRenderer = dynamic(
+  () => import("@/components/shared/PreviewRenderer"),
+  { ssr: false }
+);
 
 // Cache pour stocker les données
 const contributorsCache = new Map<
@@ -123,6 +130,13 @@ export function VotingSession({ communityId }: VotingSessionProps) {
   // Ajouter un nouvel état pour la contribution sélectionnée
   const [selectedContribution, setSelectedContribution] =
     useState<Contribution | null>(null);
+
+  const [selectedContributionContent, setSelectedContributionContent] =
+    useState("");
+
+  // Ajout d'états pour stocker le contenu parsé
+  const [parsedOriginalContent, setParsedOriginalContent] = useState("");
+  const [parsedModifiedContent, setParsedModifiedContent] = useState("");
 
   // Mémoriser l'ID de la communauté pour éviter les re-rendus inutiles
   const memoizedCommunityId = useMemo(() => communityId, [communityId]);
@@ -547,6 +561,31 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
   const { t } = useTranslation();
 
+  const parseContent = async (content: string) => {
+    // Nous n'avons pas besoin de traiter manuellement le contenu
+    // Le composant PreviewRenderer gérera la conversion
+    return content;
+  };
+
+  // Utilisation d'un effet pour parser le contenu lorsqu'il change
+  useEffect(() => {
+    const parseContents = async () => {
+      if (selectedContribution?.original_content) {
+        const original = await parseContent(
+          selectedContribution.original_content
+        );
+        setParsedOriginalContent(original || "");
+      }
+
+      if (selectedContribution?.content) {
+        const modified = await parseContent(selectedContribution.content);
+        setParsedModifiedContent(modified || "");
+      }
+    };
+
+    parseContents();
+  }, [selectedContribution?.original_content, selectedContribution?.content]);
+
   return (
     <div
       className="bg-white rounded-lg shadow-sm h-full flex flex-col"
@@ -778,7 +817,8 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           <p className="text-xs sm:text-sm text-gray-600 mt-1">
                             {(() => {
                               const tempDiv = document.createElement("div");
-                              const safeContent = contribution.content || "";
+                              const safeContent =
+                                selectedContributionContent || "";
                               tempDiv.innerHTML = safeContent.replace(
                                 /<\/?[^>]+(>|$)/g,
                                 ""
@@ -1089,12 +1129,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           </span>
                         </div>
                       </div>
-                      <div className="flex-1 overflow-y-auto">
-                        <div
-                          className="contribution-content tinymce-content p-4"
-                          dangerouslySetInnerHTML={{
-                            __html: selectedContribution?.content || "",
-                          }}
+                      <div className="flex-1 overflow-y-auto p-4">
+                        <PreviewRenderer
+                          editorContent={selectedContribution?.content || ""}
+                          className="contribution-content tinymce-content"
                         />
                       </div>
                     </div>

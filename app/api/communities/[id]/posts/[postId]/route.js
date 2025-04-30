@@ -77,8 +77,6 @@ export async function GET(request, { params }) {
       },
     });
 
-    console.log("post", post);
-
     if (!post) {
       return NextResponse.json({ error: "Post non trouvé" }, { status: 404 });
     }
@@ -122,7 +120,6 @@ export async function PUT(request, { params }) {
 
     let isContributor = false;
 
-    console.log("isContributor", isContributor);
     // Si c'est pour un commentaire, on vérifie que l'utilisateur est un contributeur ou l'auteur du post
     if (post.accept_contributions) {
       isContributor = await prisma.community_contributors.findFirst({

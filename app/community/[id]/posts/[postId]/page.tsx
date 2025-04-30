@@ -14,6 +14,7 @@ import ChatBox from "@/components/shared/ChatBox";
 import Link from "next/link";
 import { Loader } from "@/components/ui/loader";
 import { useTranslation } from "react-i18next";
+import PreviewRenderer from "@/components/shared/PreviewRenderer";
 
 interface Post {
   id: number;
@@ -55,7 +56,6 @@ export default function PostPage() {
         );
         if (!response.ok) throw new Error(t("community_posts.post_not_found"));
         const data = await response.json();
-        console.log("data", data);
         setPost(data);
       } catch (error) {
         toast.error(t("community_posts.error_loading_post"));
@@ -284,10 +284,9 @@ export default function PostPage() {
                       font-weight: 600;
                     }
                   `}</style>
-                  <div
-                    className="prose prose-lg max-w-none"
-                    dangerouslySetInnerHTML={{ __html: post.content }}
-                  />
+                  <div className="prose prose-lg max-w-none">
+                    <PreviewRenderer editorContent={post.content} />
+                  </div>
                 </div>
 
                 {/* Si le post accepte les contributions on l'indique */}

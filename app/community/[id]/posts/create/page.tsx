@@ -1,28 +1,47 @@
 "use client";
 
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
-import PostEditor, { PostData } from "@/components/community/PostEditor";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import DraftFeedbacks from "@/components/community/DraftFeedbacks";
-import { ThumbsDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import PostEditorContainer, {
+  PostData,
+} from "@/components/community/PostEditorContainer";
 
 export default function CreatePost() {
   const { isLoading, isAuthenticated, LoadingComponent } = useAuthGuard();
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [drafts, setDrafts] = useState<PostData[]>([]);
-  const [activeTab, setActiveTab] = useState("new");
-  const [selectedDraft, setSelectedDraft] = useState<PostData | null>(null);
-  const [postData, setPostData] = useState<PostData | null>(null);
   const { t } = useTranslation();
 
+  // État général de gestion des posts
+  const [drafts, setDrafts] = useState<PostData[]>([]);
+  const [selectedDraft, setSelectedDraft] = useState<PostData | null>(null);
+
+  // Initialiser les données du post à partir des paramètres d'URL (pour duplication)
+  // Déplacé ici pour garantir l'ordre constant des hooks
+  const initialData = useMemo(() => {
+    const originalTitle = searchParams.get("title");
+    const originalContent = searchParams.get("content");
+    const originalCoverImage = searchParams.get("coverImageUrl");
+    const originalTag = searchParams.get("tag");
+
+    if (originalTitle || originalContent || originalCoverImage || originalTag) {
+      return {
+        title: originalTitle || "",
+        content: originalContent || "",
+        cover_image_url: originalCoverImage || "",
+        tag: originalTag || "",
+        accept_contributions: false,
+      };
+    }
+
+    return undefined;
+  }, [searchParams]);
+
+  // Initialisation des données de post
   useEffect(() => {
     if (isAuthenticated) {
       checkContributorStatus();
@@ -30,6 +49,7 @@ export default function CreatePost() {
     }
   }, [isAuthenticated]);
 
+  // Charger le brouillon sélectionné
   useEffect(() => {
     const draftId = searchParams.get("draft_id");
 
@@ -40,33 +60,11 @@ export default function CreatePost() {
 
       if (draftToEdit) {
         setSelectedDraft(draftToEdit);
-        setActiveTab("edit");
       }
     }
   }, [searchParams, drafts]);
 
-  useEffect(() => {
-    // Récupérer les données du post original
-    const originalTitle = searchParams.get("title");
-    const originalContent = searchParams.get("content");
-    const originalCoverImage = searchParams.get("coverImageUrl");
-    const originalTag = searchParams.get("tag");
-
-    if (originalTitle && originalContent) {
-      // Pré-remplir le formulaire
-      const postData: PostData = {
-        title: originalTitle,
-        content: originalContent,
-        cover_image_url: originalCoverImage || "",
-        tag: originalTag || "",
-      };
-
-      console.log(postData);
-
-      setPostData(postData);
-    }
-  }, [searchParams]);
-
+  // Vérifier le statut de contributeur
   const checkContributorStatus = async () => {
     try {
       const response = await fetch(`/api/communities/${params.id}/membership`);
@@ -82,6 +80,7 @@ export default function CreatePost() {
     }
   };
 
+  // Récupérer les brouillons
   const fetchDrafts = async () => {
     try {
       const response = await fetch(
@@ -96,7 +95,29 @@ export default function CreatePost() {
     }
   };
 
+  // Soumettre le post
   const handleSubmitPost = async (postData: PostData) => {
+    // Validation améliorée des champs obligatoires
+    if (!postData.title.trim()) {
+      toast.info(t("post_editor.title_required"));
+      return;
+    }
+
+    if (!postData.tag) {
+      toast.info(t("post_editor.category_required"));
+      return;
+    }
+
+    if (typeof postData.content === "string" && postData.content.length < 100) {
+      toast.info(t("post_editor.content_too_short"));
+      return;
+    }
+
+    if (!postData.cover_image_url) {
+      toast.info(t("post_editor.cover_image_required"));
+      return;
+    }
+
     try {
       const response = await fetch(
         `/api/communities/${params.id}/posts/pending`,
@@ -124,39 +145,42 @@ export default function CreatePost() {
 
       router.push(`/community/${params.id}`);
     } catch (error) {
-      toast.error(t("community_posts.error_create_post"));
+      toast.info(t("community_posts.error_create_post"));
     }
   };
 
-  const handleSaveDraft = async (postData: PostData) => {
+  // Sauvegarder un brouillon
+  const handleSaveDraft = async (draftData: PostData) => {
     try {
-      const method = selectedDraft?.id ? "PUT" : "POST";
-      const url = selectedDraft?.id
-        ? `/api/communities/${params.id}/posts/drafts/${selectedDraft.id}`
+      const url = draftData.id
+        ? `/api/communities/${params.id}/posts/drafts/${draftData.id}`
         : `/api/communities/${params.id}/posts/drafts`;
 
+      const method = draftData.id ? "PUT" : "POST";
+
       const response = await fetch(url, {
-        method,
+        method: method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(postData),
+        body: JSON.stringify(draftData),
       });
 
-      if (!response.ok) throw new Error(t("community_posts.error_save"));
+      if (!response.ok) throw new Error(t("community_posts.error_save_draft"));
 
       toast.success(t("community_posts.draft_saved"));
       fetchDrafts();
 
-      if (!selectedDraft?.id) {
-        const data = await response.json();
-        setSelectedDraft({ ...postData, id: data.id });
+      // Si c'était un nouveau brouillon, réinitialiser la sélection
+      if (!draftData.id) {
+        setSelectedDraft(null);
       }
     } catch (error) {
       toast.error(t("community_posts.error_save_draft"));
     }
   };
 
+  // Supprimer un brouillon
   const handleDeleteDraft = async (draftId: number) => {
     try {
       const response = await fetch(
@@ -166,161 +190,64 @@ export default function CreatePost() {
         }
       );
 
-      if (!response.ok) throw new Error(t("community_posts.error_delete"));
+      if (!response.ok)
+        throw new Error(t("community_posts.error_delete_draft"));
 
       toast.success(t("community_posts.draft_deleted"));
       fetchDrafts();
 
       if (selectedDraft?.id === draftId) {
         setSelectedDraft(null);
-        setActiveTab("new");
       }
     } catch (error) {
       toast.error(t("community_posts.error_delete_draft"));
     }
   };
 
+  // Éditer un brouillon
   const handleEditDraft = (draft: PostData) => {
     setSelectedDraft(draft);
-    setActiveTab("edit");
   };
 
-  if (isLoading) return <LoadingComponent />;
-  if (!isAuthenticated) return null;
+  // Créer un nouveau brouillon
+  const handleNewDraft = () => {
+    setSelectedDraft(null);
+  };
+
+  // Retourner à la liste des brouillons
+  const handleBackToDrafts = () => {
+    // On garde le brouillon sélectionné mais on change juste l'affichage
+    if (selectedDraft) {
+      router.push(`/community/${params.id}/posts/create?view=drafts`);
+    }
+  };
+
+  // Surveiller le paramètre de la vue
+  useEffect(() => {
+    const view = searchParams.get("view");
+    if (view === "drafts" && selectedDraft) {
+      // Force l'affichage de l'onglet des brouillons même si un brouillon est sélectionné
+      setSelectedDraft(null);
+    }
+  }, [searchParams]);
+
+  // Rendu conditionnel pour l'authentification et le chargement
+  if (isLoading || !isAuthenticated) return <LoadingComponent />;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-[85rem] mx-auto px-4">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
-            <TabsTrigger
-              value="new"
-              onClick={() =>
-                router.push(`/community/${params.id}/posts/create`)
-              }
-            >
-              {t("community_posts.new_post")}
-            </TabsTrigger>
-            <TabsTrigger value="drafts">
-              {t("community_posts.drafts")} ({drafts.length})
-            </TabsTrigger>
-            {selectedDraft && (
-              <TabsTrigger value="edit">
-                {t("community_posts.edit_draft")}
-              </TabsTrigger>
-            )}
-          </TabsList>
-
-          <TabsContent value="new">
-            <PostEditor
-              initialData={postData ? postData : undefined}
-              communityId={params.id as string}
-              onSubmit={handleSubmitPost}
-              onSaveDraft={handleSaveDraft}
-              submitButtonText={t("actions.submit")}
-            />
-          </TabsContent>
-
-          <TabsContent value="drafts">
-            <Card className="p-6">
-              <h2 className="text-xl font-bold mb-4">
-                {t("community_posts.my_drafts")}
-              </h2>
-              {drafts.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  {t("community_posts.no_drafts")}
-                </p>
-              ) : (
-                <div className="space-y-6">
-                  {drafts.map((draft) => (
-                    <div
-                      key={draft.id}
-                      className="border border-gray-200 rounded-lg p-4 bg-white"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-semibold text-lg">
-                            {draft.title}
-                          </h3>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {t("community_posts.last_modified")}:{" "}
-                            {new Date(
-                              draft.updated_at || draft.created_at || ""
-                            ).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEditDraft(draft)}
-                          >
-                            {t("actions.edit")}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteDraft(draft.id!)}
-                            className="text-red-600 border-red-200 hover:bg-red-50"
-                          >
-                            {t("actions.delete")}
-                          </Button>
-                        </div>
-                      </div>
-
-                      {draft.was_rejected && (
-                        <DraftFeedbacks
-                          communityId={params.id as string}
-                          postId={draft.id!}
-                          variant="inline"
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="edit">
-            {selectedDraft && (
-              <div className="flex gap-6">
-                <div className="flex-1">
-                  <PostEditor
-                    communityId={params.id as string}
-                    initialData={selectedDraft}
-                    onSubmit={handleSubmitPost}
-                    onSaveDraft={(data) => handleSaveDraft(data)}
-                    submitButtonText={t("actions.submit")}
-                  />
-                </div>
-
-                {selectedDraft.was_rejected && searchParams.get("draft_id") && (
-                  <div className="w-80">
-                    <div className="sticky top-6">
-                      <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-                        <h3 className="text-lg font-medium mb-2">
-                          {t("community_posts.feedbacks_received")}
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-3">
-                          {t("community_posts.feedback_description")}
-                        </p>
-                      </div>
-
-                      <DraftFeedbacks
-                        communityId={params.id as string}
-                        postId={selectedDraft.id!}
-                        expanded={true}
-                        variant="sidebar"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+    <PostEditorContainer
+      initialData={initialData}
+      communityId={params.id as string}
+      onSubmit={handleSubmitPost}
+      onSaveDraft={handleSaveDraft}
+      submitButtonText={t("community_posts.propose_post")}
+      showDrafts={true}
+      drafts={drafts}
+      onNewDraft={handleNewDraft}
+      onEditDraft={handleEditDraft}
+      onDeleteDraft={handleDeleteDraft}
+      selectedDraft={selectedDraft}
+      showFeedbacks={true}
+    />
   );
 }
