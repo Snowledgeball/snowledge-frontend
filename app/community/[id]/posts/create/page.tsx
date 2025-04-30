@@ -4,22 +4,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import DraftFeedbacks from "@/components/community/DraftFeedbacks";
-import { Eye, ImageIcon, Save, ThumbsDown, PlusCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { TextEditor } from "@/components/shared/TextEditor";
-import { Switch } from "@/components/ui/switch";
-import Image from "next/image";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import dynamic from "next/dynamic";
 import PostEditorContainer, {
   PostData,
 } from "@/components/community/PostEditorContainer";
@@ -263,7 +248,6 @@ export default function CreatePost() {
       onDeleteDraft={handleDeleteDraft}
       selectedDraft={selectedDraft}
       showFeedbacks={true}
-      onBackToDrafts={handleBackToDrafts}
     />
   );
 }
