@@ -87,8 +87,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { ToolSelector } from "@/components/dashboard/ToolSelector";
 import { useTranslation } from "react-i18next";
-import { TextEditor } from "@/components/shared/TextEditor";
-import { useCreateBlockNote } from "@blocknote/react";
 import dynamic from "next/dynamic";
 import PostEditorContainer, {
   PostData,
@@ -297,10 +295,6 @@ export default function CommunityDashboard() {
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryLabel, setNewCategoryLabel] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [previewHTML, setPreviewHTML] = useState("");
-  const [draftTitle, setDraftTitle] = useState("");
-  const [draftContent, setDraftContent] = useState("");
   const [drafts, setDrafts] = useState<PostData[]>([]);
   const [selectedDraft, setSelectedDraft] = useState<PostData | null>(null);
 
@@ -2266,13 +2260,6 @@ export default function CommunityDashboard() {
             <DialogTitle>{t("post_editor.post_preview")}</DialogTitle>
           </DialogHeader>
 
-          {isPreviewOpen && (
-            <PreviewRenderer
-              editorContent={editorContent}
-              onHtmlGenerated={setPreviewHTML}
-            />
-          )}
-
           <div className="py-4">
             {/* Image de couverture */}
             {coverImage && (
@@ -2299,7 +2286,10 @@ export default function CommunityDashboard() {
             </h1>
 
             {/* Contenu */}
-            <div dangerouslySetInnerHTML={{ __html: previewHTML }} />
+            <PreviewRenderer
+              editorContent={editorContent}
+              className="prose max-w-none"
+            />
 
             {/* Footer */}
             <div className="mt-6 pt-4 border-t border-gray-200">

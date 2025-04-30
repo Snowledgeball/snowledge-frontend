@@ -71,7 +71,7 @@ export function TextEditor({ value, onChange }: TextEditorProps) {
     return () => clearInterval(intervalId);
   }, [editor, onChange, editorContent]);
 
-  // Boutons pour obtenir le HTML
+  // Retourner l'éditeur BlockNote
   return (
     <div>
       <BlockNoteView editor={editor} theme="light" />

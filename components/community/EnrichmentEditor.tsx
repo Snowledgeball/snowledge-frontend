@@ -29,7 +29,6 @@ export default function EnrichmentEditor({
     initialModifiedContent || originalContent
   );
   const { t } = useTranslation();
-  const [originalContentHtml, setOriginalContentHtml] = useState("");
   const [activeTab, setActiveTab] = useState<string>("modification");
 
   useEffect(() => {
@@ -97,13 +96,10 @@ export default function EnrichmentEditor({
           </div>
 
           <TabsContent value="original" className="p-6 min-h-[400px]">
-            <div className="prose max-w-none">
-              <PreviewRenderer
-                editorContent={originalContent}
-                onHtmlGenerated={setOriginalContentHtml}
-              />
-              <div dangerouslySetInnerHTML={{ __html: originalContentHtml }} />
-            </div>
+            <PreviewRenderer
+              editorContent={originalContent}
+              className="prose max-w-none"
+            />
           </TabsContent>
 
           <TabsContent value="modification" className="p-6 min-h-[400px]">

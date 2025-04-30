@@ -47,7 +47,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useTranslation } from "react-i18next";
 import dynamic from "next/dynamic";
-import { useCreateBlockNote } from "@blocknote/react";
 
 // Import avec rendu côté client uniquement sans SSR
 const PreviewRenderer = dynamic(
@@ -562,26 +561,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
 
   const { t } = useTranslation();
 
-  const editor = useCreateBlockNote();
-
   const parseContent = async (content: string) => {
-    try {
-      // Vérifier si le contenu est au format JSON (BlockNote)
-      if (
-        content &&
-        typeof content === "string" &&
-        content.trim().startsWith("[")
-      ) {
-        const blocks = JSON.parse(content);
-        return await editor.blocksToFullHTML(blocks);
-      } else {
-        // Si ce n'est pas du JSON, renvoyer le contenu tel quel
-        return content;
-      }
-    } catch (error) {
-      console.error("Erreur lors du parsing du contenu:", error);
-      return content;
-    }
+    // Nous n'avons pas besoin de traiter manuellement le contenu
+    // Le composant PreviewRenderer gérera la conversion
+    return content;
   };
 
   // Utilisation d'un effet pour parser le contenu lorsqu'il change
@@ -1146,16 +1129,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                           </span>
                         </div>
                       </div>
-                      <div className="flex-1 overflow-y-auto">
+                      <div className="flex-1 overflow-y-auto p-4">
                         <PreviewRenderer
                           editorContent={selectedContribution?.content || ""}
-                          onHtmlGenerated={setSelectedContributionContent}
-                        />
-                        <div
-                          className="contribution-content tinymce-content p-4"
-                          dangerouslySetInnerHTML={{
-                            __html: selectedContributionContent || "",
-                          }}
+                          className="contribution-content tinymce-content"
                         />
                       </div>
                     </div>
@@ -1163,8 +1140,10 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                     <div className="h-full flex flex-col">
                       <div className="flex-1 overflow-y-auto">
                         <EnrichmentCompare
-                          originalContent={parsedOriginalContent}
-                          modifiedContent={parsedModifiedContent}
+                          originalContent={
+                            selectedContribution?.original_content || ""
+                          }
+                          modifiedContent={selectedContribution?.content || ""}
                         />
                       </div>
                     </div>

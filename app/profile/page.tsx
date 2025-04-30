@@ -1341,14 +1341,8 @@ function ProfileContent() {
                           <div className="mt-2 text-sm text-gray-600 line-clamp-3">
                             <PreviewRenderer
                               editorContent={post.content}
-                              onHtmlGenerated={setSelectedCommunityPostsContent}
-                            />
-                            <div
-                              dangerouslySetInnerHTML={{
-                                __html:
-                                  selectedCommunityPostsContent?.slice(0, 200) +
-                                  "...",
-                              }}
+                              className="prose max-w-none line-clamp-3"
+                              showLoading={false}
                             />
                           </div>
                           <div className="flex items-center justify-between mt-3">

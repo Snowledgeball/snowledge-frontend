@@ -299,7 +299,9 @@ export default function PostEditorContainer({
         {/* Tag */}
         {selectedTag && (
           <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm mb-4">
-            {categories.find((t) => t.id === Number(selectedTag))?.label}
+            {categories.find((t) => t.id.toString() === selectedTag)?.label ||
+              categories.find((t) => t.id.toString() === selectedTag)?.name ||
+              selectedTag}
           </span>
         )}
 
@@ -309,7 +311,10 @@ export default function PostEditorContainer({
         </h1>
 
         {/* Contenu */}
-        <div dangerouslySetInnerHTML={{ __html: previewHTML }} />
+        <PreviewRenderer
+          editorContent={editorContent}
+          className="preview-html"
+        />
 
         {/* Footer */}
         <div className="mt-6 pt-4 border-t border-gray-200">
@@ -334,7 +339,7 @@ export default function PostEditorContainer({
     coverImage,
     selectedTag,
     postTitle,
-    previewHTML,
+    editorContent,
     contributionsEnabled,
     categories,
     t,
@@ -589,22 +594,6 @@ export default function PostEditorContainer({
                   {t("post_editor.post_preview")}
                 </DialogTitle>
               </DialogHeader>
-              {isPreviewOpen && !previewHTML && (
-                <div className="flex justify-center py-12">
-                  <Loader
-                    size="lg"
-                    color="gradient"
-                    variant="spinner"
-                    text={t("post_editor.generating_preview")}
-                  />
-                </div>
-              )}
-              {isPreviewOpen && (
-                <PreviewRenderer
-                  editorContent={editorContent}
-                  onHtmlGenerated={setPreviewHTML}
-                />
-              )}
               {previewContent}
             </DialogContent>
           </Dialog>

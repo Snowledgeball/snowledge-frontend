@@ -7,7 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronDown, Edit, FileText, PlusCircle, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useCreateBlockNote } from "@blocknote/react";
+import PreviewRenderer from "@/components/shared/PreviewRenderer";
 
 interface Post {
   id: number;
@@ -64,9 +64,6 @@ export default function CommunityPosts({
     categoriesCache.get(communityId) || []
   );
 
-  // Créer l'éditeur au niveau racine du composant
-  const contentEditor = useCreateBlockNote();
-
   // Cache pour stocker le contenu HTML convertis
   const [contentCache, setContentCache] = useState<Map<number, string>>(
     new Map()
@@ -86,8 +83,31 @@ export default function CommunityPosts({
           typeof post.content === "string" &&
           post.content.trim().startsWith("[")
         ) {
-          const blocks = JSON.parse(post.content);
-          const fullHtml = await contentEditor.blocksToFullHTML(blocks);
+          // Utiliser le PreviewRenderer pour convertir les blocs
+          const previewPromise = new Promise<string>((resolve) => {
+            const handleHtmlGenerated = (html: string) => {
+              resolve(html);
+            };
+
+            // Créer temporairement un élément PreviewRenderer pour utiliser sa logique
+            const tempElement = document.createElement("div");
+            const previewRenderer = (
+              <PreviewRenderer
+                editorContent={post.content}
+                onHtmlGenerated={handleHtmlGenerated}
+                showLoading={false}
+              />
+            );
+
+            // Rendre le composant dans le DOM avec React pour déclencher son useEffect
+            // Note: Nous utiliserons le résultat via la promesse
+            import("react-dom/client").then(({ createRoot }) => {
+              const root = createRoot(tempElement);
+              root.render(previewRenderer);
+            });
+          });
+
+          const fullHtml = await previewPromise;
 
           // Mettre à jour le cache
           setContentCache((prev) => new Map(prev).set(post.id, fullHtml));
@@ -101,7 +121,7 @@ export default function CommunityPosts({
         return post.content;
       }
     },
-    [contentCache, contentEditor]
+    [contentCache]
   );
 
   // Précharger le contenu de tous les posts visibles
@@ -464,10 +484,38 @@ export default function CommunityPosts({
                             {/* Contenu du post */}
                             <div className="mb-3 overflow-hidden relative rounded-lg">
                               <div
-                                className="mt-2 text-sm text-gray-600 line-clamp-5"
+                                className="mt-2 text-sm text-gray-600 post-preview"
+                                style={{
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: "10",
+                                  WebkitBoxOrient: "vertical",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  maxHeight: "15em",
+                                }}
                                 dangerouslySetInnerHTML={{
-                                  __html:
-                                    contentCache.get(post.id) || post.content,
+                                  __html: (() => {
+                                    try {
+                                      const content =
+                                        contentCache.get(post.id) ||
+                                        post.content;
+                                      // Tenter de parser le JSON si c'est du JSON
+                                      if (
+                                        typeof content === "string" &&
+                                        content.trim().startsWith("[")
+                                      ) {
+                                        return contentCache.get(post.id) || "";
+                                      }
+                                      // Sinon, retourner le contenu tel quel
+                                      return content;
+                                    } catch (e) {
+                                      console.error(
+                                        "Erreur lors du parsing du contenu:",
+                                        e
+                                      );
+                                      return "";
+                                    }
+                                  })(),
                                 }}
                               />
                               <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent" />
