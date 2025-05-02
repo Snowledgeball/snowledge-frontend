@@ -23,6 +23,7 @@ interface PusherContextType {
   client: PusherClient | null;
 }
 
+// Création du contexte avec une valeur par défaut sûre
 const PusherContext = createContext<PusherContextType>({ client: null });
 
 const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
@@ -45,6 +46,9 @@ export const PusherProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
+    // Seulement exécuter côté client
+    if (typeof window === "undefined") return;
+
     // Écouter l'activité de l'utilisateur
     const handleActivity = () => resetInactivityTimeout();
     window.addEventListener("mousemove", handleActivity);
@@ -57,7 +61,8 @@ export const PusherProvider = ({ children }: { children: React.ReactNode }) => {
   }, [resetInactivityTimeout]);
 
   useEffect(() => {
-    if (!mounted) return;
+    // Ne pas initialiser Pusher pendant le prérendu
+    if (!mounted || typeof window === "undefined") return;
 
     console.log("🔄 Initialisation de la connexion Pusher globale");
     const pusherClient = getPusherClient();
@@ -69,13 +74,27 @@ export const PusherProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [mounted]);
 
+  // Valeur sûre pour le SSR
+  const contextValue =
+    typeof window === "undefined"
+      ? { client: null }
+      : { client: mounted ? client : null };
+
   return (
-    <PusherContext.Provider
-      value={{ client: mounted ? getPusherClient() : null }}
-    >
+    <PusherContext.Provider value={contextValue}>
       {children}
     </PusherContext.Provider>
   );
 };
 
-export const usePusher = () => useContext(PusherContext);
+// Hook customisé avec protection pour le SSR
+export const usePusher = () => {
+  // Vérifie si nous sommes dans un environnement navigateur
+  if (typeof window === "undefined") {
+    // Retourne une valeur par défaut sûre pour le SSR
+    return { client: null };
+  }
+
+  // Utilisation normale du contexte côté client
+  return useContext(PusherContext);
+};
