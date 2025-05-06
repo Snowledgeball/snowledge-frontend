@@ -172,7 +172,16 @@
     "vote_success": "Vote submitted successfully",
     "proposal_submitted": "Proposal submitted successfully!",
     "proposal_submission_error": "Error submitting proposal",
-    "contributions_load_error": "Unable to load contributions. Please try again."
+    "contributions_load_error": "Unable to load contributions. Please try again.",
+    "topic_proposals": "Topic Proposals",
+    "pending_topics": "Pending topics",
+    "approved_topics": "Approved topics",
+    "rejected_topics": "Rejected topics",
+    "proposals_explanation": "Topic proposals are ideas submitted by the community to create new content. Vote for the ones you would like to see developed.",
+    "proposal_stats": "Proposal Statistics",
+    "community_proposals_overview": "Overview of community topic proposals",
+    "approved": "Approved",
+    "rejected": "Rejected"
   },
   "community_posts": {
     "propose_post": "Propose a post",

@@ -212,7 +212,16 @@
     "vote_success": "Vote soumis avec succès",
     "proposal_submitted": "Proposition soumise avec succès !",
     "proposal_submission_error": "Erreur lors de la soumission de la proposition",
-    "contributions_load_error": "Impossible de charger les contributions. Veuillez réessayer."
+    "contributions_load_error": "Impossible de charger les contributions. Veuillez réessayer.",
+    "topic_proposals": "Propositions de sujets",
+    "pending_topics": "Sujets en attente",
+    "approved_topics": "Sujets approuvés",
+    "rejected_topics": "Sujets rejetés",
+    "proposals_explanation": "Les propositions de sujets sont des idées soumises par la communauté pour créer de nouveaux contenus. Votez pour celles que vous souhaitez voir développées.",
+    "proposal_stats": "Statistiques des propositions",
+    "community_proposals_overview": "Aperçu des propositions de sujets dans cette communauté",
+    "approved": "Approuvé",
+    "rejected": "Rejeté"
   },
   "community_posts": {
     "propose_post": "Proposer un post",
