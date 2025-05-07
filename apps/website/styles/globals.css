@@ -1,0 +1,6 @@
+/* Ajouter les animations pour le loader après les imports Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Reste du CSS existant */

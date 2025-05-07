@@ -1,0 +1,68 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@/components/*": [
+        "components/*"
+      ]
+    },
+    "baseUrl": "."
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "utils/splitString.js",
+    "app/api/communities/route.js",
+    "app/api/communities/[id]/dashboard/route.js",
+    "app/api/communities/[id]/members/route.js",
+    "app/api/communities/[id]/membership/route.js",
+    "app/api/communities/[id]/join/route.js",
+    "app/api/communities/[id]/presentation/route.js",
+    "app/api/communities/[id]/contributor-request/route.js",
+    "app/api/users/[id]/joined-communities/route.js",
+    "app/api/firebase/route.js",
+    "app/api/communities/[communityId]/channels/[channelId]/route.js",
+    "app/api/communities/[communityId]/channels/route.js",
+    "app/api/communities/[id]/qa/route.js",
+    "app/api/communities/[id]/contributors/route.js",
+    "app/api/notifications/route.js",
+    "app/api/communities/[id]/posts/pending/route.js",
+    "app/api/notifications/[id]/route.js",
+    "app/api/communities/[id]/learners/route.js",
+    "app/api/stats/route.js",
+    "app/api/starknet/deploy-account/route.js",
+    "app/api/mint-sbt/route.js",
+    "app/api/user/status/route.js",
+    "app/api/categories/route.js",
+    "app/api/communities/[id]/posts/categories/route.js"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
