@@ -9,6 +9,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./apps/snowledge-v1
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,7 +42,6 @@ jobs:
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v20
         with:
-          working-directory: ./apps/snowledge-v1
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           vercel-args: ${{ github.ref == 'refs/heads/main' && '--prod' || '' }}
