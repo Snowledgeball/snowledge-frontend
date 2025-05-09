@@ -72,120 +72,128 @@
 
 ---
 
-## ⚙️ Workflow CI/CD et gestion des branches
+# Snowledge App
 
-Ce document décrit le processus de développement, d’intégration continue et de déploiement continu de l’application.
+## Commandes rapides (Make)
 
-### Structure des branches
+Pour simplifier l'utilisation de Docker, utilisez ces commandes :
 
-| Branche        | Environnement  | Description                                            |
-|----------------|----------------|--------------------------------------------------------|
-| `feature/*`    | Local          | Développement de fonctionnalités individuelles         |
-| `develop`      | Local          | Intégration des fonctionnalités                        |
-| `staging`      | Preview        | Pré-production pour les tests                          |
-| `main`         | Production     | Application en production                              |
+```bash
+# Afficher l'aide
+make help
 
-### Flux de travail standard
+# Démarrer tous les services
+make up
 
-```mermaid
-graph TD
-    A[Feature Branch] -->|Merge| B[Develop]
-    B -->|Merge| C[Staging]
-    C -->|Pull Request| D[Main]
-    D -->|Déploiement automatique| E[Production]
+# Importer la base de données depuis OVH
+make import-ovh
+
+# Sauvegarder la base de données locale
+make backup
+
+# Arrêter tous les services
+make down
+
+# Reconstruire complètement le projet
+make rebuild
 ```
 
-1. **Développement de fonctionnalités**
-   - Créez une branche à partir de `develop` : `git checkout -b feature/nom-fonctionnalité`
-   - Développez et testez localement
-   - Pushez régulièrement : `git push origin feature/nom-fonctionnalité`
+## Variables d'environnement par application
 
-2. **Intégration**
-   - Merge vers `develop` une fois terminé :
-     ```bash
-     git checkout develop
-     git pull
-     git merge feature/nom-fonctionnalité
-     git push origin develop
-     ```
+Chaque application a son propre fichier `.env` qui est monté dans le conteneur Docker :
 
-3. **Préparation au déploiement**
-   - Merge de `develop` vers `staging` :
-     ```bash
-     git checkout staging
-     git pull
-     git merge develop
-     git push origin staging
-     ```
+- `apps/snowledge-v1/.env` - Pour l'application principale (port 3000)
+- `apps/frontend/.env` - Pour le frontend (port 3001)
+- `apps/backend/.env` - Pour le backend (port 3002)
 
-4. **Mise en production**
-   - Pull request de `staging` vers `main`
-   - Déclenche le déploiement automatique en production
+Ces fichiers sont automatiquement ignorés par Git via le `.gitignore`, donc vos identifiants ne seront pas partagés.
 
-### Développement en parallèle
+Vous pouvez personnaliser ces fichiers avec vos propres variables d'environnement.
 
-- Chaque développeur utilise une branche `feature/*`
-- Intégration fréquente dans `develop`
-- `staging` centralise les fonctionnalités prêtes à tester
-- Une seule PR de `staging` vers `main`
+## Sécurité et variables d'environnement
 
----
+⚠️ **IMPORTANT** : Pour protéger vos données sensibles, créez un fichier `.env` à la racine du projet :
 
-## 🛠️ Gestion de la base de données avec Prisma
+```bash
+# PostgreSQL local
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=snowledge
 
-### Environnements de base de données
+# PostgreSQL OVH (informations sensibles)
+OVH_HOST=postgresql-host.database.cloud.ovh.net
+OVH_PORT=5432
+OVH_USER=votre_utilisateur
+OVH_PASSWORD=votre_mot_de_passe
+OVH_DATABASE=defaultdb
+```
 
-| Environnement  | Branche Neon    | Utilisation                            |
-|----------------|-----------------|----------------------------------------|
-| Local          | `dev`             | Développement individuel               |
-| Preview        | `preview`       | Tests d'intégration (CI/CD)            |
-| Production     | `main`          | Données de production                  |
+Ce fichier `.env` est déjà exclu de Git dans le `.gitignore`, donc vos identifiants ne seront pas partagés.
 
-### Développement local
+Si le fichier `.env` n'existe pas, le script `dump_from_ovh.sh` vous demandera ces informations de manière interactive.
 
-1. Configurer `.env.local` avec l’URL locale
-2. Modifier `prisma/schema.prisma`
-3. Créer une migration :
+## Gestion de la base de données PostgreSQL
+
+### Sauvegarder la base de données
+
+#### Depuis le conteneur Docker local
+
+Pour créer une sauvegarde de la base de données qui sera automatiquement restaurée par tous les membres de l'équipe :
+
+```bash
+# Méthode simple avec make
+make backup
+
+# OU méthode manuelle
+docker-compose exec postgres pg_dump -U postgres -d snowledge -F c -f /backup/snowledge_backup.sql
+```
+
+#### Depuis la base de données OVH
+
+Pour importer une base de données depuis OVH :
+
+1. Installez PostgreSQL sur votre machine locale (pour avoir l'outil pg_dump) :
+
+   - Sur Mac : `brew install postgresql`
+   - Sur Ubuntu/Debian : `sudo apt install postgresql-client`
+
+2. Exécutez la commande :
+
    ```bash
-   npx prisma migrate dev --name nom-de-la-migration
+   make import-ovh
    ```
-4. Appliquer localement avec `npx prisma migrate dev`
 
----
+3. La base sera automatiquement importée et disponible dans tous les conteneurs
 
-## 🚀 Pipeline CI/CD (GitHub Actions)
+### Restauration automatique
 
-Workflow défini dans `.github/workflows/deploy.yml`.
+La restauration est automatique :
 
-### Déclencheurs
+1. Placez votre fichier de sauvegarde dans `./database/backup/snowledge_backup.sql`
+2. Quand quelqu'un exécute `make up` ou `docker-compose up`, la base de données est automatiquement restaurée
 
-- Push sur `staging*` ou `main`
+### Restauration manuelle
 
-### Étapes du pipeline
+Si vous avez besoin de restaurer manuellement :
 
-1. **Checkout du code**
-2. **Installation Node.js v18**
-3. **Installation des dépendances (`npm ci`)**
-4. **Génération du client Prisma**
-5. **Déploiement des migrations**
-6. **Déploiement Vercel** :
-   - `staging*` → Preview
-   - `main` → Production
+```bash
+docker-compose exec postgres pg_restore -U postgres -d snowledge -c /backup/snowledge_backup.sql
+```
 
-### Variables d’environnement
+# Utiliser Docker en mode natif ARM64
 
-- `PREVIEW_DATABASE_URL`
-- `PRODUCTION_DATABASE_URL`
-- `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
+Nous utilisons maintenant Docker en mode natif ARM64. Cela résout les problèmes avec Prisma et bcrypt.
 
----
+Si vous avez d'autres problèmes, essayez de supprimer complètement le dossier node_modules et les images Docker avec :
 
-## ✅ Bonnes pratiques
+# Utiliser Docker en mode natif ARM64
 
-- Commits atomiques et descriptifs
-- PR bien documentées, avec captures si nécessaire
-- Migrations testées localement avant push
-- Résolution de conflits en priorité sur `develop`
-- Tests systématiques en local et en preview avant merge sur `main`
+Nous utilisons maintenant Docker en mode natif ARM64. Cela résout les problèmes avec Prisma et bcrypt.
 
----
+Si vous avez d'autres problèmes, essayez de supprimer complètement le dossier node_modules et les images Docker avec :
+
+```bash
+docker-compose down --rmi all
+rm -rf apps/snowledge-v1/node_modules
+docker-compose up -d
+```
