@@ -4,6 +4,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
+interface User {
+  id: number;
+  name: string;
+}
+
 const fetchUsers = async () => {
   const res = await fetch("http://localhost:3002/user");
   return res.json();
@@ -81,7 +86,7 @@ export default function Home() {
         <p>Chargement...</p>
       ) : (
         <ul className="mt-4 space-y-1">
-          {users.map((user: any) => (
+          {users.map((user: User) => (
             <li key={user.id} className="text-lg">
               {user.name}
             </li>
