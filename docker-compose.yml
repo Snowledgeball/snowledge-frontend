@@ -4,18 +4,15 @@ services:
   # Service pour l'application principale (snowledge-v1)
   snowledge-v1:
     build:
-      context: .
+      context: ./apps/snowledge-v1
       dockerfile: Dockerfile
-    platform: linux/amd64
     ports:
       - "3000:3000"
     volumes:
-      - .:/app
-      - /app/node_modules
-      - ./apps/snowledge-v1/.env:/app/apps/snowledge-v1/.env
+      - ./apps/snowledge-v1/.env:/app/.env
     environment:
       - NODE_ENV=development
-    working_dir: /app/apps/snowledge-v1
+    working_dir: /app
     command: npm run dev
     restart: unless-stopped
 
@@ -24,7 +21,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    platform: linux/amd64
     ports:
       - "3001:3001"
     volumes:
@@ -45,7 +41,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    platform: linux/amd64
     ports:
       - "3002:3002"
     volumes:

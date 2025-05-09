@@ -105,3 +105,19 @@ Si vous avez besoin de restaurer manuellement :
 ```bash
 docker-compose exec postgres pg_restore -U postgres -d snowledge -c /backup/snowledge_backup.sql
 ```
+# Utiliser Docker en mode natif ARM64
+Nous utilisons maintenant Docker en mode natif ARM64. Cela résout les problèmes avec Prisma et bcrypt.
+
+Si vous avez d'autres problèmes, essayez de supprimer complètement le dossier node_modules et les images Docker avec :
+
+
+# Utiliser Docker en mode natif ARM64
+Nous utilisons maintenant Docker en mode natif ARM64. Cela résout les problèmes avec Prisma et bcrypt.
+
+Si vous avez d'autres problèmes, essayez de supprimer complètement le dossier node_modules et les images Docker avec :
+
+```bash
+docker-compose down --rmi all
+rm -rf apps/snowledge-v1/node_modules
+docker-compose up -d
+```
