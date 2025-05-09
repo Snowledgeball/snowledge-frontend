@@ -1,0 +1,85 @@
+version: "3"
+
+services:
+  # Service pour l'application principale (snowledge-v1)
+  snowledge-v1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    platform: linux/amd64
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./apps/snowledge-v1/.env:/app/apps/snowledge-v1/.env
+    environment:
+      - NODE_ENV=development
+    working_dir: /app/apps/snowledge-v1
+    command: npm run dev
+    restart: unless-stopped
+
+  # Service pour le frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    platform: linux/amd64
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./apps/frontend/.env:/app/apps/frontend/.env
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
+    working_dir: /app/apps/frontend
+    command: npm run dev -- --port 3001
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # Service pour le backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    platform: linux/amd64
+    ports:
+      - "3002:3002"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./apps/backend/.env:/app/apps/backend/.env
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
+    working_dir: /app/apps/backend
+    command: npm run dev
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # Service PostgreSQL
+  postgres:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-snowledge}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+      - ./database/backup:/backup
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:

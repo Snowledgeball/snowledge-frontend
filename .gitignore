@@ -29,9 +29,20 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+apps/*/.env
+apps/*/.env.local
+apps/*/.env.development.local
+apps/*/.env.test.local
+apps/*/.env.production.local
 
 # turbo
 .turbo
 
 # ui
 dist/
+
+# Docker volumes
+.docker
+
+# Database backups (uncomment to gitignore database backups)
+# database/backup/*.sql
