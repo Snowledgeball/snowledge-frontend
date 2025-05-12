@@ -8,7 +8,13 @@ echo "   pour stocker vos identifiants et ne PAS les exposer dans ce script."
 # Charger les variables d'environnement si le fichier .env existe
 if [ -f ".env" ]; then
   echo "🔄 Chargement des variables d'environnement depuis .env"
-  export $(grep -v '^#' .env | xargs)
+  # Lecture sécurisée du fichier .env
+  while IFS= read -r line || [ -n "$line" ]; do
+    # Ignorer les commentaires (même précédés d'espaces) et les lignes vides
+    [[ "$line" =~ ^[[:space:]]*#.*$ || -z "$line" ]] && continue
+    # Exporter la variable
+    export "$line"
+  done < .env
 fi
 
 # Demander les informations si elles ne sont pas définies
@@ -44,8 +50,11 @@ echo "📊 Connexion à $OVH_HOST:$OVH_PORT avec l'utilisateur $OVH_USER"
 # Créer le répertoire de sauvegarde s'il n'existe pas
 mkdir -p ./database/backup
 
+echo "Version de pg_dump utilisée :"
+pg_dump --version
+
 # Exécuter pg_dump avec SSL requis
-PGPASSWORD="$OVH_PASSWORD" pg_dump \
+PGPASSWORD="$OVH_PASSWORD" PGSSLMODE=require pg_dump \
   -h "$OVH_HOST" \
   -p "$OVH_PORT" \
   -U "$OVH_USER" \
@@ -55,8 +64,7 @@ PGPASSWORD="$OVH_PASSWORD" pg_dump \
   --no-acl \
   -f "$BACKUP_FILE" \
   --verbose \
-  -w \
-  --ssl-mode=require
+  -w
 
 # Vérifier si le dump a réussi
 if [ $? -eq 0 ]; then
