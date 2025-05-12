@@ -1,1 +1,1 @@
-export { SubscribersChart } from "./components/SubscribersChart";
+export * from "./components/shadcn";
