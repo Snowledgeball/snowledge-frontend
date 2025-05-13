@@ -19,19 +19,17 @@ services:
   # Service pour le frontend
   frontend:
     build:
-      context: .
+      context: ./apps/frontend
       dockerfile: Dockerfile
     ports:
       - "3001:3001"
     volumes:
-      - .:/app
+      - ./apps/frontend:/app
       - /app/node_modules
-      - ./apps/frontend/.env:/app/apps/frontend/.env
+      - ./apps/frontend/.env:/app/.env
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
-    working_dir: /app/apps/frontend
-    command: npm run dev -- --port 3001
     depends_on:
       - postgres
     restart: unless-stopped
@@ -39,19 +37,18 @@ services:
   # Service pour le backend
   backend:
     build:
-      context: .
+      context: ./apps/backend
       dockerfile: Dockerfile
     ports:
       - "3002:3002"
     volumes:
-      - .:/app
+      # Monter le code source en préservant node_modules
+      - ./apps/backend:/app
       - /app/node_modules
-      - ./apps/backend/.env:/app/apps/backend/.env
+      - ./apps/backend/.env:/app/.env
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
-    working_dir: /app/apps/backend
-    command: npm run dev
     depends_on:
       - postgres
     restart: unless-stopped
@@ -71,7 +68,7 @@ services:
       - ./database/backup:/backup
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5

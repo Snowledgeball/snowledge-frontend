@@ -1,35 +1,25 @@
-FROM node:18-slim
+FROM node:22
 
 WORKDIR /app
-
-# Installer les outils de build nécessaires
-RUN apt-get update && apt-get install -y \
-    openssl \
-    build-essential \
-    python3 \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Désactiver le binary engine de Prisma qui cause des problèmes sur ARM64
 ENV PRISMA_CLIENT_ENGINE_TYPE=binary
 ENV PRISMA_CLI_QUERY_ENGINE_TYPE=binary
 
-# Copier d'abord les fichiers de configuration pour installer les dépendances
-COPY package.json .
-COPY package-lock.json* .
+# Copier uniquement les fichiers nécessaires pour installer les dépendances
+COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
-COPY next.config.ts .
-COPY tsconfig.json .
+COPY next.config.ts tsconfig.json ./
 
 # Installer les dépendances
-RUN npm install
-
-# Générer le client Prisma
-RUN npx prisma generate
+RUN npm install && \
+    npx prisma generate && \
+    npm cache clean --force
 
 # Copier le reste de l'application
 COPY . .
 
-# Reconstruire les modules natifs
+# Reconstruire les modules natifs (si nécessaire)
 RUN npm rebuild bcrypt --build-from-source
 
 # Exposer le port
