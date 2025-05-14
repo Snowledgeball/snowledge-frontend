@@ -1,18 +1,28 @@
 {
   "name": "the-best-monorepo",
   "version": "0.1.0",
-  "packageManager": "npm@11.3.0",
   "private": true,
   "scripts": {
-    "dev": "turbo run dev",
     "build": "turbo run build",
+    "clean": "turbo run clean",
+    "dev": "turbo run dev",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
     "install:all": "npm install && npm install --workspaces"
   },
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
+  "dependencies": {},
   "devDependencies": {
-    "turbo": "^2.5.2"
+    "prettier": "^3.2.5",
+    "turbo": "2.5.0"
+  },
+  "packageManager": "npm@11.3.0",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=11.0.0"
   }
 }

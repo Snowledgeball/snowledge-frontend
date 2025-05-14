@@ -7,7 +7,7 @@ services:
       context: ./apps/snowledge-v1
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - 3005:3005
     volumes:
       - ./apps/snowledge-v1/.env:/app/.env
     environment:
@@ -15,49 +15,35 @@ services:
     working_dir: /app
     command: npm run dev
     restart: unless-stopped
-
+    networks:
+      - snowledge_network
   # Service pour le frontend
   frontend:
     build:
-      context: ./apps/frontend
-      dockerfile: Dockerfile
+      context: .
     ports:
-      - "3001:3001"
-    volumes:
-      - ./apps/frontend:/app
-      - /app/node_modules
-      - ./apps/frontend/.env:/app/.env
-    environment:
-      - NODE_ENV=development
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
+      - 3000:3000
     depends_on:
       - postgres
     restart: unless-stopped
-
+    networks:
+      - snowledge_network
   # Service pour le backend
   backend:
     build:
-      context: ./apps/backend
-      dockerfile: Dockerfile
+      context: .
     ports:
-      - "3002:3002"
-    volumes:
-      # Monter le code source en préservant node_modules
-      - ./apps/backend:/app
-      - /app/node_modules
-      - ./apps/backend/.env:/app/.env
-    environment:
-      - NODE_ENV=development
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
+      - 4000:4000
     depends_on:
       - postgres
     restart: unless-stopped
-
+    networks:
+      - snowledge_network
   # Service PostgreSQL
   postgres:
     image: postgres:16
     ports:
-      - "5432:5432"
+      - 5432:5432
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
@@ -75,3 +61,6 @@ services:
 
 volumes:
   postgres-data:
+networks:
+  snowledge_network:
+    external: true

@@ -1,25 +1,25 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+import { Button, Logo } from "@repo/ui-core";
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { Button } from "@/components/ui/button";
+// import { Checkbox } from "@/components/ui/checkbox";
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
+// import { Separator } from "@/components/ui/separator";
 import { Menu, Zap, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -118,7 +118,7 @@ export function Navbar2() {
               <Zap className="h-4 w-4" /> Upgrade
             </Button>
             {/* User menu dropdown */}
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="cursor-pointer">
                   <AvatarImage
@@ -134,7 +134,7 @@ export function Navbar2() {
                 <Separator className="my-1" />
                 <DropdownMenuItem>Sign Out</DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
             {/* New item button */}
           </div>
         </div>
@@ -155,18 +155,18 @@ export function Navbar2() {
                 <NavItems isMobile={true} />
               </div>
             </div>
-            <Separator />
+            {/* <Separator /> */}
             {/* Mobile user profile section */}
             <div className="p-2">
               {/* User info */}
               <div className="flex items-center space-x-3 p-2">
-                <Avatar>
+                {/* <Avatar>
                   <AvatarImage
                     src="https://github.com/shadcn.png"
                     alt="@shadcn"
                   />
                   <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
+                </Avatar> */}
                 <div>
                   <p className="font-medium">John Doe</p>
                   <p className="text-sm text-muted-foreground">
@@ -226,11 +226,11 @@ export function Settings2() {
             {/* Search */}
             <div className="relative md:max-w-xs w-full">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input type="search" placeholder="Search" className="pl-8" />
+              {/* <Input type="search" placeholder="Search" className="pl-8" /> */}
             </div>
             {/* Mobile-only dropdown */}
             <div className="md:hidden">
-              <Select defaultValue="profile">
+              {/* <Select defaultValue="profile">
                 <SelectTrigger>
                   <SelectValue placeholder="Select setting" />
                 </SelectTrigger>
@@ -242,7 +242,7 @@ export function Settings2() {
                   <SelectItem value="invoices">Invoices</SelectItem>
                   <SelectItem value="api">API</SelectItem>
                 </SelectContent>
-              </Select>
+              </Select> */}
             </div>
           </div>
         </div>
@@ -289,7 +289,7 @@ export function Settings2() {
                   </p>
                 </div>
                 <div className="col-span-8 lg:col-span-4 space-y-4 md:space-y-6">
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label htmlFor="username">Username</Label>
                     <Input id="username" value="nicol43" readOnly />
                   </div>
@@ -308,12 +308,12 @@ export function Settings2() {
                       type="email"
                       value="stephanie_nicol@mail.com"
                     />
-                  </div>
+                  </div> */}
                   <Button>Save</Button>
                 </div>
               </section>
 
-              <Separator className="my-6" />
+              {/* <Separator className="my-6" /> */}
 
               {/* Change password section */}
               <section className="grid grid-cols-1 lg:grid-cols-8 gap-4 mb-8">
@@ -326,7 +326,7 @@ export function Settings2() {
                   </p>
                 </div>
                 <div className="col-span-8 lg:col-span-4 space-y-4 md:space-y-6">
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label htmlFor="current-password">
                       Verify current password
                     </Label>
@@ -335,30 +335,30 @@ export function Settings2() {
                       type="password"
                       value="••••••••••"
                     />
-                  </div>
+                  </div> */}
                   <div className="flex flex-col gap-2">
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <Label htmlFor="new-password">New password</Label>
                       <Input
                         id="new-password"
                         type="password"
                         value="••••••••••"
                       />
-                    </div>
+                    </div> */}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm password</Label>
+                    {/* <Label htmlFor="confirm-password">Confirm password</Label>
                     <Input
                       id="confirm-password"
                       type="password"
                       value="••••••••••"
-                    />
+                    /> */}
                   </div>
                   <Button>Save</Button>
                 </div>
               </section>
 
-              <Separator className="my-6" />
+              {/* <Separator className="my-6" /> */}
 
               {/* Advanced settings section */}
               <section className="grid grid-cols-1 lg:grid-cols-8 gap-4 mb-8">
@@ -372,7 +372,7 @@ export function Settings2() {
                 </div>
                 <div className="col-span-8 lg:col-span-4 space-y-4 md:space-y-6">
                   <div className="flex items-top space-x-2">
-                    <Checkbox id="data-export" />
+                    {/* <Checkbox id="data-export" /> */}
                     <div className="grid gap-1.5 leading-none">
                       <label
                         htmlFor="data-export"
@@ -386,7 +386,7 @@ export function Settings2() {
                     </div>
                   </div>
                   <div className="flex items-top space-x-2">
-                    <Checkbox id="admin-add" />
+                    {/* <Checkbox id="admin-add" /> */}
                     <div className="grid gap-1.5 leading-none">
                       <label
                         htmlFor="admin-add"
@@ -400,7 +400,7 @@ export function Settings2() {
                     </div>
                   </div>
                   <div className="flex items-top space-x-2">
-                    <Checkbox id="two-factor" />
+                    {/* <Checkbox id="two-factor" /> */}
                     <div className="grid gap-1.5 leading-none">
                       <label
                         htmlFor="two-factor"

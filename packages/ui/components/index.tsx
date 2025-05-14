@@ -1,0 +1,1 @@
+export { Settings2 as Setting } from "./settings/settings-2";

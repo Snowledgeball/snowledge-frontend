@@ -3,9 +3,9 @@ FROM node:22
 WORKDIR /app
 
 # Copier les fichiers de dépendances
-COPY package.json package-lock.json* ./
+COPY package*.json ./
 COPY tsconfig.json next.config.ts ./
-
+RUN npm install turbo --global
 # Installer les dépendances du projet
 RUN npm install && npm cache clean --force
 
@@ -13,7 +13,7 @@ RUN npm install && npm cache clean --force
 COPY . .
 
 # Exposer le port
-EXPOSE 3001
+EXPOSE 3000
 
 # Commande de démarrage
-CMD ["npm", "run", "dev", "--", "--port", "3001"] 
+CMD ["npm", "run", "dev", "--", "--port", "3000"] 

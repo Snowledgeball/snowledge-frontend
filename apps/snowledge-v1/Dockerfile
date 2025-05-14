@@ -23,7 +23,7 @@ COPY . .
 RUN npm rebuild bcrypt --build-from-source
 
 # Exposer le port
-EXPOSE 3000
+EXPOSE 3005
 
 # Commande de démarrage
 CMD ["npm", "run", "dev"]

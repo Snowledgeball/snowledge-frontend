@@ -1,4 +1,3 @@
-export { Button } from "./button";
 export { AspectRatio } from "./aspect-ratio";
 export {
   Breadcrumb,
@@ -8,3 +7,6 @@ export {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "./breadcrumb";
+export { Button } from "./button";
+export { Logo } from "./logo"
+
