@@ -17,7 +17,11 @@ import {
 import { NavMain } from "@/components/sidebar/nav-main";
 import { NavProjects } from "@/components/sidebar/nav-projects";
 import { NavUser } from "@/components/sidebar/nav-user";
-import { TeamSwitcher } from "@/components/sidebar/team-switcher";
+import {
+  CommunityProvider,
+  CommunitySwitcher,
+  useCurrentCommunity,
+} from "@/components/sidebar/team-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -26,173 +30,213 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-// This is sample data.
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
-  navMain: [
-    {
-      title: "Your Community",
-      url: "/dashboard/your-community",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Settings",
-          url: "/dashboard/your-community/settings",
-        },
-        {
-          title: "Members",
-          url: "/dashboard/your-community/members",
-        },
-        {
-          title: "Invite",
-          url: "/dashboard/your-community/invite",
-        },
-        {
-          title: "Pricing",
-          url: "/dashboard/your-community/pricing",
-        },
-      ],
-    },
-    {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-};
+import { toSlug } from "@/utils/slug";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
+    <CommunityProvider>
+      <Sidebar collapsible="icon" {...props}>
+        <SidebarHeader>
+          <CommunitySwitcher />
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarNavs />
+        </SidebarContent>
+        <SidebarFooter>
+          <NavUser
+            user={{
+              name: "shadcn",
+              email: "m@example.com",
+              avatar: "/avatars/shadcn.jpg",
+            }}
+          />
+        </SidebarFooter>
+        <SidebarRail />
+      </Sidebar>
+    </CommunityProvider>
+  );
+}
+
+function SidebarNavs() {
+  const { activeCommunity } = useCurrentCommunity();
+  const slug = toSlug(activeCommunity.name);
+  // Structure enrichie pour NavMain (élève)
+  const navMain = [
+    {
+      title: "Tableau de bord",
+      url: `/${slug}/dashboard`,
+      icon: PieChart,
+      items: [
+        {
+          title: "Vue globale",
+          url: `/${slug}/dashboard/overview`,
+        },
+        {
+          title: "Statistiques détaillées",
+          url: `/${slug}/dashboard/details`,
+        },
+      ],
+    },
+    {
+      title: "Contenu",
+      url: `/${slug}/content`,
+      icon: BookOpen,
+      items: [
+        {
+          title: "Articles",
+          url: `/${slug}/content/articles`,
+        },
+        {
+          title: "Vidéos",
+          url: `/${slug}/content/videos`,
+        },
+        {
+          title: "Podcasts",
+          url: `/${slug}/content/podcasts`,
+        },
+      ],
+    },
+    {
+      title: "Discussions",
+      url: `/${slug}/discussions`,
+      icon: Bot,
+      items: [
+        {
+          title: "Forum",
+          url: `/${slug}/discussions/forum`,
+        },
+        {
+          title: "Chat général",
+          url: `/${slug}/discussions/chat`,
+        },
+      ],
+    },
+    {
+      title: "Ressources",
+      url: `/${slug}/resources`,
+      icon: BookOpen,
+      items: [
+        {
+          title: "Documents",
+          url: `/${slug}/resources/documents`,
+        },
+        {
+          title: "Liens utiles",
+          url: `/${slug}/resources/links`,
+        },
+      ],
+    },
+    {
+      title: "Idées",
+      url: `/${slug}/ideas`,
+      icon: SquareTerminal,
+      items: [
+        {
+          title: "Proposer une idée",
+          url: `/${slug}/ideas/propose`,
+        },
+        {
+          title: "Mes idées",
+          url: `/${slug}/ideas/my-ideas`,
+        },
+      ],
+    },
+    {
+      title: "Calendrier",
+      url: `/${slug}/calendar`,
+      icon: Frame,
+      items: [
+        {
+          title: "Événements",
+          url: `/${slug}/calendar/events`,
+        },
+        {
+          title: "Mes rendez-vous",
+          url: `/${slug}/calendar/my-events`,
+        },
+      ],
+    },
+    {
+      title: "Notifications",
+      url: `/${slug}/notifications`,
+      icon: Command,
+    },
+    {
+      title: "FAQ",
+      url: `/${slug}/faq`,
+      icon: GalleryVerticalEnd,
+    },
+    {
+      title: "Support",
+      url: `/${slug}/support`,
+      icon: AudioWaveform,
+    },
+  ];
+  // Structure enrichie pour NavContributeur
+  const navContributeur = [
+    {
+      title: "Contribuer",
+      url: `/${slug}/contribute`,
+      icon: Frame,
+      items: [
+        {
+          title: "Proposer un projet",
+          url: `/${slug}/contribute/propose`,
+        },
+        {
+          title: "Mes contributions",
+          url: `/${slug}/contribute/my-contributions`,
+        },
+        {
+          title: "Idées à valider",
+          url: `/${slug}/contribute/validate-ideas`,
+        },
+        {
+          title: "Collaborations",
+          url: `/${slug}/contribute/collaborations`,
+        },
+      ],
+    },
+  ];
+  // Structure enrichie pour NavProjects (admin/créateur)
+  const navProjects = [
+    {
+      name: "Administration",
+      url: `/${slug}/admin`,
+      icon: Settings2,
+      items: [
+        {
+          title: "Paramètres",
+          url: `/${slug}/admin/settings`,
+        },
+        {
+          title: "Membres",
+          url: `/${slug}/admin/members`,
+        },
+        {
+          title: "Invitations",
+          url: `/${slug}/admin/invite`,
+        },
+        {
+          title: "Tarifs",
+          url: `/${slug}/admin/pricing`,
+        },
+        {
+          title: "Modération",
+          url: `/${slug}/admin/moderation`,
+        },
+        {
+          title: "Logs",
+          url: `/${slug}/admin/logs`,
+        },
+      ],
+    },
+  ];
+  return (
+    <>
+      <NavMain items={navMain} />
+      <NavMain items={navContributeur} label="Contribuer" />
+      <NavProjects projects={navProjects} />
+    </>
   );
 }

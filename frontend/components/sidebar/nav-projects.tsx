@@ -35,6 +35,7 @@ export function NavProjects({
     name: string;
     url: string;
     icon: LucideIcon;
+    items?: { title: string; url: string }[];
   }[];
 }) {
   const { isMobile } = useSidebar();
@@ -51,6 +52,20 @@ export function NavProjects({
                 <span>{item.name}</span>
               </a>
             </SidebarMenuButton>
+            {/* Sous-items (admin) */}
+            {item.items && item.items.length > 0 && (
+              <ul className="ml-6 mt-1 space-y-1">
+                {item.items.map((sub) => (
+                  <li key={sub.title}>
+                    <SidebarMenuButton asChild size="sm">
+                      <a href={sub.url} className="pl-2">
+                        <span>{sub.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </li>
+                ))}
+              </ul>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover>

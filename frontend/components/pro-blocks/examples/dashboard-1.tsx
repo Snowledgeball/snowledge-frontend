@@ -80,7 +80,7 @@ import {
   GalleryVerticalEnd,
 } from "lucide-react";
 
-import { TeamSwitcher } from "@/components/sidebar/team-switcher";
+import { CommunitySwitcher } from "@/components/sidebar/team-switcher";
 import { NavMain } from "@/components/sidebar/nav-main";
 import { NavUser } from "@/components/sidebar/nav-user";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";

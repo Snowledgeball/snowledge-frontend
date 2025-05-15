@@ -15,11 +15,21 @@ import { Settings, Home, Folder } from "lucide-react";
 // Mapping pour afficher des labels jolis et des icônes
 const breadcrumbLabels: Record<string, string> = {
   dashboard: "Dashboard",
-  "your-community": "Ma communauté",
+  InvestisseursFous: "InvestisseursFous",
+  CryptoClub: "Crypto Club",
+  ImmoPro: "Immo Pro",
+  contribute: "Contribuer",
+  propose: "Proposer un projet",
+  "my-contributions": "Mes contributions",
+  "validate-ideas": "Idées à valider",
   settings: "Paramètres",
   members: "Membres",
-  test: "Test",
-  pricing: "Prix",
+  invite: "Invitations",
+  pricing: "Tarifs",
+  content: "Contenu",
+  ideas: "Idées",
+  discussions: "Discussions",
+  resources: "Ressources",
   // Ajoute d'autres segments si besoin
 };
 

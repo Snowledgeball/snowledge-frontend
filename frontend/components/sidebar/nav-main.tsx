@@ -21,6 +21,7 @@ import {
 
 export function NavMain({
   items,
+  label = "Créateur",
 }: {
   items: {
     title: string;
@@ -32,10 +33,11 @@ export function NavMain({
       url: string;
     }[];
   }[];
+  label?: string;
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>{label}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const { openSections, setOpenSection } = useSidebarAccordion();
