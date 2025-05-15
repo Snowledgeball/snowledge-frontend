@@ -21,6 +21,7 @@ services:
   frontend:
     build:
       context: .
+      dockerfile: ./apps/frontend/Dockerfile.prod
     ports:
       - 3000:3000
     depends_on:
@@ -32,6 +33,7 @@ services:
   backend:
     build:
       context: .
+      dockerfile: ./apps/backend/Dockerfile.prod
     ports:
       - 4000:4000
     depends_on:
