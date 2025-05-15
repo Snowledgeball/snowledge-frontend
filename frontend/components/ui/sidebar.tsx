@@ -5,25 +5,25 @@ import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
 import { PanelLeftIcon } from "lucide-react";
 
-import { useIsMobile } from "../../hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { Button } from "./button";
-import { Input } from "./input";
-import { Separator } from "./separator";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "./sheet";
-import { Skeleton } from "./skeleton";
+} from "@/components/ui/sheet";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "./tooltip";
+} from "@/components/ui/tooltip";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -43,6 +43,20 @@ type SidebarContextProps = {
 };
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
+
+// Ajout du context pour l'état des accordéons
+const ACCORDION_LOCALSTORAGE_KEY = "sidebar_accordion_state";
+const AccordionStateContext = React.createContext<{
+  openSections: Record<string, boolean>;
+  setOpenSection: (key: string, open: boolean) => void;
+} | null>(null);
+
+function useSidebarAccordion() {
+  const ctx = React.useContext(AccordionStateContext);
+  if (!ctx)
+    throw new Error("useSidebarAccordion must be used within SidebarProvider");
+  return ctx;
+}
 
 function useSidebar() {
   const context = React.useContext(SidebarContext);
@@ -126,27 +140,62 @@ function SidebarProvider({
     [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
   );
 
+  // 1. Lire l'état initial depuis le localStorage
+  const [openSections, setOpenSections] = React.useState<
+    Record<string, boolean>
+  >({});
+
+  const [isHydrated, setIsHydrated] = React.useState(false);
+
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem(ACCORDION_LOCALSTORAGE_KEY);
+      if (stored) {
+        setOpenSections(JSON.parse(stored));
+      }
+    } catch {
+      // ignore
+    }
+    setIsHydrated(true);
+  }, []);
+
+  // 2. Mettre à jour le localStorage à chaque changement
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        ACCORDION_LOCALSTORAGE_KEY,
+        JSON.stringify(openSections)
+      );
+    }
+  }, [openSections]);
+
+  const setOpenSection = (key: string, open: boolean) => {
+    setOpenSections((prev) => ({ ...prev, [key]: open }));
+  };
+
   return (
     <SidebarContext.Provider value={contextValue}>
-      <TooltipProvider delayDuration={0}>
-        <div
-          data-slot="sidebar-wrapper"
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH,
-              "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
-              ...style,
-            } as React.CSSProperties
-          }
-          className={cn(
-            "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
-            className
-          )}
-          {...props}
-        >
-          {children}
-        </div>
-      </TooltipProvider>
+      <AccordionStateContext.Provider value={{ openSections, setOpenSection }}>
+        <TooltipProvider delayDuration={0}>
+          <div
+            data-slot="sidebar-wrapper"
+            style={
+              {
+                "--sidebar-width": SIDEBAR_WIDTH,
+                "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+                ...style,
+              } as React.CSSProperties
+            }
+            className={cn(
+              "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
+              className
+            )}
+            {...props}
+          >
+            {isHydrated ? children : null}
+          </div>
+        </TooltipProvider>
+      </AccordionStateContext.Provider>
     </SidebarContext.Provider>
   );
 }
@@ -723,4 +772,5 @@ export {
   SidebarSeparator,
   SidebarTrigger,
   useSidebar,
+  useSidebarAccordion,
 };

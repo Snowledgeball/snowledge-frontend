@@ -1,99 +1,19 @@
-// app/page.tsx
-"use client";
-
-// import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-// import { useState } from "react";
-// interface User {
-//   id: number;
-//   name: string;
-// }
-
-// const fetchUsers = async () => {
-//   const res = await fetch("http://localhost:4000/user");
-//   return res.json();
-// };
-
-// const postUser = async (name: string) => {
-//   const res = await fetch("http://localhost:4000/user", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json", "x-auth-token": "12345" },
-//     body: JSON.stringify({ name }),
-//   });
-//   return res.json();
-// };
+import { Navbar1 } from "@/components/pro-blocks/navbars/navbar-1";
+import { HeroSection1 } from "@/components/pro-blocks/hero-sections/hero-section-1";
+import { FeatureSection1 } from "@/components/pro-blocks/feature-sections/feature-section-1";
+import { PricingSection1 } from "@/components/pro-blocks/pricing-sections/pricing-section-1";
+import { TestimonialsSection1 } from "@/components/pro-blocks/testimonials-sections/testimonials-section-1";
+import { Footer1 } from "@/components/pro-blocks/footers/footer-1";
 
 export default function Home() {
-  // const [name, setName] = useState("");
-  // const queryClient = useQueryClient();
-
-  // const { data: users = [], isLoading } = useQuery({
-  //   queryKey: ["users"],
-  //   queryFn: fetchUsers,
-  // });
-
-  // const mutation = useMutation({
-  //   mutationFn: postUser,
-  //   onSuccess: (data) => {
-  //     queryClient.invalidateQueries({ queryKey: ["users"] });
-  //     setName("");
-  //     console.log(data);
-  //   },
-  //   onError: (error) => {
-  //     console.log(error);
-  //   },
-  // });
-
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (name.trim()) mutation.mutate(name);
-  // };
-
-  return <div>Hello</div>;
-  // return (
-  //   <div className="flex flex-col items-center justify-center h-screen space-y-4">
-  //     <h1 className="text-4xl font-bold">Utilisateurs</h1>
-  //     <Button type="submit">Click 3</Button>
-
-  //     <form onSubmit={handleSubmit} className="flex space-x-2">
-  //       <input
-  //         value={name}
-  //         onChange={(e) => setName(e.target.value)}
-  //         placeholder="Nom"
-  //         className="border px-2 py-1 rounded"
-  //       />
-  //       <button
-  //         type="submit"
-  //         className="bg-blue-600 text-white px-4 py-1 rounded"
-  //         disabled={mutation.isPending}
-  //       >
-  //         {mutation.isPending ? "Ajout en cours..." : "Ajouter"}
-  //       </button>
-  //     </form>
-
-  //     {mutation.isError && (
-  //       <p className="text-red-500">
-  //         {mutation.error?.message || "Une erreur est survenue"}
-  //       </p>
-  //     )}
-
-  //     {mutation.isSuccess && (
-  //       <p className="text-green-500">
-  //         {mutation.data.message + " " + mutation.data.user.name ||
-  //           "Utilisateur ajouté avec succès"}
-  //       </p>
-  //     )}
-
-  //     {isLoading ? (
-  //       <p>Chargement...</p>
-  //     ) : (
-  //       <ul className="mt-4 space-y-1">
-  //         {users.map((user: User) => (
-  //           <li key={user.id} className="text-lg">
-  //             {user.name}
-  //           </li>
-  //         ))}
-  //       </ul>
-  //     )}
-  //   </div>
-  // );
+  return (
+    <>
+      <Navbar1 />
+      <HeroSection1 />
+      <FeatureSection1 />
+      <PricingSection1 />
+      <TestimonialsSection1 />
+      <Footer1 />
+    </>
+  );
 }

@@ -17,9 +17,9 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { TeamSwitcher } from "@/components/team-switcher";
-import { NavMain } from "@/components/nav-main";
-import { NavUser } from "@/components/nav-user";
+import { TeamSwitcher } from "@/components/sidebar/team-switcher";
+import { NavMain } from "@/components/sidebar/nav-main";
+import { NavUser } from "@/components/sidebar/nav-user";
 import {
   Cog,
   ExternalLink,
@@ -127,7 +127,6 @@ const data = {
         {
           title: "Integrations",
           url: "#integrations",
-          
         },
         {
           title: "Billing",
@@ -260,11 +259,12 @@ const integrations: IntegrationType[] = [
 ];
 
 export function Settings4({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [activeIntegrations, setActiveIntegrations] = React.useState<IntegrationType[]>(integrations);
+  const [activeIntegrations, setActiveIntegrations] =
+    React.useState<IntegrationType[]>(integrations);
 
   const handleToggle = (integrationName: string) => {
-    setActiveIntegrations(prevIntegrations =>
-      prevIntegrations.map(integration =>
+    setActiveIntegrations((prevIntegrations) =>
+      prevIntegrations.map((integration) =>
         integration.name === integrationName
           ? { ...integration, enabled: !integration.enabled }
           : integration
@@ -377,7 +377,7 @@ export function Settings4({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <Cog className="h-4 w-4" />
                       Settings
                     </Button>
-                    <Switch 
+                    <Switch
                       checked={integration.enabled}
                       onCheckedChange={() => handleToggle(integration.name)}
                     />

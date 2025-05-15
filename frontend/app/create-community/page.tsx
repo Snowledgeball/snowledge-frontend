@@ -53,11 +53,14 @@ function useCommunityTypes() {
       // Simule un appel API, à remplacer par un vrai fetch
       await new Promise((res) => setTimeout(res, 300));
       return [
-        { value: "sport", label: "Sport" },
-        { value: "musique", label: "Musique" },
-        { value: "tech", label: "Tech" },
-        { value: "art", label: "Art" },
-        { value: "voyage", label: "Voyage" },
+        { value: "immobilier", label: "Immobilier" },
+        { value: "bourse", label: "Bourse" },
+        { value: "crypto", label: "Cryptomonnaies" },
+        { value: "startups", label: "Startups" },
+        { value: "crowdfunding", label: "Crowdfunding" },
+        { value: "épargne", label: "Épargne" },
+        { value: "or", label: "Or & métaux précieux" },
+        { value: "nft", label: "NFT & actifs digitaux" },
       ];
     },
   });
@@ -248,22 +251,6 @@ export default function CreateCommunity() {
           <Button type="submit" className="w-full">
             Créer la communauté
           </Button>
-
-          <Select>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select a fruit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Fruits</SelectLabel>
-                <SelectItem value="apple">Apple</SelectItem>
-                <SelectItem value="banana">Banana</SelectItem>
-                <SelectItem value="blueberry">Blueberry</SelectItem>
-                <SelectItem value="grapes">Grapes</SelectItem>
-                <SelectItem value="pineapple">Pineapple</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
         </form>
       </Form>
     </div>

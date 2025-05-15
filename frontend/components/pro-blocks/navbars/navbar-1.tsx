@@ -1,6 +1,6 @@
 "use client";
 
-import { Logo } from "@/components/logo";
+import { Logo } from "../logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -84,19 +84,20 @@ export function Navbar1() {
           className={`${linkClasses} ${
             isMobile ? "text-primary" : "text-primary"
           }`}
+          href="/dashboard"
         >
           Dashboard
         </Link>
-        <Link className={`${linkClasses} flex gap-2`}>
+        <Link className={`${linkClasses} flex gap-2`} href="/orders">
           Orders
           <Badge className="h-5 w-5 text-xs flex items-center justify-center p-0">
             2
           </Badge>
         </Link>
-        <Link className={linkClasses}>
+        <Link className={linkClasses} href="/products">
           Products
         </Link>
-        <Link className={linkClasses}>
+        <Link className={linkClasses} href="/customers">
           Customers
         </Link>
         {/* Settings dropdown or expandable section */}
@@ -119,21 +120,25 @@ export function Navbar1() {
                 {/* Mobile settings sub-items */}
                 <Link
                   className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium"
+                  href="/general"
                 >
                   General
                 </Link>
                 <Link
                   className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium"
+                  href="/security"
                 >
                   Security
                 </Link>
                 <Link
                   className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium"
+                  href="/api"
                 >
                   API
                 </Link>
                 <Link
                   className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium"
+                  href="/advanced"
                 >
                   Advanced
                 </Link>
@@ -240,21 +245,25 @@ export function Navbar1() {
               <div>
                 <Link
                   className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
+                  href="/my-profile"
                 >
                   My profile
                 </Link>
                 <Link
                   className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
+                  href="/account-settings"
                 >
                   Account settings
                 </Link>
                 <Link
                   className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
+                  href="/billing"
                 >
                   Billing
                 </Link>
                 <Link
                   className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
+                  href="/sign-out"
                 >
                   Sign out
                 </Link>
