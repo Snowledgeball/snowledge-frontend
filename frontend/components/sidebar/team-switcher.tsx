@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { toSlug } from "@/utils/slug";
-
+import { features } from "@/config/features";
 // Création d'un context pour la communauté sélectionnée
 const CommunityContext = React.createContext<{
   activeCommunity: Community;
@@ -160,11 +160,13 @@ export function CommunitySwitcher() {
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <Plus className="size-4" />
               </div>
-              <Link href="/create-community">
-                <div className="text-muted-foreground font-medium">
-                  Créer une communauté
-                </div>
-              </Link>
+              {features.createCommunity.enabled && (
+                <Link href="/create-community">
+                  <div className="text-muted-foreground font-medium">
+                    Créer une communauté
+                  </div>
+                </Link>
+              )}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

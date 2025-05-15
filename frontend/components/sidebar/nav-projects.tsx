@@ -30,6 +30,7 @@ import {
 
 export function NavProjects({
   projects,
+  label,
 }: {
   projects: {
     name: string;
@@ -37,12 +38,13 @@ export function NavProjects({
     icon: LucideIcon;
     items?: { title: string; url: string }[];
   }[];
+  label: string;
 }) {
   const { isMobile } = useSidebar();
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+      <SidebarGroupLabel>{label}</SidebarGroupLabel>
       <SidebarMenu>
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>

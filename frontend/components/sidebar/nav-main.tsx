@@ -21,7 +21,7 @@ import {
 
 export function NavMain({
   items,
-  label = "Créateur",
+  label,
 }: {
   items: {
     title: string;
