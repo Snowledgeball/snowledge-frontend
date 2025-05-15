@@ -4,13 +4,15 @@ services:
   # Service pour le frontend
   frontend:
     build:
-      dockerfile: ./Dockerfile.prod
+      context: ./frontend
+      dockerfile: Dockerfile.prod
     environment:
       - NODE_ENV=production
   # Service pour le backend
   backend:
     build:
-      dockerfile: ./Dockerfile.prod
+      context: ./backend
+      dockerfile: Dockerfile.prod
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
