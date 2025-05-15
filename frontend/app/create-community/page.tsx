@@ -40,7 +40,6 @@ const formSchema = z.object({
   price: z.string().optional(),
   description: z.string().optional(),
   externalLinks: z.string().optional(),
-  gainParams: z.string().optional(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -79,7 +78,6 @@ export default function CreateCommunity() {
       price: "",
       description: "",
       externalLinks: "",
-      gainParams: "",
     },
   });
 
@@ -223,26 +221,6 @@ export default function CreateCommunity() {
                   <FormDescription>
                     Ajoutez un ou plusieurs liens externes (séparés par des
                     virgules).
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="gainParams"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Paramètre de gains</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ex: % de commission, bonus..."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Définissez les paramètres de gains éventuels.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
