@@ -88,7 +88,7 @@ export default function CreateCommunity() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex mt-6 justify-center">
       <div className="max-w-xl w-full mx-auto py-8">
         <h1 className="text-2xl font-bold mb-6">Créer une communauté</h1>
         <Form {...form}>
