@@ -1,6 +1,6 @@
 "use client";
 
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { AspectRatio } from "ui";
 import Image from "next/image";
 
 const TABLE_OF_CONTENTS = [
@@ -23,15 +23,15 @@ export function RichTextSection4() {
   };
 
   return (
-    <section 
-      className="py-16 md:py-24 bg-background" 
+    <section
+      className="py-16 md:py-24 bg-background"
       aria-labelledby="article-title"
     >
       <div className="container mx-auto px-6">
         <article className="flex flex-col gap-12 md:gap-16">
           <div className="flex flex-col gap-4 md:gap-5 max-w-3xl mx-auto text-center items-center">
             {/* Title */}
-            <h1 
+            <h1
               id="article-title"
               className="text-4xl font-bold leading-tight lg:text-5xl"
             >

@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "ui";
 import { ArrowRight } from "lucide-react";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Input } from "@/components/ui/input";
+import { AspectRatio } from "ui";
+import { Input } from "ui";
 import Image from "next/image";
 
 export function HeroSection4() {
   return (
-    <section 
+    <section
       className="bg-background py-16 lg:py-24"
       aria-labelledby="hero-heading"
     >
@@ -17,14 +17,14 @@ export function HeroSection4() {
         <div className="flex flex-col gap-6 lg:gap-8 flex-1">
           <div className="flex flex-col gap-4 lg:gap-5">
             {/* Category Tag */}
-            <p 
+            <p
               className="text-muted-foreground text-sm lg:text-base font-semibold"
               aria-hidden="true"
             >
               Hero section
             </p>
             {/* Main Heading */}
-            <h1 
+            <h1
               id="hero-heading"
               className="text-foreground text-3xl md:text-5xl font-bold"
             >
@@ -40,13 +40,13 @@ export function HeroSection4() {
           </div>
 
           {/* Email Form */}
-          <form 
+          <form
             className="flex flex-col lg:flex-row gap-3 w-full md:max-w-sm"
             onSubmit={(e) => e.preventDefault()}
             aria-label="Email signup form"
           >
-            <Input 
-              placeholder="Your email" 
+            <Input
+              placeholder="Your email"
               type="email"
               required
               aria-required="true"

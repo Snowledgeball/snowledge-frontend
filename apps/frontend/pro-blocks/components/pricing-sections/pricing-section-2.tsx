@@ -1,14 +1,9 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "ui";
+import { Button } from "ui";
 import { Check, Info } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "ui";
 
 const pricingData = {
   plans: [
@@ -126,7 +121,7 @@ const pricingData = {
 
 export function PricingSection2() {
   return (
-    <section 
+    <section
       className="py-16 md:py-24 bg-background"
       aria-labelledby="pricing-section-title-2"
     >
@@ -139,8 +134,8 @@ export function PricingSection2() {
               Pricing section
             </p>
             {/* Main Title */}
-            <h2 
-              id="pricing-section-title-2" 
+            <h2
+              id="pricing-section-title-2"
               className="text-3xl md:text-4xl font-bold"
             >
               Benefit-focused headline that highlights choice
@@ -192,7 +187,7 @@ export function PricingSection2() {
                     </div>
 
                     {/* Call-to-Action Button */}
-                    <Button variant={plan.variant} className="w-full">
+                    <Button variant="default" className="w-full">
                       Purchase plan
                     </Button>
                   </div>
@@ -220,7 +215,9 @@ export function PricingSection2() {
                           {/* Interactive Tooltip for Feature Details */}
                           <TooltipProvider>
                             <Tooltip>
-                              <TooltipTrigger aria-label={`More information about ${feature.name}`}>
+                              <TooltipTrigger
+                                aria-label={`More information about ${feature.name}`}
+                              >
                                 <Info className="h-4 w-4 text-muted-foreground opacity-70 hover:opacity-100 cursor-pointer" />
                               </TooltipTrigger>
                               <TooltipContent className="max-w-xs">

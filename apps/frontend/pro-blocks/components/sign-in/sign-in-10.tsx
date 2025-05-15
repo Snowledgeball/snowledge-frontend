@@ -1,14 +1,10 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "ui";
+import { Checkbox } from "ui";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "ui";
+import { Input } from "ui";
+import { Separator } from "ui";
 import Link from "next/link";
 import { useState } from "react";
 

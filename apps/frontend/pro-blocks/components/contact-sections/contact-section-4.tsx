@@ -1,17 +1,17 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "ui";
+import { Checkbox } from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
+import { Textarea } from "ui";
 import { Phone, Mail, MapPin } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "ui";
 import Link from "next/link";
 
 export function ContactSection4() {
   return (
-    <section 
+    <section
       className="bg-background py-16 md:py-0"
       aria-labelledby="contact-heading"
     >
@@ -26,7 +26,7 @@ export function ContactSection4() {
                 Contact us
               </p>
               {/* Main Title */}
-              <h2 
+              <h2
                 id="contact-heading"
                 className="text-3xl md:text-4xl font-bold text-foreground"
               >
@@ -81,7 +81,7 @@ export function ContactSection4() {
         {/* Right Column */}
         <div className="md:bg-muted/40 flex flex-col items-center justify-center flex-1 px-6 py-0 md:py-24">
           {/* Contact Form */}
-          <form 
+          <form
             className="flex flex-col gap-5 md:gap-6 max-w-md w-full"
             onSubmit={(e) => e.preventDefault()}
             aria-label="Contact form"
@@ -89,8 +89,8 @@ export function ContactSection4() {
             {/* Name Input */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="name">Name</Label>
-              <Input 
-                id="name" 
+              <Input
+                id="name"
                 placeholder="Name"
                 required
                 aria-required="true"
@@ -100,9 +100,9 @@ export function ContactSection4() {
             {/* Email Input */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                type="email" 
+              <Input
+                id="email"
+                type="email"
                 placeholder="Email"
                 required
                 aria-required="true"
@@ -123,11 +123,7 @@ export function ContactSection4() {
 
             {/* Privacy Policy Checkbox */}
             <div className="flex items-center gap-2">
-              <Checkbox 
-                id="privacy"
-                required
-                aria-required="true"
-              />
+              <Checkbox id="privacy" required aria-required="true" />
               <Label
                 htmlFor="privacy"
                 className="font-normal leading-tight text-muted-foreground"

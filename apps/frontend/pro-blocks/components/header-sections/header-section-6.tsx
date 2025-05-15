@@ -7,11 +7,11 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "ui";
 
 export function HeaderSection6() {
   return (
-    <section 
+    <section
       className="bg-zinc-950 pt-4 pb-16 lg:pb-24"
       aria-labelledby="page-heading"
     >
@@ -20,15 +20,21 @@ export function HeaderSection6() {
         <Breadcrumb aria-label="Page navigation">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="#" className="text-white/80">Home</BreadcrumbLink>
+              <BreadcrumbLink href="#" className="text-white/80">
+                Home
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="text-white/50" />
             <BreadcrumbItem>
-              <BreadcrumbLink href="#" className="text-white/80">Header Sections</BreadcrumbLink>
+              <BreadcrumbLink href="#" className="text-white/80">
+                Header Sections
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="text-white/50" />
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-white/90">Header Section Six</BreadcrumbPage>
+              <BreadcrumbPage className="text-white/90">
+                Header Section Six
+              </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -37,21 +43,21 @@ export function HeaderSection6() {
         <div className="flex flex-col gap-6 lg:gap-8 flex-1 max-w-xl">
           <div className="flex flex-col gap-4 lg:gap-5">
             {/* Category Tag */}
-            <p 
+            <p
               className="text-white/80 text-sm lg:text-base font-semibold"
               aria-hidden="true"
             >
               Header section
             </p>
             {/* Main Title */}
-            <h1 
+            <h1
               id="page-heading"
               className="text-white text-3xl md:text-5xl font-bold"
             >
               Short engaging headline
             </h1>
             {/* Section Description */}
-            <p 
+            <p
               className="text-white/80 text-base lg:text-lg"
               aria-description="page description"
             >

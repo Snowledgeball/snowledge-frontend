@@ -1,11 +1,11 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Logo } from "../logo";
+import { Button } from "ui";
+import { Checkbox } from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
+import { Separator } from "ui";
 import Link from "next/link";
 
 export function SignUp3() {
@@ -18,7 +18,9 @@ export function SignUp3() {
           <div className="space-y-6 mb-6">
             <Logo className="h-8 w-8" />
             <div className="flex flex-col gap-y-3">
-              <h1 className="text-2xl md:text-3xl font-bold">Create an account</h1>
+              <h1 className="text-2xl md:text-3xl font-bold">
+                Create an account
+              </h1>
               <p className="text-muted-foreground text-sm">
                 Let's get started. Fill in the details below to create your
                 account.

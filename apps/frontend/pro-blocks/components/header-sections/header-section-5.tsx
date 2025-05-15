@@ -7,11 +7,11 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "ui";
 
 export function HeaderSection5() {
   return (
-    <section 
+    <section
       className="bg-background pt-4 pb-16 lg:pb-24"
       aria-labelledby="page-heading"
     >
@@ -37,21 +37,21 @@ export function HeaderSection5() {
         <div className="flex flex-col gap-6 lg:gap-8 flex-1 max-w-xl">
           <div className="flex flex-col gap-4 lg:gap-5">
             {/* Category Tag */}
-            <p 
+            <p
               className="text-muted-foreground text-sm lg:text-base font-semibold"
               aria-hidden="true"
             >
               Header section
             </p>
             {/* Main Title */}
-            <h1 
+            <h1
               id="page-heading"
               className="text-foreground text-3xl md:text-5xl font-bold"
             >
               Short engaging headline
             </h1>
             {/* Section Description */}
-            <p 
+            <p
               className="text-muted-foreground text-base lg:text-lg"
               aria-description="page description"
             >

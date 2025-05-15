@@ -1,11 +1,11 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Logo } from "../logo";
+import { Button } from "ui";
+import { Checkbox } from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
+import { Separator } from "ui";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -18,7 +18,7 @@ export function SignIn2() {
         <div className="absolute top-4 left-1/2 -translate-x-1/2 md:left-4 md:translate-x-0">
           <Logo className="w-8 h-8" />
         </div>
-        
+
         {/* Sign-in form container */}
         <div className="w-full max-w-sm space-y-6 m-auto">
           {/* Header */}
@@ -68,7 +68,7 @@ export function SignIn2() {
 
               <span>Sign in with Google</span>
             </Button>
-            
+
             {/* Apple sign-in button */}
             <Button variant="outline" className="w-full text-foreground">
               <svg
@@ -120,7 +120,10 @@ export function SignIn2() {
               <Checkbox id="keep-signed-in" />
               <Label htmlFor="keep-signed-in">Keep me signed in</Label>
             </div>
-            <Link href="#" className="text-sm text-muted-foreground hover:text-foreground underline">
+            <Link
+              href="#"
+              className="text-sm text-muted-foreground hover:text-foreground underline"
+            >
               Forgot password?
             </Link>
           </div>

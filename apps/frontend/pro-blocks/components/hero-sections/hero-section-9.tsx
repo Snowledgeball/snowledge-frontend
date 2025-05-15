@@ -1,12 +1,12 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "ui";
 import { ArrowRight } from "lucide-react";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { AspectRatio } from "ui";
 
 export function HeroSection9() {
   return (
-    <section 
+    <section
       className="bg-background py-16 lg:py-24"
       aria-labelledby="hero-heading"
     >
@@ -15,14 +15,14 @@ export function HeroSection9() {
         <div className="flex flex-col gap-6 lg:gap-8 flex-1 max-w-2xl items-center text-center mx-auto">
           <div className="flex flex-col gap-4 lg:gap-5">
             {/* Category Tag */}
-            <p 
+            <p
               className="text-muted-foreground text-sm lg:text-base font-semibold"
               aria-hidden="true"
             >
               Hero section
             </p>
             {/* Main Title */}
-            <h1 
+            <h1
               id="hero-heading"
               className="text-foreground text-3xl md:text-5xl font-bold"
             >
@@ -36,7 +36,7 @@ export function HeroSection9() {
             </p>
           </div>
           {/* CTA Button */}
-          <Button 
+          <Button
             className="md:flex-1"
             aria-label="Get started with our service"
           >

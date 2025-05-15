@@ -1,11 +1,10 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "ui";
+import { Card, CardHeader, CardFooter } from "ui";
+import { Avatar, AvatarImage } from "ui";
+import { Separator } from "ui";
 import { TreePalm, MapPin, User } from "lucide-react";
-import { CardContent } from "../ui/card";
 
 export function Card4() {
   return (

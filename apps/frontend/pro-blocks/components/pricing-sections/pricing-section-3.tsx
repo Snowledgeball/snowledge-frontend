@@ -1,14 +1,9 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "ui";
+import { Button } from "ui";
 import { Check, Info } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "ui";
 
 const pricingData = {
   plans: [
@@ -77,7 +72,7 @@ const pricingData = {
 export function PricingSection3() {
   return (
     // Main pricing section container with muted background
-    <section 
+    <section
       className="py-16 md:py-24 bg-muted/40"
       aria-labelledby="pricing-section-title-3"
     >
@@ -90,8 +85,8 @@ export function PricingSection3() {
               Pricing section
             </p>
             {/* Main Title */}
-            <h2 
-              id="pricing-section-title-3" 
+            <h2
+              id="pricing-section-title-3"
               className="text-3xl md:text-4xl font-bold"
             >
               Benefit-focused headline that highlights choice
@@ -111,7 +106,9 @@ export function PricingSection3() {
               <Card
                 key={plan.name}
                 className={`p-6 sm:p-12 md:rounded-br-none md:rounded-bl-xl md:rounded-tr-none md:rounded-tl-xl md:border-r-0 ${
-                  plan.highlighted ? "md:rounded-xl md:shadow-xl md:border-r-1" : ""
+                  plan.highlighted
+                    ? "md:rounded-xl md:shadow-xl md:border-r-1"
+                    : ""
                 }`}
               >
                 {/* Card Content Container */}
@@ -120,9 +117,11 @@ export function PricingSection3() {
                   <div className="flex flex-col gap-6">
                     {/* Plan Title and Description Block */}
                     <div className="flex flex-col gap-3 relative">
-                      <h3 className={`text-lg font-semibold ${
-                        plan.highlighted ? "text-primary" : ""
-                      }`}>
+                      <h3
+                        className={`text-lg font-semibold ${
+                          plan.highlighted ? "text-primary" : ""
+                        }`}
+                      >
                         {plan.name}
                       </h3>
                       <p className="text-sm text-muted-foreground">
@@ -141,7 +140,7 @@ export function PricingSection3() {
                     </div>
 
                     {/* Call-to-Action Button */}
-                    <Button variant={plan.variant} className="w-full">
+                    <Button variant="default" className="w-full">
                       Purchase plan
                     </Button>
                   </div>
@@ -150,7 +149,9 @@ export function PricingSection3() {
                   <div className="flex flex-col gap-4">
                     {/* Features Header with Plan Inheritance */}
                     <p className="text-sm font-medium">
-                      {index === 0 ? "What's included:" : `Everything in ${pricingData.plans[index - 1].name}, plus:`}
+                      {index === 0
+                        ? "What's included:"
+                        : `Everything in ${pricingData.plans[index - 1].name}, plus:`}
                     </p>
                     {/* Features Grid with Tooltips */}
                     <div className="flex flex-col gap-4">

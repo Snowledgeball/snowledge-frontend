@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "ui";
+import { Button } from "ui";
 import { Link, Download, Trash2 } from "lucide-react";
 
 export function Card8() {

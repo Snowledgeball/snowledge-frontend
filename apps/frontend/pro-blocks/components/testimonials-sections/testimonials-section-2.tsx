@@ -1,12 +1,12 @@
 "use client";
 
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarImage } from "ui";
+import { Separator } from "ui";
 
 export function TestimonialsSection2() {
   return (
-    <section 
-      className="bg-background py-16 md:py-24" 
+    <section
+      className="bg-background py-16 md:py-24"
       aria-labelledby="testimonial-title"
     >
       <div className="container px-6 m-auto">

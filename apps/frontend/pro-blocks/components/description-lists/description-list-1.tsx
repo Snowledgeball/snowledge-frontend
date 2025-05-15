@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "ui";
+import { Card, CardContent } from "ui";
 import { File, Download } from "lucide-react";
 
 interface DescriptionListItemProps {
@@ -15,9 +15,7 @@ function DescriptionListItem({ label, children }: DescriptionListItemProps) {
       <div className="col-span-4 text-sm font-semibold text-foreground">
         {label}
       </div>
-      <div className="col-span-8 text-sm text-muted-foreground">
-        {children}
-      </div>
+      <div className="col-span-8 text-sm text-muted-foreground">{children}</div>
     </div>
   );
 }

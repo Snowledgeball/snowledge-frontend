@@ -1,15 +1,15 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+} from "ui";
+import { Avatar, AvatarFallback, AvatarImage } from "ui";
 import { EllipsisVertical, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Input } from "ui";
 
 export function PageHeader8() {
   return (

@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "ui";
+import { Input } from "ui";
 import { Search, ListFilter, Plus, Download } from "lucide-react";
 
 export function TableHeader3() {

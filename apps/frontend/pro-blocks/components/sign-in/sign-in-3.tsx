@@ -1,10 +1,10 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Logo } from "../logo";
+import { Button } from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
+import { Separator } from "ui";
 import Link from "next/link";
 
 export function SignIn3() {
@@ -24,7 +24,7 @@ export function SignIn3() {
               </p>
             </div>
           </div>
-          
+
           {/* Email and password inputs */}
           <div className="space-y-4 mb-6">
             {/* Email input */}
@@ -46,11 +46,11 @@ export function SignIn3() {
               <Input id="password" placeholder="Password" type="password" />
             </div>
           </div>
-          
+
           {/* Sign-in button and social login options */}
           <div className="flex flex-col space-y-6">
             <Button className="w-full">Sign in</Button>
-            
+
             {/* Separator */}
             <div className="w-full relative">
               <div className="text-xs text-muted-foreground bg-background px-2 uppercase absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -58,7 +58,7 @@ export function SignIn3() {
               </div>
               <Separator />
             </div>
-            
+
             {/* Social login buttons */}
             <div className="flex gap-x-3">
               {/* GitHub button */}
@@ -145,7 +145,7 @@ export function SignIn3() {
                 </svg>
               </Button>
             </div>
-            
+
             {/* Sign-up link */}
             <p className="text-sm text-center text-muted-foreground">
               Don't have an account?{" "}
@@ -156,7 +156,7 @@ export function SignIn3() {
           </div>
         </div>
       </div>
-      
+
       {/* Right side: Image and testimonial */}
       <div className="w-1/2 min-h-full bg-destructive rounded-xl hidden md:flex flex-col-reverse bg-[url('https://ui.shadcn.com/placeholder.svg')] bg-cover bg-center relative overflow-hidden">
         <div className="absolute inset-0 bg-black opacity-60"></div>

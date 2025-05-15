@@ -1,45 +1,45 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Plus, PenLine, Send, MoreHorizontal } from "lucide-react"
+import { Button } from "ui";
+import { Plus, PenLine, Send, MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "ui";
 
 export function Button4() {
   return (
     <div className="flex -space-x-px w-fit mx-auto mt-10">
-      <Button 
-        variant="outline" 
+      <Button
+        variant="outline"
         className="flex items-center gap-2 h-10 rounded-r-none"
       >
         <Plus className="w-4 h-4" />
         New
       </Button>
-      
-      <Button 
-        variant="outline" 
+
+      <Button
+        variant="outline"
         className="flex items-center gap-2 h-10 rounded-none"
       >
         <PenLine className="w-4 h-4" />
         Edit
       </Button>
-      
-      <Button 
-        variant="outline" 
+
+      <Button
+        variant="outline"
         className="flex items-center gap-2 h-10 rounded-none"
       >
         <Send className="w-4 h-4" />
         Send
       </Button>
-      
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="icon"
             className="h-10 w-10 rounded-l-none"
           >
@@ -53,5 +53,5 @@ export function Button4() {
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
-  )
+  );
 }

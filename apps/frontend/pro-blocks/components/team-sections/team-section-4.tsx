@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "ui";
 import Link from "next/link";
 
 export function TeamSection4() {
@@ -88,10 +88,7 @@ export function TeamSection4() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 lg:gap-x-6 gap-y-12">
             {teamMembers.map((member, index) => (
-              <div
-                key={index}
-                className="flex flex-col gap-4"
-              >
+              <div key={index} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-4">
                   <Avatar className="w-full aspect-[4/3] h-auto rounded-xl">
                     <AvatarImage

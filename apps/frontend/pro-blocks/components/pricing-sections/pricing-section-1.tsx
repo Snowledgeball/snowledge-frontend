@@ -1,17 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "ui";
+import { Button } from "ui";
+import { Badge } from "ui";
+import { Tabs, TabsList, TabsTrigger } from "ui";
 import { Check, Info } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "ui";
 
 const pricingData = {
   plans: [
@@ -21,16 +16,17 @@ const pricingData = {
       features: [
         {
           name: "Up to 5 team members",
-          tooltip: "Collaborate with up to 5 team members on unlimited projects"
+          tooltip:
+            "Collaborate with up to 5 team members on unlimited projects",
         },
         {
           name: "10GB storage space",
-          tooltip: "Secure cloud storage for all your project files and assets"
+          tooltip: "Secure cloud storage for all your project files and assets",
         },
         {
           name: "Basic analytics",
-          tooltip: "Access to essential metrics and performance tracking"
-        }
+          tooltip: "Access to essential metrics and performance tracking",
+        },
       ],
       pricing: {
         monthly: 29,
@@ -45,20 +41,20 @@ const pricingData = {
       features: [
         {
           name: "Up to 20 team members",
-          tooltip: "Scale your team with expanded collaboration capabilities"
+          tooltip: "Scale your team with expanded collaboration capabilities",
         },
         {
           name: "50GB storage space",
-          tooltip: "More storage for larger projects and asset libraries"
+          tooltip: "More storage for larger projects and asset libraries",
         },
         {
           name: "Advanced analytics",
-          tooltip: "Detailed insights with custom reporting and dashboards"
+          tooltip: "Detailed insights with custom reporting and dashboards",
         },
         {
           name: "Priority support",
-          tooltip: "Get help within 24 hours from our dedicated support team"
-        }
+          tooltip: "Get help within 24 hours from our dedicated support team",
+        },
       ],
       pricing: {
         monthly: 49,
@@ -73,32 +69,33 @@ const pricingData = {
       features: [
         {
           name: "Unlimited team members",
-          tooltip: "No limits on team size or collaboration"
+          tooltip: "No limits on team size or collaboration",
         },
         {
           name: "250GB storage space",
-          tooltip: "Enterprise-grade storage with advanced security"
+          tooltip: "Enterprise-grade storage with advanced security",
         },
         {
           name: "Custom analytics",
-          tooltip: "Tailored analytics solutions with API access"
+          tooltip: "Tailored analytics solutions with API access",
         },
         {
           name: "24/7 premium support",
-          tooltip: "Round-the-clock dedicated support with 4-hour response time"
+          tooltip:
+            "Round-the-clock dedicated support with 4-hour response time",
         },
         {
           name: "White-labeling",
-          tooltip: "Custom branding and white-label solutions"
-        }
+          tooltip: "Custom branding and white-label solutions",
+        },
       ],
       pricing: {
         monthly: 99,
         annually: 990,
       },
       variant: "secondary",
-    }
-  ]
+    },
+  ],
 };
 
 export function PricingSection1() {
@@ -106,7 +103,7 @@ export function PricingSection1() {
 
   return (
     // Main pricing section container
-    <section 
+    <section
       className="py-16 md:py-24 bg-background"
       aria-labelledby="pricing-section-title"
     >
@@ -119,8 +116,8 @@ export function PricingSection1() {
               Pricing section
             </p>
             {/* Main Title */}
-            <h2 
-              id="pricing-section-title" 
+            <h2
+              id="pricing-section-title"
               className="text-3xl md:text-4xl font-bold"
             >
               Benefit-focused headline that highlights choice
@@ -135,7 +132,11 @@ export function PricingSection1() {
           </div>
 
           {/* Billing Period Toggle */}
-          <Tabs value={billingPeriod} onValueChange={setBillingPeriod} className="w-fit">
+          <Tabs
+            value={billingPeriod}
+            onValueChange={setBillingPeriod}
+            className="w-fit"
+          >
             <TabsList className="bg-muted h-10 p-1 rounded-[40px]">
               <TabsTrigger
                 value="monthly"
@@ -155,9 +156,9 @@ export function PricingSection1() {
           {/* Pricing Cards Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 w-full lg:max-w-5xl">
             {pricingData.plans.map((plan, index) => (
-              <Card 
+              <Card
                 key={plan.name}
-                className={`p-6 lg:p-8 rounded-xl ${plan.highlighted ? 'border-2 border-primary' : ''}`}
+                className={`p-6 lg:p-8 rounded-xl ${plan.highlighted ? "border-2 border-primary" : ""}`}
               >
                 <CardContent className="p-0 flex flex-col gap-8">
                   {/* Plan Header */}
@@ -165,8 +166,14 @@ export function PricingSection1() {
                     {/* Plan Title and Description */}
                     <div className="flex flex-col gap-3 relative">
                       {/* Popular Plan Badge */}
-                      {plan.badge && <Badge className="w-fit absolute top-1 right-0">{plan.badge}</Badge>}
-                      <h3 className={`text-lg font-semibold ${plan.highlighted ? 'text-primary' : ''}`}>
+                      {plan.badge && (
+                        <Badge className="w-fit absolute top-1 right-0">
+                          {plan.badge}
+                        </Badge>
+                      )}
+                      <h3
+                        className={`text-lg font-semibold ${plan.highlighted ? "text-primary" : ""}`}
+                      >
                         {plan.name}
                       </h3>
                       <p className="text-sm text-muted-foreground">
@@ -177,15 +184,20 @@ export function PricingSection1() {
                     {/* Pricing Display */}
                     <div className="flex items-end gap-0.5">
                       <span className="text-4xl font-semibold">
-                        ${plan.pricing[billingPeriod as keyof typeof plan.pricing]}
+                        $
+                        {
+                          plan.pricing[
+                            billingPeriod as keyof typeof plan.pricing
+                          ]
+                        }
                       </span>
                       <span className="text-base text-muted-foreground">
-                        /{billingPeriod === 'monthly' ? 'month' : 'year'}
+                        /{billingPeriod === "monthly" ? "month" : "year"}
                       </span>
                     </div>
 
                     {/* CTA Button */}
-                    <Button variant={plan.variant} className="w-full">
+                    <Button variant="default" className="w-full">
                       Purchase plan
                     </Button>
                   </div>
@@ -193,7 +205,9 @@ export function PricingSection1() {
                   {/* Features List */}
                   <div className="flex flex-col gap-4">
                     <p className="text-sm font-medium">
-                      {index === 0 ? "What's included:" : `Everything in ${pricingData.plans[index - 1].name}, plus:`}
+                      {index === 0
+                        ? "What's included:"
+                        : `Everything in ${pricingData.plans[index - 1].name}, plus:`}
                     </p>
                     <div className="flex flex-col gap-4">
                       {plan.features.map((feature, i) => (
@@ -207,7 +221,9 @@ export function PricingSection1() {
                           {/* Feature Info Tooltip */}
                           <TooltipProvider>
                             <Tooltip>
-                              <TooltipTrigger aria-label={`More information about ${feature.name}`}>
+                              <TooltipTrigger
+                                aria-label={`More information about ${feature.name}`}
+                              >
                                 <Info className="h-4 w-4 text-muted-foreground opacity-70 hover:opacity-100 cursor-pointer" />
                               </TooltipTrigger>
                               <TooltipContent className="max-w-xs">

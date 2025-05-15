@@ -500,8 +500,8 @@ export default function EnrichmentVotingSession({
                             getParticipationRate(contribution) >= 50
                               ? "bg-green-600"
                               : getParticipationRate(contribution) >= 25
-                              ? "bg-yellow-400"
-                              : "bg-red-500"
+                                ? "bg-yellow-400"
+                                : "bg-red-500"
                           }`}
                           style={{
                             width: `${getParticipationRate(contribution)}%`,
@@ -528,8 +528,8 @@ export default function EnrichmentVotingSession({
                               : 50)
                               ? "bg-green-600"
                               : getApprovalRate(contribution) >= 50
-                              ? "bg-yellow-400"
-                              : "bg-red-500"
+                                ? "bg-yellow-400"
+                                : "bg-red-500"
                           }`}
                           style={{ width: `${getApprovalRate(contribution)}%` }}
                         ></div>

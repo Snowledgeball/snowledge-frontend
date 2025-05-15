@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Button } from "ui";
+import { AspectRatio } from "ui";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 

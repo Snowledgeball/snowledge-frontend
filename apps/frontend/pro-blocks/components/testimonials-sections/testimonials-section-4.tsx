@@ -1,33 +1,36 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Card } from "ui";
+import { Avatar, AvatarImage } from "ui";
 
 const testimonials = [
   {
-    quote: "Shadcn UI Kit for Figma has completely transformed our design process. It's incredibly intuitive and saves us so much time. The components are beautifully crafted and customizable.",
+    quote:
+      "Shadcn UI Kit for Figma has completely transformed our design process. It's incredibly intuitive and saves us so much time. The components are beautifully crafted and customizable.",
     author: "Lando Norris",
     role: "Founder at Acme Inc.",
-    avatar: "https://github.com/shadcn.png"
+    avatar: "https://github.com/shadcn.png",
   },
   {
-    quote: "The attention to detail in this UI kit is outstanding. We've seen a significant improvement in our development speed since implementing it. Highly recommended for any serious project.",
+    quote:
+      "The attention to detail in this UI kit is outstanding. We've seen a significant improvement in our development speed since implementing it. Highly recommended for any serious project.",
     author: "Sarah Chen",
     role: "Lead Designer at TechCorp",
-    avatar: "https://github.com/shadcn.png"
+    avatar: "https://github.com/shadcn.png",
   },
   {
-    quote: "What impressed me most was how seamlessly it integrated with our existing workflow. The documentation is clear, and the component quality is consistently high.",
+    quote:
+      "What impressed me most was how seamlessly it integrated with our existing workflow. The documentation is clear, and the component quality is consistently high.",
     author: "Marcus Rodriguez",
     role: "CTO at StartupX",
-    avatar: "https://github.com/shadcn.png"
-  }
+    avatar: "https://github.com/shadcn.png",
+  },
 ];
 
 export function TestimonialsSection4() {
   return (
-    <section 
-      className="py-16 md:py-24 bg-muted/40" 
+    <section
+      className="py-16 md:py-24 bg-muted/40"
       aria-labelledby="testimonial-title"
     >
       {/* Main Content Container */}
@@ -41,7 +44,7 @@ export function TestimonialsSection4() {
               Testimonial section
             </p>
             {/* Main Title */}
-            <h2 
+            <h2
               id="testimonial-title"
               className="text-3xl md:text-4xl font-bold"
             >

@@ -1,11 +1,11 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Logo } from "../logo";
+import { Avatar, AvatarFallback, AvatarImage } from "ui";
+import { Button } from "ui";
+import { Checkbox } from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
 import Link from "next/link";
 
 export function SignUp5() {
@@ -35,7 +35,7 @@ export function SignUp5() {
         </div>
       </div>
 
-      {/* Main sign up form container */} 
+      {/* Main sign up form container */}
       <div className="md:w-[60%] flex items-center justify-center">
         <div className="max-w-sm px-6 py-16 md:p-0 w-full ">
           {/* Header section */}

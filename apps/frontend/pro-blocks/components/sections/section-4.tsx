@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "ui";
+import { Input } from "ui";
 import { ArrowLeft, ArrowRight, Search, ListFilter, Plus } from "lucide-react";
 import {
   Table,
@@ -10,7 +10,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "ui";
 
 const invoices = [
   {
@@ -59,7 +59,9 @@ const invoices = [
 
 export function Section4() {
   return (
-    <div className="bg-background"> {/* Add border border-border shadow-sm and rounded-lg class to make this section look like a card */}
+    <div className="bg-background">
+      {" "}
+      {/* Add border border-border shadow-sm and rounded-lg class to make this section look like a card */}
       {/* Section header */}
       <div className="container mx-auto flex flex-col lg:flex-row justify-between w-full gap-6 bg-background px-6 pt-6">
         {/* Title and description */}

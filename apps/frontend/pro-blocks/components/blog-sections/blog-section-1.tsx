@@ -1,6 +1,6 @@
 "use client";
 
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { AspectRatio } from "ui";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -66,7 +66,7 @@ export function BlogSection1() {
             <p className="text-base font-semibold text-muted-foreground md:text-sm">
               Blog section
             </p>
-            
+
             {/* Main Title */}
             <h2
               id="blog-section-heading"
@@ -74,7 +74,7 @@ export function BlogSection1() {
             >
               Short and clear engaging headline for a blog
             </h2>
-            
+
             {/* Section Description */}
             <p className="text-base text-muted-foreground">
               Add a concise value statement that captures reader interest and
@@ -89,11 +89,7 @@ export function BlogSection1() {
             role="list"
           >
             {BLOG_POSTS.map((post) => (
-              <Link
-                href="#"
-                key={post.id}
-                className="group block"
-              >
+              <Link href="#" key={post.id} className="group block">
                 {/* Blog Card */}
                 <div className="flex flex-col gap-4 rounded-xl transition-all duration-200">
                   {/* Image Wrapper */}

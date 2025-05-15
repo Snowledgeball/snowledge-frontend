@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "ui";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,7 +9,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "ui";
 import {
   AudioWaveform,
   BookOpen,
@@ -24,10 +24,10 @@ import {
   Search,
 } from "lucide-react";
 
-import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
-import { NavUser } from "@/components/nav-user";
-import { TeamSwitcher } from "@/components/team-switcher";
+import { NavMain } from "../nav-main";
+import { NavProjects } from "../nav-projects";
+import { NavUser } from "../nav-user";
+import { TeamSwitcher } from "../team-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -37,8 +37,8 @@ import {
   SidebarRail,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { Input } from "@/components/ui/input";
+} from "ui";
+import { Input } from "ui";
 
 const data = {
   user: {
@@ -194,9 +194,7 @@ export function AppShell4({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="#">
-                      Settings
-                    </BreadcrumbLink>
+                    <BreadcrumbLink href="#">Settings</BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>

@@ -1,15 +1,15 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Logo } from "../logo";
+import { Avatar, AvatarFallback, AvatarImage } from "ui";
+import { Button } from "ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
+} from "ui";
+import { Separator } from "ui";
 import { Menu, Zap, X, EllipsisVertical } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -71,14 +71,21 @@ export function Navbar2() {
     return (
       <>
         {/* Main navigation links */}
-        <Link className={linkClasses}>Dashboard</Link>
-        <Link className={linkClasses}>Orders</Link>
-        <Link className={linkClasses}>Products</Link>
-        <Link className={linkClasses}>Customers</Link>
+        <Link className={linkClasses} href={""}>
+          Dashboard
+        </Link>
+        <Link className={linkClasses} href={""}>
+          Orders
+        </Link>
+        <Link className={linkClasses} href={""}>
+          Products
+        </Link>
+        <Link className={linkClasses} href={""}>
+          Customers
+        </Link>
         <Link
-          className={`${linkClasses} ${
-            isMobile ? "text-primary" : "text-primary"
-          }`}
+          className={`${linkClasses} ${isMobile ? "text-primary" : "text-primary"}`}
+          href={""}
         >
           Settings
         </Link>

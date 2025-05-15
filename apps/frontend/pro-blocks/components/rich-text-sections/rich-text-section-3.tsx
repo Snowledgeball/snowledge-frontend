@@ -1,7 +1,7 @@
 "use client";
 
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { AspectRatio } from "ui";
+import { Avatar, AvatarImage } from "ui";
 import Image from "next/image";
 
 const TABLE_OF_CONTENTS = [
@@ -24,8 +24,8 @@ export function RichTextSection3() {
   };
 
   return (
-    <section 
-      className="py-16 md:py-24 bg-background" 
+    <section
+      className="py-16 md:py-24 bg-background"
       aria-labelledby="article-title"
     >
       <div className="container mx-auto px-6 flex gap-12">
@@ -41,7 +41,7 @@ export function RichTextSection3() {
               </div>
 
               {/* Title */}
-              <h1 
+              <h1
                 id="article-title"
                 className="text-4xl font-bold leading-tight lg:text-5xl"
               >

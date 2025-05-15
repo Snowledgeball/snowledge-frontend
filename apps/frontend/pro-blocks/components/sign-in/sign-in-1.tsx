@@ -1,10 +1,10 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Logo } from "../logo";
+import { Button } from "ui";
+import { Checkbox } from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -48,7 +48,10 @@ export function SignIn1() {
                   Keep me signed in
                 </Label>
               </div>
-              <Link className="text-sm text-muted-foreground hover:text-foreground underline">
+              <Link
+                href={""}
+                className="text-sm text-muted-foreground hover:text-foreground underline"
+              >
                 Forgot password?
               </Link>
             </div>

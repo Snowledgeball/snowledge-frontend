@@ -1,8 +1,8 @@
 "use client";
 
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { AspectRatio } from "ui";
 import Image from "next/image";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "ui";
 
 interface Author {
   name: string;
@@ -81,7 +81,7 @@ const BLOG_POSTS: BlogPost[] = [
 
 export function BlogSection5() {
   return (
-    <section 
+    <section
       className="bg-background py-16 md:py-24"
       aria-labelledby="blog-section-5-heading"
     >
@@ -110,10 +110,7 @@ export function BlogSection5() {
           </div>
 
           {/* Blog List */}
-          <div 
-            className="flex flex-col gap-10 md:gap-8 w-full"
-            role="list"
-          >
+          <div className="flex flex-col gap-10 md:gap-8 w-full" role="list">
             {BLOG_POSTS.map((post) => (
               <div
                 key={post.id}

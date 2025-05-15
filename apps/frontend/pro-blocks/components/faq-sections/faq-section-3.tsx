@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "ui";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
@@ -40,7 +40,7 @@ const faqItems = [
 
 export function FaqSection3() {
   return (
-    <section 
+    <section
       className="bg-background py-16 md:py-24"
       aria-labelledby="faq-heading"
     >
@@ -55,7 +55,7 @@ export function FaqSection3() {
                 FAQ section
               </p>
               {/* Main Title */}
-              <h1 
+              <h1
                 id="faq-heading"
                 className="text-3xl md:text-4xl font-bold text-foreground"
               >
@@ -63,24 +63,19 @@ export function FaqSection3() {
               </h1>
               {/* Section Description */}
               <p className="text-muted-foreground">
-                We've compiled the most important information to help you get the
-                most out of your experience. Can't find what you're looking for? Contact us.
+                We've compiled the most important information to help you get
+                the most out of your experience. Can't find what you're looking
+                for? Contact us.
               </p>
             </div>
 
             {/* Action Buttons */}
             <div className="flex flex-col md:flex-row gap-3">
-              <Button 
-                variant="outline"
-                aria-label="Contact our support team"
-              >
+              <Button variant="outline" aria-label="Contact our support team">
                 Contact us
                 <ArrowUpRight />
               </Button>
-              <Button 
-                variant="outline"
-                aria-label="View documentation"
-              >
+              <Button variant="outline" aria-label="View documentation">
                 View documentation
                 <ArrowUpRight />
               </Button>
@@ -88,16 +83,12 @@ export function FaqSection3() {
           </div>
 
           {/* FAQ Grid */}
-          <div 
+          <div
             className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8"
             role="list"
           >
             {faqItems.map((item, index) => (
-              <div 
-                key={index} 
-                className="flex flex-col gap-2"
-                role="listitem"
-              >
+              <div key={index} className="flex flex-col gap-2" role="listitem">
                 <h3 className="text-base font-semibold text-card-foreground">
                   {item.question}
                 </h3>

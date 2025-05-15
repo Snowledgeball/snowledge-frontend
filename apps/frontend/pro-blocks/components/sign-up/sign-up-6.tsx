@@ -1,9 +1,9 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Logo } from "../logo";
+import { Button } from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
 import { ShieldCheck, User } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";

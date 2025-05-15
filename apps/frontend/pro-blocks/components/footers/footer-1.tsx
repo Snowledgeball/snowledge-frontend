@@ -1,12 +1,12 @@
 "use client";
 
-import { Logo } from "@/components/logo";
+import { Logo } from "../logo";
 import Link from "next/link";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "ui";
 
 export function Footer1() {
   return (
-    <footer 
+    <footer
       className="bg-background py-16 lg:py-24"
       role="contentinfo"
       aria-label="Site footer"
@@ -20,7 +20,7 @@ export function Footer1() {
           </Link>
 
           {/* Main Navigation */}
-          <nav 
+          <nav
             className="flex flex-col md:flex-row items-center gap-8"
             aria-label="Footer navigation"
           >
@@ -64,19 +64,15 @@ export function Footer1() {
         <div className="w-full flex flex-col-reverse lg:flex-row lg:justify-between items-center gap-12 lg:gap-6">
           {/* Copyright Text */}
           <p className="text-muted-foreground text-center lg:text-left">
-            <span>Copyright © {new Date().getFullYear()}</span>
-            {" "}
-            <Link 
-              href="/"
-              className="hover:underline"
-            >
+            <span>Copyright © {new Date().getFullYear()}</span>{" "}
+            <Link href="/" className="hover:underline">
               shadcndesign.com
             </Link>
             . All rights reserved.
           </p>
 
           {/* Legal Navigation */}
-          <nav 
+          <nav
             className="flex flex-col md:flex-row items-center gap-6 md:gap-8"
             aria-label="Legal links"
           >

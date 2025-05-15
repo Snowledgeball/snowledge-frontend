@@ -1,23 +1,17 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Logo } from "../logo";
+import { Avatar, AvatarFallback, AvatarImage } from "ui";
+import { Badge } from "ui";
+import { Button } from "ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+} from "ui";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "ui";
+import { Separator } from "ui";
 import {
   Table,
   TableHeader,
@@ -25,7 +19,7 @@ import {
   TableRow,
   TableHead,
   TableCell,
-} from "@/components/ui/table";
+} from "ui";
 import { Plus } from "lucide-react";
 import {
   ChevronDown,
@@ -92,11 +86,21 @@ function Navbar1() {
 
     return (
       <>
-        <Link href="#" className={`${linkClasses}`}>Dashboard</Link>
-        <Link href="#" className={linkClasses}>Orders</Link>
-        <Link href="#" className={linkClasses}>Products</Link>
-        <Link href="#" className={linkClasses}>Customers</Link>
-        <Link href="#" className={`${linkClasses} text-primary`}>Settings</Link>
+        <Link href="#" className={`${linkClasses}`}>
+          Dashboard
+        </Link>
+        <Link href="#" className={linkClasses}>
+          Orders
+        </Link>
+        <Link href="#" className={linkClasses}>
+          Products
+        </Link>
+        <Link href="#" className={linkClasses}>
+          Customers
+        </Link>
+        <Link href="#" className={`${linkClasses} text-primary`}>
+          Settings
+        </Link>
       </>
     );
   };
@@ -169,16 +173,28 @@ function Navbar1() {
                 </div>
               </div>
               <div>
-                <Link href="#" className="block font-medium text-muted-foreground px-2 py-2 rounded-md">
+                <Link
+                  href="#"
+                  className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
+                >
                   My profile
                 </Link>
-                <Link href="#" className="block font-medium text-muted-foreground px-2 py-2 rounded-md">
+                <Link
+                  href="#"
+                  className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
+                >
                   Account settings
                 </Link>
-                <Link href="#" className="block font-medium text-muted-foreground px-2 py-2 rounded-md">
+                <Link
+                  href="#"
+                  className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
+                >
                   Billing
                 </Link>
-                <Link href="#" className="block font-medium text-muted-foreground px-2 py-2 rounded-md">
+                <Link
+                  href="#"
+                  className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
+                >
                   Sign out
                 </Link>
               </div>
@@ -197,27 +213,42 @@ function PageHeader3() {
     <div className="bg-background border-b border-border pt-0 md:pb-6 pb-4">
       <nav className="border-b border-border mb-6">
         <div className="container mx-auto lg:px-3 px-4 flex overflow-x-auto">
-          <Link href="#" className="text-sm py-1.5 text-foreground flex-shrink-0">
+          <Link
+            href="#"
+            className="text-sm py-1.5 text-foreground flex-shrink-0"
+          >
             <span className="px-2.5 py-2 block rounded-md hover:bg-muted">
               Profile
             </span>
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground py-1.5 flex-shrink-0">
+          <Link
+            href="#"
+            className="text-sm text-muted-foreground py-1.5 flex-shrink-0"
+          >
             <span className="px-2.5 py-2 block rounded-md hover:bg-muted">
               Account
             </span>
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground py-1.5 flex-shrink-0">
+          <Link
+            href="#"
+            className="text-sm text-muted-foreground py-1.5 flex-shrink-0"
+          >
             <span className="px-2.5 py-2 block rounded-md hover:bg-muted">
               Analytics
             </span>
           </Link>
-          <Link href="#" className="border-b-2 border-primary text-sm text-foreground py-1.5 flex-shrink-0">
+          <Link
+            href="#"
+            className="border-b-2 border-primary text-sm text-foreground py-1.5 flex-shrink-0"
+          >
             <span className="px-2.5 py-2 block rounded-md hover:bg-muted">
               API
             </span>
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground py-1.5 flex-shrink-0">
+          <Link
+            href="#"
+            className="text-sm text-muted-foreground py-1.5 flex-shrink-0"
+          >
             <span className="px-2.5 py-2 block rounded-md hover:bg-muted">
               Members
             </span>

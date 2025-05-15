@@ -1,12 +1,12 @@
 "use client";
 
-import { Logo } from "@/components/logo";
+import { Logo } from "../logo";
 import Link from "next/link";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "ui";
 
 export function Footer3() {
   return (
-    <footer 
+    <footer
       className="bg-background py-16 lg:py-24"
       role="contentinfo"
       aria-label="Site footer"
@@ -20,7 +20,7 @@ export function Footer3() {
           </Link>
 
           {/* Main Navigation */}
-          <nav 
+          <nav
             className="flex flex-col lg:flex-row items-center gap-6 md:gap-8 lg:absolute lg:left-1/2 lg:-translate-x-1/2"
             aria-label="Footer navigation"
           >
@@ -57,7 +57,7 @@ export function Footer3() {
           </nav>
 
           {/* Social Media Links */}
-          <div 
+          <div
             className="flex justify-center gap-4 md:gap-6"
             aria-label="Social media links"
           >
@@ -156,19 +156,15 @@ export function Footer3() {
         <div className="flex flex-col lg:flex-row justify-between items-center gap-12 md:gap-6 text-center lg:text-left">
           {/* Copyright Text */}
           <p className="text-muted-foreground order-2 md:order-1">
-            <span>Copyright © {new Date().getFullYear()}</span>
-            {" "}
-            <Link 
-              href="/"
-              className="hover:underline"
-            >
+            <span>Copyright © {new Date().getFullYear()}</span>{" "}
+            <Link href="/" className="hover:underline">
               shadcndesign.com
             </Link>
             . All rights reserved.
           </p>
 
           {/* Legal Navigation */}
-          <nav 
+          <nav
             className="flex flex-col md:flex-row items-center gap-6 md:gap-7 order-1 md:order-2 text-center"
             aria-label="Legal links"
           >

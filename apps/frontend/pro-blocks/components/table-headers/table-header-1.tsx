@@ -1,13 +1,13 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "ui";
+import { Input } from "ui";
 import { Search, ListFilter, Plus } from "lucide-react";
 
 export function TableHeader1() {
   return (
     <div className="container mx-auto flex flex-col lg:flex-row justify-between w-full gap-6 bg-background p-6">
-        {/* Title and description */}
+      {/* Title and description */}
       <div className="flex flex-col gap-1">
         <h2 className="text-lg lg:text-xl  font-semibold text-foreground leading-7">
           Table name

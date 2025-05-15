@@ -2,7 +2,7 @@
 
 import { Rocket } from "lucide-react";
 import Image from "next/image";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { AspectRatio } from "ui";
 
 export function FeatureSection11() {
   return (

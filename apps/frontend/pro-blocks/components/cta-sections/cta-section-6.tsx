@@ -1,18 +1,15 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "ui";
 
 export function CtaSection6() {
   return (
-    <section 
-      className="bg-background"
-      aria-labelledby="cta-heading"
-    >
+    <section className="bg-background" aria-labelledby="cta-heading">
       <div className="container mx-auto">
         <div className="px-6 py-16 md:p-16 bg-primary sm:rounded-xl">
           <div className="w-full flex flex-col md:flex-row gap-8 items-center text-center md:text-left justify-between">
             <div className="flex flex-col gap-4 max-w-xl">
-              <h2 
+              <h2
                 id="cta-heading"
                 className="text-2xl font-bold text-primary-foreground"
               >
@@ -24,7 +21,7 @@ export function CtaSection6() {
               </p>
             </div>
             <div className="flex flex-col md:flex-row gap-3 align-right">
-              <Button 
+              <Button
                 className="bg-primary-foreground hover:bg-primary-foreground/80 text-primary"
                 aria-label="Get started with our service"
               >

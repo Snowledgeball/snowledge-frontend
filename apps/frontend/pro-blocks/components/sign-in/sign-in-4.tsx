@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
+import { Separator } from "ui";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -152,7 +152,9 @@ export function SignIn4() {
             {/* Sign-up link */}
             <p className="text-sm text-center text-muted-foreground">
               Don't have an account?{" "}
-              <Link href="#" className="underline text-foreground">Sign up</Link>
+              <Link href="#" className="underline text-foreground">
+                Sign up
+              </Link>
             </p>
           </div>
         </div>

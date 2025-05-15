@@ -1,15 +1,15 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
+import { Textarea } from "ui";
+import { Checkbox } from "ui";
 import Link from "next/link";
 
 export function ContactSection1() {
   return (
-    <section 
+    <section
       className="bg-background py-16 lg:py-24"
       aria-labelledby="contact-heading"
     >
@@ -21,15 +21,12 @@ export function ContactSection1() {
             <p className="text-sm md:text-base font-semibold text-muted-foreground">
               Contact us
             </p>
-            
+
             {/* Main Title */}
-            <h1 
-              id="contact-heading"
-              className="text-3xl md:text-4xl font-bold"
-            >
+            <h1 id="contact-heading" className="text-3xl md:text-4xl font-bold">
               Get in touch
             </h1>
-            
+
             {/* Section Description */}
             <p className="text-base text-muted-foreground leading-6">
               Write one or two welcoming sentences that encourage contact.
@@ -39,7 +36,7 @@ export function ContactSection1() {
           </div>
 
           {/* Contact Form */}
-          <form 
+          <form
             className="flex flex-col w-full gap-5"
             onSubmit={(e) => e.preventDefault()}
             aria-label="Contact form"
@@ -47,9 +44,9 @@ export function ContactSection1() {
             {/* Name Input */}
             <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>
-              <Input 
-                id="name" 
-                placeholder="Name" 
+              <Input
+                id="name"
+                placeholder="Name"
                 required
                 aria-required="true"
               />
@@ -58,12 +55,12 @@ export function ContactSection1() {
             {/* Email Input */}
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                placeholder="Email" 
+              <Input
+                id="email"
+                placeholder="Email"
                 type="email"
                 required
-                aria-required="true" 
+                aria-required="true"
               />
             </div>
 
@@ -81,13 +78,9 @@ export function ContactSection1() {
 
             {/* Privacy Policy Checkbox */}
             <div className="flex items-start gap-2">
-              <Checkbox 
-                id="privacy" 
-                required
-                aria-required="true"
-              />
-              <Label 
-                htmlFor="privacy" 
+              <Checkbox id="privacy" required aria-required="true" />
+              <Label
+                htmlFor="privacy"
                 className="font-normal leading-none text-muted-foreground"
               >
                 By selecting this you agree to our{" "}

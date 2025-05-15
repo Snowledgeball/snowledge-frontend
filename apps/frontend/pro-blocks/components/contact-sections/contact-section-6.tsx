@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "ui";
+import { Checkbox } from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
+import { Textarea } from "ui";
+import { Separator } from "ui";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -13,7 +13,7 @@ export function ContactSection6() {
   const [agreed, setAgreed] = useState(false);
 
   return (
-    <section 
+    <section
       className="bg-background flex flex-col lg:flex-row min-h-screen py-16 md:py-0 gap-8 md:gap-0"
       aria-labelledby="contact-heading"
     >
@@ -27,7 +27,7 @@ export function ContactSection6() {
               Contact us
             </p>
             {/* Main Title */}
-            <h1 
+            <h1
               id="contact-heading"
               className="text-3xl md:text-4xl font-bold text-foreground"
             >
@@ -42,7 +42,7 @@ export function ContactSection6() {
           </div>
 
           {/* Contact Form */}
-          <form 
+          <form
             className="flex flex-col gap-5 md:gap-6"
             onSubmit={(e) => e.preventDefault()}
             aria-label="Contact form"
@@ -50,8 +50,8 @@ export function ContactSection6() {
             {/* Name Input */}
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
-              <Input 
-                id="name" 
+              <Input
+                id="name"
                 placeholder="Name"
                 required
                 aria-required="true"
@@ -61,9 +61,9 @@ export function ContactSection6() {
             {/* Email Input */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                type="email" 
+              <Input
+                id="email"
+                type="email"
                 placeholder="Email"
                 required
                 aria-required="true"
@@ -73,8 +73,8 @@ export function ContactSection6() {
             {/* Message Textarea */}
             <div className="space-y-2">
               <Label htmlFor="message">Message</Label>
-              <Textarea 
-                id="message" 
+              <Textarea
+                id="message"
                 placeholder="Type your message"
                 required
                 aria-required="true"

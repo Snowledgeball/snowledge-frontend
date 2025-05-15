@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ThumbsUp, ThumbsDown, MessageCircle } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 import { Loader } from "@/components/ui/loader";
 import { useTranslation } from "react-i18next";
+import { Progress } from "@/components/ui/progress";
 
 interface Review {
   id: number;

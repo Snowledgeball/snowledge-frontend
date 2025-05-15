@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "ui";
 
 interface DescriptionListItemProps {
   label: string;
@@ -37,38 +37,61 @@ export function DescriptionList2() {
           <DescriptionListItem label="Full name">
             <div className="flex md:flex-row flex-col md:items-center justify-between gap-x-6 gap-y-4">
               <span className="text-muted-foreground">Alex Thompson</span>
-              <Button variant="link" className="h-5 hidden md:flex">Edit</Button>
-              <Button variant="outline" className="md:hidden w-full">Edit</Button>
+              <Button variant="link" className="h-5 hidden md:flex">
+                Edit
+              </Button>
+              <Button variant="outline" className="md:hidden w-full">
+                Edit
+              </Button>
             </div>
           </DescriptionListItem>
           <DescriptionListItem label="Address">
             <div className="flex md:flex-row flex-col md:items-center justify-between gap-x-6 gap-y-4">
-              <span className="text-muted-foreground">123 Main Street, City, Country</span>
-              <Button variant="link" className="h-5 hidden md:flex">Edit</Button>
-              <Button variant="outline" className="md:hidden w-full">Edit</Button>
+              <span className="text-muted-foreground">
+                123 Main Street, City, Country
+              </span>
+              <Button variant="link" className="h-5 hidden md:flex">
+                Edit
+              </Button>
+              <Button variant="outline" className="md:hidden w-full">
+                Edit
+              </Button>
             </div>
           </DescriptionListItem>
           <DescriptionListItem label="Email address">
             <div className="flex md:flex-row flex-col md:items-center justify-between gap-x-6 gap-y-4">
               <span className="text-muted-foreground">alex@example.com</span>
-              <Button variant="link" className="h-5 hidden md:flex">Edit</Button>
-              <Button variant="outline" className="md:hidden w-full">Edit</Button>
+              <Button variant="link" className="h-5 hidden md:flex">
+                Edit
+              </Button>
+              <Button variant="outline" className="md:hidden w-full">
+                Edit
+              </Button>
             </div>
           </DescriptionListItem>
           <DescriptionListItem label="Phone number">
             <div className="flex md:flex-row flex-col md:items-center justify-between gap-x-6 gap-y-4">
               <span className="text-muted-foreground">+1 234 567 890</span>
-              <Button variant="link" className="h-5 hidden md:flex">Edit</Button>
-              <Button variant="outline" className="md:hidden w-full">Edit</Button>
+              <Button variant="link" className="h-5 hidden md:flex">
+                Edit
+              </Button>
+              <Button variant="outline" className="md:hidden w-full">
+                Edit
+              </Button>
             </div>
           </DescriptionListItem>
           <DescriptionListItem label="About">
             <div className="flex md:flex-row flex-col md:items-center justify-between gap-x-6 gap-y-4">
               <span className="text-muted-foreground">
-                A motivated professional with 5+ years of experience in software development.
+                A motivated professional with 5+ years of experience in software
+                development.
               </span>
-              <Button variant="link" className="h-5 hidden md:flex">Edit</Button>
-              <Button variant="outline" className="md:hidden w-full">Edit</Button>
+              <Button variant="link" className="h-5 hidden md:flex">
+                Edit
+              </Button>
+              <Button variant="outline" className="md:hidden w-full">
+                Edit
+              </Button>
             </div>
           </DescriptionListItem>
         </div>

@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "ui";
+import { Separator } from "ui";
+import { Card, CardContent } from "ui";
 import { File, Download } from "lucide-react";
 
 interface DescriptionListItemProps {

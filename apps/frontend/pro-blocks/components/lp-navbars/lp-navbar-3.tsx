@@ -1,8 +1,8 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Logo } from "../logo";
+import { Button } from "ui";
+import { Separator } from "ui";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
@@ -80,7 +80,9 @@ export function LpNavbar3() {
             <Separator className="my-2" />
             <div className="flex flex-col gap-3">
               <Link href="/signin">
-                <Button variant="ghost" className="w-full">Sign in</Button>
+                <Button variant="ghost" className="w-full">
+                  Sign in
+                </Button>
               </Link>
               <Link href="/signup">
                 <Button className="w-full">Sign up</Button>

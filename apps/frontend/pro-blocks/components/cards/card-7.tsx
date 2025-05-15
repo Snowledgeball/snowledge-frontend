@@ -1,43 +1,34 @@
-"use client"
+"use client";
 
-import { Card,CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Link, Download } from "lucide-react"
+import { Card, CardContent } from "ui";
+import { Button } from "ui";
+import { Link, Download } from "lucide-react";
 
 export function Card7() {
   return (
     <Card className="max-w-lg mx-auto mt-12">
       <CardContent className="p-4 md:p-6 flex items-center gap-3">
         <Link className="w-4 h-4 text-foreground shrink-0" />
-        
+
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-card-foreground">
               resume_1.pdf
             </span>
-            <span className="text-sm text-muted-foreground">
-              2,4mb
-            </span>
+            <span className="text-sm text-muted-foreground">2,4mb</span>
           </div>
 
           {/* Desktop button */}
-          <Button 
-            variant="outline" 
-            className="hidden md:flex"
-          >
+          <Button variant="outline" className="hidden md:flex">
             Download
           </Button>
 
           {/* Mobile button */}
-          <Button 
-            variant="outline" 
-            size="icon"
-            className="md:hidden"
-          >
+          <Button variant="outline" size="icon" className="md:hidden">
             <Download />
           </Button>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

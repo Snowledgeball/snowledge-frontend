@@ -20,8 +20,8 @@ import {
 } from "firebase/firestore";
 import Image from "next/image";
 import { Trash2, Pencil, Check, X } from "lucide-react";
-import { Loader } from "@/components/ui/loader";
 import { useTranslation } from "react-i18next";
+import { Loader } from "@/components/ui/loader";
 
 interface Channel {
   id: number;
@@ -369,7 +369,7 @@ export default function ChatBox({
           ({
             id: doc.id,
             ...doc.data(),
-          } as Message)
+          }) as Message
       );
       setMessages(newMessages);
       setHasMoreMessages(newMessages.length === messageLimit);
@@ -716,8 +716,8 @@ export default function ChatBox({
                             (msg.timestamp as FirestoreTimestamp).seconds * 1000
                           ).toLocaleString()
                         : msg.timestamp instanceof Date
-                        ? msg.timestamp.toLocaleString()
-                        : ""}
+                          ? msg.timestamp.toLocaleString()
+                          : ""}
                     </span>
                   </div>
                 )}

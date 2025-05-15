@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "ui";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 export function SectionFooter5() {

@@ -1,12 +1,12 @@
 "use client";
 
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { AspectRatio } from "ui";
+import { Avatar, AvatarImage } from "ui";
 import Image from "next/image";
 
 export function RichTextSection1() {
   return (
-    <section 
+    <section
       className="py-16 md:py-24 bg-background"
       aria-labelledby="article-title"
     >
@@ -19,14 +19,22 @@ export function RichTextSection1() {
             {/* Title and Meta Information Block */}
             <div className="flex flex-col gap-4 md:gap-5">
               {/* Article Meta Information - Date and Category */}
-              <div className="flex items-center gap-2" aria-label="Article metadata">
+              <div
+                className="flex items-center gap-2"
+                aria-label="Article metadata"
+              >
                 <p className="text-sm text-muted-foreground">Nov 11, 2024</p>
-                <span className="text-sm text-muted-foreground" aria-hidden="true">·</span>
+                <span
+                  className="text-sm text-muted-foreground"
+                  aria-hidden="true"
+                >
+                  ·
+                </span>
                 <p className="text-sm text-muted-foreground">Articles</p>
               </div>
 
               {/* Article Main Title */}
-              <h1 
+              <h1
                 id="article-title"
                 className="text-4xl font-bold leading-tight lg:text-5xl"
               >
@@ -42,7 +50,7 @@ export function RichTextSection1() {
             </div>
 
             {/* Author Information Block */}
-            <div 
+            <div
               className="flex items-center gap-4"
               aria-label="Article author"
             >
@@ -84,7 +92,7 @@ export function RichTextSection1() {
             </p>
 
             {/* First Section - The King's Plan */}
-            <h2 
+            <h2
               className="text-3xl font-semibold border-b pb-2"
               id="the-kings-plan"
             >
@@ -103,10 +111,7 @@ export function RichTextSection1() {
             </blockquote>
 
             {/* Second Section - The Joke Tax */}
-            <h3 
-              className="mt-8 text-2xl font-semibold"
-              id="the-joke-tax"
-            >
+            <h3 className="mt-8 text-2xl font-semibold" id="the-joke-tax">
               The Joke Tax
             </h3>
 
@@ -116,7 +121,7 @@ export function RichTextSection1() {
             </p>
 
             {/* Tax Rates List */}
-            <ul 
+            <ul
               className="ml-6 list-disc space-y-2"
               aria-label="Joke tax rates"
             >
@@ -148,7 +153,9 @@ export function RichTextSection1() {
               laugh. And once they started laughing, they couldn't stop.
             </p>
 
-            <h3 className="mt-8 text-2xl font-semibold">The People's Rebellion</h3>
+            <h3 className="mt-8 text-2xl font-semibold">
+              The People's Rebellion
+            </h3>
 
             <p className="leading-7">
               The people of the kingdom, feeling uplifted by the laughter,

@@ -774,8 +774,8 @@ export function VotingSession({ communityId }: VotingSessionProps) {
                               ? "bg-purple-100 border-purple-300"
                               : "bg-blue-100 border-blue-300"
                             : contribution?.tag === "creation"
-                            ? "border-l-4 border-l-purple-500 border-gray-200 bg-white"
-                            : "border-l-4 border-l-blue-500 border-gray-200 bg-white"
+                              ? "border-l-4 border-l-purple-500 border-gray-200 bg-white"
+                              : "border-l-4 border-l-blue-500 border-gray-200 bg-white"
                         } hover:shadow-sm transition-all`}
                       >
                         {/* Section du contenu principal */}

@@ -434,8 +434,8 @@ function ProfileContent() {
       const postsData = Array.isArray(data.posts)
         ? data.posts
         : Array.isArray(data)
-        ? data
-        : [];
+          ? data
+          : [];
 
       //On parse le contenu des posts
 
@@ -483,8 +483,8 @@ function ProfileContent() {
       const enrichmentsData = Array.isArray(data.enrichments)
         ? data.enrichments
         : Array.isArray(data)
-        ? data
-        : [];
+          ? data
+          : [];
 
       // Mettre à jour le cache
       profileCache.enrichments.set(cacheKey, {
@@ -529,8 +529,8 @@ function ProfileContent() {
       const reviewsData = Array.isArray(data.reviews)
         ? data.reviews
         : Array.isArray(data)
-        ? data
-        : [];
+          ? data
+          : [];
 
       // Mettre à jour le cache
       if (!profileCache.reviews) {
@@ -584,8 +584,8 @@ function ProfileContent() {
       const proposalsData = Array.isArray(data.contentProposals)
         ? data.contentProposals
         : Array.isArray(data)
-        ? data
-        : [];
+          ? data
+          : [];
 
       // Mettre à jour le cache
       if (!profileCache.contentProposals) {
@@ -645,8 +645,8 @@ function ProfileContent() {
       const messagesData = Array.isArray(data.messages)
         ? data.messages
         : Array.isArray(data)
-        ? data
-        : [];
+          ? data
+          : [];
 
       // Mettre à jour le cache
       if (!profileCache.messages) {
@@ -803,8 +803,8 @@ function ProfileContent() {
           const postsData = Array.isArray(data.posts)
             ? data.posts
             : Array.isArray(data)
-            ? data
-            : [];
+              ? data
+              : [];
 
           // Mettre à jour le cache
           profileCache.communityPosts.set(cacheKey, {
@@ -1267,15 +1267,15 @@ function ProfileContent() {
                                   enrichment.status === "APPROVED"
                                     ? "bg-green-100 text-green-700"
                                     : enrichment.status === "PENDING"
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : "bg-red-100 text-red-700"
+                                      ? "bg-yellow-100 text-yellow-700"
+                                      : "bg-red-100 text-red-700"
                                 }`}
                               >
                                 {enrichment.status === "APPROVED"
                                   ? t("profile.approved")
                                   : enrichment.status === "PENDING"
-                                  ? t("profile.pending")
-                                  : t("profile.rejected")}
+                                    ? t("profile.pending")
+                                    : t("profile.rejected")}
                               </span>
                               <h4 className="mt-2 font-medium text-gray-900">
                                 {t("profile.enrichment_for")}:{" "}

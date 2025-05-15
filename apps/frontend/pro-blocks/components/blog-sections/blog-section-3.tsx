@@ -1,6 +1,6 @@
 "use client";
 
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { AspectRatio } from "ui";
 import Image from "next/image";
 
 interface BlogPost {
@@ -44,7 +44,7 @@ const BLOG_POSTS: BlogPost[] = [
 
 export function BlogSection3() {
   return (
-    <section 
+    <section
       className="bg-background py-16 md:py-24"
       aria-labelledby="blog-section-3-heading"
     >
@@ -58,7 +58,7 @@ export function BlogSection3() {
             </p>
 
             {/* Main Title */}
-            <h2 
+            <h2
               id="blog-section-3-heading"
               className="text-3xl font-bold leading-tight md:text-4xl"
             >
@@ -74,7 +74,7 @@ export function BlogSection3() {
           </div>
 
           {/* Blog Grid */}
-          <div 
+          <div
             className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-6 w-full"
             role="list"
           >

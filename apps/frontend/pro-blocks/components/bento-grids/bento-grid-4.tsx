@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "ui";
 import Image from "next/image";
 
 export function BentoGrid4() {

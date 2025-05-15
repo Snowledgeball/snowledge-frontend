@@ -1,7 +1,7 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
+import { Logo } from "../logo";
+import { Button } from "ui";
 import {
   Card,
   CardContent,
@@ -9,10 +9,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+} from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
+import { Separator } from "ui";
 import Link from "next/link";
 
 export function SignIn8() {

@@ -1,9 +1,8 @@
 "use client";
 
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { AspectRatio } from "ui";
 import Image from "next/image";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@radix-ui/react-separator";
+import { Avatar, AvatarImage } from "ui";
 
 const TABLE_OF_CONTENTS = [
   { label: "The King's Plan", href: "#the-kings-plan" },
@@ -27,8 +26,8 @@ export function RichTextSection5() {
   return (
     <section className="py-16 md:py-24 bg-background">
       <div className="container mx-auto px-6">
-        <article 
-          className="flex flex-col gap-12 md:gap-24" 
+        <article
+          className="flex flex-col gap-12 md:gap-24"
           aria-labelledby="article-title"
         >
           <div className="flex flex-col lg:flex-row items-top gap-8 lg:gap-12">
@@ -46,7 +45,7 @@ export function RichTextSection5() {
                   </p>
                 </div>
 
-                <h1 
+                <h1
                   id="article-title"
                   className="text-4xl lg:text-5xl font-bold text-foreground"
                 >

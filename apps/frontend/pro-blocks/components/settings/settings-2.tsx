@@ -1,25 +1,25 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Logo } from "../logo";
+import { Avatar, AvatarFallback, AvatarImage } from "ui";
+import { Button } from "ui";
+import { Checkbox } from "ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+} from "ui";
+import { Separator } from "ui";
 import { Menu, Zap, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";

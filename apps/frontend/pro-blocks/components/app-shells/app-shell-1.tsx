@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Menu, Zap, Search, X, EllipsisVertical } from "lucide-react";
+import {
+  ChevronDown,
+  Menu,
+  Zap,
+  Search,
+  X,
+  EllipsisVertical,
+} from "lucide-react";
 import Link from "next/link";
 import {
   Breadcrumb,
@@ -10,18 +17,18 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
+} from "ui";
+import { Button } from "ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Logo } from "@/components/logo";
+} from "ui";
+import { Avatar, AvatarFallback, AvatarImage } from "ui";
+import { Badge } from "ui";
+import { Separator } from "ui";
+import { Logo } from "../logo";
 
 export function AppShell1() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -81,7 +88,10 @@ export function AppShell1() {
 
     return (
       <>
-        <Link href="#" className={`${linkClasses} ${isMobile ? "text-primary" : "text-primary"}`}>
+        <Link
+          href="#"
+          className={`${linkClasses} ${isMobile ? "text-primary" : "text-primary"}`}
+        >
           Dashboard
         </Link>
         <Link href="#" className={`${linkClasses} flex gap-2`}>
@@ -90,8 +100,12 @@ export function AppShell1() {
             2
           </Badge>
         </Link>
-        <Link href="#" className={linkClasses}>Products</Link>
-        <Link href="#" className={linkClasses}>Customers</Link>
+        <Link href="#" className={linkClasses}>
+          Products
+        </Link>
+        <Link href="#" className={linkClasses}>
+          Customers
+        </Link>
         {isMobile ? (
           <div>
             <button
@@ -107,16 +121,28 @@ export function AppShell1() {
             </button>
             {isSettingsOpen && (
               <div className="ml-3 mt-1 space-y-1">
-                <Link href="#" className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium">
+                <Link
+                  href="#"
+                  className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium"
+                >
                   General
                 </Link>
-                <Link href="#" className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium">
+                <Link
+                  href="#"
+                  className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium"
+                >
                   Security
                 </Link>
-                <Link href="#" className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium">
+                <Link
+                  href="#"
+                  className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium"
+                >
                   API
                 </Link>
-                <Link href="#" className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium">
+                <Link
+                  href="#"
+                  className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium"
+                >
                   Advanced
                 </Link>
               </div>
@@ -157,7 +183,10 @@ export function AppShell1() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="cursor-pointer">
-                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                  <AvatarImage
+                    src="https://github.com/shadcn.png"
+                    alt="@shadcn"
+                  />
                   <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
@@ -194,25 +223,42 @@ export function AppShell1() {
             <div className="p-2">
               <div className="flex items-center space-x-3 p-2">
                 <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                  <AvatarImage
+                    src="https://github.com/shadcn.png"
+                    alt="@shadcn"
+                  />
                   <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="font-medium">John Doe</p>
-                  <p className="text-sm text-muted-foreground">hi@shadcndesign.com</p>
+                  <p className="text-sm text-muted-foreground">
+                    hi@shadcndesign.com
+                  </p>
                 </div>
               </div>
               <div>
-                <Link href="#" className="block font-medium text-muted-foreground px-2 py-2 rounded-md">
+                <Link
+                  href="#"
+                  className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
+                >
                   My profile
                 </Link>
-                <Link href="#" className="block font-medium text-muted-foreground px-2 py-2 rounded-md">
+                <Link
+                  href="#"
+                  className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
+                >
                   Account settings
                 </Link>
-                <Link href="#" className="block font-medium text-muted-foreground px-2 py-2 rounded-md">
+                <Link
+                  href="#"
+                  className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
+                >
                   Billing
                 </Link>
-                <Link href="#" className="block font-medium text-muted-foreground px-2 py-2 rounded-md">
+                <Link
+                  href="#"
+                  className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
+                >
                   Sign out
                 </Link>
               </div>
@@ -231,7 +277,9 @@ export function AppShell1() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href="/docs/components">Projects</BreadcrumbLink>
+                <BreadcrumbLink href="/docs/components">
+                  Projects
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -246,7 +294,8 @@ export function AppShell1() {
                 Project alpha
               </h1>
               <p className="text-sm lg:text-base text-muted-foreground">
-                Manage your project's details such as name, image, description and settings.
+                Manage your project's details such as name, image, description
+                and settings.
               </p>
             </div>
             <div className="flex gap-2 justify-end flex-row-reverse md:flex-row">

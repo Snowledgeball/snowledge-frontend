@@ -7,8 +7,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Input } from "@/components/ui/input";
+} from "ui";
+import { Input } from "ui";
 import { Search } from "lucide-react";
 
 export function PageHeader4() {

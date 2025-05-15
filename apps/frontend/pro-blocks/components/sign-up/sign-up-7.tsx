@@ -1,9 +1,9 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { Logo } from "../logo";
+import { Button } from "ui";
+import { Checkbox } from "ui";
+import { Input } from "ui";
 import Link from "next/link";
 
 export function SignUp7() {

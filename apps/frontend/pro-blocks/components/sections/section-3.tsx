@@ -1,19 +1,21 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "ui";
+import { Button } from "ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+} from "ui";
+import { Input } from "ui";
 import { EllipsisVertical, Search, Inbox } from "lucide-react";
 
 export function Section3() {
   return (
-    <div className="bg-background"> {/* Add border border-border shadow-sm and rounded-lg class to make this section look like a card */}  
+    <div className="bg-background">
+      {" "}
+      {/* Add border border-border shadow-sm and rounded-lg class to make this section look like a card */}
       {/* Section header */}
       <div className="container mx-auto lg:px-6 px-4 pt-4 md:pt-6 flex flex-col gap-6">
         {/* Title */}
@@ -66,7 +68,9 @@ export function Section3() {
             <Inbox className="h-6 w-6" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-lg md:text-xl font-semibold">No databases added</h1>
+            <h1 className="text-lg md:text-xl font-semibold">
+              No databases added
+            </h1>
             <p className="text-sm text-muted-foreground">
               Read and write directly to databases and stores from your
               projects.
@@ -74,7 +78,9 @@ export function Section3() {
           </div>
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-center gap-3 w-full">
             <Button size="sm">Create new</Button>
-            <Button variant="outline" size="sm">Learn more</Button>
+            <Button variant="outline" size="sm">
+              Learn more
+            </Button>
           </div>
         </div>
       </div>

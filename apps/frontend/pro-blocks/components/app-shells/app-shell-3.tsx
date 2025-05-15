@@ -1,16 +1,16 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Logo } from "../logo";
+import { Avatar, AvatarFallback, AvatarImage } from "ui";
+import { Badge } from "ui";
+import { Button } from "ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
+} from "ui";
+import { Separator } from "ui";
 import { Menu, Zap, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -21,8 +21,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Input } from "@/components/ui/input";
+} from "ui";
+import { Input } from "ui";
 
 function Navbar2() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -81,14 +81,21 @@ function Navbar2() {
     return (
       <>
         {/* Main navigation links */}
-        <Link className={linkClasses}>Dashboard</Link>
-        <Link className={linkClasses}>Orders</Link>
-        <Link className={linkClasses}>Products</Link>
-        <Link className={linkClasses}>Customers</Link>
+        <Link className={linkClasses} href={""}>
+          Dashboard
+        </Link>
+        <Link className={linkClasses} href={""}>
+          Orders
+        </Link>
+        <Link className={linkClasses} href={""}>
+          Products
+        </Link>
+        <Link className={linkClasses} href={""}>
+          Customers
+        </Link>
         <Link
-          className={`${linkClasses} ${
-            isMobile ? "text-primary" : "text-primary"
-          }`}
+          className={`${linkClasses} ${isMobile ? "text-primary" : "text-primary"}`}
+          href={""}
         >
           Settings
         </Link>

@@ -1,31 +1,25 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Logo } from "../logo";
+import { Avatar, AvatarFallback, AvatarImage } from "ui";
+import { Button } from "ui";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+} from "ui";
+import { Separator } from "ui";
 import { Menu, Zap, Search, Terminal, X, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -260,34 +254,22 @@ export function Settings1() {
           <aside className="hidden md:block w-64 py-6 pr-6">
             <ul className="space-y-1 -ml-3">
               <li className="hover:bg-accent-foreground/10 rounded-md px-3 py-2 text-sm text-muted-foreground font-medium cursor-pointer">
-                <a>
-                  Profile
-                </a>
+                <a>Profile</a>
               </li>
               <li className="hover:bg-accent-foreground/10 rounded-md px-3 py-2 text-sm text-muted-foreground font-medium cursor-pointer">
-                <a>
-                  Account
-                </a>
+                <a>Account</a>
               </li>
               <li className="hover:bg-accent-foreground/10 rounded-md px-3 py-2 text-sm text-muted-foreground font-medium cursor-pointer">
-                <a>
-                  Members
-                </a>
+                <a>Members</a>
               </li>
               <li className="hover:bg-accent-foreg bg-accent-foreground/5 rounded-md px-3 py-2 text-sm text-accent-foreground font-medium cursor-pointer">
-                <a>
-                  Billing
-                </a>
+                <a>Billing</a>
               </li>
               <li className="hover:bg-accent-foreground/10 rounded-md px-3 py-2 text-sm text-muted-foreground font-medium cursor-pointer">
-                <a>
-                  Invoices
-                </a>
+                <a>Invoices</a>
               </li>
               <li className="hover:bg-accent-foreground/10 rounded-md px-3 py-2 text-sm text-muted-foreground font-medium cursor-pointer">
-                <a>
-                  API
-                </a>
+                <a>API</a>
               </li>
             </ul>
           </aside>

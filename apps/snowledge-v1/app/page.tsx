@@ -322,9 +322,9 @@ const HomePage = () => {
               ? creator.id === parseInt(userId)
                 ? t("communities.access_your_community")
                 : community_learners_id.includes(parseInt(userId)) ||
-                  community_contributors_id.includes(parseInt(userId))
-                ? t("communities.access")
-                : t("communities.join")
+                    community_contributors_id.includes(parseInt(userId))
+                  ? t("communities.access")
+                  : t("communities.join")
               : t("communities.join")}
           </button>
         </CardContent>

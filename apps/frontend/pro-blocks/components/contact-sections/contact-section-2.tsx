@@ -1,17 +1,17 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "ui";
+import { Checkbox } from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
+import { Textarea } from "ui";
 import { MapPin, Phone, Mail } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "ui";
 import Link from "next/link";
 
 export function ContactSection2() {
   return (
-    <section 
+    <section
       className="bg-background py-16 md:py-0"
       aria-labelledby="contact-heading"
     >
@@ -26,7 +26,7 @@ export function ContactSection2() {
                 Contact us
               </p>
               {/* Main Title */}
-              <h1 
+              <h1
                 id="contact-heading"
                 className="text-3xl md:text-4xl font-bold text-foreground"
               >
@@ -41,7 +41,7 @@ export function ContactSection2() {
             </div>
 
             {/* Contact Form */}
-            <form 
+            <form
               className="flex flex-col gap-5 md:gap-6"
               onSubmit={(e) => e.preventDefault()}
               aria-label="Contact form"
@@ -49,8 +49,8 @@ export function ContactSection2() {
               {/* Name Input */}
               <div className="flex flex-col gap-2">
                 <Label htmlFor="name">Name</Label>
-                <Input 
-                  id="name" 
+                <Input
+                  id="name"
                   placeholder="Name"
                   required
                   aria-required="true"
@@ -60,9 +60,9 @@ export function ContactSection2() {
               {/* Email Input */}
               <div className="flex flex-col gap-2">
                 <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
+                <Input
+                  id="email"
+                  type="email"
                   placeholder="Email"
                   required
                   aria-required="true"
@@ -83,12 +83,11 @@ export function ContactSection2() {
 
               {/* Privacy Policy Checkbox */}
               <div className="flex items-center gap-2">
-                <Checkbox 
-                  id="privacy"
-                  required
-                  aria-required="true"
-                />
-                <Label htmlFor="privacy" className="font-normal leading-tight text-muted-foreground">
+                <Checkbox id="privacy" required aria-required="true" />
+                <Label
+                  htmlFor="privacy"
+                  className="font-normal leading-tight text-muted-foreground"
+                >
                   By selecting this you agree to our{" "}
                   <Link href="#" className="underline text-foreground">
                     Privacy Policy

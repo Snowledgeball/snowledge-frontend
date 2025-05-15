@@ -1,7 +1,7 @@
-"use client"; 
+"use client";
 
 import { Rocket } from "lucide-react";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { AspectRatio } from "ui";
 import Image from "next/image";
 
 export function FeatureSection5() {

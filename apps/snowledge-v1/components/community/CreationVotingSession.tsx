@@ -508,8 +508,8 @@ export default function CreationVotingSession({
                             participationRate >= 50
                               ? "bg-green-600"
                               : participationRate >= 25
-                              ? "bg-yellow-400"
-                              : "bg-red-500"
+                                ? "bg-yellow-400"
+                                : "bg-red-500"
                           }`}
                           style={{ width: `${participationRate}%` }}
                         ></div>
@@ -533,8 +533,8 @@ export default function CreationVotingSession({
                               : 50)
                               ? "bg-green-600"
                               : approvalRate >= 50
-                              ? "bg-yellow-400"
-                              : "bg-red-500"
+                                ? "bg-yellow-400"
+                                : "bg-red-500"
                           }`}
                           style={{ width: `${approvalRate}%` }}
                         ></div>

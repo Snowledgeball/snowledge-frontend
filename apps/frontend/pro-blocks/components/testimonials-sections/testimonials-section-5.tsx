@@ -1,12 +1,12 @@
 "use client";
 
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarImage, AvatarFallback } from "ui";
+import { Separator } from "ui";
 
 export function TestimonialsSection5() {
   return (
-    <section 
-      className="py-16 md:py-24 bg-background" 
+    <section
+      className="py-16 md:py-24 bg-background"
       aria-labelledby="testimonial-title"
     >
       {/* Main Content Container */}
@@ -20,7 +20,7 @@ export function TestimonialsSection5() {
               Testimonial section
             </p>
             {/* Main Title */}
-            <h2 
+            <h2
               id="testimonial-title"
               className="text-3xl md:text-4xl font-bold"
             >

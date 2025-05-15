@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "ui";
 
 export function SectionFooter2() {
   return (

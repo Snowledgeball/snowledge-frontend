@@ -5,8 +5,8 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
+} from "ui";
+import { Button } from "ui";
 import Link from "next/link";
 
 // FAQ items data
@@ -40,7 +40,7 @@ const faqItems = [
 
 export function FaqSection4() {
   return (
-    <section 
+    <section
       className="bg-background py-16 md:py-24"
       aria-labelledby="faq-heading"
     >
@@ -52,7 +52,7 @@ export function FaqSection4() {
             FAQ section
           </p>
           {/* Main Title */}
-          <h1 
+          <h1
             id="faq-heading"
             className="text-3xl md:text-4xl font-bold text-foreground"
           >
@@ -69,10 +69,7 @@ export function FaqSection4() {
         </div>
 
         {/* FAQ List */}
-        <div 
-          className="flex flex-col gap-6 md:gap-8"
-          role="list"
-        >
+        <div className="flex flex-col gap-6 md:gap-8" role="list">
           {faqItems.map((item, index) => (
             <div
               key={index}
@@ -84,9 +81,7 @@ export function FaqSection4() {
                 {item.question}
               </h2>
               {/* Answer */}
-              <p className="text-muted-foreground flex-1">
-                {item.answer}
-              </p>
+              <p className="text-muted-foreground flex-1">{item.answer}</p>
             </div>
           ))}
         </div>

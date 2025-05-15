@@ -1,12 +1,12 @@
 "use client";
 
 import { MapPin, Phone, Mail } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "ui";
 import Link from "next/link";
 
 export function ContactSection3() {
   return (
-    <section 
+    <section
       className="bg-background py-16 md:py-24"
       aria-labelledby="contact-heading"
     >
@@ -21,7 +21,7 @@ export function ContactSection3() {
                 Contact us
               </p>
               {/* Main Title */}
-              <h1 
+              <h1
                 id="contact-heading"
                 className="text-3xl md:text-4xl font-bold text-foreground"
               >

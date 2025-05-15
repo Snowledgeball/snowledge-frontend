@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Avatar, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card } from "@/components/ui/card"
-import { Users, Plus } from "lucide-react"
+import { useState } from "react";
+import { Avatar, AvatarImage } from "ui";
+import { Button } from "ui";
+import { Input } from "ui";
+import { Card } from "ui";
+import { Users, Plus } from "lucide-react";
 
 interface MemberCardProps {
-  name: string
-  role: string
-  avatarUrl: string
-  onAdd: () => void
+  name: string;
+  role: string;
+  avatarUrl: string;
+  onAdd: () => void;
 }
 
 function MemberCard({ name, role, avatarUrl, onAdd }: MemberCardProps) {
@@ -25,33 +25,41 @@ function MemberCard({ name, role, avatarUrl, onAdd }: MemberCardProps) {
           <h3 className="font-semibold">{name}</h3>
           <p className="text-sm text-muted-foreground">{role}</p>
         </div>
-        <Button variant="ghost" size="icon" onClick={onAdd} className="absolute md:static right-0 top-0">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onAdd}
+          className="absolute md:static right-0 top-0"
+        >
           <Plus className="h-4 w-4" />
         </Button>
       </div>
     </Card>
-  )
+  );
 }
 
 interface InviteFormProps {
-  onSubmit: (email: string) => void
+  onSubmit: (email: string) => void;
 }
 
 function InviteForm({ onSubmit }: InviteFormProps) {
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (email) {
-      onSubmit(email)
-      setEmail("")
+      onSubmit(email);
+      setEmail("");
     }
-  }
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col md:flex-row w-full gap-2">
-      <Input 
-        type="email" 
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col md:flex-row w-full gap-2"
+    >
+      <Input
+        type="email"
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
@@ -60,34 +68,48 @@ function InviteForm({ onSubmit }: InviteFormProps) {
       />
       <Button type="submit">Send invite</Button>
     </form>
-  )
+  );
 }
 
 export function EmptySection3() {
   const handleInvite = (email: string) => {
     // Handle invite logic here
-    console.log("Sending invite to:", email)
-  }
+    console.log("Sending invite to:", email);
+  };
 
   const handleAddMember = (name: string) => {
     // Handle add member logic here
-    console.log("Adding member:", name)
-  }
+    console.log("Adding member:", name);
+  };
 
   const suggestedMembers = [
-    { name: "Kurt Bates", role: "Innovation Specialist", avatarUrl: "https://github.com/shadcn.png" },
-    { name: "Dennis Callis", role: "Designer", avatarUrl: "https://github.com/shadcn.png" },
-    { name: "Frances Swann", role: "UI/UX Designer", avatarUrl: "https://github.com/shadcn.png" },
-  ]
+    {
+      name: "Kurt Bates",
+      role: "Innovation Specialist",
+      avatarUrl: "https://github.com/shadcn.png",
+    },
+    {
+      name: "Dennis Callis",
+      role: "Designer",
+      avatarUrl: "https://github.com/shadcn.png",
+    },
+    {
+      name: "Frances Swann",
+      role: "UI/UX Designer",
+      avatarUrl: "https://github.com/shadcn.png",
+    },
+  ];
 
   return (
-    <section className="bg-background py-12"> {/* Add border border-border shadow-sm and rounded-lg class to make this section look like a card */}
+    <section className="bg-background py-12">
+      {" "}
+      {/* Add border border-border shadow-sm and rounded-lg class to make this section look like a card */}
       <div className="flex flex-col items-center max-w-xl mx-auto px-4 md:px-6">
         <div className="flex flex-col items-center space-y-6 w-full">
           <div className="flex items-center justify-center w-12 h-12 rounded-md bg-card border shadow-sm">
             <Users className="w-6 h-6 text-foreground" />
           </div>
-          
+
           <div className="flex flex-col items-center space-y-1 text-center">
             <h2 className="text-lg md:text-xl font-semibold text-foreground">
               Add members
@@ -111,5 +133,5 @@ export function EmptySection3() {
         </div>
       </div>
     </section>
-  )
+  );
 }

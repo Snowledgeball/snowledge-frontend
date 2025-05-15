@@ -1,8 +1,8 @@
 "use client";
 
-import { Logo } from "@/components/logo";
+import { Logo } from "../logo";
 import Link from "next/link";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "ui";
 
 // Footer navigation data
 const FOOTER_COLUMNS = [
@@ -53,7 +53,7 @@ const LEGAL_LINKS = [
 
 export function Footer4() {
   return (
-    <footer 
+    <footer
       className="bg-background py-16 lg:py-24"
       role="contentinfo"
       aria-label="Site footer"
@@ -76,7 +76,7 @@ export function Footer4() {
                 {column.title}
               </h2>
               {/* Column Navigation */}
-              <nav 
+              <nav
                 className="flex flex-col gap-3"
                 aria-label={`${column.title} links`}
               >
@@ -101,19 +101,15 @@ export function Footer4() {
         <div className="flex flex-col gap-12 lg:flex-row lg:items-center lg:justify-between text-center lg:text-left">
           {/* Copyright Text */}
           <p className="text-center text-base text-muted-foreground lg:text-left order-2 lg:order-1">
-            <span>Copyright © {new Date().getFullYear()}</span>
-            {" "}
-            <Link 
-              href="/"
-              className="hover:underline"
-            >
+            <span>Copyright © {new Date().getFullYear()}</span>{" "}
+            <Link href="/" className="hover:underline">
               shadcndesign.com
             </Link>
             . All rights reserved.
           </p>
 
           {/* Legal Navigation */}
-          <nav 
+          <nav
             className="flex flex-col gap-6 lg:flex-row lg:gap-8 text-center lg:text-left items-center lg:items-start order-1 lg:order-2"
             aria-label="Legal links"
           >

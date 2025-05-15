@@ -1,7 +1,7 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
+import { Logo } from "../logo";
+import { Button } from "ui";
 import {
   Card,
   CardContent,
@@ -9,12 +9,12 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "ui";
+import { Checkbox } from "ui";
+import { Input } from "ui";
+import { Label } from "ui";
+import { Separator } from "ui";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui";
 import Link from "next/link";
 
 export function SignIn6() {
@@ -56,7 +56,10 @@ export function SignIn6() {
                     <Checkbox id="keep-signed-in" />
                     <Label htmlFor="keep-signed-in">Keep me signed in</Label>
                   </div>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground underline">
+                  <Link
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-foreground underline"
+                  >
                     Forgot password?
                   </Link>
                 </div>
@@ -135,10 +138,7 @@ export function SignIn6() {
             </Button>
 
             {/* Apple sign-in button */}
-            <Button
-              variant="outline"
-              className="w-full text-foreground"
-            >
+            <Button variant="outline" className="w-full text-foreground">
               <svg
                 width="17"
                 height="16"

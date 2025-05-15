@@ -5,12 +5,12 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "ui";
 import Link from "next/link";
 
 export function FaqSection2() {
   return (
-    <section 
+    <section
       className="bg-background py-16 md:py-24"
       aria-labelledby="faq-heading"
     >
@@ -23,7 +23,7 @@ export function FaqSection2() {
               FAQ section
             </p>
             {/* Main Title */}
-            <h1 
+            <h1
               id="faq-heading"
               className="text-3xl md:text-4xl font-bold text-foreground"
             >
@@ -48,8 +48,8 @@ export function FaqSection2() {
                 General
               </h2>
               {/* FAQ Accordion */}
-              <Accordion 
-                type="single" 
+              <Accordion
+                type="single"
                 collapsible
                 aria-label="General FAQ items"
               >
@@ -94,8 +94,8 @@ export function FaqSection2() {
                 Billing
               </h2>
               {/* FAQ Accordion */}
-              <Accordion 
-                type="single" 
+              <Accordion
+                type="single"
                 collapsible
                 aria-label="Billing FAQ items"
               >

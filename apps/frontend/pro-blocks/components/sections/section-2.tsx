@@ -1,19 +1,21 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "ui";
+import { Button } from "ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+} from "ui";
+import { Input } from "ui";
 import { EllipsisVertical, Search } from "lucide-react";
 
 export function Section2() {
   return (
-    <div className="bg-background"> {/* Add border border-border shadow-sm and rounded-lg class to make this section look like a card */}
+    <div className="bg-background">
+      {" "}
+      {/* Add border border-border shadow-sm and rounded-lg class to make this section look like a card */}
       {/* Section header */}
       <div className="container mx-auto lg:px-6 px-4 pt-4 md:pt-6 flex flex-col gap-6">
         {/* Title */}
@@ -67,14 +69,14 @@ export function Section2() {
       </div>
       {/* Section footer */}
       <div className="border-t border-border py-4">
-      <div className="container mx-auto lg:px-6 px-4 gap-4 flex md:flex-row flex-col justify-between md:items-center items-start">
-        <div className="text-sm text-muted-foreground w-full">
-          Replace this text with your content
-        </div>
-        <div className="flex items-center gap-2 md:flex-row flex-row-reverse">
-          <Button variant="outline">View</Button>
-          <Button variant="outline">Edit</Button>
-          <Button>Save</Button>
+        <div className="container mx-auto lg:px-6 px-4 gap-4 flex md:flex-row flex-col justify-between md:items-center items-start">
+          <div className="text-sm text-muted-foreground w-full">
+            Replace this text with your content
+          </div>
+          <div className="flex items-center gap-2 md:flex-row flex-row-reverse">
+            <Button variant="outline">View</Button>
+            <Button variant="outline">Edit</Button>
+            <Button>Save</Button>
           </div>
         </div>
       </div>

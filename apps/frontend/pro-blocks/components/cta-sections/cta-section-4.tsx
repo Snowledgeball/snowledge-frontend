@@ -1,13 +1,13 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Input } from "@/components/ui/input";
+import { Button } from "ui";
+import { AspectRatio } from "ui";
+import { Input } from "ui";
 import Image from "next/image";
 
 export function CtaSection4() {
   return (
-    <section 
+    <section
       className="bg-background py-16 lg:py-24"
       aria-labelledby="cta-heading"
     >
@@ -21,7 +21,7 @@ export function CtaSection4() {
               CTA section
             </p>
             {/* Main Title */}
-            <h2 
+            <h2
               id="cta-heading"
               className="text-foreground text-3xl md:text-4xl font-bold"
             >
@@ -35,22 +35,19 @@ export function CtaSection4() {
             </p>
           </div>
           {/* Email Form */}
-          <form 
+          <form
             className="flex flex-col md:flex-row gap-3 w-full md:max-w-sm"
             onSubmit={(e) => e.preventDefault()}
             aria-label="Email signup form"
           >
-            <Input 
-              placeholder="Email" 
+            <Input
+              placeholder="Email"
               type="email"
               required
               aria-required="true"
               aria-label="Enter your email"
             />
-            <Button 
-              type="submit"
-              aria-label="Start using our service for free"
-            >
+            <Button type="submit" aria-label="Start using our service for free">
               Start for free
             </Button>
           </form>

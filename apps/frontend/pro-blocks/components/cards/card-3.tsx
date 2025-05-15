@@ -1,9 +1,9 @@
 "use client";
 
-import { Card, CardHeader, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardHeader, CardFooter } from "ui";
+import { Avatar, AvatarImage } from "ui";
+import { Button } from "ui";
+import { Separator } from "ui";
 import { Mail, Phone } from "lucide-react";
 
 export function Card3() {

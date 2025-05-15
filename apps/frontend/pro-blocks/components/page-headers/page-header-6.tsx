@@ -1,13 +1,13 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "ui";
+import { Button } from "ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "ui";
 import { EllipsisVertical } from "lucide-react";
 
 export function PageHeader6() {
@@ -22,9 +22,7 @@ export function PageHeader6() {
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                John Doe
-              </h1>
+              <h1 className="text-2xl font-bold tracking-tight">John Doe</h1>
               <p className="text-sm lg:text-base text-muted-foreground">
                 hi@example.com
               </p>

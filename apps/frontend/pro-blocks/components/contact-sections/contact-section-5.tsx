@@ -2,12 +2,12 @@
 
 import { MapPin, Phone, Mail } from "lucide-react";
 import Link from "next/link";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { AspectRatio } from "ui";
 import Image from "next/image";
 
 export function ContactSection5() {
   return (
-    <section 
+    <section
       className="bg-background py-16 md:py-24"
       aria-labelledby="contact-heading"
     >
@@ -33,7 +33,7 @@ export function ContactSection5() {
               Contact us
             </p>
             {/* Main Title */}
-            <h2 
+            <h2
               id="contact-heading"
               className="text-3xl md:text-4xl font-bold text-foreground"
             >

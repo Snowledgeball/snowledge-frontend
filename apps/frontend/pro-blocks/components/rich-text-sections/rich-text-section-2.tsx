@@ -1,12 +1,12 @@
 "use client";
 
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { AspectRatio } from "ui";
+import { Avatar, AvatarImage } from "ui";
 import Image from "next/image";
 
 export function RichTextSection2() {
   return (
-    <section 
+    <section
       className="py-16 md:py-24 bg-background"
       aria-labelledby="article-title"
     >
@@ -14,13 +14,21 @@ export function RichTextSection2() {
         <article className="flex flex-col gap-12 md:gap-16">
           <div className="flex flex-col gap-8 max-w-3xl">
             <div className="flex flex-col gap-4 md:gap-5">
-              <div className="flex items-center gap-2" aria-label="Article metadata">
+              <div
+                className="flex items-center gap-2"
+                aria-label="Article metadata"
+              >
                 <p className="text-sm text-muted-foreground">Nov 11, 2024</p>
-                <span className="text-sm text-muted-foreground" aria-hidden="true">·</span>
+                <span
+                  className="text-sm text-muted-foreground"
+                  aria-hidden="true"
+                >
+                  ·
+                </span>
                 <p className="text-sm text-muted-foreground">Articles</p>
               </div>
 
-              <h1 
+              <h1
                 id="article-title"
                 className="text-4xl font-bold leading-tight lg:text-5xl"
               >
@@ -34,7 +42,7 @@ export function RichTextSection2() {
               </p>
             </div>
 
-            <div 
+            <div
               className="flex items-center gap-4"
               aria-label="Article author"
             >
@@ -51,18 +59,17 @@ export function RichTextSection2() {
                 </p>
               </div>
             </div>
-            
           </div>
 
           <AspectRatio ratio={16 / 10}>
-              <Image
-                src="https://ui.shadcn.com/placeholder.svg"
-                alt="Article cover image"
-                fill
-                className="object-cover rounded-xl h-full w-full"
-                priority
-              />
-            </AspectRatio>
+            <Image
+              src="https://ui.shadcn.com/placeholder.svg"
+              alt="Article cover image"
+              fill
+              className="object-cover rounded-xl h-full w-full"
+              priority
+            />
+          </AspectRatio>
 
           <div className="flex flex-col gap-6 max-w-3xl">
             <p className="leading-7">
@@ -71,7 +78,7 @@ export function RichTextSection2() {
               came to him with a problem: the kingdom was running out of money.
             </p>
 
-            <h2 
+            <h2
               className="text-3xl font-semibold border-b pb-2"
               id="the-kings-plan"
             >
@@ -88,10 +95,7 @@ export function RichTextSection2() {
               fair that they should pay for the privilege."
             </blockquote>
 
-            <h3 
-              className="mt-8 text-2xl font-semibold"
-              id="the-joke-tax"
-            >
+            <h3 className="mt-8 text-2xl font-semibold" id="the-joke-tax">
               The Joke Tax
             </h3>
 
@@ -100,7 +104,7 @@ export function RichTextSection2() {
               but the king was firm:
             </p>
 
-            <ul 
+            <ul
               className="ml-6 list-disc space-y-2"
               aria-label="Joke tax rates"
             >
@@ -115,10 +119,7 @@ export function RichTextSection2() {
               king's foolishness get him down: a court jester named Jokester.
             </p>
 
-            <h3 
-              className="mt-8 text-2xl font-semibold"
-              id="jokesters-revolt"
-            >
+            <h3 className="mt-8 text-2xl font-semibold" id="jokesters-revolt">
               Jokester's Revolt
             </h3>
 
@@ -135,7 +136,7 @@ export function RichTextSection2() {
               laugh. And once they started laughing, they couldn't stop.
             </p>
 
-            <h3 
+            <h3
               className="mt-8 text-2xl font-semibold"
               id="the-peoples-rebellion"
             >

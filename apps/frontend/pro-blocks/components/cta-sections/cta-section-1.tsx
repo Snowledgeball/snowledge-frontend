@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "ui";
 import { ArrowRight } from "lucide-react";
 
 export function CtaSection1() {
   return (
-    <section 
+    <section
       className="bg-primary py-16 md:py-24"
       aria-labelledby="cta-heading"
     >
@@ -18,7 +18,7 @@ export function CtaSection1() {
               CTA section
             </p>
             {/* Main Title */}
-            <h2 
+            <h2
               id="cta-heading"
               className="text-3xl md:text-4xl font-bold text-primary-foreground text-center"
             >
@@ -31,9 +31,9 @@ export function CtaSection1() {
               to act now. Align this copy with your CTA button text.
             </p>
           </div>
-          
+
           {/* CTA Button */}
-          <Button 
+          <Button
             className="bg-primary-foreground hover:bg-primary-foreground/80 text-primary"
             aria-label="Get started with our service"
           >

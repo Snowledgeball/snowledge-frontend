@@ -1,8 +1,8 @@
 "use client";
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardFooter } from "ui";
+import { Avatar, AvatarImage, AvatarFallback } from "ui";
+import { Separator } from "ui";
 
 interface BlogPost {
   id: number;
@@ -53,7 +53,7 @@ const BLOG_POSTS: BlogPost[] = [
 
 export function BlogSection2() {
   return (
-    <section 
+    <section
       className="bg-background py-16 md:py-24"
       aria-labelledby="blog-section-2-heading"
     >
@@ -67,7 +67,7 @@ export function BlogSection2() {
             </p>
 
             {/* Main Title */}
-            <h2 
+            <h2
               id="blog-section-2-heading"
               className="text-3xl font-bold leading-tight md:text-4xl"
             >
@@ -83,7 +83,7 @@ export function BlogSection2() {
           </div>
 
           {/* Blog Grid */}
-          <div 
+          <div
             className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-6"
             role="list"
           >

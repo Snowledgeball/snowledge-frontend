@@ -1,19 +1,19 @@
-'use client'
+"use client";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-  DropdownMenuItem
-} from "@/components/ui/dropdown-menu"
-import { ChevronDown, Rocket } from "lucide-react"
+  DropdownMenuItem,
+} from "ui";
+import { ChevronDown, Rocket } from "lucide-react";
 
 export function Button3() {
   return (
     <div className="flex -space-x-px w-fit mx-auto mt-10">
-      <Button 
-        variant="outline" 
+      <Button
+        variant="outline"
         className="rounded-r-none flex items-center gap-2 justify-center"
       >
         <Rocket className="h-4 w-4" />
@@ -21,8 +21,8 @@ export function Button3() {
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="rounded-l-none h-10 w-10 p-2 flex items-center justify-center"
           >
             <ChevronDown className="h-4 w-4" />
@@ -41,5 +41,5 @@ export function Button3() {
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
-  )
+  );
 }

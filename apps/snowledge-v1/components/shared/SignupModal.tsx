@@ -322,8 +322,8 @@ const SignUpForm = ({ closeModal }: { closeModal: () => void }) => {
                     step.completed
                       ? "text-green-700"
                       : step.current
-                      ? "text-blue-700 font-medium"
-                      : "text-gray-500"
+                        ? "text-blue-700 font-medium"
+                        : "text-gray-500"
                   }`}
                 >
                   {step.name}

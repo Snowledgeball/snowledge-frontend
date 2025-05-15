@@ -1,7 +1,7 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Button } from "@/components/ui/button";
+import { Logo } from "../logo";
+import { Button } from "ui";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
@@ -51,7 +51,7 @@ export function LpNavbar1() {
             {isMenuOpen ? <X /> : <Menu />}
           </Button>
         </div>
-        
+
         {/* Desktop Navigation */}
         <div className="hidden md:flex flex-row gap-5 w-full justify-end">
           <NavMenuItems />

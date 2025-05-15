@@ -1,16 +1,16 @@
 "use client";
 
-import { Logo } from "@/components/logo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Logo } from "../logo";
+import { Avatar, AvatarFallback, AvatarImage } from "ui";
+import { Badge } from "ui";
+import { Button } from "ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
+} from "ui";
+import { Separator } from "ui";
 import { ChevronDown, Menu, Zap, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -81,22 +81,23 @@ export function Navbar1() {
       <>
         {/* Main navigation links */}
         <Link
+          href={""}
           className={`${linkClasses} ${
             isMobile ? "text-primary" : "text-primary"
           }`}
         >
           Dashboard
         </Link>
-        <Link className={`${linkClasses} flex gap-2`}>
+        <Link href={""} className={`${linkClasses} flex gap-2`}>
           Orders
           <Badge className="h-5 w-5 text-xs flex items-center justify-center p-0">
             2
           </Badge>
         </Link>
-        <Link className={linkClasses}>
+        <Link href={""} className={linkClasses}>
           Products
         </Link>
-        <Link className={linkClasses}>
+        <Link href={""} className={linkClasses}>
           Customers
         </Link>
         {/* Settings dropdown or expandable section */}
@@ -118,21 +119,25 @@ export function Navbar1() {
               <div className="ml-3 mt-1 space-y-1">
                 {/* Mobile settings sub-items */}
                 <Link
+                  href={""}
                   className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium"
                 >
                   General
                 </Link>
                 <Link
+                  href={""}
                   className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium"
                 >
                   Security
                 </Link>
                 <Link
+                  href={""}
                   className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium"
                 >
                   API
                 </Link>
                 <Link
+                  href={""}
                   className="block text-muted-foreground px-3 py-2 rounded-md text-base font-medium"
                 >
                   Advanced
@@ -239,21 +244,25 @@ export function Navbar1() {
               {/* User-related links */}
               <div>
                 <Link
+                  href={""}
                   className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
                 >
                   My profile
                 </Link>
                 <Link
+                  href={""}
                   className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
                 >
                   Account settings
                 </Link>
                 <Link
+                  href={""}
                   className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
                 >
                   Billing
                 </Link>
                 <Link
+                  href={""}
                   className="block font-medium text-muted-foreground px-2 py-2 rounded-md"
                 >
                   Sign out

@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "ui";
+import { Input } from "ui";
+import { Switch } from "ui";
+import { Tabs, TabsList, TabsTrigger } from "ui";
+import { Card } from "ui";
+import { Separator } from "ui";
 import {
   Sidebar,
   SidebarContent,
@@ -16,10 +16,10 @@ import {
   SidebarRail,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { TeamSwitcher } from "@/components/team-switcher";
-import { NavMain } from "@/components/nav-main";
-import { NavUser } from "@/components/nav-user";
+} from "ui";
+import { TeamSwitcher } from "../team-switcher";
+import { NavMain } from "../nav-main";
+import { NavUser } from "../nav-user";
 import {
   Cog,
   ExternalLink,
@@ -39,7 +39,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "ui";
 
 const data = {
   user: {
@@ -127,7 +127,6 @@ const data = {
         {
           title: "Integrations",
           url: "#integrations",
-          
         },
         {
           title: "Billing",
@@ -260,11 +259,12 @@ const integrations: IntegrationType[] = [
 ];
 
 export function Settings4({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [activeIntegrations, setActiveIntegrations] = React.useState<IntegrationType[]>(integrations);
+  const [activeIntegrations, setActiveIntegrations] =
+    React.useState<IntegrationType[]>(integrations);
 
   const handleToggle = (integrationName: string) => {
-    setActiveIntegrations(prevIntegrations =>
-      prevIntegrations.map(integration =>
+    setActiveIntegrations((prevIntegrations) =>
+      prevIntegrations.map((integration) =>
         integration.name === integrationName
           ? { ...integration, enabled: !integration.enabled }
           : integration
@@ -377,7 +377,7 @@ export function Settings4({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <Cog className="h-4 w-4" />
                       Settings
                     </Button>
-                    <Switch 
+                    <Switch
                       checked={integration.enabled}
                       onCheckedChange={() => handleToggle(integration.name)}
                     />

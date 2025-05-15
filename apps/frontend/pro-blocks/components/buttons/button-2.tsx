@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import React from "react"
-import { Button } from "@/components/ui/button"
-import { ThumbsUp } from "lucide-react"
+import React from "react";
+import { Button } from "ui";
+import { ThumbsUp } from "lucide-react";
 
 export function Button2() {
-  const [isLiked, setIsLiked] = React.useState(false)
-  const [likeCount, setLikeCount] = React.useState(24)
+  const [isLiked, setIsLiked] = React.useState(false);
+  const [likeCount, setLikeCount] = React.useState(24);
 
   const toggleLike = () => {
-    setIsLiked(!isLiked)
-    setLikeCount(prevCount => isLiked ? prevCount - 1 : prevCount + 1)
-  }
+    setIsLiked(!isLiked);
+    setLikeCount((prevCount) => (isLiked ? prevCount - 1 : prevCount + 1));
+  };
 
   return (
     <div className="flex items-center -space-x-px w-fit mx-auto mt-10">
-      <Button 
+      <Button
         variant={isLiked ? "default" : "outline"}
         className={`flex items-center gap-2 h-10 px-4 py-2 rounded-r-none ${
           isLiked ? "bg-primary text-primary-foreground" : ""
@@ -29,12 +29,12 @@ export function Button2() {
           {isLiked ? "Liked" : "Like"}
         </span>
       </Button>
-      
-      <Button 
+
+      <Button
         variant={isLiked ? "default" : "outline"}
         className={`flex items-center h-10 px-3 py-2 rounded-l-none ${
-          isLiked 
-            ? "bg-primary text-primary-foreground" 
+          isLiked
+            ? "bg-primary text-primary-foreground"
             : "text-muted-foreground"
         }`}
         aria-label={`${likeCount} likes`}
@@ -42,5 +42,5 @@ export function Button2() {
         <span className="text-sm font-medium leading-5">{likeCount}</span>
       </Button>
     </div>
-  )
+  );
 }

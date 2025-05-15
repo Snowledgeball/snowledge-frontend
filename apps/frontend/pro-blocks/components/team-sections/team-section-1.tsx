@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "ui";
 import Link from "next/link";
 
 export function TeamSection1() {
@@ -94,10 +94,7 @@ export function TeamSection1() {
               >
                 <div className="flex flex-col items-center gap-4">
                   <Avatar className="h-16 w-16 rounded-xl">
-                    <AvatarImage
-                      src={member.image}
-                      alt={member.name}
-                    />
+                    <AvatarImage src={member.image} alt={member.name} />
                   </Avatar>
                   <div className="flex flex-col">
                     <p className="text-base font-semibold text-foreground">

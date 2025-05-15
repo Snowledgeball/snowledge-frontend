@@ -1,17 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "ui";
+import { Button } from "ui";
+import { Badge } from "ui";
+import { Tabs, TabsList, TabsTrigger } from "ui";
 import { Check, Info } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "ui";
 
 const pricingData = {
   plans: [
@@ -21,16 +16,17 @@ const pricingData = {
       features: [
         {
           name: "Up to 5 team members",
-          tooltip: "Collaborate with up to 5 team members on unlimited projects"
+          tooltip:
+            "Collaborate with up to 5 team members on unlimited projects",
         },
         {
           name: "10GB storage space",
-          tooltip: "Secure cloud storage for all your project files and assets"
+          tooltip: "Secure cloud storage for all your project files and assets",
         },
         {
           name: "Basic analytics",
-          tooltip: "Access to essential metrics and performance tracking"
-        }
+          tooltip: "Access to essential metrics and performance tracking",
+        },
       ],
       pricing: {
         monthly: 29,
@@ -45,20 +41,20 @@ const pricingData = {
       features: [
         {
           name: "Up to 20 team members",
-          tooltip: "Scale your team with expanded collaboration capabilities"
+          tooltip: "Scale your team with expanded collaboration capabilities",
         },
         {
           name: "50GB storage space",
-          tooltip: "More storage for larger projects and asset libraries"
+          tooltip: "More storage for larger projects and asset libraries",
         },
         {
           name: "Advanced analytics",
-          tooltip: "Detailed insights with custom reporting and dashboards"
+          tooltip: "Detailed insights with custom reporting and dashboards",
         },
         {
           name: "Priority support",
-          tooltip: "Get help within 24 hours from our dedicated support team"
-        }
+          tooltip: "Get help within 24 hours from our dedicated support team",
+        },
       ],
       pricing: {
         monthly: 49,
@@ -72,32 +68,33 @@ const pricingData = {
       features: [
         {
           name: "Unlimited team members",
-          tooltip: "No limits on team size or collaboration"
+          tooltip: "No limits on team size or collaboration",
         },
         {
           name: "250GB storage space",
-          tooltip: "Enterprise-grade storage with advanced security"
+          tooltip: "Enterprise-grade storage with advanced security",
         },
         {
           name: "Custom analytics",
-          tooltip: "Tailored analytics solutions with API access"
+          tooltip: "Tailored analytics solutions with API access",
         },
         {
           name: "24/7 premium support",
-          tooltip: "Round-the-clock dedicated support with 4-hour response time"
+          tooltip:
+            "Round-the-clock dedicated support with 4-hour response time",
         },
         {
           name: "White-labeling",
-          tooltip: "Custom branding and white-label solutions"
-        }
+          tooltip: "Custom branding and white-label solutions",
+        },
       ],
       pricing: {
         monthly: 99,
         annually: 990,
       },
       variant: "secondary",
-    }
-  ]
+    },
+  ],
 };
 
 export function PricingSection4() {
@@ -105,7 +102,7 @@ export function PricingSection4() {
 
   return (
     // Main pricing section container with light background
-    <section 
+    <section
       className="py-16 md:py-24 bg-background"
       aria-labelledby="pricing-section-title-4"
     >
@@ -118,8 +115,8 @@ export function PricingSection4() {
               Pricing section
             </p>
             {/* Main Title */}
-            <h2 
-              id="pricing-section-title-4" 
+            <h2
+              id="pricing-section-title-4"
               className="text-3xl md:text-4xl font-bold"
             >
               Benefit-focused headline that highlights choice
@@ -134,7 +131,11 @@ export function PricingSection4() {
           </div>
 
           {/* Billing Period Toggle Switch */}
-          <Tabs value={billingPeriod} onValueChange={setBillingPeriod} className="w-fit">
+          <Tabs
+            value={billingPeriod}
+            onValueChange={setBillingPeriod}
+            className="w-fit"
+          >
             <TabsList className="bg-muted h-10 p-1 rounded-[40px]">
               <TabsTrigger
                 value="monthly"
@@ -154,10 +155,10 @@ export function PricingSection4() {
           {/* Horizontal Pricing Cards Layout - Stacks on mobile */}
           <div className="flex flex-col lg:flex-row gap-6 lg:max-w-5xl w-full mx-auto">
             {pricingData.plans.map((plan, index) => (
-              <Card 
+              <Card
                 key={plan.name}
                 className={`p-8 space-y-8 ${
-                  index === 2 ? 'bg-foreground text-background' : ''
+                  index === 2 ? "bg-foreground text-background" : ""
                 }`}
               >
                 {/* Plan Content Container */}
@@ -167,9 +168,11 @@ export function PricingSection4() {
                     <h3 className="text-lg font-semibold leading-7">
                       {plan.name}
                     </h3>
-                    <p className={`text-sm leading-5 ${
-                      index === 2 ? 'opacity-70' : 'text-muted-foreground'
-                    }`}>
+                    <p
+                      className={`text-sm leading-5 ${
+                        index === 2 ? "opacity-70" : "text-muted-foreground"
+                      }`}
+                    >
                       {plan.description}
                     </p>
                   </div>
@@ -177,18 +180,23 @@ export function PricingSection4() {
                   {/* Price Display with Currency and Period */}
                   <div className="flex items-end gap-0.5">
                     <span className="text-4xl font-semibold leading-10">
-                      ${billingPeriod === 'monthly' ? plan.pricing.monthly : plan.pricing.annually}
+                      $
+                      {billingPeriod === "monthly"
+                        ? plan.pricing.monthly
+                        : plan.pricing.annually}
                     </span>
-                    <span className={`text-base leading-6 ${
-                      index === 2 ? 'opacity-70' : 'text-muted-foreground'
-                    }`}>
-                      /{billingPeriod === 'monthly' ? 'month' : 'year'}
+                    <span
+                      className={`text-base leading-6 ${
+                        index === 2 ? "opacity-70" : "text-muted-foreground"
+                      }`}
+                    >
+                      /{billingPeriod === "monthly" ? "month" : "year"}
                     </span>
                   </div>
 
                   {/* Call-to-Action Button */}
-                  <Button 
-                    variant={index === 2 ? 'secondary' : 'default'}
+                  <Button
+                    variant={index === 2 ? "secondary" : "default"}
                     className="w-full"
                   >
                     Purchase plan
@@ -199,26 +207,36 @@ export function PricingSection4() {
                 <div className="space-y-4">
                   {/* Features Header with Plan Inheritance */}
                   <p className="text-sm font-medium">
-                    {index === 0 ? "What's included:" : `Everything in ${pricingData.plans[index - 1].name}, plus:`}
+                    {index === 0
+                      ? "What's included:"
+                      : `Everything in ${pricingData.plans[index - 1].name}, plus:`}
                   </p>
                   {/* Features Grid with Tooltips */}
                   <div className="flex flex-col gap-4">
                     {plan.features.map((feature, i) => (
                       <div key={i} className="flex items-center gap-3">
-                        <Check className={`h-5 w-5 ${
-                          index === 2 ? '' : 'text-primary'
-                        }`} />
-                        <span className={`text-sm flex-1 ${
-                          index === 2 ? 'opacity-70' : 'text-muted-foreground'
-                        }`}>
+                        <Check
+                          className={`h-5 w-5 ${
+                            index === 2 ? "" : "text-primary"
+                          }`}
+                        />
+                        <span
+                          className={`text-sm flex-1 ${
+                            index === 2 ? "opacity-70" : "text-muted-foreground"
+                          }`}
+                        >
                           {feature.name}
                         </span>
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger>
-                              <Info className={`h-4 w-4 ${
-                                index === 2 ? 'opacity-40' : 'text-muted-foreground opacity-70'
-                              }`} />
+                              <Info
+                                className={`h-4 w-4 ${
+                                  index === 2
+                                    ? "opacity-40"
+                                    : "text-muted-foreground opacity-70"
+                                }`}
+                              />
                             </TooltipTrigger>
                             <TooltipContent className="max-w-xs">
                               <p>{feature.tooltip}</p>

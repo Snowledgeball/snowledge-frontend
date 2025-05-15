@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "ui";
 import { ArrowRight } from "lucide-react";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { AspectRatio } from "ui";
+import { Avatar, AvatarImage } from "ui";
 import Image from "next/image";
 
 export function FeatureSection12() {

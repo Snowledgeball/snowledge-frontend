@@ -1,18 +1,18 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Logo } from "@/components/logo";
+import { Button } from "ui";
+import { Badge } from "ui";
+import { Avatar, AvatarImage } from "ui";
+import { Input } from "ui";
+import { Logo } from "../logo";
 import { Bell, Search } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
+} from "ui";
+import { Separator } from "ui";
 
 export function Navbar3() {
   return (
