@@ -199,6 +199,46 @@ function SidebarNavs() {
         },
       ].filter(Boolean),
     },
+    // Nouveau menu principal pour les ressources contributeur
+    features.community.contribute?.resources && {
+      title: "Ressources Contributeur",
+      url: `/${slug}/contribute/resources`,
+      icon: BookOpen,
+      items: [
+        features.community.contribute.resources.tutorials && {
+          title: "Tutoriels de contribution",
+          url: `/${slug}/contribute/tutorials`,
+        },
+        features.community.contribute.resources.history && {
+          title: "Historique des contributions",
+          url: `/${slug}/contribute/history`,
+        },
+        features.community.contribute.resources.leaderboard && {
+          title: "Classement des contributeurs",
+          url: `/${slug}/contribute/leaderboard`,
+        },
+      ].filter(Boolean),
+    },
+    // Nouveau menu principal pour les outils contributeur
+    features.community.contribute?.tools && {
+      title: "Outils Contributeur",
+      url: `/${slug}/contribute/tools`,
+      icon: SquareTerminal,
+      items: [
+        features.community.contribute.tools.badges && {
+          title: "Mes badges",
+          url: `/${slug}/contribute/tools/badges`,
+        },
+        features.community.contribute.tools.validationRequests && {
+          title: "Demandes de validation",
+          url: `/${slug}/contribute/tools/validation-requests`,
+        },
+        features.community.contribute.tools.stats && {
+          title: "Statistiques de contribution",
+          url: `/${slug}/contribute/tools/stats`,
+        },
+      ].filter(Boolean),
+    },
   ].filter(Boolean);
 
   // Structure enrichie pour NavProjects (admin/créateur)
