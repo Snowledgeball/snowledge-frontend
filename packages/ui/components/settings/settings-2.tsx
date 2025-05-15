@@ -1,15 +1,14 @@
 "use client";
 
-import { Button, Logo } from "@repo/ui-core";
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button, Logo, Avatar, AvatarImage, Separator, AvatarFallback } from "@repo/ui-core";
 // import { Button } from "@/components/ui/button";
 // import { Checkbox } from "@/components/ui/checkbox";
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuTrigger,
-// } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@repo/ui-core";
 // import { Input } from "@/components/ui/input";
 // import { Label } from "@/components/ui/label";
 // import {
@@ -118,7 +117,7 @@ export function Navbar2() {
               <Zap className="h-4 w-4" /> Upgrade
             </Button>
             {/* User menu dropdown */}
-            {/* <DropdownMenu>
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="cursor-pointer">
                   <AvatarImage
@@ -134,7 +133,7 @@ export function Navbar2() {
                 <Separator className="my-1" />
                 <DropdownMenuItem>Sign Out</DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu> */}
+            </DropdownMenu> 
             {/* New item button */}
           </div>
         </div>
@@ -160,13 +159,13 @@ export function Navbar2() {
             <div className="p-2">
               {/* User info */}
               <div className="flex items-center space-x-3 p-2">
-                {/* <Avatar>
+                <Avatar>
                   <AvatarImage
                     src="https://github.com/shadcn.png"
                     alt="@shadcn"
                   />
                   <AvatarFallback>JD</AvatarFallback>
-                </Avatar> */}
+                </Avatar>
                 <div>
                   <p className="font-medium">John Doe</p>
                   <p className="text-sm text-muted-foreground">
