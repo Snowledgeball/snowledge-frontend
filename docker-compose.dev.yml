@@ -4,12 +4,12 @@ services:
   # Service pour le frontend
   frontend:
     build:
-      context: ./apps/frontend
+      context: ./frontend
       dockerfile: Dockerfile.dev
     volumes:
-      - ./apps/frontend:/app
+      - ./frontend:/app
       - /app/node_modules
-      - ./apps/frontend/.env:/app/.env
+      - ./frontend/.env:/app/.env
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
@@ -17,13 +17,13 @@ services:
 
   backend:
     build:
-      context: ./apps/backend
+      context: ./backend
       dockerfile: Dockerfile.dev
     volumes:
       # Monter le code source en préservant node_modules
-      - ./apps/backend:/app
+      - ./backend:/app
       - /app/node_modules
-      - ./apps/backend/.env:/app/.env
+      - ./backend/.env:/app/.env
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
