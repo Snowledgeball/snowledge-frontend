@@ -88,171 +88,173 @@ export default function CreateCommunity() {
   }
 
   return (
-    <div className="max-w-xl mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Créer une communauté</h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nom</FormLabel>
-                <FormControl>
-                  <Input placeholder="Nom de la communauté" {...field} />
-                </FormControl>
-                <FormDescription>Le nom de votre communauté.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="isFree"
-            render={({ field }) => (
-              <FormItem className="flex items-center gap-4">
-                <FormLabel>Gratuit</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={(checked) => {
-                      field.onChange(checked);
-                      setIsFree(checked);
-                    }}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Activez pour rendre la communauté gratuite. Désactivez pour
-                  indiquer un prix.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {!isFree && (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="max-w-xl w-full mx-auto py-8">
+        <h1 className="text-2xl font-bold mb-6">Créer une communauté</h1>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="price"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Prix</FormLabel>
+                  <FormLabel>Nom</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="Prix en €"
-                      {...field}
+                    <Input placeholder="Nom de la communauté" {...field} />
+                  </FormControl>
+                  <FormDescription>Le nom de votre communauté.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="isFree"
+              render={({ field }) => (
+                <FormItem className="flex items-center gap-4">
+                  <FormLabel>Gratuit</FormLabel>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={(checked) => {
+                        field.onChange(checked);
+                        setIsFree(checked);
+                      }}
                     />
                   </FormControl>
                   <FormDescription>
-                    Prix d&apos;accès à la communauté.
+                    Activez pour rendre la communauté gratuite. Désactivez pour
+                    indiquer un prix.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          )}
-          <FormField
-            control={form.control}
-            name="tags"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Type / Tags</FormLabel>
-                <FormControl>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={loadingTypes}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Choisissez un type" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50" position="popper">
-                      <SelectGroup>
-                        <SelectLabel>Types</SelectLabel>
-                        {communityTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormDescription>
-                  Sélectionnez le type principal de la communauté.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Décrivez votre communauté..."
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Une description pour présenter la communauté.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
+            {!isFree && (
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Prix</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="Prix en €"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Prix d&apos;accès à la communauté.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
-          />
+            <FormField
+              control={form.control}
+              name="tags"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Type / Tags</FormLabel>
+                  <FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={loadingTypes}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Choisissez un type" />
+                      </SelectTrigger>
+                      <SelectContent className="z-50" position="popper">
+                        <SelectGroup>
+                          <SelectLabel>Types</SelectLabel>
+                          {communityTypes.map((type) => (
+                            <SelectItem key={type.value} value={type.value}>
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormDescription>
+                    Sélectionnez le type principal de la communauté.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="externalLinks"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Liens externes</FormLabel>
-                <FormControl>
-                  <Input placeholder="https://..." {...field} />
-                </FormControl>
-                <FormDescription>
-                  Ajoutez un ou plusieurs liens externes (séparés par des
-                  virgules).
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Décrivez votre communauté..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Une description pour présenter la communauté.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="gainParams"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Paramètre de gains</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ex: % de commission, bonus..."
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Définissez les paramètres de gains éventuels.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="externalLinks"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Liens externes</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://..." {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Ajoutez un ou plusieurs liens externes (séparés par des
+                    virgules).
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <Button type="submit" className="w-full">
-            Créer la communauté
-          </Button>
-        </form>
-      </Form>
+            <FormField
+              control={form.control}
+              name="gainParams"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Paramètre de gains</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ex: % de commission, bonus..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Définissez les paramètres de gains éventuels.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full">
+              Créer la communauté
+            </Button>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 }
