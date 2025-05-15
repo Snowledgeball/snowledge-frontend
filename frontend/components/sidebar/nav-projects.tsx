@@ -27,6 +27,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Separator } from "@radix-ui/react-separator";
 
 export function NavProjects({
   projects,
@@ -97,11 +98,8 @@ export function NavProjects({
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
+        <Separator />
         <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
-            <MoreHorizontal className="text-sidebar-foreground/70" />
-            <span>More</span>
-          </SidebarMenuButton>
           <Link href="/">
             <SidebarMenuButton className="text-sidebar-foreground/70">
               <Home className="text-sidebar-foreground/70" />

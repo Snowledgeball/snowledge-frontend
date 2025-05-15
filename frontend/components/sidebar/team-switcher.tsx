@@ -155,19 +155,22 @@ export function CommunitySwitcher() {
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>
             ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
-              <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                <Plus className="size-4" />
-              </div>
-              {features.createCommunity.enabled && (
-                <Link href="/create-community">
-                  <div className="text-muted-foreground font-medium">
-                    Créer une communauté
+            {features.createCommunity.enabled && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="gap-2 p-2">
+                  <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
+                    <Plus className="size-4" />
                   </div>
-                </Link>
-              )}
-            </DropdownMenuItem>
+
+                  <Link href="/create-community">
+                    <div className="text-muted-foreground font-medium">
+                      Créer une communauté
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
