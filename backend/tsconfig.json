@@ -1,6 +1,19 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
-    "outDir": "./dist",
+    "strictPropertyInitialization": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "useDefineForClassFields": false,
+    "plugins": [
+      {
+        "name": "typescript-plugin-nestjs-legacy-decorators"
+      }
+    ]
   }
 }

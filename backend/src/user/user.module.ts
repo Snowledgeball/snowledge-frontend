@@ -1,7 +1,7 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
-import { LoggerMiddleware } from '../logger/logger.middleware';
+import { LoggerMiddleware } from '../common/middleware/logger/logger.middleware';
 
 @Module({
   providers: [UserService],

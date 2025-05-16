@@ -49,3 +49,8 @@ dist/
 
 # vscode
 .vscode
+
+# backend
+backend/dist/
+backend/*.js
+backend/*.js.map

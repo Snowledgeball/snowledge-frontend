@@ -7,7 +7,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserValidationPipe } from 'src/user-validation/user-validation.pipe';
 import { AuthGuard } from './auth/auth.guard';
 
 @Controller('user')
@@ -20,7 +19,6 @@ export class UserController {
   }
 
   @Post()
-  @UsePipes(UserValidationPipe)
   @UseGuards(AuthGuard)
   createUser(@Body() user: any) {
     return { message: 'User created successfully', user };
