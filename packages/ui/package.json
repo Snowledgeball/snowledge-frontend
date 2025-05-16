@@ -1,10 +1,11 @@
 {
     "name": "@repo/ui",
     "version": "0.0.0",
-    "type": "module",
     "exports": {
-      ".": "./index.ts",
-      "./postcss": "./postcss.config.js"
+      "./global.css": "./global.css",
+      "./postcss": "./postcss.config.js",
+      "./tailwind.config": "./tailwind.config.js",
+      ".": "./index.ts"
     },  
     "publishConfig": {
       "access": "public"

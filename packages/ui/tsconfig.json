@@ -20,9 +20,5 @@
     "preserveWatchOutput": true,
     "skipLibCheck": true,
     "strict": true,
-    "paths": {
-      "@/*": ["./*"]
-    },
-    "baseUrl": "."
   }
 }

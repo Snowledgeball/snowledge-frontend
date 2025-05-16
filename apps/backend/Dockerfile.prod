@@ -9,7 +9,7 @@ RUN apk update
 RUN apk add --no-cache libc6-compat
 # Set working directory
 WORKDIR /app
-RUN npm install turbo --global
+RUN npm install turbo @nestjs/cli --global
 COPY . .
 RUN turbo prune backend --docker
 

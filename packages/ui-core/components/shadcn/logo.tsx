@@ -18,8 +18,8 @@ export const Logo: React.FC<LogoProps> = ({
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      <g clip-path="url(#clip0_3014_8110)">
-        <g clip-path="url(#clip1_3014_8110)">
+      <g clipPath="url(#clip0_3014_8110)">
+        <g clipPath="url(#clip1_3014_8110)">
           <rect
             x="4.5"
             y="4.5"
@@ -27,7 +27,7 @@ export const Logo: React.FC<LogoProps> = ({
             height="27"
             fill="black"
             stroke="#4497F7"
-            stroke-width="2.25"
+            strokeWidth="2.25"
           />
           <rect
             x="1.125"
@@ -36,7 +36,7 @@ export const Logo: React.FC<LogoProps> = ({
             height="6.75"
             fill="white"
             stroke="#4497F7"
-            stroke-width="2.25"
+            strokeWidth="2.25"
           />
           <rect
             x="28.125"
@@ -45,7 +45,7 @@ export const Logo: React.FC<LogoProps> = ({
             height="6.75"
             fill="white"
             stroke="#4497F7"
-            stroke-width="2.25"
+            strokeWidth="2.25"
           />
           <rect
             x="1.125"
@@ -54,7 +54,7 @@ export const Logo: React.FC<LogoProps> = ({
             height="6.75"
             fill="white"
             stroke="#4497F7"
-            stroke-width="2.25"
+            strokeWidth="2.25"
           />
           <rect
             x="28.125"
@@ -63,17 +63,17 @@ export const Logo: React.FC<LogoProps> = ({
             height="6.75"
             fill="white"
             stroke="#4497F7"
-            stroke-width="2.25"
+            strokeWidth="2.25"
           />
           <path
             d="M10.6875 25.3125L25.3125 10.6875"
             stroke="white"
-            stroke-width="2.25"
+            strokeWidth="2.25"
           />
           <path
             d="M19.6875 25.3125L25.3125 19.6875"
             stroke="white"
-            stroke-width="2.25"
+            strokeWidth="2.25"
           />
         </g>
       </g>
