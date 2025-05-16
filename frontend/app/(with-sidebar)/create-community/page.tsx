@@ -33,6 +33,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { features } from "@/config/features";
 import { notFound } from "next/navigation";
+import ModalInvite from "./ModalInvite";
 
 const formSchema = z.object({
   name: z
@@ -73,6 +74,7 @@ export default function CreateCommunity() {
     notFound();
   }
   const [isFree, setIsFree] = useState(true);
+  const [openInvite, setOpenInvite] = useState(false);
   const { data: communityTypes = [], isLoading: loadingTypes } =
     useCommunityTypes();
   const form = useForm<FormSchema>({
@@ -89,6 +91,10 @@ export default function CreateCommunity() {
 
   function onSubmit(values: FormSchema) {
     console.log(values);
+    // Simule la création de la communauté puis ouvre le modal d'invitation
+    setTimeout(() => {
+      setOpenInvite(true);
+    }, 500);
   }
 
   return (
@@ -238,6 +244,7 @@ export default function CreateCommunity() {
             </Button>
           </form>
         </Form>
+        <ModalInvite open={openInvite} onOpenChange={setOpenInvite} />
       </div>
     </div>
   );
