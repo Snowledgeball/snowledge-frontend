@@ -8,6 +8,7 @@ import {
   Command,
   Frame,
   GalleryVerticalEnd,
+  Home,
   Map,
   PieChart,
   Settings2,
@@ -30,8 +31,11 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
+import Link from "next/link";
+
 import { toSlug } from "@/utils/slug";
 import { features } from "@/config/features";
+import { Button } from "../ui/button";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -277,6 +281,12 @@ function SidebarNavs() {
   ].filter(Boolean);
   return (
     <>
+      <Link href={`/${slug}`}>
+        <Button className="p-0 w-full justify-start" variant="ghost">
+          <Home />
+          <span>Accueil</span>
+        </Button>
+      </Link>
       <NavMain items={navMain} label="Apprenant" />
       <NavMain items={navContributeur} label="Contributeur" />
       <NavProjects projects={navProjects} label="Créateur" />
