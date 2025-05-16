@@ -1,24 +1,28 @@
 "use client";
 
-import { Button, Logo, Avatar, AvatarImage, Separator, AvatarFallback } from "@repo/ui-core";
-// import { Button } from "@/components/ui/button";
-// import { Checkbox } from "@/components/ui/checkbox";
+import { 
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button, 
+  Checkbox,
+  Label,
+  Logo, 
+  Input,
+  Separator,  } from "@repo/ui-core";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@repo/ui-core";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select";
-// import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui-core";
 import { Menu, Zap, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -154,7 +158,7 @@ export function Navbar2() {
                 <NavItems isMobile={true} />
               </div>
             </div>
-            {/* <Separator /> */}
+            <Separator />
             {/* Mobile user profile section */}
             <div className="p-2">
               {/* User info */}
@@ -229,7 +233,7 @@ export function Settings2() {
             </div>
             {/* Mobile-only dropdown */}
             <div className="md:hidden">
-              {/* <Select defaultValue="profile">
+              <Select defaultValue="profile">
                 <SelectTrigger>
                   <SelectValue placeholder="Select setting" />
                 </SelectTrigger>
@@ -241,7 +245,7 @@ export function Settings2() {
                   <SelectItem value="invoices">Invoices</SelectItem>
                   <SelectItem value="api">API</SelectItem>
                 </SelectContent>
-              </Select> */}
+              </Select>
             </div>
           </div>
         </div>
@@ -288,7 +292,7 @@ export function Settings2() {
                   </p>
                 </div>
                 <div className="col-span-8 lg:col-span-4 space-y-4 md:space-y-6">
-                  {/* <div className="space-y-2">
+                  <div className="space-y-2">
                     <Label htmlFor="username">Username</Label>
                     <Input id="username" value="nicol43" readOnly />
                   </div>
@@ -307,7 +311,7 @@ export function Settings2() {
                       type="email"
                       value="stephanie_nicol@mail.com"
                     />
-                  </div> */}
+                  </div>
                   <Button>Save</Button>
                 </div>
               </section>
@@ -325,7 +329,7 @@ export function Settings2() {
                   </p>
                 </div>
                 <div className="col-span-8 lg:col-span-4 space-y-4 md:space-y-6">
-                  {/* <div className="space-y-2">
+                  <div className="space-y-2">
                     <Label htmlFor="current-password">
                       Verify current password
                     </Label>
@@ -334,24 +338,24 @@ export function Settings2() {
                       type="password"
                       value="••••••••••"
                     />
-                  </div> */}
+                  </div>
                   <div className="flex flex-col gap-2">
-                    {/* <div className="space-y-2">
+                    <div className="space-y-2">
                       <Label htmlFor="new-password">New password</Label>
                       <Input
                         id="new-password"
                         type="password"
                         value="••••••••••"
                       />
-                    </div> */}
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    {/* <Label htmlFor="confirm-password">Confirm password</Label>
+                    <Label htmlFor="confirm-password">Confirm password</Label>
                     <Input
                       id="confirm-password"
                       type="password"
                       value="••••••••••"
-                    /> */}
+                    />
                   </div>
                   <Button>Save</Button>
                 </div>
