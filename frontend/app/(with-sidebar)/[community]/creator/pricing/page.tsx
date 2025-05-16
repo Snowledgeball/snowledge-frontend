@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 
 export default function Page() {
   const { community } = useParams();
-  if (!features.community.creator.admin.pricing) {
+  if (!features.community.creator.pricing) {
     notFound();
   }
   return <div>Tarifs d'administration pour la communauté {community}</div>;

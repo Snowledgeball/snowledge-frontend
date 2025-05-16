@@ -67,179 +67,179 @@ function SidebarNavs() {
   const slug = toSlug(activeCommunity.name);
   // Structure enrichie pour NavMain (élève)
   const navMain = [
-    features.community.dashboard?.enabled && {
+    features.community.learner.dashboard.enabled && {
       title: "Tableau de bord",
-      url: `/${slug}/dashboard`,
+      url: `/${slug}/learner/dashboard`,
       icon: PieChart,
       items: [
-        features.community.dashboard.overview && {
+        features.community.learner.dashboard.overview && {
           title: "Vue globale",
-          url: `/${slug}/dashboard/overview`,
+          url: `/${slug}/learner/dashboard/overview`,
         },
-        features.community.dashboard.details && {
+        features.community.learner.dashboard.details && {
           title: "Statistiques détaillées",
-          url: `/${slug}/dashboard/details`,
+          url: `/${slug}/learner/dashboard/details`,
         },
       ].filter(Boolean),
     },
-    features.community.content?.enabled && {
+    features.community.learner.content.enabled && {
       title: "Contenu",
-      url: `/${slug}/content`,
+      url: `/${slug}/learner/content`,
       icon: BookOpen,
       items: [
-        features.community.content.articles && {
+        features.community.learner.content.articles && {
           title: "Articles",
-          url: `/${slug}/content/articles`,
+          url: `/${slug}/learner/content/articles`,
         },
-        features.community.content.videos && {
+        features.community.learner.content.videos && {
           title: "Vidéos",
-          url: `/${slug}/content/videos`,
+          url: `/${slug}/learner/content/videos`,
         },
-        features.community.content.podcasts && {
+        features.community.learner.content.podcasts && {
           title: "Podcasts",
-          url: `/${slug}/content/podcasts`,
+          url: `/${slug}/learner/content/podcasts`,
         },
       ].filter(Boolean),
     },
-    features.community.discussions?.enabled && {
+    features.community.learner.discussions.enabled && {
       title: "Discussions",
-      url: `/${slug}/discussions`,
+      url: `/${slug}/learner/discussions`,
       icon: Bot,
       items: [
-        features.community.discussions.forum && {
+        features.community.learner.discussions.forum && {
           title: "Forum",
-          url: `/${slug}/discussions/forum`,
+          url: `/${slug}/learner/discussions/forum`,
         },
-        features.community.discussions.chat && {
+        features.community.learner.discussions.chat && {
           title: "Chat général",
-          url: `/${slug}/discussions/chat`,
+          url: `/${slug}/learner/discussions/chat`,
         },
       ].filter(Boolean),
     },
-    features.community.resources?.enabled && {
+    features.community.learner.resources.enabled && {
       title: "Ressources",
-      url: `/${slug}/resources`,
+      url: `/${slug}/learner/resources`,
       icon: BookOpen,
       items: [
-        features.community.resources.documents && {
+        features.community.learner.resources.documents && {
           title: "Documents",
-          url: `/${slug}/resources/documents`,
+          url: `/${slug}/learner/resources/documents`,
         },
-        features.community.resources.links && {
+        features.community.learner.resources.links && {
           title: "Liens utiles",
-          url: `/${slug}/resources/links`,
+          url: `/${slug}/learner/resources/links`,
         },
       ].filter(Boolean),
     },
-    features.community.ideas?.enabled && {
+    features.community.learner.ideas.enabled && {
       title: "Idées",
-      url: `/${slug}/ideas`,
+      url: `/${slug}/learner/ideas`,
       icon: SquareTerminal,
       items: [
-        features.community.ideas.propose && {
+        features.community.learner.ideas.propose && {
           title: "Proposer une idée",
-          url: `/${slug}/ideas/propose`,
+          url: `/${slug}/learner/ideas/propose`,
         },
-        features.community.ideas.myIdeas && {
+        features.community.learner.ideas.myIdeas && {
           title: "Mes idées",
-          url: `/${slug}/ideas/my-ideas`,
+          url: `/${slug}/learner/ideas/my-ideas`,
         },
       ].filter(Boolean),
     },
-    features.community.calendar?.enabled && {
+    features.community.learner.calendar.enabled && {
       title: "Calendrier",
-      url: `/${slug}/calendar`,
+      url: `/${slug}/learner/calendar`,
       icon: Frame,
       items: [
-        features.community.calendar.events && {
+        features.community.learner.calendar.events && {
           title: "Événements",
-          url: `/${slug}/calendar/events`,
+          url: `/${slug}/learner/calendar/events`,
         },
-        features.community.calendar.myEvents && {
+        features.community.learner.calendar.myEvents && {
           title: "Mes rendez-vous",
-          url: `/${slug}/calendar/my-events`,
+          url: `/${slug}/learner/calendar/my-events`,
         },
       ].filter(Boolean),
     },
-    features.community.notifications?.enabled && {
+    features.community.learner.notifications.enabled && {
       title: "Notifications",
-      url: `/${slug}/notifications`,
+      url: `/${slug}/learner/notifications`,
       icon: Command,
     },
-    features.community.faq && {
+    features.community.learner.faq && {
       title: "FAQ",
-      url: `/${slug}/faq`,
+      url: `/${slug}/learner/faq`,
       icon: GalleryVerticalEnd,
     },
-    features.community.support && {
+    features.community.learner.support.enabled && {
       title: "Support",
-      url: `/${slug}/support`,
+      url: `/${slug}/learner/support`,
       icon: AudioWaveform,
     },
   ].filter(Boolean);
 
   // Structure enrichie pour NavContributeur
   const navContributeur = [
-    features.community.contribute?.enabled && {
+    features.community.contributor.contribute.enabled && {
       title: "Contribuer",
-      url: `/${slug}/contribute`,
+      url: `/${slug}/contributor/contribute`,
       icon: Frame,
       items: [
-        features.community.contribute.propose && {
+        features.community.contributor.contribute.propose && {
           title: "Proposer un projet",
-          url: `/${slug}/contribute/propose`,
+          url: `/${slug}/contributor/contribute/propose`,
         },
-        features.community.contribute.myContributions && {
+        features.community.contributor.contribute.myContributions && {
           title: "Mes contributions",
-          url: `/${slug}/contribute/my-contributions`,
+          url: `/${slug}/contributor/contribute/my-contributions`,
         },
-        features.community.contribute.validateIdeas && {
+        features.community.contributor.contribute.validateIdeas && {
           title: "Idées à valider",
-          url: `/${slug}/contribute/validate-ideas`,
+          url: `/${slug}/contributor/contribute/validate-ideas`,
         },
-        features.community.contribute.collaborations && {
+        features.community.contributor.contribute.collaborations && {
           title: "Collaborations",
-          url: `/${slug}/contribute/collaborations`,
+          url: `/${slug}/contributor/contribute/collaborations`,
         },
       ].filter(Boolean),
     },
     // Nouveau menu principal pour les ressources contributeur
-    features.community.resourcesContrib?.enabled && {
+    features.community.contributor.resourcesContrib.enabled && {
       title: "Ressources Contributeur",
-      url: `/${slug}/ressources-contrib`,
+      url: `/${slug}/contributor/ressources-contrib`,
       icon: BookOpen,
       items: [
-        features.community.resourcesContrib.tutorials && {
+        features.community.contributor.resourcesContrib.tutorials && {
           title: "Tutoriels de contribution",
-          url: `/${slug}/ressources-contrib/tutorials`,
+          url: `/${slug}/contributor/ressources-contrib/tutorials`,
         },
-        features.community.resourcesContrib.history && {
+        features.community.contributor.resourcesContrib.history && {
           title: "Historique des contributions",
-          url: `/${slug}/ressources-contrib/history`,
+          url: `/${slug}/contributor/ressources-contrib/history`,
         },
-        features.community.resourcesContrib.leaderboard && {
+        features.community.contributor.resourcesContrib.leaderboard && {
           title: "Classement des contributeurs",
-          url: `/${slug}/ressources-contrib/leaderboard`,
+          url: `/${slug}/contributor/ressources-contrib/leaderboard`,
         },
       ].filter(Boolean),
     },
     // Nouveau menu principal pour les outils contributeur
-    features.community.tools?.enabled && {
+    features.community.contributor.tools.enabled && {
       title: "Outils Contributeur",
-      url: `/${slug}/tools`,
+      url: `/${slug}/contributor/tools`,
       icon: SquareTerminal,
       items: [
-        features.community.tools.badges && {
+        features.community.contributor.tools.badges && {
           title: "Mes badges",
-          url: `/${slug}/tools/badges`,
+          url: `/${slug}/contributor/tools/badges`,
         },
-        features.community.tools.validationRequests && {
+        features.community.contributor.tools.validationRequests && {
           title: "Demandes de validation",
-          url: `/${slug}/tools/validation-requests`,
+          url: `/${slug}/contributor/tools/validation-requests`,
         },
-        features.community.tools.stats && {
+        features.community.contributor.tools.stats && {
           title: "Statistiques de contribution",
-          url: `/${slug}/tools/stats`,
+          url: `/${slug}/contributor/tools/stats`,
         },
       ].filter(Boolean),
     },
@@ -247,34 +247,34 @@ function SidebarNavs() {
 
   // Structure enrichie pour NavProjects (admin/créateur)
   const navProjects = [
-    features.community.admin?.enabled && {
+    features.community.creator.enabled && {
       name: "Administration",
-      url: `/${slug}/admin`,
+      url: `/${slug}/creator`,
       icon: Settings2,
       items: [
-        features.community.admin.settings && {
+        features.community.creator.settings && {
           title: "Paramètres",
-          url: `/${slug}/admin/settings`,
+          url: `/${slug}/creator/settings`,
         },
-        features.community.admin.members && {
+        features.community.creator.members && {
           title: "Membres",
-          url: `/${slug}/admin/members`,
+          url: `/${slug}/creator/members`,
         },
-        features.community.admin.invite && {
+        features.community.creator.invite && {
           title: "Invitations",
-          url: `/${slug}/admin/invite`,
+          url: `/${slug}/creator/invite`,
         },
-        features.community.admin.pricing && {
+        features.community.creator.pricing && {
           title: "Tarifs",
-          url: `/${slug}/admin/pricing`,
+          url: `/${slug}/creator/pricing`,
         },
-        features.community.admin.moderation && {
+        features.community.creator.moderation && {
           title: "Modération",
-          url: `/${slug}/admin/moderation`,
+          url: `/${slug}/creator/moderation`,
         },
-        features.community.admin.logs && {
+        features.community.creator.logs && {
           title: "Logs",
-          url: `/${slug}/admin/logs`,
+          url: `/${slug}/creator/logs`,
         },
       ].filter(Boolean),
     },

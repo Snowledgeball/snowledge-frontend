@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 
 export default function Page() {
   const { community } = useParams();
-  if (!features.community.creator.admin.moderation) {
+  if (!features.community.creator.moderation) {
     notFound();
   }
   return <div>Modération pour la communauté {community}</div>;

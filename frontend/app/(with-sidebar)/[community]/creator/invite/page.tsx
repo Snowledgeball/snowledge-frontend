@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 
 export default function Page() {
   const { community } = useParams();
-  if (!features.community.creator.admin.invite) {
+  if (!features.community.creator.invite) {
     notFound();
   }
   return <div>Invitations d'administration pour la communauté {community}</div>;

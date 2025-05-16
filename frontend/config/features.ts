@@ -10,7 +10,6 @@ export const features = {
     enabled: true,
     // Groupe pour les créateurs (creator)
     creator: {
-      admin: {
         enabled: true,
         logs: true,
         moderation: true,
@@ -18,10 +17,10 @@ export const features = {
         invite: true,
         members: true,
         settings: true,
-      },
     },
     // Groupe pour les apprenants (learner)
     learner: {
+      enabled: true,
       dashboard: {
         enabled: true,
         details: true,
@@ -63,6 +62,7 @@ export const features = {
     },
     // Groupe pour les contributeurs (contributor)
     contributor: {
+      enabled: true,
       contribute: {
         enabled: true,
         collaborations: true,
