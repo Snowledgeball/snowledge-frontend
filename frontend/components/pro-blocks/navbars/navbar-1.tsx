@@ -200,9 +200,11 @@ export function Navbar1() {
               </DropdownMenuContent>
             </DropdownMenu>
             {/* New item button */}
-            <Button>
-              <Zap className="h-4 w-4" /> Upgrade
-            </Button>
+            <Link href="/investisseurs-fous">
+              <Button>
+                <Zap className="h-4 w-4" /> Se connecter
+              </Button>
+            </Link>
           </div>
         </div>
       </nav>

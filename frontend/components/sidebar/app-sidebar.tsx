@@ -204,42 +204,42 @@ function SidebarNavs() {
       ].filter(Boolean),
     },
     // Nouveau menu principal pour les ressources contributeur
-    features.community.contribute?.resources && {
+    features.community.resourcesContrib?.enabled && {
       title: "Ressources Contributeur",
-      url: `/${slug}/contribute/resources`,
+      url: `/${slug}/ressources-contrib`,
       icon: BookOpen,
       items: [
-        features.community.contribute.resources.tutorials && {
+        features.community.resourcesContrib.tutorials && {
           title: "Tutoriels de contribution",
-          url: `/${slug}/contribute/tutorials`,
+          url: `/${slug}/ressources-contrib/tutorials`,
         },
-        features.community.contribute.resources.history && {
+        features.community.resourcesContrib.history && {
           title: "Historique des contributions",
-          url: `/${slug}/contribute/history`,
+          url: `/${slug}/ressources-contrib/history`,
         },
-        features.community.contribute.resources.leaderboard && {
+        features.community.resourcesContrib.leaderboard && {
           title: "Classement des contributeurs",
-          url: `/${slug}/contribute/leaderboard`,
+          url: `/${slug}/ressources-contrib/leaderboard`,
         },
       ].filter(Boolean),
     },
     // Nouveau menu principal pour les outils contributeur
-    features.community.contribute?.tools && {
+    features.community.tools?.enabled && {
       title: "Outils Contributeur",
-      url: `/${slug}/contribute/tools`,
+      url: `/${slug}/tools`,
       icon: SquareTerminal,
       items: [
-        features.community.contribute.tools.badges && {
+        features.community.tools.badges && {
           title: "Mes badges",
-          url: `/${slug}/contribute/tools/badges`,
+          url: `/${slug}/tools/badges`,
         },
-        features.community.contribute.tools.validationRequests && {
+        features.community.tools.validationRequests && {
           title: "Demandes de validation",
-          url: `/${slug}/contribute/tools/validation-requests`,
+          url: `/${slug}/tools/validation-requests`,
         },
-        features.community.contribute.tools.stats && {
+        features.community.tools.stats && {
           title: "Statistiques de contribution",
-          url: `/${slug}/contribute/tools/stats`,
+          url: `/${slug}/tools/stats`,
         },
       ].filter(Boolean),
     },

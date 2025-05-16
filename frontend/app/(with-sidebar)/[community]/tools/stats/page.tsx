@@ -2,7 +2,7 @@ import { features } from "@/config/features";
 import { notFound } from "next/navigation";
 
 export default function StatsPage() {
-  if (!features.community.contribute.tools.stats) notFound();
+  if (!features.community.tools.stats) notFound();
   return (
     <div>
       <h1>Statistiques de contribution</h1>

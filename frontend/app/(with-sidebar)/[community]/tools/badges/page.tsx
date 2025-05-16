@@ -2,7 +2,7 @@ import { features } from "@/config/features";
 import { notFound } from "next/navigation";
 
 export default function BadgesPage() {
-  if (!features.community.contribute.tools.badges) notFound();
+  if (!features.community.tools.badges) notFound();
   return (
     <div>
       <h1>Mes badges</h1>

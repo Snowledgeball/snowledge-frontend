@@ -2,7 +2,7 @@ import { features } from "@/config/features";
 import { notFound } from "next/navigation";
 
 export default function HistoryPage() {
-  if (!features.community.contribute.resources.history) notFound();
+  if (!features.community.resourcesContrib.history) notFound();
   return (
     <div>
       <h1>Historique des contributions</h1>

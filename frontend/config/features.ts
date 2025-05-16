@@ -34,16 +34,18 @@ export const features = {
       validateIdeas: true,
       myContributions: true,
       propose: true,
-      resources: {
-        tutorials: true,
-        history: true,
-        leaderboard: true,
-      },
-      tools: {
-        badges: true,
-        validationRequests: true,
-        stats: true,
-      },
+    },
+    resourcesContrib: {
+      enabled: true,
+      tutorials: true,
+      history: true,
+      leaderboard: true,
+    },
+    tools: {
+      enabled: true,
+      badges: true,
+      validationRequests: true,
+      stats: true,
     },
     support: {
       enabled: true,
