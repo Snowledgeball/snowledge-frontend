@@ -4,8 +4,8 @@ module.exports = {
   ...ui,
   content: [
     ...ui.content,
-    './app/**/*.{js,ts,jsx,tsx}',
-    '../../packages/ui/**/*.{js,ts,jsx,tsx}',
-    '../../packages/ui-core/**/*.{js,ts,jsx,tsx}',
+    './app/**/*.{js,ts,jsx,tsx,css,mdx}',
+    '../../packages/ui/**/*.{js,ts,jsx,tsx,css,mdx}',
+    '../../packages/ui-core/**/*.{js,ts,jsx,tsx,css,mdx}',
   ],
 };

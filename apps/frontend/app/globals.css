@@ -1,5 +1,10 @@
 @import "tailwindcss";
-@import "@repo/ui/global.css";
+@import "@repo/ui/globals.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

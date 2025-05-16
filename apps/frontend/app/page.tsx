@@ -1,9 +1,11 @@
 // app/page.tsx
 "use client";
 
+import { Settings } from "@/components/settings";
+
 // import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 // import { useState } from "react";
-import { Setting } from "@repo/ui";
+// import { Setting } from "@repo/ui";
 // interface User {
 //   id: number;
 //   name: string;
@@ -50,7 +52,7 @@ export default function Home() {
   // };
 
   return (
-    <Setting />
+    <div>Home</div>
   )
   // return (
   //   <div className="flex flex-col items-center justify-center h-screen space-y-4">
