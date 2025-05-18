@@ -9,5 +9,5 @@ export default function Page() {
   if (!features.community.creator.pricing) {
     notFound();
   }
-  return <div>Tarifs d'administration pour la communauté {community}</div>;
+  return <div>Tarifs d&apos;administration pour la communauté {community}</div>;
 }

@@ -1,12 +1,6 @@
 "use client";
 
-import { 
-  Logo,
-  Button,
-  Checkbox,
-  Input,
-  Label
- } from "@repo/ui";
+import { Logo, Button, Checkbox, Input, Label } from "@repo/ui";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -50,7 +44,10 @@ export default function SignIn() {
                   Keep me signed in
                 </Label>
               </div>
-              <Link href="" className="text-sm text-muted-foreground hover:text-foreground underline">
+              <Link
+                href=""
+                className="text-sm text-muted-foreground hover:text-foreground underline"
+              >
                 Forgot password?
               </Link>
             </div>
@@ -59,7 +56,7 @@ export default function SignIn() {
           <div className="flex flex-col space-y-4">
             <Button className="w-full">Sign in</Button>
             <p className="text-sm text-center text-muted-foreground">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link className="underline text-foreground" href="#">
                 Sign up
               </Link>

@@ -10,7 +10,6 @@ import {
   GalleryVerticalEnd,
   Home,
   LucideIcon,
-  Map,
   PieChart,
   Settings2,
   SquareTerminal,
@@ -32,11 +31,8 @@ import {
   SidebarRail,
 } from "@repo/ui/components/sidebar";
 
-import Link from "next/link";
-
 import { toSlug } from "@/utils/slug";
 import { features } from "@/config/features";
-import { Button } from "@repo/ui/components/button";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (

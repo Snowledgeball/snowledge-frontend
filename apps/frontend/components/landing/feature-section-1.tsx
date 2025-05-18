@@ -15,12 +15,12 @@ export function FeatureSection1() {
               Feature section
             </p>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-              Headline that shows solution's impact on user success
+              Headline that shows solution&apos;s impact on user success
             </h2>
             <p className="text-base text-muted-foreground">
               Explain in one or two concise sentences how your solution
-              transforms users' challenges into positive outcomes. Focus on the
-              end benefits that matter most to your target audience. Keep it
+              transforms users&apos; challenges into positive outcomes. Focus on
+              the end benefits that matter most to your target audience. Keep it
               clear and compelling.
             </p>
           </div>

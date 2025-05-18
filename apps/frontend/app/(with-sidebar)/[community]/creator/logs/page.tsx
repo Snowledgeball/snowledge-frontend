@@ -8,5 +8,5 @@ export default function Page() {
   if (!features.community.creator.logs) {
     notFound();
   }
-  return <div>Logs d'administration pour la communauté {community}</div>;
+  return <div>Logs d&apos;administration pour la communauté {community}</div>;
 }

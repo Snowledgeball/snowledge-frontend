@@ -49,51 +49,44 @@ jobs:
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           working-directory: ./apps/snowledge-v1
 
-  build-and-deploy-docker:
+  deploy-ovh:
+    needs: deploy
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip docker]') }}
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+      - name: Déploiement sur OVH (staging)
+        if: github.ref == 'refs/heads/staging'
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push Docker image (frontend)
-        run: |
-          cd apps/frontend
-          docker build -f Dockerfile.prod -t ${{ secrets.DOCKER_USERNAME }}/monapp-frontend:${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }} .
-          docker push ${{ secrets.DOCKER_USERNAME }}/monapp-frontend:${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}
-
-      - name: Build and push Docker image (backend)
-        run: |
-          cd ../../apps/backend
-          docker build -f Dockerfile.prod -t ${{ secrets.DOCKER_USERNAME }}/monapp-backend:${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }} .
-          docker push ${{ secrets.DOCKER_USERNAME }}/monapp-backend:${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}
-
-      - name: Deploy frontend via SSH
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ github.ref == 'refs/heads/main' && secrets.PROD_HOST || secrets.STAGING_HOST }}
-          username: ${{ github.ref == 'refs/heads/main' && secrets.PROD_USER || secrets.STAGING_USER }}
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/monapp-frontend:${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}
-            docker stop monapp-frontend || true
-            docker rm monapp-frontend || true
-            docker run -d -p 80:3000 --name monapp-frontend ${{ secrets.DOCKER_USERNAME }}/monapp-frontend:${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}
+            if [ ! -d "/home/ubuntu/Snowledge/.git" ]; then
+              git clone https://github.com/Snowledge-eu/Snowledge.git /home/ubuntu/Snowledge
+            fi
+            cd /home/ubuntu/Snowledge
+            git fetch origin
+            git checkout staging
+            git pull origin staging
+            docker compose -f docker-compose.prod.yml up -d --build
 
-      - name: Deploy backend via SSH
-        uses: appleboy/ssh-action@v0.1.7
+      - name: Déploiement sur OVH (prod)
+        if: github.ref == 'refs/heads/main'
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ github.ref == 'refs/heads/main' && secrets.PROD_HOST || secrets.STAGING_HOST }}
-          username: ${{ github.ref == 'refs/heads/main' && secrets.PROD_USER || secrets.STAGING_USER }}
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/monapp-backend:${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}
-            docker stop monapp-backend || true
-            docker rm monapp-backend || true
-            docker run -d -p 4000:4000 --name monapp-backend ${{ secrets.DOCKER_USERNAME }}/monapp-backend:${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}
+            if [ ! -d "/home/ubuntu/Snowledge/.git" ]; then
+              git clone https://github.com/Snowledge-eu/Snowledge.git /home/ubuntu/Snowledge
+            fi
+            cd /home/ubuntu/Snowledge
+            git fetch origin
+            git checkout main
+            git pull origin main
+            docker compose -f docker-compose.prod.yml up -d --build

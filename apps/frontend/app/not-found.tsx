@@ -20,7 +20,7 @@ export default function NotFound() {
         Page non trouvée
       </h2>
       <p style={{ fontSize: "1.2rem", marginBottom: "2rem", color: "#64748b" }}>
-        Oups, la page que vous cherchez n'existe pas ou a été déplacée.
+        Oups, la page que vous cherchez n&apos;existe pas ou a été déplacée.
       </p>
       <Link
         href="/"
@@ -35,7 +35,7 @@ export default function NotFound() {
           transition: "background 0.2s",
         }}
       >
-        Revenir à l'accueil
+        Revenir à l&apos;accueil
       </Link>
     </div>
   );

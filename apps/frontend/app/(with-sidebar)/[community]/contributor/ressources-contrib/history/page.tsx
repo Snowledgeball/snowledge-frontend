@@ -6,7 +6,9 @@ export default function HistoryPage() {
   return (
     <div>
       <h1>Historique des contributions</h1>
-      <p>Consultez l'historique de toutes vos contributions à la communauté.</p>
+      <p>
+        Consultez l&apos;historique de toutes vos contributions à la communauté.
+      </p>
     </div>
   );
 }

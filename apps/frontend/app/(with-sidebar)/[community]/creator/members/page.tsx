@@ -9,5 +9,7 @@ export default function Page() {
   if (!features.community.creator.members) {
     notFound();
   }
-  return <div>Membres d'administration pour la communauté {community}</div>;
+  return (
+    <div>Membres d&apos;administration pour la communauté {community}</div>
+  );
 }

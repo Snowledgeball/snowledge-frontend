@@ -18,13 +18,7 @@ import {
   TableRow,
 } from "@repo/ui/components/table";
 import { AreaChart, Area, XAxis, CartesianGrid } from "recharts";
-import {
-  Search,
-  Plus,
-  ChevronDown,
-  Download,
-  MoreHorizontal,
-} from "lucide-react";
+import { Search, ChevronDown, Download, MoreHorizontal } from "lucide-react";
 import {
   ChartConfig,
   ChartContainer,
@@ -42,7 +36,7 @@ import {
 } from "@repo/ui/components/pagination";
 
 import { Calendar } from "@repo/ui/components/calendar";
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
 
@@ -65,15 +59,7 @@ import {
   DropdownMenuItem,
 } from "@repo/ui/components/dropdown-menu";
 
-import {
-  Home,
-  Store,
-  Mail,
-  Users,
-  Settings2,
-  GalleryVerticalEnd,
-} from "lucide-react";
-import { SidebarInset, SidebarTrigger } from "@repo/ui/components/sidebar";
+import { SidebarInset } from "@repo/ui/components/sidebar";
 const dateRange = {
   from: new Date(2024, 0, 1), // January 1, 2024
   to: new Date(2024, 6, 31), // December 31, 2024
@@ -110,76 +96,6 @@ const chartData = [
   { month: "May", current: 209, previous: 130 },
   { month: "June", current: 214, previous: 140 },
 ];
-
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "https://github.com/shadcn.png",
-  },
-  navMain: [
-    {
-      title: "Home",
-      url: "#",
-      icon: Home,
-      items: [],
-    },
-    {
-      title: "Store",
-      url: "#",
-      icon: Store,
-      isActive: true,
-      items: [
-        {
-          title: "Products",
-          url: "#products",
-        },
-        {
-          title: "Orders",
-          url: "#orders",
-          isActive: true,
-        },
-        {
-          title: "Subscriptions",
-          url: "#subscriptions",
-        },
-        {
-          title: "Customers",
-          url: "#customers",
-        },
-        {
-          title: "Discounts",
-          url: "#discounts",
-        },
-      ],
-    },
-    {
-      title: "Email",
-      url: "#",
-      icon: Mail,
-      items: [],
-    },
-    {
-      title: "Affiliates",
-      url: "#",
-      icon: Users,
-      items: [],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [],
-    },
-  ],
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Free",
-    },
-  ],
-};
 
 const chartConfig = {
   current: {

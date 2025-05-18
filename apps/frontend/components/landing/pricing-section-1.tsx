@@ -202,7 +202,10 @@ export function PricingSection1() {
                     </div>
 
                     {/* CTA Button */}
-                    <Button variant={plan.variant as any} className="w-full">
+                    <Button
+                      variant={plan.variant as "default" | "secondary"}
+                      className="w-full"
+                    >
                       Purchase plan
                     </Button>
                   </div>

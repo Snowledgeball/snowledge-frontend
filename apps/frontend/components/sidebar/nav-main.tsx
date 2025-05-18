@@ -38,12 +38,13 @@ export function NavMain({
   label?: string;
 }) {
   const router = useRouter();
+  const { openSections, setOpenSection } = useSidebarAccordion();
+
   return (
     <SidebarGroup>
       {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
       <SidebarMenu>
         {items.map((item) => {
-          const { openSections, setOpenSection } = useSidebarAccordion();
           const isOpen = openSections[item.title] || false;
 
           return (
@@ -60,7 +61,9 @@ export function NavMain({
                     className={`${!item.items ? "cursor-pointer" : ""}`}
                     tooltip={item.title}
                     onClick={() => {
-                      !item.items && router.push(item.url);
+                      if (!item.items) {
+                        router.push(item.url);
+                      }
                     }}
                   >
                     {item.icon && <item.icon />}

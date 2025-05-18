@@ -9,5 +9,7 @@ export default function Page() {
   if (!features.community.creator.settings) {
     notFound();
   }
-  return <div>Paramètres d'administration pour la communauté {community}</div>;
+  return (
+    <div>Paramètres d&apos;administration pour la communauté {community}</div>
+  );
 }

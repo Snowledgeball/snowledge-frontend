@@ -18,7 +18,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@repo/ui/components/sidebar";
-import Link from "next/link";
 import { toSlug } from "@/utils/slug";
 import { features } from "@/config/features";
 // Création d'un context pour la communauté sélectionnée

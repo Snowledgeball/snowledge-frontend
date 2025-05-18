@@ -9,5 +9,7 @@ export default function Page() {
   if (!features.community.creator.invite) {
     notFound();
   }
-  return <div>Invitations d'administration pour la communauté {community}</div>;
+  return (
+    <div>Invitations d&apos;administration pour la communauté {community}</div>
+  );
 }

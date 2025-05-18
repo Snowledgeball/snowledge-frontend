@@ -27,7 +27,7 @@ export function HeroSection1() {
               id="hero-heading"
               className="text-foreground text-3xl md:text-5xl font-bold"
             >
-              Headline that solves user's{" "}
+              Headline that solves user&apos;s{" "}
               <span className="text-primary">main problem</span>
             </h1>
             {/* Description */}
