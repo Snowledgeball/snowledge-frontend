@@ -5,12 +5,16 @@ on:
     branches:
       - staging
       - main
+  pull_request:
+    branches:
+      - main
+      - staging
 
 permissions:
   contents: read
   deployments: write
   pull-requests: write
-  issues: write
+  
 jobs:
   deploy-v1-vercel:
     runs-on: ubuntu-latest
