@@ -65,10 +65,10 @@ jobs:
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            if [ ! -d "/home/ubuntu/Snowledge/.git" ]; then
-              git clone https://github.com/Snowledge-eu/Snowledge.git /home/ubuntu/Snowledge
+            if [ ! -d "/home/debian/Snowledge/.git" ]; then
+              git clone https://github.com/Snowledge-eu/Snowledge.git /home/debian/Snowledge
             fi
-            cd /home/ubuntu/Snowledge
+            cd /home/debian/Snowledge
             git fetch origin
             git checkout staging
             git pull origin staging
@@ -82,10 +82,10 @@ jobs:
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            if [ ! -d "/home/ubuntu/Snowledge/.git" ]; then
-              git clone https://github.com/Snowledge-eu/Snowledge.git /home/ubuntu/Snowledge
+            if [ ! -d "/home/debian/Snowledge/.git" ]; then
+              git clone https://github.com/Snowledge-eu/Snowledge.git /home/debian/Snowledge
             fi
-            cd /home/ubuntu/Snowledge
+            cd /home/debian/Snowledge
             git fetch origin
             git checkout main
             git pull origin main
