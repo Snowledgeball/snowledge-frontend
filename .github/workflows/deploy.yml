@@ -65,13 +65,13 @@ jobs:
       - name: Build and push Docker image (frontend)
         run: |
           cd apps/frontend
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/monapp-frontend:${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }} .
+          docker build -f Dockerfile.prod -t ${{ secrets.DOCKER_USERNAME }}/monapp-frontend:${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }} .
           docker push ${{ secrets.DOCKER_USERNAME }}/monapp-frontend:${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}
 
       - name: Build and push Docker image (backend)
         run: |
           cd ../../apps/backend
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/monapp-backend:${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }} .
+          docker build -f Dockerfile.prod -t ${{ secrets.DOCKER_USERNAME }}/monapp-backend:${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }} .
           docker push ${{ secrets.DOCKER_USERNAME }}/monapp-backend:${{ github.ref == 'refs/heads/main' && 'prod' || 'staging' }}
 
       - name: Deploy frontend via SSH
