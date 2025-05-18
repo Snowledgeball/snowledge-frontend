@@ -6,6 +6,10 @@ on:
       - staging
       - main
 
+permissions:
+  contents: read
+  deployments: write
+
 jobs:
   deploy-v1-vercel:
     runs-on: ubuntu-latest
