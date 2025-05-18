@@ -7,8 +7,9 @@ on:
       - main
 
 jobs:
-  deploy:
+  deploy-v1-vercel:
     runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, '[skip vercel]') }}
     defaults:
       run:
         working-directory: ./apps/snowledge-v1
@@ -50,9 +51,8 @@ jobs:
           working-directory: ./apps/snowledge-v1
 
   deploy-ovh:
-    needs: deploy
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+    if: ${{ !contains(github.event.head_commit.message, '[skip ovh]') }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
