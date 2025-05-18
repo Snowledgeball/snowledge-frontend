@@ -53,6 +53,7 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           working-directory: ./apps/snowledge-v1
+          github-comment: false
 
   deploy-ovh:
     runs-on: ubuntu-latest
