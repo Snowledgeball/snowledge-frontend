@@ -46,3 +46,6 @@ dist/
 
 # Database backups (uncomment to gitignore database backups)
 # database/backup/*.sql
+
+# vscode
+.vscode

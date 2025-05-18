@@ -1,1 +1,1 @@
-export * from "./components/shadcn";
+export * from "./src/components";

@@ -21,7 +21,7 @@
     "skipLibCheck": true,
     "strict": true,
     "paths": {
-      "@/*": ["./*"]
+      "@repo/ui/*": ["./src/*"]
     },
     "baseUrl": "."
   }

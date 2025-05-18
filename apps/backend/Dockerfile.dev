@@ -1,0 +1,33 @@
+FROM node:22-alpine3.21 AS base
+
+FROM base AS prune
+RUN apk update
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+RUN npm install turbo @nestjs/cli --global
+COPY . .
+RUN turbo prune backend --docker
+
+FROM base AS installer
+RUN apk update
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+# Copier les fichiers de dépendances
+COPY --from=prune /app/out/json/ .
+# Installer NestJS CLI globalement
+RUN npm install
+
+# Copier le reste du code source
+COPY --from=prune /app/out/full/ .
+COPY turbo.json turbo.json
+
+RUN npx turbo run build --filter=backend^... --no-cache
+
+FROM base AS runner
+WORKDIR /app
+COPY --from=installer /app .
+# Exposer le port
+EXPOSE 4000
+
+# Commande de démarrage
+CMD ["npm", "run", "dev"]

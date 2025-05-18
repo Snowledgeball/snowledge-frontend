@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  # Service pour le frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: ./apps/frontend/Dockerfile.dev
+    volumes:
+      - ./apps/frontend:/app
+      - /app/node_modules
+      - ./apps/frontend/.env:/app/.env
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
+  # Service pour le backend
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./apps/backend/Dockerfile.dev
+    volumes:
+      # Monter le code source en préservant node_modules
+      - ./apps/backend:/app
+      - /app/node_modules
+      - ./apps/backend/.env:/app/.env
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge

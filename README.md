@@ -102,9 +102,9 @@ make rebuild
 
 Chaque application a son propre fichier `.env` qui est monté dans le conteneur Docker :
 
-- `apps/snowledge-v1/.env` - Pour l'application principale (port 3000)
-- `apps/frontend/.env` - Pour le frontend (port 3001)
-- `apps/backend/.env` - Pour le backend (port 3002)
+- `apps/snowledge-v1/.env` - Pour l'application principale (port 3001)
+- `apps/frontend/.env` - Pour le frontend (port 3000)
+- `apps/backend/.env` - Pour le backend (port 4000)
 
 Ces fichiers sont automatiquement ignorés par Git via le `.gitignore`, donc vos identifiants ne seront pas partagés.
 

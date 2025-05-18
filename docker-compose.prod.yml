@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  # Service pour le frontend
+  frontend:
+    build: 
+      dockerfile: ./apps/frontend/Dockerfile.prod
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+  # Service pour le backend
+  backend:
+    build: 
+      dockerfile: ./apps/backend/Dockerfile.prod
+    environment:
+      - PORT=4000
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
