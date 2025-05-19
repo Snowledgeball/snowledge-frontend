@@ -44,10 +44,10 @@ export default function SignUpForm() {
                         <div className="flex items-center space-x-2">
                             <Checkbox id="terms" />
                             <label htmlFor="terms" className="text-sm leading-none ">
-                            I agree to the{" "}
-                            <Link href="/cgu" target="_blank" rel="noreferrer" className="underline">
-                                Terms & Conditions
-                            </Link>
+                                I agree to the{" "}
+                                <Link href="/cgu" target="_blank" rel="noreferrer" className="underline">
+                                    Terms & Conditions
+                                </Link>
                             </label>
                         </div>
                     </div>
