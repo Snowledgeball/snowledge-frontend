@@ -196,15 +196,19 @@ export function Navbar1() {
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>My Profile</DropdownMenuItem>
-                <DropdownMenuItem>Account</DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/profile">My Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/account">Account</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem>Billing</DropdownMenuItem>
                 <Separator className="my-1" />
                 <DropdownMenuItem>Sign Out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             {/* New item button */}
-            <Link href="/investisseurs-fous">
+            <Link href="/sign-in">
               <Button>
                 <Zap className="h-4 w-4" /> Se connecter
               </Button>
