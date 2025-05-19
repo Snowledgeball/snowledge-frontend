@@ -1,7 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "Default",
-  "include": ["."],
+  "include": [
+    ".",
+    "../../apps/frontend/components/landing/shared/pocform.tsx",
+    "../../apps/frontend/components/landing/shared/langage.tsx"
+  ],
   "exclude": ["dist", "build", "node_modules"],
   "compilerOptions": {
     "composite": false,

@@ -53,9 +53,6 @@ export function Navbar() {
         </span>
       </Button>
 
-      {/* Logo */}
-      <Logo className="absolute left-1/2 transform -translate-x-1/2 w-8 h-8" />
-
       {/* Mobile upgrade button */}
       <div className="flex items-center gap-3 absolute right-4">
         <Button className="h-9 w-9 p-0 [&_svg]:size-5">

@@ -1,0 +1,90 @@
+{
+  "menu": {
+    "snowledge": "Snowledge",
+    "features": "Fonctionnalités",
+    "faq": "FAQ",
+    "partners": "Partenaires"
+  },
+  "cta": {
+    "test": "Testez Snowledge"
+  },
+  "form": {
+    "title": "Inscription POC Snowledge",
+    "firstname": "Prénom",
+    "lastname": "Nom",
+    "email": "Adresse mail",
+    "expertise": "Expertise",
+    "expertise_placeholder": "Choisissez une expertise",
+    "community_size": "Taille de la communauté",
+    "community_size_placeholder": "Choisissez une taille",
+    "platforms": "Plateformes utilisées",
+    "platforms_placeholder": "Sélectionnez les plateformes",
+    "submit": "Testez Snowledge",
+    "close": "Fermer",
+    "community_size_less_than_100": "Moins de 100",
+    "community_size_more_than_100": "Plus de 100"
+  },
+  "menu_toggle": {
+    "open": "Ouvrir le menu",
+    "close": "Fermer le menu"
+  },
+  "hero": {
+    "title_start": "Fini les contenus produit à",
+    "title_blind": "l'aveugle",
+    "title_and": "et",
+    "title_alone": "seul",
+    "title_end": " !",
+    "description": "Gagnez du temps, engagez vos membres, et créez des contenus de qualité grâce à l'intelligence collective. Snowledge transforme chaque interaction communautaire en opportunité de croissance.",
+    "cta": "Testez Snowledge",
+    "discover": "Découvrez Snowledge"
+  },
+  "features": {
+    "title_start": "Appuyez-vous sur votre communauté pour",
+    "title_create": "créer",
+    "title_and": "et",
+    "title_sell": "vendre",
+    "title_end": "plus et mieux !",
+    "description": "Sur Snowledge, les idées viennent des créateurs ou de la communauté. Les besoins sont détectés automatiquement, les bons contributeurs mobilisés, la création orchestrée, et les revenus répartis selon l'apport de chacun.",
+    "card_1_title": "Mesure et analyse des besoins",
+    "card_1_text": "Snowledge analyse les échanges sur Discord pour identifier les tendances et les besoins. Les membres peuvent aussi soumettre des idées et voter, vous aidant à prioriser ce qui mérite d'être créé.",
+    "card_2_title": "Orchestration de la co-création",
+    "card_2_text": "Snowledge mobilise les bons contributeurs au bon moment, organise le travail collaboratif et facilite l'émergence de ressources de qualité, sans que vous ayez à tout gérer vous-même.",
+    "card_3_title": "Répartition des revenus",
+    "card_3_text": "Les contributions sont tracées, leur impact mesuré, et les revenus automatiquement partagés. Plus besoin de gérer quoi que ce soit : chacun reçoit sa part, renforçant ainsi l'engagement."
+  },
+  "faq": {
+    "title": "Questions fréquentes",
+    "description": "Nous avons compilé les informations les plus importantes pour vous aider à tirer le meilleur parti de votre expérience.",
+    "not_found": "Vous ne trouvez pas ce que vous cherchez ?",
+    "contact": "Contactez-nous.",
+    "item_1_question": "Pourquoi Snowledge mise sur la co-création communautaire ?",
+    "item_1_answer": "Parce que les meilleurs contenus éducatifs ne naissent pas seuls. Snowledge permet aux créateurs d'impliquer leur communauté dès la phase d'idée, pour valider ce qui mérite d'être produit, mobiliser les bons profils et partager la valeur créée. C'est plus juste, plus efficace, et plus durable.",
+    "item_2_question": "Quel est le rôle de l'intelligence artificielle dans Snowledge ?",
+    "item_2_answer": "L'IA analyse les échanges de votre communauté pour en extraire des signaux clairs : besoins récurrents, sujets émergents, attentes concrètes. Elle vous aide à détecter quoi produire, avec qui, et pour qui sans avoir à lire chaque message ou lancer des sondages manuels.",
+    "item_3_question": "Pourquoi intégrer la blockchain dans une plateforme éducative ?",
+    "item_3_answer": "Parce que la reconnaissance, la traçabilité et la répartition équitable sont essentielles. Grâce à la blockchain, Snowledge enregistre automatiquement qui contribue à quoi, comment et quand puis distribue les revenus de façon transparente, sans intermédiaire.",
+    "item_4_question": "Quel est le but profond derrière Snowledge ?",
+    "item_4_answer": "Nous voulons aider à changer la dynamique du \"créateur solitaire\". Trop de talents créent seuls, espèrent vendre, et s'épuisent. Snowledge repose sur une conviction : l'intelligence collective peut produire des contenus plus utiles, plus justes, et mieux rémunérés. Notre mission est de rendre ce modèle possible — techniquement, économiquement, et humainement.",
+    "cta_title": "L'approche et le produit résonnent en vous ?",
+    "cta_description": "Contactez-nous afin de faire partie de nos premiers ambassadeurs !",
+    "cta_button": "Contactez-nous"
+  },
+  "partners": {
+    "title": "Partenaires",
+    "description": "Ils nous font confiance et nous accompagnent dans notre aventure."
+  },
+  "footer": {
+    "home": "Accueil",
+    "about": "À propos de nous",
+    "contact": "Contact",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation",
+    "copyright": "Tous droits réservés."
+  },
+  "upgrade_banner": {
+    "description_start": "cliquez sur le bouton",
+    "description_cta": "Testez Snowledge",
+    "description_end": "pour vous inscrire à la phase de test",
+    "button_text": "Développement en cours"
+  }
+}

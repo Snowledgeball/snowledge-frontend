@@ -1,4 +1,4 @@
-import "../globals.css";
+import "../../globals.css";
 import { ReactQueryClientProvider } from "@/utils/react-query-provider";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import Header from "@/components/Header";
