@@ -24,6 +24,8 @@ services:
       - ./apps/backend:/app
       - /app/node_modules
       - ./apps/backend/.env:/app/.env
+    env_file:
+      - .env.dev
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
