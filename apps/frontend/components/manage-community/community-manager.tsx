@@ -8,6 +8,8 @@ import { CommunityGeneralSection } from "./community-general-section";
 import { CommunityAccessSection } from "./community-access-section";
 import { CommunityGainsSection } from "./community-gains-section";
 
+import { features } from "@/config/features";
+
 const communityTypes = [
   { value: "immobilier", label: "Immobilier" },
   { value: "bourse", label: "Bourse" },
@@ -70,22 +72,28 @@ export function CommunityManager() {
           <main className="flex-1 overflow-y-auto">
             <div className="container mx-auto px-0 py-4 md:py-6 md:pl-6">
               <form onSubmit={handleSubmit}>
-                <CommunityGeneralSection
-                  form={form}
-                  handleChange={handleChange}
-                  handleSelect={handleSelect}
-                  communityTypes={communityTypes}
-                />
-                <CommunityAccessSection
-                  isFree={isFree}
-                  form={form}
-                  handleChange={handleChange}
-                  setIsFree={setIsFree}
-                />
-                <CommunityGainsSection
-                  form={form}
-                  handleChange={handleChange}
-                />
+                {features.community.creator.settings.general && (
+                  <CommunityGeneralSection
+                    form={form}
+                    handleChange={handleChange}
+                    handleSelect={handleSelect}
+                    communityTypes={communityTypes}
+                  />
+                )}
+                {features.community.creator.settings.access && (
+                  <CommunityAccessSection
+                    isFree={isFree}
+                    form={form}
+                    handleChange={handleChange}
+                    setIsFree={setIsFree}
+                  />
+                )}
+                {features.community.creator.settings.gains && (
+                  <CommunityGainsSection
+                    form={form}
+                    handleChange={handleChange}
+                  />
+                )}
                 <div className="flex justify-end">
                   <Button type="submit">Enregistrer</Button>
                 </div>
