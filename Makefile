@@ -76,7 +76,7 @@ reset:
 rebuild:
 	@echo "🔄 Reconstruire complètement le projet..."
 	@echo $(COMPOSE)
-	@docker-compose down
+	@$(COMPOSE) down
 	@$(COMPOSE) build --no-cache
-	@docker-compose up -d
+	@$(COMPOSE) up -d
 	@echo "✅ Reconstruction terminée" 
