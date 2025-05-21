@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@repo/ui";
+import { useTranslations } from "next-intl";
 
 import { useState } from "react";
 import { CommunityHeader } from "./community-header";
@@ -38,6 +39,8 @@ export function CommunityManager() {
     prizeAnimation: "20",
     prizeSharing: "20",
   });
+
+  const t = useTranslations("manageCommunity");
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -95,7 +98,7 @@ export function CommunityManager() {
                   />
                 )}
                 <div className="flex justify-end">
-                  <Button type="submit">Enregistrer</Button>
+                  <Button type="submit">{t("save")}</Button>
                 </div>
               </form>
             </div>

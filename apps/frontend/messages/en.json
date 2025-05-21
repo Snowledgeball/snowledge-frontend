@@ -182,5 +182,57 @@
       "success": "Invitations sent to: {emails}"
     },
     "submit": "Send invitations"
+  },
+  "manageCommunity": {
+    "title": "Community management",
+    "save": "Save",
+    "general": {
+      "title": "General information",
+      "intro": "Edit the main information of your community.",
+      "name": {
+        "label": "Name",
+        "placeholder": "Community name"
+      },
+      "tags": {
+        "label": "Type / Tags",
+        "placeholder": "Choose a type"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Describe the community..."
+      },
+      "externalLinks": {
+        "label": "External links",
+        "placeholder": "https://..."
+      }
+    },
+    "access": {
+      "title": "Access settings",
+      "description": "Define if access is free or paid.",
+      "isFree": {
+        "label": "Free",
+        "description": "Enable to make the community free. Disable to set a price."
+      },
+      "price": {
+        "label": "Price",
+        "placeholder": "Price in €"
+      }
+    },
+    "gains": {
+      "title": "Gains distribution",
+      "description": "Set the share for admin, prize pool and platform (total = 100%).",
+      "adminShare": { "label": "Admin share (%)" },
+      "prizePoolShare": { "label": "Prize pool share (%)" },
+      "platformShare": { "label": "Platform share (%)" },
+      "totalHint": "Total must be 100%.",
+      "internal": {
+        "title": "Internal prize pool distribution",
+        "prizeCreation": { "label": "Creation (%)" },
+        "prizeRevision": { "label": "Revision (%)" },
+        "prizeAnimation": { "label": "Animation (%)" },
+        "prizeSharing": { "label": "Sharing / Invitations (%)" },
+        "totalHint": "Total must be 100% for internal prize pool distribution."
+      }
+    }
   }
 }

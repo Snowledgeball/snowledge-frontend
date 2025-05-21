@@ -1,4 +1,5 @@
 import { Label, Input } from "@repo/ui";
+import { useTranslations } from "next-intl";
 
 interface Props {
   form: any;
@@ -6,18 +7,19 @@ interface Props {
 }
 
 export function CommunityGainsSection({ form, handleChange }: Props) {
+  const t = useTranslations("manageCommunity");
+
   return (
     <section className="grid grid-cols-1 lg:grid-cols-8 gap-4 mb-8">
       <div className="col-span-8 lg:col-span-4">
-        <h2 className="text-lg font-semibold mb-1">Répartition des gains</h2>
+        <h2 className="text-lg font-semibold mb-1">{t("gains.title")}</h2>
         <p className="text-sm text-muted-foreground">
-          Définissez la part des gains pour l'admin, le prize pool et la
-          plateforme (total = 100%).
+          {t("gains.description")}
         </p>
       </div>
       <div className="col-span-8 lg:col-span-4 space-y-4 md:space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="adminShare">Part pour l'admin (%)</Label>
+          <Label htmlFor="adminShare">{t("gains.adminShare.label")}</Label>
           <Input
             id="adminShare"
             name="adminShare"
@@ -30,7 +32,9 @@ export function CommunityGainsSection({ form, handleChange }: Props) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="prizePoolShare">Part pour le prize pool (%)</Label>
+          <Label htmlFor="prizePoolShare">
+            {t("gains.prizePoolShare.label")}
+          </Label>
           <Input
             id="prizePoolShare"
             name="prizePoolShare"
@@ -43,7 +47,9 @@ export function CommunityGainsSection({ form, handleChange }: Props) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="platformShare">Part pour la plateforme (%)</Label>
+          <Label htmlFor="platformShare">
+            {t("gains.platformShare.label")}
+          </Label>
           <Input
             id="platformShare"
             name="platformShare"
@@ -57,15 +63,17 @@ export function CommunityGainsSection({ form, handleChange }: Props) {
           />
         </div>
         <span className="text-muted-foreground text-sm">
-          Le total doit faire 100%.
+          {t("gains.totalHint")}
         </span>
         <div className="border rounded-lg p-4 mt-4 bg-muted">
           <h3 className="font-semibold mb-2 text-base">
-            Répartition interne du prize pool
+            {t("gains.internal.title")}
           </h3>
           <div className="space-y-2">
             <div className="space-y-1">
-              <Label htmlFor="prizeCreation">Création (%)</Label>
+              <Label htmlFor="prizeCreation">
+                {t("gains.internal.prizeCreation.label")}
+              </Label>
               <Input
                 id="prizeCreation"
                 name="prizeCreation"
@@ -78,7 +86,9 @@ export function CommunityGainsSection({ form, handleChange }: Props) {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="prizeRevision">Révision (%)</Label>
+              <Label htmlFor="prizeRevision">
+                {t("gains.internal.prizeRevision.label")}
+              </Label>
               <Input
                 id="prizeRevision"
                 name="prizeRevision"
@@ -91,7 +101,9 @@ export function CommunityGainsSection({ form, handleChange }: Props) {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="prizeAnimation">Animation (%)</Label>
+              <Label htmlFor="prizeAnimation">
+                {t("gains.internal.prizeAnimation.label")}
+              </Label>
               <Input
                 id="prizeAnimation"
                 name="prizeAnimation"
@@ -104,7 +116,9 @@ export function CommunityGainsSection({ form, handleChange }: Props) {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="prizeSharing">Partage / Invitations (%)</Label>
+              <Label htmlFor="prizeSharing">
+                {t("gains.internal.prizeSharing.label")}
+              </Label>
               <Input
                 id="prizeSharing"
                 name="prizeSharing"
@@ -118,7 +132,7 @@ export function CommunityGainsSection({ form, handleChange }: Props) {
             </div>
           </div>
           <span className="text-muted-foreground text-xs block mt-2">
-            Le total doit faire 100% pour la répartition interne du prize pool.
+            {t("gains.internal.totalHint")}
           </span>
         </div>
       </div>

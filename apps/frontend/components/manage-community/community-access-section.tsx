@@ -1,4 +1,5 @@
 import { Label, Input, Switch } from "@repo/ui";
+import { useTranslations } from "next-intl";
 
 interface Props {
   isFree: boolean;
@@ -13,17 +14,19 @@ export function CommunityAccessSection({
   handleChange,
   setIsFree,
 }: Props) {
+  const t = useTranslations("manageCommunity");
+
   return (
     <section className="grid grid-cols-1 lg:grid-cols-8 gap-4 mb-8">
       <div className="col-span-8 lg:col-span-4">
-        <h2 className="text-lg font-semibold mb-1">Paramètres d'accès</h2>
+        <h2 className="text-lg font-semibold mb-1">{t("access.title")}</h2>
         <p className="text-sm text-muted-foreground">
-          Définissez si l'accès est gratuit ou payant.
+          {t("access.description")}
         </p>
       </div>
       <div className="col-span-8 lg:col-span-4 space-y-4 md:space-y-6">
         <div className="flex items-center gap-4">
-          <Label htmlFor="isFree">Gratuit</Label>
+          <Label htmlFor="isFree">{t("access.isFree.label")}</Label>
           <Switch
             checked={form.isFree}
             onCheckedChange={(checked) => {
@@ -34,13 +37,12 @@ export function CommunityAccessSection({
             }}
           />
           <span className="text-muted-foreground text-sm">
-            Activez pour rendre la communauté gratuite. Désactivez pour indiquer
-            un prix.
+            {t("access.isFree.description")}
           </span>
         </div>
         {!isFree && (
           <div className="space-y-2">
-            <Label htmlFor="price">Prix</Label>
+            <Label htmlFor="price">{t("access.price.label")}</Label>
             <Input
               id="price"
               name="price"
@@ -49,7 +51,7 @@ export function CommunityAccessSection({
               step="0.01"
               value={form.price}
               onChange={handleChange}
-              placeholder="Prix en €"
+              placeholder={t("access.price.placeholder")}
             />
           </div>
         )}

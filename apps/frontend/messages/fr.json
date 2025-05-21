@@ -182,5 +182,57 @@
       "success": "Invitations envoyées à : {emails}"
     },
     "submit": "Envoyer les invitations"
+  },
+  "manageCommunity": {
+    "title": "Gestion de la communauté",
+    "save": "Enregistrer",
+    "general": {
+      "title": "Informations générales",
+      "intro": "Modifiez les informations principales de votre communauté.",
+      "name": {
+        "label": "Nom",
+        "placeholder": "Nom de la communauté"
+      },
+      "tags": {
+        "label": "Type / Tags",
+        "placeholder": "Choisissez un type"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Décrivez la communauté..."
+      },
+      "externalLinks": {
+        "label": "Liens externes",
+        "placeholder": "https://..."
+      }
+    },
+    "access": {
+      "title": "Paramètres d'accès",
+      "description": "Définissez si l'accès est gratuit ou payant.",
+      "isFree": {
+        "label": "Gratuit",
+        "description": "Activez pour rendre la communauté gratuite. Désactivez pour indiquer un prix."
+      },
+      "price": {
+        "label": "Prix",
+        "placeholder": "Prix en €"
+      }
+    },
+    "gains": {
+      "title": "Répartition des gains",
+      "description": "Définissez la part des gains pour l'admin, le prize pool et la plateforme (total = 100%).",
+      "adminShare": { "label": "Part pour l'admin (%)" },
+      "prizePoolShare": { "label": "Part pour le prize pool (%)" },
+      "platformShare": { "label": "Part pour la plateforme (%)" },
+      "totalHint": "Le total doit faire 100%.",
+      "internal": {
+        "title": "Répartition interne du prize pool",
+        "prizeCreation": { "label": "Création (%)" },
+        "prizeRevision": { "label": "Révision (%)" },
+        "prizeAnimation": { "label": "Animation (%)" },
+        "prizeSharing": { "label": "Partage / Invitations (%)" },
+        "totalHint": "Le total doit faire 100% pour la répartition interne du prize pool."
+      }
+    }
   }
 }

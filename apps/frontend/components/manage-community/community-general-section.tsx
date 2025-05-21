@@ -6,6 +6,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@repo/ui";
+import { useTranslations } from "next-intl";
 
 interface Props {
   form: any;
@@ -22,33 +23,33 @@ export function CommunityGeneralSection({
   handleSelect,
   communityTypes,
 }: Props) {
+  const t = useTranslations("manageCommunity");
+
   return (
     <section className="grid grid-cols-1 lg:grid-cols-8 gap-4 mb-8">
       <div className="col-span-8 lg:col-span-4">
-        <h2 className="text-lg font-semibold mb-1">Informations générales</h2>
-        <p className="text-sm text-muted-foreground">
-          Modifiez les informations principales de votre communauté.
-        </p>
+        <h2 className="text-lg font-semibold mb-1">{t("general.title")}</h2>
+        <p className="text-sm text-muted-foreground">{t("general.intro")}</p>
       </div>
       <div className="col-span-8 lg:col-span-4 space-y-4 md:space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="name">Nom</Label>
+          <Label htmlFor="name">{t("general.name.label")}</Label>
           <Input
             id="name"
             name="name"
             value={form.name}
             onChange={handleChange}
-            placeholder="Nom de la communauté"
+            placeholder={t("general.name.placeholder")}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="tags">Type / Tags</Label>
+          <Label htmlFor="tags">{t("general.tags.label")}</Label>
           <Select
             value={form.tags}
             onValueChange={(v) => handleSelect("tags", v)}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Choisissez un type" />
+              <SelectValue placeholder={t("general.tags.placeholder")} />
             </SelectTrigger>
             <SelectContent className="z-50">
               {communityTypes.map((type) => (
@@ -60,23 +61,25 @@ export function CommunityGeneralSection({
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{t("general.description.label")}</Label>
           <Textarea
             id="description"
             name="description"
             value={form.description}
             onChange={handleChange}
-            placeholder="Décrivez la communauté..."
+            placeholder={t("general.description.placeholder")}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="externalLinks">Liens externes</Label>
+          <Label htmlFor="externalLinks">
+            {t("general.externalLinks.label")}
+          </Label>
           <Input
             id="externalLinks"
             name="externalLinks"
             value={form.externalLinks}
             onChange={handleChange}
-            placeholder="https://..."
+            placeholder={t("general.externalLinks.placeholder")}
           />
         </div>
       </div>
