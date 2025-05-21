@@ -9,7 +9,7 @@ on:
 permissions:
   contents: read
   deployments: write
-  
+
 jobs:
   deploy-v1-vercel:
     runs-on: ubuntu-latest
@@ -77,7 +77,7 @@ jobs:
             git fetch origin
             git checkout staging
             git pull origin staging
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+            docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d --build
 
       - name: Déploiement sur OVH (prod)
         if: github.ref == 'refs/heads/main'

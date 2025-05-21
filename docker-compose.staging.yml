@@ -1,0 +1,52 @@
+version: "3"
+
+services:
+  # Service pour le frontend
+  frontend:
+    build:
+      dockerfile: ./apps/frontend/Dockerfile.prod
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - VIRTUAL_HOST=test.snowledge.eu
+      - LETSENCRYPT_HOST=test.snowledge.eu
+      - LETSENCRYPT_EMAIL=alexandre@snowledge.eu
+  # Service pour le backend
+  backend:
+    build:
+      dockerfile: ./apps/backend/Dockerfile.prod
+    environment:
+      - PORT=4000
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs:ro
+      - ./vhost.d:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - snowledge_network
+
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: nginx-letsencrypt
+    environment:
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/etc/nginx/certs
+    networks:
+      - snowledge_network
+
+networks:
+  snowledge_network:
+    external: true
