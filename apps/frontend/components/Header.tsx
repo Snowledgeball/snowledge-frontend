@@ -34,7 +34,12 @@ const breadcrumbLabels: Record<string, string> = {
 
 export default function Header() {
   const pathname = usePathname(); // ex: "/dashboard/settings/test"
-  const segments = pathname.split("/").filter(Boolean); // ["dashboard", "settings", "test"]
+  let segments = pathname.split("/").filter(Boolean); // ["dashboard", "settings", "test"]
+
+  // Ignore le segment de langue (fr ou en) s'il est présent
+  if (segments[0] === "fr" || segments[0] === "en") {
+    segments = segments.slice(1);
+  }
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
