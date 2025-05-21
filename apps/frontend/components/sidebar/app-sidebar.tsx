@@ -33,6 +33,7 @@ import {
 
 import { toSlug } from "@/utils/slug";
 import { features } from "@/config/features";
+import { useTranslations } from "next-intl";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -62,120 +63,121 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 function SidebarNavs() {
   const { activeCommunity } = useCurrentCommunity();
   const slug = toSlug(activeCommunity.name);
+  const tNavbar = useTranslations("navbar");
 
   const home = {
-    title: "Accueil",
+    title: tNavbar("dashboard"),
     url: `/${slug}`,
     icon: Home,
   };
   // Structure enrichie pour NavMain (élève)
   const navMain = [
     features.community.learner.dashboard.enabled && {
-      title: "Tableau de bord",
+      title: tNavbar("dashboard"),
       url: `/${slug}/learner/dashboard`,
       icon: PieChart,
       items: [
         features.community.learner.dashboard.overview && {
-          title: "Vue globale",
+          title: tNavbar("overview"),
           url: `/${slug}/learner/dashboard/overview`,
         },
         features.community.learner.dashboard.details && {
-          title: "Statistiques détaillées",
+          title: tNavbar("details"),
           url: `/${slug}/learner/dashboard/details`,
         },
       ].filter(Boolean),
     },
     features.community.learner.content.enabled && {
-      title: "Contenu",
+      title: tNavbar("content"),
       url: `/${slug}/learner/content`,
       icon: BookOpen,
       items: [
         features.community.learner.content.articles && {
-          title: "Articles",
+          title: tNavbar("articles"),
           url: `/${slug}/learner/content/articles`,
         },
         features.community.learner.content.videos && {
-          title: "Vidéos",
+          title: tNavbar("videos"),
           url: `/${slug}/learner/content/videos`,
         },
         features.community.learner.content.podcasts && {
-          title: "Podcasts",
+          title: tNavbar("podcasts"),
           url: `/${slug}/learner/content/podcasts`,
         },
       ].filter(Boolean),
     },
     features.community.learner.discussions.enabled && {
-      title: "Discussions",
+      title: tNavbar("discussions"),
       url: `/${slug}/learner/discussions`,
       icon: Bot,
       items: [
         features.community.learner.discussions.forum && {
-          title: "Forum",
+          title: tNavbar("forum"),
           url: `/${slug}/learner/discussions/forum`,
         },
         features.community.learner.discussions.chat && {
-          title: "Chat général",
+          title: tNavbar("chat"),
           url: `/${slug}/learner/discussions/chat`,
         },
       ].filter(Boolean),
     },
     features.community.learner.resources.enabled && {
-      title: "Ressources",
+      title: tNavbar("resources"),
       url: `/${slug}/learner/resources`,
       icon: BookOpen,
       items: [
         features.community.learner.resources.documents && {
-          title: "Documents",
+          title: tNavbar("documents"),
           url: `/${slug}/learner/resources/documents`,
         },
         features.community.learner.resources.links && {
-          title: "Liens utiles",
+          title: tNavbar("links"),
           url: `/${slug}/learner/resources/links`,
         },
       ].filter(Boolean),
     },
     features.community.learner.ideas.enabled && {
-      title: "Idées",
+      title: tNavbar("ideas"),
       url: `/${slug}/learner/ideas`,
       icon: SquareTerminal,
       items: [
         features.community.learner.ideas.propose && {
-          title: "Proposer une idée",
+          title: tNavbar("propose"),
           url: `/${slug}/learner/ideas/propose`,
         },
         features.community.learner.ideas.myIdeas && {
-          title: "Mes idées",
+          title: tNavbar("my-ideas"),
           url: `/${slug}/learner/ideas/my-ideas`,
         },
       ].filter(Boolean),
     },
     features.community.learner.calendar.enabled && {
-      title: "Calendrier",
+      title: tNavbar("calendar"),
       url: `/${slug}/learner/calendar`,
       icon: Frame,
       items: [
         features.community.learner.calendar.events && {
-          title: "Événements",
+          title: tNavbar("events"),
           url: `/${slug}/learner/calendar/events`,
         },
         features.community.learner.calendar.myEvents && {
-          title: "Mes rendez-vous",
+          title: tNavbar("my-events"),
           url: `/${slug}/learner/calendar/my-events`,
         },
       ].filter(Boolean),
     },
     features.community.learner.notifications.enabled && {
-      title: "Notifications",
+      title: tNavbar("notifications"),
       url: `/${slug}/learner/notifications`,
       icon: Command,
     },
     features.community.learner.faq && {
-      title: "FAQ",
+      title: tNavbar("faq"),
       url: `/${slug}/learner/faq`,
       icon: GalleryVerticalEnd,
     },
     features.community.learner.support.enabled && {
-      title: "Support",
+      title: tNavbar("support"),
       url: `/${slug}/learner/support`,
       icon: AudioWaveform,
     },
@@ -189,64 +191,64 @@ function SidebarNavs() {
   // Structure enrichie pour NavContributeur
   const navContributeur = [
     features.community.contributor.contribute.enabled && {
-      title: "Contribuer",
+      title: tNavbar("contribute"),
       url: `/${slug}/contributor/contribute`,
       icon: Frame,
       items: [
         features.community.contributor.contribute.propose && {
-          title: "Proposer un projet",
+          title: tNavbar("propose"),
           url: `/${slug}/contributor/contribute/propose`,
         },
         features.community.contributor.contribute.myContributions && {
-          title: "Mes contributions",
+          title: tNavbar("my-contributions"),
           url: `/${slug}/contributor/contribute/my-contributions`,
         },
         features.community.contributor.contribute.validateIdeas && {
-          title: "Idées à valider",
+          title: tNavbar("validate-ideas"),
           url: `/${slug}/contributor/contribute/validate-ideas`,
         },
         features.community.contributor.contribute.collaborations && {
-          title: "Collaborations",
+          title: tNavbar("collaborations"),
           url: `/${slug}/contributor/contribute/collaborations`,
         },
       ].filter(Boolean),
     },
     // Nouveau menu principal pour les ressources contributeur
     features.community.contributor.resourcesContrib.enabled && {
-      title: "Ressources Contributeur",
+      title: tNavbar("ressources-contrib"),
       url: `/${slug}/contributor/ressources-contrib`,
       icon: BookOpen,
       items: [
         features.community.contributor.resourcesContrib.tutorials && {
-          title: "Tutoriels de contribution",
+          title: tNavbar("tutorials"),
           url: `/${slug}/contributor/ressources-contrib/tutorials`,
         },
         features.community.contributor.resourcesContrib.history && {
-          title: "Historique des contributions",
+          title: tNavbar("history"),
           url: `/${slug}/contributor/ressources-contrib/history`,
         },
         features.community.contributor.resourcesContrib.leaderboard && {
-          title: "Classement des contributeurs",
+          title: tNavbar("leaderboard"),
           url: `/${slug}/contributor/ressources-contrib/leaderboard`,
         },
       ].filter(Boolean),
     },
     // Nouveau menu principal pour les outils contributeur
     features.community.contributor.tools.enabled && {
-      title: "Outils Contributeur",
+      title: tNavbar("tools"),
       url: `/${slug}/contributor/tools`,
       icon: SquareTerminal,
       items: [
         features.community.contributor.tools.badges && {
-          title: "Mes badges",
+          title: tNavbar("badges"),
           url: `/${slug}/contributor/tools/badges`,
         },
         features.community.contributor.tools.validationRequests && {
-          title: "Demandes de validation",
+          title: tNavbar("validation-requests"),
           url: `/${slug}/contributor/tools/validation-requests`,
         },
         features.community.contributor.tools.stats && {
-          title: "Statistiques de contribution",
+          title: tNavbar("stats"),
           url: `/${slug}/contributor/tools/stats`,
         },
       ].filter(Boolean),
@@ -261,32 +263,32 @@ function SidebarNavs() {
   // Structure enrichie pour NavProjects (admin/créateur)
   const navProjects = [
     features.community.creator.enabled && {
-      name: "Administration",
+      name: tNavbar("creator"),
       url: `/${slug}/creator`,
       icon: Settings2,
       items: [
         features.community.creator.settings && {
-          title: "Paramètres",
+          title: tNavbar("settings"),
           url: `/${slug}/creator/settings`,
         },
         features.community.creator.members && {
-          title: "Membres",
+          title: tNavbar("members"),
           url: `/${slug}/creator/members`,
         },
         features.community.creator.invite && {
-          title: "Invitations",
+          title: tNavbar("invite"),
           url: `/${slug}/creator/invite`,
         },
         features.community.creator.pricing && {
-          title: "Tarifs",
+          title: tNavbar("pricing"),
           url: `/${slug}/creator/pricing`,
         },
         features.community.creator.moderation && {
-          title: "Modération",
+          title: tNavbar("moderation"),
           url: `/${slug}/creator/moderation`,
         },
         features.community.creator.logs && {
-          title: "Logs",
+          title: tNavbar("logs"),
           url: `/${slug}/creator/logs`,
         },
       ].filter(Boolean) as { title: string; url: string }[],
@@ -300,9 +302,9 @@ function SidebarNavs() {
   return (
     <>
       <NavMain items={[home]} label="" />
-      <NavMain items={navMain} label="Apprenant" />
-      <NavMain items={navContributeur} label="Contributeur" />
-      <NavProjects projects={navProjects} label="Créateur" />
+      <NavMain items={navMain} label={tNavbar("learner")} />
+      <NavMain items={navContributeur} label={tNavbar("contributor")} />
+      <NavProjects projects={navProjects} label={tNavbar("creator")} />
     </>
   );
 }
