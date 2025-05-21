@@ -10,27 +10,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@repo/ui/components/breadcrumb";
-
-// Mapping pour afficher des labels jolis et des icônes
-const breadcrumbLabels: Record<string, string> = {
-  dashboard: "Dashboard",
-  InvestisseursFous: "InvestisseursFous",
-  CryptoClub: "Crypto Club",
-  ImmoPro: "Immo Pro",
-  contribute: "Contribuer",
-  propose: "Proposer un projet",
-  "my-contributions": "Mes contributions",
-  "validate-ideas": "Idées à valider",
-  settings: "Paramètres",
-  members: "Membres",
-  invite: "Invitations",
-  pricing: "Tarifs",
-  content: "Contenu",
-  ideas: "Idées",
-  discussions: "Discussions",
-  resources: "Ressources",
-  // Ajoute d'autres segments si besoin
-};
+import { useTranslations } from "next-intl";
 
 export default function Header() {
   const pathname = usePathname(); // ex: "/dashboard/settings/test"
@@ -40,6 +20,8 @@ export default function Header() {
   if (segments[0] === "fr" || segments[0] === "en") {
     segments = segments.slice(1);
   }
+
+  const tBreadcrumb = useTranslations("breadcrumb");
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -53,20 +35,24 @@ export default function Header() {
           <BreadcrumbList>
             {segments.map((segment, idx) => {
               const isLast = idx === segments.length - 1;
-              const label = breadcrumbLabels[segment] || segment;
+              let label: string;
+              try {
+                label = tBreadcrumb(segment);
+              } catch {
+                label = segment;
+              }
+              label = label.charAt(0).toUpperCase() + label.slice(1);
               return (
                 <span key={idx} className="flex items-center">
                   {idx > 0 && <BreadcrumbSeparator />}
                   <BreadcrumbItem>
                     {isLast ? (
-                      <BreadcrumbPage>
-                        {label.charAt(0).toUpperCase() + label.slice(1)}
-                      </BreadcrumbPage>
+                      <BreadcrumbPage>{label}</BreadcrumbPage>
                     ) : (
                       <BreadcrumbLink
                         href={`/${segments.slice(0, idx + 1).join("/")}`}
                       >
-                        {label.charAt(0).toUpperCase() + label.slice(1)}
+                        {label}
                       </BreadcrumbLink>
                     )}
                   </BreadcrumbItem>

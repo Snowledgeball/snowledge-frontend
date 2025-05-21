@@ -1,34 +1,34 @@
 {
-    "menu": {
-      "snowledge": "Snowledge",
-      "features": "Features",
-      "faq": "FAQ",
-      "partners": "Partners"
-    },
-    "cta": {
-      "test": "Try Snowledge"
-    },
-    "form": {
-      "title": "Snowledge POC Registration",
-      "firstname": "First name",
-      "lastname": "Last name",
-      "email": "Email address",
-      "expertise": "Expertise",
-      "expertise_placeholder": "Choose an expertise",
-      "community_size": "Community size",
-      "community_size_placeholder": "Choose a size",
-      "platforms": "Platforms used",
-      "platforms_placeholder": "Select platforms",
-      "submit": "Try Snowledge",
-      "close": "Close",
-      "community_size_less_than_100": "Less than 100",
-      "community_size_more_than_100": "More than 100"
-    },
-    "menu_toggle": {
-      "open": "Open menu",
-      "close": "Close menu"
-    },
-    "hero": {
+  "menu": {
+    "snowledge": "Snowledge",
+    "features": "Features",
+    "faq": "FAQ",
+    "partners": "Partners"
+  },
+  "cta": {
+    "test": "Try Snowledge"
+  },
+  "form": {
+    "title": "Snowledge POC Registration",
+    "firstname": "First name",
+    "lastname": "Last name",
+    "email": "Email address",
+    "expertise": "Expertise",
+    "expertise_placeholder": "Choose an expertise",
+    "community_size": "Community size",
+    "community_size_placeholder": "Choose a size",
+    "platforms": "Platforms used",
+    "platforms_placeholder": "Select platforms",
+    "submit": "Try Snowledge",
+    "close": "Close",
+    "community_size_less_than_100": "Less than 100",
+    "community_size_more_than_100": "More than 100"
+  },
+  "menu_toggle": {
+    "open": "Open menu",
+    "close": "Close menu"
+  },
+  "hero": {
     "title_start": "No more content created",
     "title_blind": "blindly",
     "title_and": "and",
@@ -37,54 +37,102 @@
     "description": "Save time, engage your members, and create quality content through collective intelligence. Snowledge transforms every community interaction into a growth opportunity.",
     "cta": "Try Snowledge",
     "discover": "Discover Snowledge"
-    },
-    "features": {
-      "title_start": "Rely on your community to",
-      "title_create": "create",
-      "title_and": "and",
-      "title_sell": "sell",
-      "title_end": "more and better!",
-      "description": "On Snowledge, ideas come from creators or the community. Needs are automatically detected, the right contributors are mobilized, creation is orchestrated, and revenues are distributed according to each person's contribution.",
-      "card_1_title": "Needs measurement and analysis",
-      "card_1_text": "Snowledge analyzes Discord exchanges to identify trends and needs. Members can also submit ideas and vote, helping you prioritize what deserves to be created.",
-      "card_2_title": "Co-creation orchestration",
-      "card_2_text": "Snowledge mobilizes the right contributors at the right time, organizes collaborative work, and facilitates the emergence of quality resources, without you having to manage everything yourself.",
-      "card_3_title": "Revenue sharing",
-      "card_3_text": "Contributions are tracked, their impact measured, and revenues automatically shared. No need to manage anything: everyone gets their share, thus strengthening engagement."
-    },
-    "faq": {
-      "title": "Frequently Asked Questions",
-      "description": "We have compiled the most important information to help you get the most out of your experience.",
-      "not_found": "Can't find what you're looking for?",
-      "contact": "Contact us.",
-      "item_1_question": "Why does Snowledge focus on community co-creation?",
-      "item_1_answer": "Because the best educational content is not created alone. Snowledge allows creators to involve their community from the idea stage, to validate what deserves to be produced, mobilize the right profiles, and share the value created. It's fairer, more efficient, and more sustainable.",
-      "item_2_question": "What is the role of artificial intelligence in Snowledge?",
-      "item_2_answer": "AI analyzes your community's exchanges to extract clear signals: recurring needs, emerging topics, concrete expectations. It helps you detect what to produce, with whom, and for whom without having to read every message or launch manual surveys.",
-      "item_3_question": "Why integrate blockchain into an educational platform?",
-      "item_3_answer": "Because recognition, traceability, and fair distribution are essential. Thanks to blockchain, Snowledge automatically records who contributes to what, how, and when, then distributes revenues transparently, without intermediaries.",
-      "item_4_question": "What is the deeper purpose behind Snowledge?",
-      "item_4_answer": "We want to help change the 'lone creator' dynamic. Too many talents create alone, hope to sell, and burn out. Snowledge is based on a belief: collective intelligence can produce more useful, fairer, and better-paid content. Our mission is to make this model possible—technically, economically, and humanly.",
-      "cta_title": "Do our approach and product resonate with you?",
-      "cta_description": "Contact us to become one of our first ambassadors!",
-      "cta_button": "Contact us"
-    },
-    "partners": {
-      "title": "Partners",
-      "description": "They trust us and support us in our journey."
-    },
-    "footer": {
-      "home": "Home",
-      "about": "About us",
-      "contact": "Contact",
-      "privacy": "Privacy Policy",
-      "terms": "Terms of Use",
-      "copyright": "All rights reserved."
-    },
-    "upgrade_banner": {
-      "description_start": "click the button",
-      "description_cta": "Try Snowledge",
-      "description_end": "to register for the test phase",
-      "button_text": "In development"
-    }
+  },
+  "features": {
+    "title_start": "Rely on your community to",
+    "title_create": "create",
+    "title_and": "and",
+    "title_sell": "sell",
+    "title_end": "more and better!",
+    "description": "On Snowledge, ideas come from creators or the community. Needs are automatically detected, the right contributors are mobilized, creation is orchestrated, and revenues are distributed according to each person's contribution.",
+    "card_1_title": "Needs measurement and analysis",
+    "card_1_text": "Snowledge analyzes Discord exchanges to identify trends and needs. Members can also submit ideas and vote, helping you prioritize what deserves to be created.",
+    "card_2_title": "Co-creation orchestration",
+    "card_2_text": "Snowledge mobilizes the right contributors at the right time, organizes collaborative work, and facilitates the emergence of quality resources, without you having to manage everything yourself.",
+    "card_3_title": "Revenue sharing",
+    "card_3_text": "Contributions are tracked, their impact measured, and revenues automatically shared. No need to manage anything: everyone gets their share, thus strengthening engagement."
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "description": "We have compiled the most important information to help you get the most out of your experience.",
+    "not_found": "Can't find what you're looking for?",
+    "contact": "Contact us.",
+    "item_1_question": "Why does Snowledge focus on community co-creation?",
+    "item_1_answer": "Because the best educational content is not created alone. Snowledge allows creators to involve their community from the idea stage, to validate what deserves to be produced, mobilize the right profiles, and share the value created. It's fairer, more efficient, and more sustainable.",
+    "item_2_question": "What is the role of artificial intelligence in Snowledge?",
+    "item_2_answer": "AI analyzes your community's exchanges to extract clear signals: recurring needs, emerging topics, concrete expectations. It helps you detect what to produce, with whom, and for whom without having to read every message or launch manual surveys.",
+    "item_3_question": "Why integrate blockchain into an educational platform?",
+    "item_3_answer": "Because recognition, traceability, and fair distribution are essential. Thanks to blockchain, Snowledge automatically records who contributes to what, how, and when, then distributes revenues transparently, without intermediaries.",
+    "item_4_question": "What is the deeper purpose behind Snowledge?",
+    "item_4_answer": "We want to help change the 'lone creator' dynamic. Too many talents create alone, hope to sell, and burn out. Snowledge is based on a belief: collective intelligence can produce more useful, fairer, and better-paid content. Our mission is to make this model possible—technically, economically, and humanly.",
+    "cta_title": "Do our approach and product resonate with you?",
+    "cta_description": "Contact us to become one of our first ambassadors!",
+    "cta_button": "Contact us"
+  },
+  "partners": {
+    "title": "Partners",
+    "description": "They trust us and support us in our journey."
+  },
+  "footer": {
+    "home": "Home",
+    "about": "About us",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use",
+    "copyright": "All rights reserved."
+  },
+  "upgrade_banner": {
+    "description_start": "click the button",
+    "description_cta": "Try Snowledge",
+    "description_end": "to register for the test phase",
+    "button_text": "In development"
+  },
+  "breadcrumb": {
+    "dashboard": "Dashboard",
+    "investisseurs-fous": "Investors Fools",
+    "crypto-club": "Crypto Club",
+    "immo-pro": "Immo Pro",
+    "contribute": "Contribute",
+    "propose": "Propose a project",
+    "my-contributions": "My contributions",
+    "validate-ideas": "Ideas to validate",
+    "settings": "Settings",
+    "learner": "Learner",
+    "contributor": "Contributor",
+    "creator": "Creator",
+    "members": "Members",
+    "invite": "Invitations",
+    "pricing": "Pricing",
+    "content": "Content",
+    "ideas": "Ideas",
+    "discussions": "Discussions",
+    "resources": "Resources",
+    "overview": "Overview",
+    "details": "Details",
+    "articles": "Articles",
+    "videos": "Videos",
+    "podcasts": "Podcasts",
+    "forum": "Forum",
+    "chat": "Chat",
+    "documents": "Documents",
+    "links": "Links",
+    "my-ideas": "My ideas",
+    "calendar": "Calendar",
+    "events": "Events",
+    "my-events": "My meetings",
+    "notifications": "Notifications",
+    "faq": "FAQ",
+    "support": "Support",
+    "collaborations": "Collaborations",
+    "ressources-contrib": "Contributor resources",
+    "tutorials": "Tutorials",
+    "history": "History",
+    "leaderboard": "Leaderboard",
+    "tools": "Tools",
+    "badges": "Badges",
+    "validation-requests": "Validation requests",
+    "stats": "Contribution stats",
+    "moderation": "Moderation",
+    "logs": "Logs"
   }
+}
