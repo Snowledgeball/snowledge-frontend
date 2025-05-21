@@ -181,6 +181,12 @@
     "toast": {
       "success": "Invitations envoyées à : {emails}"
     },
+    "copy": {
+      "button": "Copier le lien de la communauté",
+      "copied": "Copié !",
+      "success": "Lien copié dans le presse-papier !",
+      "error": "Erreur lors de la copie du lien."
+    },
     "submit": "Envoyer les invitations"
   },
   "manageCommunity": {

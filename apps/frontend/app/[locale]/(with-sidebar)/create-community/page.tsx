@@ -74,6 +74,7 @@ export default function CreateCommunity() {
   if (!features.createCommunity.enabled) {
     notFound();
   }
+  const [community, setCommunity] = useState("");
   const [isFree, setIsFree] = useState(true);
   const [openInvite, setOpenInvite] = useState(false);
   const { data: communityTypes = [], isLoading: loadingTypes } =
@@ -93,6 +94,7 @@ export default function CreateCommunity() {
 
   function onSubmit(values: FormSchema) {
     console.log(values);
+    setCommunity(values.name);
     // Simule la création de la communauté puis ouvre le modal d'invitation
     setTimeout(() => {
       setOpenInvite(true);
@@ -241,7 +243,11 @@ export default function CreateCommunity() {
             </Button>
           </form>
         </Form>
-        <ModalInvite open={openInvite} onOpenChange={setOpenInvite} />
+        <ModalInvite
+          open={openInvite}
+          onOpenChange={setOpenInvite}
+          communityUrl={`${window.location.origin}/community/${community}`}
+        />
       </div>
     </div>
   );

@@ -17,7 +17,7 @@ import {
 } from "@repo/ui/components/avatar";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { X, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
@@ -67,9 +67,11 @@ function fetchUsers(search: string) {
 const ModalInvite = ({
   open,
   onOpenChange,
+  communityUrl,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityUrl: string;
 }) => {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<typeof MOCK_USERS>([]);
@@ -80,6 +82,8 @@ const ModalInvite = ({
   });
 
   const t = useTranslations("inviteModal");
+
+  const [copied, setCopied] = useState(false);
 
   const handleSelect = (user: (typeof MOCK_USERS)[0]) => {
     if (!selected.find((u) => u.id === user.id)) {
@@ -101,6 +105,17 @@ const ModalInvite = ({
     onOpenChange(false);
   };
 
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(communityUrl);
+      setCopied(true);
+      toast.success(t("copy.success"));
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error(t("copy.error"));
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -108,6 +123,29 @@ const ModalInvite = ({
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
+
+        {/* Zone de copie du lien */}
+        <div className="flex items-center gap-2 mb-4 bg-muted rounded px-3 py-2">
+          <Input
+            value={communityUrl}
+            readOnly
+            className="flex-1 bg-muted border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-xs"
+          />
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            onClick={handleCopy}
+            aria-label={t("copy.button")}
+          >
+            <Copy className="w-4 h-4" />
+          </Button>
+          {copied && (
+            <span className="text-xs text-green-600 ml-2">
+              {t("copy.copied")}
+            </span>
+          )}
+        </div>
 
         <div className="space-y-2">
           <Input
