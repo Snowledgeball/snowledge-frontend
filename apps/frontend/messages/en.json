@@ -187,7 +187,8 @@
       "success": "Link copied to clipboard!",
       "error": "Error copying the link."
     },
-    "submit": "Send invitations"
+    "submit": "Send invitations",
+    "loading": "Sending invitations..."
   },
   "manageCommunity": {
     "title": "Community management",

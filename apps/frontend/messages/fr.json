@@ -168,7 +168,8 @@
       "placeholder": "https://...",
       "description": "Ajoutez un ou plusieurs liens externes (séparés par des virgules)."
     },
-    "submit": "Créer la communauté"
+    "submit": "Créer la communauté",
+    "loading": "Création en cours..."
   },
   "inviteModal": {
     "title": "Invitez des utilisateurs",

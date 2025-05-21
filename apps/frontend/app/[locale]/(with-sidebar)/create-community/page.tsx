@@ -29,7 +29,7 @@ import { Switch } from "@repo/ui/components/switch";
 import { Button } from "@repo/ui/components/button";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
 import { features } from "@/config/features";
@@ -92,19 +92,53 @@ export default function CreateCommunity() {
   });
   const t = useTranslations("createCommunity");
 
+  // Ajout de la mutation React Query
+  const {
+    mutate: createCommunity,
+    isPending: isCreating,
+    isError,
+    error,
+  } = useMutation({
+    mutationFn: async (data: FormSchema) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }
+      );
+      if (!res.ok) {
+        let err;
+        try {
+          err = await res.json();
+        } catch {
+          err = { message: "Erreur inconnue" };
+        }
+        throw new Error(err.message || "Erreur lors de la création");
+      }
+      return res.json();
+    },
+    onSuccess: (data, variables) => {
+      setCommunity(variables.name);
+      setTimeout(() => setOpenInvite(true), 500);
+    },
+  });
+
   function onSubmit(values: FormSchema) {
-    console.log(values);
-    setCommunity(values.name);
-    // Simule la création de la communauté puis ouvre le modal d'invitation
-    setTimeout(() => {
-      setOpenInvite(true);
-    }, 500);
+    createCommunity(values);
   }
 
   return (
     <div className="min-h-screen flex mt-6 justify-center">
       <div className="max-w-xl w-full mx-auto py-8">
         <h1 className="text-2xl font-bold mb-6">{t("title")}</h1>
+        {/* Affichage des erreurs de création */}
+        {isError && (
+          <div className="text-red-500 mb-2">
+            {(error as Error)?.message || "Erreur lors de la création"}
+          </div>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -238,8 +272,8 @@ export default function CreateCommunity() {
               )}
             />
 
-            <Button type="submit" className="w-full">
-              {t("submit")}
+            <Button type="submit" className="w-full" disabled={isCreating}>
+              {isCreating ? t("loading") : t("submit")}
             </Button>
           </form>
         </Form>
