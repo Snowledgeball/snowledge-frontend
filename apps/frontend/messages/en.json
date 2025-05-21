@@ -133,6 +133,54 @@
     "logs": "Logs",
     "creator": "Creator",
     "learner": "Learner",
-    "contributor": "Contributor"
+    "contributor": "Contributor",
+    "create-community": "Create a community"
+  },
+  "createCommunity": {
+    "title": "Create a community",
+    "name": {
+      "label": "Name",
+      "placeholder": "Community name",
+      "description": "The name of your community."
+    },
+    "isFree": {
+      "label": "Free",
+      "description": "Enable to make the community free. Disable to set a price."
+    },
+    "price": {
+      "label": "Price",
+      "placeholder": "Price in €",
+      "description": "Access price for the community."
+    },
+    "tags": {
+      "label": "Type / Tags",
+      "placeholder": "Choose a type",
+      "groupLabel": "Types",
+      "description": "Select the main type of the community."
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Describe your community...",
+      "description": "A description to introduce the community."
+    },
+    "externalLinks": {
+      "label": "External links",
+      "placeholder": "https://...",
+      "description": "Add one or more external links (comma separated)."
+    },
+    "submit": "Create the community"
+  },
+  "inviteModal": {
+    "title": "Invite users",
+    "description": "Search and select users to invite to your community.",
+    "search": {
+      "placeholder": "Search for a user (name or email)",
+      "loading": "Searching...",
+      "noResult": "No user found"
+    },
+    "toast": {
+      "success": "Invitations sent to: {emails}"
+    },
+    "submit": "Send invitations"
   }
 }

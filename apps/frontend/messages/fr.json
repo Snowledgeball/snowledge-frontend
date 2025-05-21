@@ -133,6 +133,54 @@
     "logs": "Logs",
     "creator": "Créateur",
     "learner": "Apprenant",
-    "contributor": "Contributeur"
+    "contributor": "Contributeur",
+    "create-community": "Créer une communauté"
+  },
+  "createCommunity": {
+    "title": "Créer une communauté",
+    "name": {
+      "label": "Nom",
+      "placeholder": "Nom de la communauté",
+      "description": "Le nom de votre communauté."
+    },
+    "isFree": {
+      "label": "Gratuit",
+      "description": "Activez pour rendre la communauté gratuite. Désactivez pour indiquer un prix."
+    },
+    "price": {
+      "label": "Prix",
+      "placeholder": "Prix en €",
+      "description": "Prix d'accès à la communauté."
+    },
+    "tags": {
+      "label": "Type / Tags",
+      "placeholder": "Choisissez un type",
+      "groupLabel": "Types",
+      "description": "Sélectionnez le type principal de la communauté."
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Décrivez votre communauté...",
+      "description": "Une description pour présenter la communauté."
+    },
+    "externalLinks": {
+      "label": "Liens externes",
+      "placeholder": "https://...",
+      "description": "Ajoutez un ou plusieurs liens externes (séparés par des virgules)."
+    },
+    "submit": "Créer la communauté"
+  },
+  "inviteModal": {
+    "title": "Invitez des utilisateurs",
+    "description": "Recherchez et sélectionnez des utilisateurs à inviter dans votre communauté.",
+    "search": {
+      "placeholder": "Rechercher un utilisateur (nom ou email)",
+      "loading": "Recherche...",
+      "noResult": "Aucun utilisateur trouvé"
+    },
+    "toast": {
+      "success": "Invitations envoyées à : {emails}"
+    },
+    "submit": "Envoyer les invitations"
   }
 }

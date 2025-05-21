@@ -30,6 +30,7 @@ import { Button } from "@repo/ui/components/button";
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 
 import { features } from "@/config/features";
 import { notFound } from "next/navigation";
@@ -88,6 +89,7 @@ export default function CreateCommunity() {
       externalLinks: "",
     },
   });
+  const t = useTranslations("createCommunity");
 
   function onSubmit(values: FormSchema) {
     console.log(values);
@@ -100,7 +102,7 @@ export default function CreateCommunity() {
   return (
     <div className="min-h-screen flex mt-6 justify-center">
       <div className="max-w-xl w-full mx-auto py-8">
-        <h1 className="text-2xl font-bold mb-6">Créer une communauté</h1>
+        <h1 className="text-2xl font-bold mb-6">{t("title")}</h1>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -108,11 +110,11 @@ export default function CreateCommunity() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom</FormLabel>
+                  <FormLabel>{t("name.label")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nom de la communauté" {...field} />
+                    <Input placeholder={t("name.placeholder")} {...field} />
                   </FormControl>
-                  <FormDescription>Le nom de votre communauté.</FormDescription>
+                  <FormDescription>{t("name.description")}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -123,7 +125,7 @@ export default function CreateCommunity() {
               name="isFree"
               render={({ field }) => (
                 <FormItem className="flex items-center gap-4">
-                  <FormLabel>Gratuit</FormLabel>
+                  <FormLabel>{t("isFree.label")}</FormLabel>
                   <FormControl>
                     <Switch
                       checked={field.value}
@@ -133,10 +135,7 @@ export default function CreateCommunity() {
                       }}
                     />
                   </FormControl>
-                  <FormDescription>
-                    Activez pour rendre la communauté gratuite. Désactivez pour
-                    indiquer un prix.
-                  </FormDescription>
+                  <FormDescription>{t("isFree.description")}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -148,19 +147,17 @@ export default function CreateCommunity() {
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prix</FormLabel>
+                    <FormLabel>{t("price.label")}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         min="0"
                         step="0.01"
-                        placeholder="Prix en €"
+                        placeholder={t("price.placeholder")}
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Prix d&apos;accès à la communauté.
-                    </FormDescription>
+                    <FormDescription>{t("price.description")}</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -171,7 +168,7 @@ export default function CreateCommunity() {
               name="tags"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Type / Tags</FormLabel>
+                  <FormLabel>{t("tags.label")}</FormLabel>
                   <FormControl>
                     <Select
                       value={field.value}
@@ -179,11 +176,11 @@ export default function CreateCommunity() {
                       disabled={loadingTypes}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Choisissez un type" />
+                        <SelectValue placeholder={t("tags.placeholder")} />
                       </SelectTrigger>
                       <SelectContent className="z-50" position="popper">
                         <SelectGroup>
-                          <SelectLabel>Types</SelectLabel>
+                          <SelectLabel>{t("tags.groupLabel")}</SelectLabel>
                           {communityTypes.map((type) => (
                             <SelectItem key={type.value} value={type.value}>
                               {type.label}
@@ -193,9 +190,7 @@ export default function CreateCommunity() {
                       </SelectContent>
                     </Select>
                   </FormControl>
-                  <FormDescription>
-                    Sélectionnez le type principal de la communauté.
-                  </FormDescription>
+                  <FormDescription>{t("tags.description")}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -206,15 +201,15 @@ export default function CreateCommunity() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t("description.label")}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Décrivez votre communauté..."
+                      placeholder={t("description.placeholder")}
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    Une description pour présenter la communauté.
+                    {t("description.description")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -226,13 +221,15 @@ export default function CreateCommunity() {
               name="externalLinks"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Liens externes</FormLabel>
+                  <FormLabel>{t("externalLinks.label")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://..." {...field} />
+                    <Input
+                      placeholder={t("externalLinks.placeholder")}
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
-                    Ajoutez un ou plusieurs liens externes (séparés par des
-                    virgules).
+                    {t("externalLinks.description")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -240,7 +237,7 @@ export default function CreateCommunity() {
             />
 
             <Button type="submit" className="w-full">
-              Créer la communauté
+              {t("submit")}
             </Button>
           </form>
         </Form>

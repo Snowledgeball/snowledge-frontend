@@ -19,6 +19,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 // Simule une base d'utilisateurs
 const MOCK_USERS = [
@@ -78,6 +79,8 @@ const ModalInvite = ({
     enabled: open && search.length > 0,
   });
 
+  const t = useTranslations("inviteModal");
+
   const handleSelect = (user: (typeof MOCK_USERS)[0]) => {
     if (!selected.find((u) => u.id === user.id)) {
       setSelected((prev) => [...prev, user]);
@@ -91,7 +94,7 @@ const ModalInvite = ({
   const handleInvite = () => {
     // Simule l'envoi d'invitations
     toast.success(
-      `Invitations envoyées à : ${selected.map((u) => u.email).join(", ")}`
+      t("toast.success", { emails: selected.map((u) => u.email).join(", ") })
     );
     setSelected([]);
     setSearch("");
@@ -102,16 +105,13 @@ const ModalInvite = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Invitez des utilisateurs</DialogTitle>
-          <DialogDescription>
-            Recherchez et sélectionnez des utilisateurs à inviter dans votre
-            communauté.
-          </DialogDescription>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2">
           <Input
-            placeholder="Rechercher un utilisateur (nom ou email)"
+            placeholder={t("search.placeholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             autoFocus
@@ -122,11 +122,11 @@ const ModalInvite = ({
             <div className="max-h-40 overflow-y-auto border rounded-md bg-muted">
               {isLoading ? (
                 <div className="p-2 text-sm text-muted-foreground">
-                  Recherche...
+                  {t("search.loading")}
                 </div>
               ) : users.length === 0 ? (
                 <div className="p-2 text-sm text-muted-foreground">
-                  Aucun utilisateur trouvé
+                  {t("search.noResult")}
                 </div>
               ) : (
                 users.map((user) => (
@@ -196,7 +196,7 @@ const ModalInvite = ({
             disabled={selected.length === 0}
             className="w-full"
           >
-            Envoyer les invitations
+            {t("submit")}
           </Button>
         </DialogFooter>
       </DialogContent>
