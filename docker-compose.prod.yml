@@ -11,6 +11,7 @@ services:
       - VIRTUAL_HOST=hi.snowledge.eu
       - LETSENCRYPT_HOST=hi.snowledge.eu
       - LETSENCRYPT_EMAIL=alexandre@snowledge.eu
+      - VIRTUAL_PORT=3000
   # Service pour le backend
   backend:
     build:
@@ -20,30 +21,28 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
   nginx-proxy:
-    image: jwilder/nginx-proxy
+    image: nginxproxy/nginx-proxy
     container_name: nginx-proxy
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./certs:/etc/nginx/certs:ro
-      - ./vhost.d:/etc/nginx/vhost.d
+      - ./certs:/etc/nginx/certs
       - ./html:/usr/share/nginx/html
-    depends_on:
-      - frontend
-      - backend
+      - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
       - snowledge_network
 
-  letsencrypt:
-    image: jrcs/letsencrypt-nginx-proxy-companion
-    container_name: nginx-letsencrypt
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
     environment:
-      - NGINX_PROXY_CONTAINER=nginx-proxy
+      - DEFAULT_EMAIL=alexandre@snowledge.eu
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./certs:/etc/nginx/certs
+      - ./html:/usr/share/nginx/html
+      - ./acme:/etc/acme.sh
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - snowledge_network
 
