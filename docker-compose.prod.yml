@@ -8,8 +8,8 @@ services:
     environment:
       - PORT=3000
       - NODE_ENV=production
-      - VIRTUAL_HOST=hi.snowledge.euw
-      - LETSENCRYPT_HOST=hi.snowledge.euw
+      - VIRTUAL_HOST=hi.snowledge.eu
+      - LETSENCRYPT_HOST=hi.snowledge.eu
       - LETSENCRYPT_EMAIL=alexandre@snowledge.eu
   # Service pour le backend
   backend:
