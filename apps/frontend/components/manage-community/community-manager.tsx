@@ -24,23 +24,23 @@ const communityTypes = [
 
 export function CommunityManager() {
   const params = useParams();
-  const communityId = params?.id as string;
+  const communitySlug = params?.slug as string;
 
   const {
     data: community,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["community", communityId],
+    queryKey: ["community", communitySlug],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communityId}`
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communitySlug}`
       );
       if (!res.ok)
         throw new Error("Erreur lors du chargement de la communauté");
       return res.json();
     },
-    enabled: !!communityId,
+    enabled: !!communitySlug,
   });
 
   const defaultForm = {
