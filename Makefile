@@ -73,10 +73,17 @@ reset:
 	@echo "✅ Environnement réinitialisé"
 
 # Rebuild from scratch
+build:
+	@echo "🔄 Construire complètement du projet..."
+	@echo $(COMPOSE) build --no-cache
+	@$(COMPOSE) build --no-cache
+	@echo "✅ Construction terminée" 
+
+# Rebuild from scratch
 rebuild:
 	@echo "🔄 Reconstruire complètement le projet..."
 	@echo $(COMPOSE)
-	@docker-compose down
+	@$(COMPOSE) down
 	@$(COMPOSE) build --no-cache
-	@docker-compose up -d
+	@$(COMPOSE) up -d
 	@echo "✅ Reconstruction terminée" 

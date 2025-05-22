@@ -3,20 +3,39 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
-import { CommunityModule } from './community/community.module';
 import serverConfig from './config/server.config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import postgresConfig from './config/postgres.config';
+import { AuthModule } from './auth/auth.module';
+import { EmailModule } from './email/email.module';
+import mailingConfig from './config/mailing.config';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      envFilePath: ['.env.dev', '.env.prod'],
+	imports: [
+		ConfigModule.forRoot({
+			envFilePath: ['.env.dev', '.env.prod'],
 			isGlobal: true,
-			load: [serverConfig,],
+			load: [mailingConfig, postgresConfig, serverConfig],
 		}),
-    UserModule,
-    CommunityModule
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+		TypeOrmModule.forRootAsync({
+			imports: [ConfigModule],
+			inject: [postgresConfig.KEY],
+			useFactory: (postgresConfig) => ({
+				type: 'postgres',
+				host: postgresConfig.host,
+				port: postgresConfig.port,
+				username: postgresConfig.username,
+				password: postgresConfig.password,
+				database: postgresConfig.database,
+				synchronize: true,
+				autoLoadEntities: true,
+			}),
+		}),
+		AuthModule,
+		EmailModule,
+		UserModule,
+	],
+	controllers: [AppController],
+	providers: [AppService],
 })
 export class AppModule {}

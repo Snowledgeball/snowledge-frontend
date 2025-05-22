@@ -33,6 +33,7 @@ yarn-error.log*
 apps/*/.env
 apps/*/.env.local
 apps/*/.env.development.local
+apps/*/.env.dev
 apps/*/.env.test.local
 apps/*/.env.production.local
 
@@ -50,3 +51,5 @@ dist/
 
 # vscode
 .vscode
+apps/backend/tsconfig.build.tsbuildinfo
+.env.dev

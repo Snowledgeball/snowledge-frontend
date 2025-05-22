@@ -1,13 +1,15 @@
 FROM node:22-alpine3.21 AS base
+
 RUN npm install -g npm@latest
 RUN npm -v
+
 FROM base AS prune
 RUN apk update
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 RUN npm install turbo --global
 COPY . .
-RUN turbo prune frontend --docker
+RUN turbo prune frontend --docker 
 
 
 FROM base AS installer
@@ -15,18 +17,18 @@ RUN apk update
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-COPY --from=prune /app/out/json/ .
+COPY --from=prune /app/out/json .
 RUN npm install
 
-COPY --from=prune /app/out/full/ .
+COPY --from=prune /app/out/full .
 COPY turbo.json turbo.json
 
-RUN npx turbo run build --filter=frontend^... --no-cache
+RUN npx turbo run dev --filter=frontend^... --no-cache
 
 FROM base AS runner
 WORKDIR /app
-
 COPY --from=installer /app .
+RUN npm install
 
 # Exposer le port
 EXPOSE 3000
