@@ -29,11 +29,11 @@ import {
 } from "@repo/ui/components/sidebar";
 import { Separator } from "@repo/ui/components/separator";
 
-export function NavProjects({
-  projects,
+export function NavCreator({
+  items,
   label,
 }: {
-  projects: {
+  items: {
     name: string;
     url: string;
     icon: LucideIcon;
@@ -47,7 +47,7 @@ export function NavProjects({
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>{label}</SidebarGroupLabel>
       <SidebarMenu>
-        {projects.map((item) => (
+        {items.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
               <a href={item.url}>

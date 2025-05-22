@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 import { NavMain } from "./nav-main";
-import { NavProjects } from "./nav-projects";
+import { NavCreator } from "./nav-creator";
 import { NavUser } from "./nav-user";
 import {
   CommunityProvider,
@@ -71,7 +71,7 @@ function SidebarNavs() {
     icon: Home,
   };
   // Structure enrichie pour NavMain (élève)
-  const navMain = [
+  const navLearner = [
     features.community.learner.dashboard.enabled && {
       title: tNavbar("dashboard"),
       url: `/${slug}/learner/dashboard`,
@@ -261,7 +261,7 @@ function SidebarNavs() {
   }[];
 
   // Structure enrichie pour NavProjects (admin/créateur)
-  const navProjects = [
+  const navCreator = [
     features.community.creator.enabled && {
       name: tNavbar("creator"),
       url: `/${slug}/creator`,
@@ -302,9 +302,9 @@ function SidebarNavs() {
   return (
     <>
       <NavMain items={[home]} label="" />
-      <NavMain items={navMain} label={tNavbar("learner")} />
+      <NavMain items={navLearner} label={tNavbar("learner")} />
       <NavMain items={navContributeur} label={tNavbar("contributor")} />
-      <NavProjects projects={navProjects} label={tNavbar("creator")} />
+      <NavCreator items={navCreator} label={tNavbar("creator")} />
     </>
   );
 }
