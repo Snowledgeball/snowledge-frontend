@@ -2,21 +2,21 @@ version: "3"
 
 services:
   # Service pour l'application principale (snowledge-v1)
-  snowledge-v1:
-    build:
-      context: ./apps/snowledge-v1
-      dockerfile: Dockerfile
-    ports:
-      - 3005:3005
-    volumes:
-      - ./apps/snowledge-v1/.env:/app/.env
-    environment:
-      - NODE_ENV=development
-    working_dir: /app
-    command: npm run dev
-    restart: unless-stopped
-    networks:
-      - snowledge_network
+  # snowledge-v1:
+  #   build:
+  #     context: ./apps/snowledge-v1
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 3005:3005
+  #   volumes:
+  #     - ./apps/snowledge-v1/.env:/app/.env
+  #   environment:
+  #     - NODE_ENV=development
+  #   working_dir: /app
+  #   command: npm run dev
+  #   restart: unless-stopped
+  #   networks:
+  #     - snowledge_network
   # Service pour le frontend
   frontend:
     build:
@@ -35,7 +35,8 @@ services:
     ports:
       - 4000:4000
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - snowledge_network
@@ -58,7 +59,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
+    networks:
+      - snowledge_network
 volumes:
   postgres-data:
 networks:

@@ -50,3 +50,5 @@ dist/
 
 # vscode
 .vscode
+apps/backend/tsconfig.build.tsbuildinfo
+.env.dev

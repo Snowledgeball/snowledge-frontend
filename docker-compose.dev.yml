@@ -6,13 +6,15 @@ services:
     build:
       context: .
       dockerfile: ./apps/frontend/Dockerfile.dev
-    volumes:
-      - ./apps/frontend:/app
-      - /app/node_modules
-      - ./apps/frontend/.env:/app/.env
+    # volumes:
+    #   - ./apps/frontend:/app
+      # - /app/node_modules
+      # - ./apps/frontend/.env:/app/.env
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
+    networks:
+      - snowledge_network
   # Service pour le backend
 
   backend:
@@ -26,6 +28,27 @@ services:
       - ./apps/backend/.env:/app/.env
     env_file:
       - .env.dev
+    networks:
+      - snowledge_network
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
+      - PGSQL_HOST=postgres
+      - PGSQL_PORT=5432
+      - PGSQL_DB=snowledge
+      - PGSQL_NAME=postgres
+      - PGSQL_PWD=postgres
+  pgadmin:
+    image: dpage/pgadmin4 
+    restart: always 
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com 
+      - PGADMIN_DEFAULT_PASSWORD=pgadmin4 
+    ports: 
+      - '5050:80' 
+    depends_on: 
+      - postgres
+    networks:
+      - snowledge_network
+networks:
+  snowledge_network:
+    external: true
