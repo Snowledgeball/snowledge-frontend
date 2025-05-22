@@ -17,6 +17,12 @@ export class CommunityService {
 		return this.communityRepository.find();
 	}
 
+	async findAllByUser(userId: number): Promise<Community[]> {
+		return this.communityRepository.find({
+			where: { user: { id: userId } },
+		});
+	}
+
 	async create(data: CreateCommunityDto): Promise<Community> {
 		const community = this.communityRepository.create({
 			...data,

@@ -15,7 +15,7 @@ import { toSlug } from "@/utils/slug";
 import { useTranslations } from "next-intl";
 
 export function useNavLearner(activeCommunity: { name: string }) {
-  const slug = toSlug(activeCommunity.name);
+  const slug = toSlug(activeCommunity.name || "");
   const tNavbar = useTranslations("navbar");
 
   return [

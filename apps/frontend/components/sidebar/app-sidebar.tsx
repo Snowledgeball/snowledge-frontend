@@ -22,11 +22,8 @@ import { useNavLearner } from "./hooks/useNavLearner";
 import { SidebarNavMain } from "./sidebar-nav";
 import { SidebarCreatorNav } from "./sidebar-creator-nav";
 
-import {
-  CommunityProvider,
-  CommunitySwitcher,
-  useCurrentCommunity,
-} from "./team-switcher";
+import { CommunityProvider, useCurrentCommunity } from "./community-context";
+import { CommunitySwitcher } from "./team-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -66,18 +63,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 function SidebarNavs() {
   const { activeCommunity } = useCurrentCommunity();
-  const slug = toSlug(activeCommunity.name);
+  const slug = toSlug(activeCommunity?.name || "");
   const tNavbar = useTranslations("navbar");
-
   const home = {
     title: tNavbar("dashboard"),
     url: `/${slug}`,
     icon: Home,
   };
 
-  const navLearner = useNavLearner(activeCommunity);
-  const navContributeur = useNavContributor(activeCommunity);
-  const navCreator = useNavCreator(activeCommunity);
+  const navLearner = useNavLearner(activeCommunity ?? { name: "" });
+  const navContributeur = useNavContributor(activeCommunity ?? { name: "" });
+  const navCreator = useNavCreator(activeCommunity ?? { name: "" });
 
   return (
     <>

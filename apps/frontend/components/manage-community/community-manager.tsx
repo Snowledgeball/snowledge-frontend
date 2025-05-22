@@ -4,7 +4,7 @@ import { Button } from "@repo/ui";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CommunityHeader } from "./community-header";
 import { CommunityGeneralSection } from "./community-general-section";
 import { CommunityAccessSection } from "./community-access-section";
@@ -62,7 +62,7 @@ export function CommunityManager() {
   const [form, setForm] = useState(defaultForm);
   const [isFree, setIsFree] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (community) {
       setForm({
         ...defaultForm,

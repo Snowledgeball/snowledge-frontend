@@ -12,19 +12,19 @@ export default function RootLayout({
 }>) {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen min-w-full">
-        <AppSidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 w-full">
-            <ReactQueryClientProvider>
+      <ReactQueryClientProvider>
+        <div className="flex min-h-screen min-w-full">
+          <AppSidebar />
+          <div className="flex-1 flex flex-col">
+            <Header />
+            <main className="flex-1 w-full">
               <SidebarInset>
                 {children} <Toaster />
               </SidebarInset>
-            </ReactQueryClientProvider>
-          </main>
+            </main>
+          </div>
         </div>
-      </div>
+      </ReactQueryClientProvider>
     </SidebarProvider>
   );
 }

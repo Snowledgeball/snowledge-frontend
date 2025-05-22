@@ -15,6 +15,11 @@ export class CommunityController {
 		return this.communityService.findAll();
 	}
 
+	@Get('all/:userId')
+	findAllByUser(@Param('userId') userId: number): Promise<Community[]> {
+		return this.communityService.findAllByUser(userId);
+	}
+
 	@Get(':slug')
 	findOneBySlug(@Param('slug') slug: string): Promise<Community> {
 		return this.communityService.findOneBySlug(slug);
