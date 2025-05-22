@@ -21,7 +21,7 @@ import {
 
 import { useRouter } from "next/navigation";
 
-export function NavMain({
+export function SidebarNavMain({
   items,
   label,
 }: {

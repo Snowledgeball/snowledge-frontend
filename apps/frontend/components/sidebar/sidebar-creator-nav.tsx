@@ -29,12 +29,12 @@ import {
 } from "@repo/ui/components/sidebar";
 import { Separator } from "@repo/ui/components/separator";
 
-export function NavCreator({
+export function SidebarCreatorNav({
   items,
   label,
 }: {
   items: {
-    name: string;
+    title: string;
     url: string;
     icon: LucideIcon;
     items?: { title: string; url: string }[];
@@ -48,11 +48,11 @@ export function NavCreator({
       <SidebarGroupLabel>{label}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
-          <SidebarMenuItem key={item.name}>
+          <SidebarMenuItem key={item.title}>
             <SidebarMenuButton asChild>
               <a href={item.url}>
                 <item.icon />
-                <span>{item.name}</span>
+                <span>{item.title}</span>
               </a>
             </SidebarMenuButton>
             {/* Sous-items (admin) */}
