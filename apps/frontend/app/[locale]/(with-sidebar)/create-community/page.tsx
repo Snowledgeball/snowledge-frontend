@@ -286,7 +286,7 @@ export default function CreateCommunity() {
         <ModalInvite
           open={openInvite}
           onOpenChange={setOpenInvite}
-          communityUrl={`${window.location.origin}/community/${community}`}
+          communityUrl={`${window.location.origin}/community/${id}`}
         />
       </div>
     </div>
