@@ -2,7 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Community } from "../community-context";
 
 export function useUserCommunities(userId: number) {
-  const { data: communities } = useQuery<Community[]>({
+  const {
+    data: communities,
+    isLoading,
+    isError,
+    isSuccess,
+    refetch,
+  } = useQuery<Community[]>({
     queryKey: ["communities", userId],
     queryFn: async () => {
       const res = await fetch(
@@ -15,8 +21,9 @@ export function useUserCommunities(userId: number) {
   });
   return {
     data: communities,
-    isLoading: !communities,
-    isError: !!communities,
-    isSuccess: !!communities,
+    isLoading,
+    isError,
+    isSuccess,
+    refetch,
   };
 }

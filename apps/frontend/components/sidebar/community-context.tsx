@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react";
 import { useUserCommunities } from "./hooks/useUserCommunities";
 
@@ -5,6 +6,7 @@ export type Community = {
   name: string;
   tags: string;
   description: string;
+  slug: string;
 };
 
 const CommunityContext = React.createContext<{

@@ -28,13 +28,24 @@ import { Textarea } from "@repo/ui/components/textarea";
 import { Switch } from "@repo/ui/components/switch";
 import { Button } from "@repo/ui/components/button";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
 import { features } from "@/config/features";
 import { notFound } from "next/navigation";
 import ModalInvite from "./ModalInvite";
+import { useUserCommunities } from "@/components/sidebar/hooks/useUserCommunities";
+import { useCurrentCommunity } from "@/components/sidebar/community-context";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+export type Community = {
+  name: string;
+  tags: string;
+  description: string;
+  slug: string;
+};
 
 const formSchema = z.object({
   name: z
@@ -79,6 +90,7 @@ export default function CreateCommunity() {
   const [openInvite, setOpenInvite] = useState(false);
   const { data: communityTypes = [], isLoading: loadingTypes } =
     useCommunityTypes();
+  const router = useRouter();
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -91,6 +103,11 @@ export default function CreateCommunity() {
     },
   });
   const t = useTranslations("createCommunity");
+  const { refetch: refetchUserCommunities } = useUserCommunities(2); // TODO: replace userId by the user id
+  const { setActiveCommunity } = useCurrentCommunity();
+  const [pendingCommunity, setPendingCommunity] = useState<Community | null>(
+    null
+  );
 
   // Ajout de la mutation React Query
   const {
@@ -126,10 +143,27 @@ export default function CreateCommunity() {
       return res.json();
     },
     onSuccess: (data, variables) => {
+      toast.success("Communauté créée avec succès");
       setCommunity(variables.name);
-      setTimeout(() => setOpenInvite(true), 500);
+      setOpenInvite(true);
+      setPendingCommunity(data);
     },
   });
+
+  // Effet qui attend la fermeture de la modal
+  useEffect(() => {
+    if (!openInvite && pendingCommunity) {
+      refetchUserCommunities();
+      setActiveCommunity(pendingCommunity);
+      setTimeout(() => router.push(`/${pendingCommunity.slug}`), 500);
+      setPendingCommunity(null); // Reset
+    }
+  }, [
+    openInvite,
+    pendingCommunity,
+    refetchUserCommunities,
+    setActiveCommunity,
+  ]);
 
   function onSubmit(values: FormSchema) {
     createCommunity(values);

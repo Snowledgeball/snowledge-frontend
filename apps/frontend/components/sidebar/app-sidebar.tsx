@@ -23,7 +23,7 @@ import { useNavLearner } from "./hooks/useNavLearner";
 import { SidebarNavMain } from "./sidebar-nav";
 import { SidebarCreatorNav } from "./sidebar-creator-nav";
 
-import { CommunityProvider, useCurrentCommunity } from "./community-context";
+import { useCurrentCommunity } from "./community-context";
 import { CommunitySwitcher } from "./team-switcher";
 import {
   Sidebar,
@@ -39,26 +39,24 @@ import { NavUser } from "./nav-user";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <CommunityProvider>
-      <Sidebar collapsible="icon" {...props}>
-        <SidebarHeader>
-          <CommunitySwitcher />
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarNavs />
-        </SidebarContent>
-        <SidebarFooter>
-          <NavUser
-            user={{
-              name: "shadcn",
-              email: "m@example.com",
-              avatar: "https://github.com/shadcn.png",
-            }}
-          />
-        </SidebarFooter>
-        <SidebarRail />
-      </Sidebar>
-    </CommunityProvider>
+    <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader>
+        <CommunitySwitcher />
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarNavs />
+      </SidebarContent>
+      <SidebarFooter>
+        <NavUser
+          user={{
+            name: "shadcn",
+            email: "m@example.com",
+            avatar: "https://github.com/shadcn.png",
+          }}
+        />
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
   );
 }
 
