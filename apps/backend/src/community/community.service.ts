@@ -4,6 +4,7 @@ import { Community } from './entities/community.entity';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class CommunityService {
@@ -16,10 +17,6 @@ export class CommunityService {
 		return this.communityRepository.find();
 	}
 
-	async findOneBySlug(slug: string): Promise<Community> {
-		return this.communityRepository.findOne({ where: { slug } });
-	}
-
 	async create(data: CreateCommunityDto): Promise<Community> {
 		const community = this.communityRepository.create({
 			...data,
@@ -27,5 +24,14 @@ export class CommunityService {
 			slug: slugify(data.name, { lower: true, strict: true }),
 		});
 		return this.communityRepository.save(community);
+	}
+
+	async findOneBySlug(slug: string): Promise<Community> {
+		return this.communityRepository.findOne({ where: { slug } });
+	}
+
+	async getCommunityCreatorFromSlug(slug: string): Promise<User> {
+		const community = await this.findOneBySlug(slug);
+		return community.user;
 	}
 }
