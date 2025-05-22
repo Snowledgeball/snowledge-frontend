@@ -2,13 +2,13 @@
 
 import { Button } from "@repo/ui";
 import { useTranslations } from "next-intl";
-
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
+import React, { useState } from "react";
 import { CommunityHeader } from "./community-header";
 import { CommunityGeneralSection } from "./community-general-section";
 import { CommunityAccessSection } from "./community-access-section";
 import { CommunityGainsSection } from "./community-gains-section";
-
 import { features } from "@/config/features";
 
 const communityTypes = [
@@ -23,8 +23,27 @@ const communityTypes = [
 ];
 
 export function CommunityManager() {
-  const [isFree, setIsFree] = useState(true);
-  const [form, setForm] = useState({
+  const params = useParams();
+  const communityId = params?.id as string;
+
+  const {
+    data: community,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["community", communityId],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communityId}`
+      );
+      if (!res.ok)
+        throw new Error("Erreur lors du chargement de la communauté");
+      return res.json();
+    },
+    enabled: !!communityId,
+  });
+
+  const defaultForm = {
     name: "Ma communauté",
     tags: "",
     description: "",
@@ -38,7 +57,27 @@ export function CommunityManager() {
     prizeRevision: "20",
     prizeAnimation: "20",
     prizeSharing: "20",
-  });
+  };
+
+  const [form, setForm] = useState(defaultForm);
+  const [isFree, setIsFree] = useState(true);
+
+  React.useEffect(() => {
+    if (community) {
+      setForm({
+        ...defaultForm,
+        ...community,
+        adminShare: community.adminShare ?? defaultForm.adminShare,
+        platformShare: community.platformShare ?? defaultForm.platformShare,
+        prizePoolShare: community.prizePoolShare ?? defaultForm.prizePoolShare,
+        prizeCreation: community.prizeCreation ?? defaultForm.prizeCreation,
+        prizeRevision: community.prizeRevision ?? defaultForm.prizeRevision,
+        prizeAnimation: community.prizeAnimation ?? defaultForm.prizeAnimation,
+        prizeSharing: community.prizeSharing ?? defaultForm.prizeSharing,
+      });
+      setIsFree(community.isFree ?? true);
+    }
+  }, [community]);
 
   const t = useTranslations("manageCommunity");
 
@@ -66,6 +105,9 @@ export function CommunityManager() {
     // TODO: call API
     console.log(form);
   }
+
+  if (isLoading) return <div>Chargement...</div>;
+  if (isError) return <div>Erreur lors du chargement</div>;
 
   return (
     <div className="min-h-screen bg-background">

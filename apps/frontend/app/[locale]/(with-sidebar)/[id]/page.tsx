@@ -15,7 +15,7 @@ export default function Page() {
     <div>
       <div className="flex flex-col items-center justify-center gap-2">
         <h1 className="text-2xl font-bold">
-          Dashboard de la communauté {fromSlug(community as string)}
+          Dashboard de la communauté {fromSlug(id as string)}
         </h1>
         <p className="text-sm text-gray-500">
           Cette communauté est une communauté de test. Elle est créée pour

@@ -41,6 +41,7 @@
 		"reflect-metadata": "^0.2.2",
 		"rxjs": "^7.8.1",
 		"sha.js": "^2.4.11",
+		"slugify": "^1.6.6",
 		"sql-highlight": "^6.0.0",
 		"typeorm": "^0.3.24"
 	},

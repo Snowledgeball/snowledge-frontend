@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { CommunityService } from './community.service';
 import { Community } from './entities/community.entity';
 import { CreateCommunityDto } from './dto/create-community.dto';
@@ -12,6 +12,11 @@ export class CommunityController {
 	@Get('all')
 	findAll(): Promise<Community[]> {
 		return this.communityService.findAll();
+	}
+
+	@Get(':slug')
+	findOneBySlug(@Param('slug') slug: string): Promise<Community> {
+		return this.communityService.findOneBySlug(slug);
 	}
 
 	@Post()

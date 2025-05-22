@@ -6,6 +6,9 @@ export class Community {
 	@PrimaryGeneratedColumn()
 	id: number;
 
+	@Column({ unique: true })
+	slug: string;
+
 	@Column({ length: 100 })
 	name: string;
 

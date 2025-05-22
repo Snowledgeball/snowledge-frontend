@@ -35,13 +35,8 @@ export default function Header() {
           <BreadcrumbList>
             {segments.map((segment, idx) => {
               const isLast = idx === segments.length - 1;
-              let label: string;
-              try {
-                label = tBreadcrumb(segment);
-              } catch {
-                label = segment;
-              }
-              label = label.charAt(0).toUpperCase() + label.slice(1);
+              let label: string = segment;
+              label.charAt(0).toUpperCase() + label.slice(1);
               return (
                 <span key={idx} className="flex items-center">
                   {idx > 0 && <BreadcrumbSeparator />}
