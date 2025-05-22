@@ -1,4 +1,4 @@
-import "../../globals.css";
+import "../../../globals.css";
 import SettingsSideBarDesktop from "@/components/settings/sidebar-desktop";
 import SettingsSideBarMobile from "@/components/settings/sidebar-mobile";
 

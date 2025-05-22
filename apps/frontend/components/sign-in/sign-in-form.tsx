@@ -34,10 +34,6 @@ export default function SignInForm() {
                         <Label htmlFor="password">Password</Label>
                         <Input id="password" placeholder="Password" type="password" />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="confirm-password">Confirm password</Label>
-                        <Input id="confirm-password" placeholder="Confirm password" type="password" />
-                    </div>
                     {/* Remember me checkbox and Forgot password link */}
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
