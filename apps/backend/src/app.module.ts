@@ -9,7 +9,7 @@ import postgresConfig from './config/postgres.config';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import mailingConfig from './config/mailing.config';
-
+import { CommunityModule } from './community/community.module';
 @Module({
 	imports: [
 		ConfigModule.forRoot({
@@ -34,6 +34,7 @@ import mailingConfig from './config/mailing.config';
 		AuthModule,
 		EmailModule,
 		UserModule,
+		CommunityModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

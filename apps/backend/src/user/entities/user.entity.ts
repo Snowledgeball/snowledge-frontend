@@ -1,4 +1,3 @@
-
 import {
 	Entity,
 	Column,
@@ -9,11 +8,10 @@ import {
 	BeforeInsert,
 } from 'typeorm';
 
-
 import { randomUUID } from 'node:crypto';
 import { Gender } from 'src/shared/interface/enums/gender';
 import { Email } from 'src/email/entities/email.entity';
-
+import { Community } from 'src/community/entities/community.entity';
 
 @Entity()
 export class User {
@@ -33,11 +31,11 @@ export class User {
 	pseudo: string;
 
 	@Column({
-		type: "enum",
-        enum: Gender,
+		type: 'enum',
+		enum: Gender,
 	})
 	gender: Gender;
-	
+
 	@Column()
 	age: number;
 
@@ -55,7 +53,10 @@ export class User {
 
 	@OneToMany(() => Email, (email) => email.user)
 	emails: Email[];
-	
+
+	@OneToMany(() => Community, (community) => community.user)
+	communities: Community[];
+
 	@CreateDateColumn({
 		type: 'timestamp',
 		default: () => 'CURRENT_TIMESTAMP(6)',

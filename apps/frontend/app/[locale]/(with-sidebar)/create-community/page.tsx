@@ -104,8 +104,14 @@ export default function CreateCommunity() {
         `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer fake-token-123", // TODO: get token
+          },
+          body: JSON.stringify({
+            ...data,
+            user: 2, // TODO: get user id
+          }),
         }
       );
       if (!res.ok) {

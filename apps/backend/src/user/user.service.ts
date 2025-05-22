@@ -47,5 +47,4 @@ export class UserService {
 	deleteByEmail(email: string) {
 		return this.userRepository.delete({ email });
 	}
-
 }
