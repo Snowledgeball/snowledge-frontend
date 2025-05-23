@@ -1,4 +1,11 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import {
+	Controller,
+	Get,
+	Post,
+	Body,
+	Param,
+	ConflictException,
+} from '@nestjs/common';
 import { CommunityService } from './community.service';
 import { Community } from './entities/community.entity';
 import { CreateCommunityDto } from './dto/create-community.dto';
@@ -25,13 +32,26 @@ export class CommunityController {
 		return this.communityService.findOneBySlug(slug);
 	}
 
+	@Get(':name')
+	findOneByName(@Param('name') name: string): Promise<Community> {
+		return this.communityService.findOneByName(name);
+	}
+
 	@Get(':slug/creator')
 	getCommunityCreatorFromSlug(@Param('slug') slug: string): Promise<User> {
 		return this.communityService.getCommunityCreatorFromSlug(slug);
 	}
 
 	@Post()
-	create(@Body() data: CreateCommunityDto): Promise<Community> {
-		return this.communityService.create(data);
+	async create(@Body() createCommunityDto: CreateCommunityDto) {
+		const existing = await this.communityService.findOneByName(
+			createCommunityDto.name,
+		);
+		if (existing) {
+			throw new ConflictException(
+				'A community with this name already exists.',
+			);
+		}
+		return this.communityService.create(createCommunityDto);
 	}
 }

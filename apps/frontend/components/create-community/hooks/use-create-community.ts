@@ -8,7 +8,8 @@ export function useCreateCommunity({
 }: {
   onSuccess?: (data: any, variables: any) => void;
 } = {}) {
-  const t = useTranslations("createCommunityForm");
+  const t = useTranslations("createCommunityForm.toast");
+
   return useMutation({
     mutationFn: async (data: FormSchema) => {
       const res = await fetch(
@@ -30,15 +31,22 @@ export function useCreateCommunity({
         try {
           err = await res.json();
         } catch {
-          err = { message: "Erreur inconnue" };
+          err = { message: t("unknownError") };
         }
-        throw new Error(err.message || "Erreur lors de la création");
+        throw new Error(err.message || t("unknownError"));
       }
       return res.json();
     },
     onSuccess: (data, variables) => {
-      toast.success(t("toast.success"));
+      toast.success(t("success"));
       onSuccess?.(data, variables);
+    },
+    onError: (error: any) => {
+      if (error.message.includes("already exists")) {
+        toast.error(t("alreadyExists"));
+      } else {
+        toast.error(error.message);
+      }
     },
   });
 }

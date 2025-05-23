@@ -36,6 +36,10 @@ export class CommunityService {
 		return this.communityRepository.findOne({ where: { slug } });
 	}
 
+	async findOneByName(name: string): Promise<Community> {
+		return this.communityRepository.findOne({ where: { name } });
+	}
+
 	async getCommunityCreatorFromSlug(slug: string): Promise<User> {
 		const community = await this.findOneBySlug(slug);
 		return community.user;

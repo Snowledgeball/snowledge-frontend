@@ -221,7 +221,9 @@
   },
   "createCommunityForm": {
     "toast": {
-      "success": "Communauté créée avec succès"
+      "success": "Communauté créée avec succès",
+      "unknownError": "Erreur inconnue lors de la création de la communauté.",
+      "alreadyExists": "Une communauté avec ce nom existe déjà."
     },
     "title": "Créer et gérer votre communauté",
     "form-description": "Remplissez les informations pour commencer",
