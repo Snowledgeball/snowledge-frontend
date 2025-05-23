@@ -11,11 +11,24 @@ import { redirect } from "next/navigation";
 import { useUserCommunities } from "@/hooks/use-user-communities";
 
 export default function Home() {
-  const session = { user: { id: 2 } };
-  const { data: communities } = useUserCommunities(session?.user?.id || 0);
+  const session = { user: { id: 2 } }; // TODO: remplacer par le user id
 
+  // Appelle le hook directement dans le composant
+  const { data: communities, isLoading } = useUserCommunities(
+    session?.user?.id || 0
+  );
+
+  // Redirection selon le résultat
+  if (!isLoading && communities) {
+    if (communities.length > 0) {
+      redirect(`/${communities[0].slug}`);
+    } else {
+      redirect("/post-sign-up");
+    }
+  }
+
+  // Si pas connecté : affiche la landing page
   if (!session) {
-    // Pas connecté : affiche la landing page
     return (
       <>
         <LpNavbar2 />
@@ -39,9 +52,5 @@ export default function Home() {
     );
   }
 
-  if (communities && communities.length > 0) {
-    redirect(`/communities/${communities[0].slug}`);
-  } else {
-    redirect("/post-sign-up");
-  }
+  return null;
 }
