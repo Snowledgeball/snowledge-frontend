@@ -1,14 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Info } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@repo/ui";
+import { ArrowLeft } from "lucide-react";
+import { TooltipProvider } from "@repo/ui";
 import { Button } from "@repo/ui";
 import {
   Card,
@@ -20,7 +15,6 @@ import {
 } from "@repo/ui";
 import { Input } from "@repo/ui";
 import { Label } from "@repo/ui";
-import { RadioGroup, RadioGroupItem } from "@repo/ui";
 import { Textarea } from "@repo/ui";
 import { MultiSelect } from "./multi-select";
 import { useForm } from "react-hook-form";
