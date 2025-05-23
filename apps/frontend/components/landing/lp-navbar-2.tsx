@@ -2,7 +2,7 @@
 
 import { Logo } from "@repo/ui/components/logo";
 import { Button } from "@repo/ui/components/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Zap } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -19,6 +19,9 @@ import {
 import { SocialIcon } from "react-social-icons";
 import { LanguageSwitcher } from "./shared/langage";
 import { PocForm } from "./shared/pocform";
+import { redirect, useRouter } from "next/navigation";
+import { useUserCommunities } from "@/hooks/use-user-communities";
+import { Community } from "@/types/general";
 
 interface NavMenuItemsProps {
   className?: string;
@@ -53,7 +56,28 @@ export function LpNavbar2() {
   const tForm = useTranslations("form");
   const tToggle = useTranslations("menu_toggle");
 
+  const router = useRouter();
+  // const session = { user: { id: 2 } };
+  // const { data: communities, isLoading } = useUserCommunities(
+  //   session?.user?.id || 0
+  // );
+
+  const isLoading = false;
+  const communities: Community[] = [];
+
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+
+  const handleGoTest = () => {
+    // TODO: A modifier, quand user fonctionne (login...) Rajouter un bouton dans le header, pour rediriger vers soit les commu rejoint soit le post-sign-up. En grois le bouton onclick appellera la logique juste en dessous
+    if (!isLoading && communities) {
+      if (communities.length > 0) {
+        router.push(`/${communities[0].slug}`);
+      } else {
+        // TODO:  A MODIFIER VERS SIGN-UP / LOGIN
+        router.push("/post-sign-up");
+      }
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-background py-3.5 md:py-4 isolate">
@@ -138,7 +162,7 @@ export function LpNavbar2() {
           </div>
         )}
 
-        {/* Bouton CTA + Language Switcher */}
+        {/* Bouton CTA + Language Switcher + Bouton éclair */}
         <div className="hidden md:flex md:ml-auto items-center gap-2">
           <Credenza>
             <CredenzaTrigger asChild>
@@ -158,6 +182,14 @@ export function LpNavbar2() {
               </CredenzaFooter>
             </CredenzaContent>
           </Credenza>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleGoTest}
+            aria-label="Go test"
+          >
+            <Zap className="w-5 h-5 text-yellow-400" />
+          </Button>
           <LanguageSwitcher />
         </div>
       </div>

@@ -11,46 +11,48 @@ import { redirect } from "next/navigation";
 import { useUserCommunities } from "@/hooks/use-user-communities";
 
 export default function Home() {
-  const session = { user: { id: 2 } }; // TODO: remplacer par le user id
+  // const session = { user: { id: 2 } }; // TODO: remplacer par le user id
 
   // Appelle le hook directement dans le composant
-  const { data: communities, isLoading } = useUserCommunities(
-    session?.user?.id || 0
-  );
+  // const { data: communities, isLoading } = useUserCommunities(
+  //   session?.user?.id || 0
+  // );
 
   // Redirection selon le résultat
-  if (!isLoading && communities) {
-    if (communities.length > 0) {
-      redirect(`/${communities[0].slug}`);
-    } else {
-      redirect("/post-sign-up");
-    }
-  }
+  // TODO: A modifier, quand user fonctionne (login...) Rajouter un bouton dans le header, pour rediriger vers soit les commu rejoint soit le post-sign-up. En grois le bouton onclick appellera la logique juste en dessous
+  // if (!isLoading && communities) {
+  //   if (communities.length > 0) {
+  //     redirect(`/${communities[0].slug}`);
+  //   } else {
+  //     redirect("/post-sign-up");
+  //   }
+  // }
 
   // Si pas connecté : affiche la landing page
-  if (!session) {
-    return (
-      <>
-        <LpNavbar2 />
-        <div className="mt-4 md:mt-6 mb-0">
-          <UpgradeBanner />
-        </div>
-        <div className="bg-hero-gradient">
-          <HeroSection7 />
-        </div>
-        <section id="features" className="scroll-mt-24 bg-features">
-          <FeatureSection9 />
-        </section>
-        <section className="bg-faq">
-          <FaqSection1 />
-        </section>
-        <PartnersSection />
-        <div className="bg-footer-gradient">
-          <Footer2 />
-        </div>
-      </>
-    );
-  }
+  // if (!session) {
+  return (
+    <>
+      <LpNavbar2 />
 
-  return null;
+      <div className="mt-4 md:mt-6 mb-0">
+        <UpgradeBanner />
+      </div>
+      <div className="bg-hero-gradient">
+        <HeroSection7 />
+      </div>
+      <section id="features" className="scroll-mt-24 bg-features">
+        <FeatureSection9 />
+      </section>
+      <section className="bg-faq">
+        <FaqSection1 />
+      </section>
+      <PartnersSection />
+      <div className="bg-footer-gradient">
+        <Footer2 />
+      </div>
+    </>
+  );
+  // }
+
+  // return null;
 }
