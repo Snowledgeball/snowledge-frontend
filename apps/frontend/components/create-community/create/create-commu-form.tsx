@@ -66,6 +66,18 @@ const formSchema = z
             "Le prix doit être strictement supérieur à 0 pour une communauté payante.",
         });
       }
+      // Validation du total des pourcentages
+      const your = Number(data.yourPercentage) || 0;
+      const comm = Number(data.communityPercentage) || 0;
+      const snowledgePercentage = 15;
+      const total = your + comm + snowledgePercentage;
+      if (total !== 100) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["repartition"],
+          message: "La somme des pourcentages doit faire exactement 100%.",
+        });
+      }
     }
   });
 
@@ -127,6 +139,10 @@ export default function CreateCommunity() {
   const yourPercentage = Number(watch("yourPercentage")) || 0;
   const communityPercentage = Number(watch("communityPercentage")) || 0;
   const snowledgePercentage = 15;
+
+  const totalRepartition =
+    yourPercentage + communityPercentage + snowledgePercentage;
+  const repartitionError = (errors as any)["repartition"]?.message;
 
   // Soumission du formulaire
   function onSubmit(values: FormSchema) {
@@ -345,8 +361,13 @@ export default function CreateCommunity() {
                     <div className="pt-2 border-t">
                       <div className="flex justify-between text-sm">
                         <span>{t("membership.total")}</span>
-                        <span className="font-medium">100%</span>
+                        <span className="font-medium">{totalRepartition}%</span>
                       </div>
+                      {repartitionError && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {repartitionError}
+                        </p>
+                      )}
                       <p className="text-xs text-muted-foreground mt-1">
                         {t("membership.editableHint")}
                       </p>
