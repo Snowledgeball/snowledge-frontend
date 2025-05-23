@@ -136,40 +136,6 @@
     "contributor": "Contributor",
     "create-community": "Create a community"
   },
-  "createCommunity": {
-    "title": "Create a community",
-    "name": {
-      "label": "Name",
-      "placeholder": "Community name",
-      "description": "The name of your community."
-    },
-    "isFree": {
-      "label": "Free",
-      "description": "Enable to make the community free. Disable to set a price."
-    },
-    "price": {
-      "label": "Price",
-      "placeholder": "Price in €",
-      "description": "Access price for the community."
-    },
-    "tags": {
-      "label": "Type / Tags",
-      "placeholder": "Choose a type",
-      "groupLabel": "Types",
-      "description": "Select the main type of the community."
-    },
-    "description": {
-      "label": "Description",
-      "placeholder": "Describe your community...",
-      "description": "A description to introduce the community."
-    },
-    "externalLinks": {
-      "label": "External links",
-      "placeholder": "https://...",
-      "description": "Add one or more external links (comma separated)."
-    },
-    "submit": "Create the community"
-  },
   "inviteModal": {
     "title": "Invite users",
     "description": "Search and select users to invite to your community.",
@@ -253,5 +219,45 @@
     "error_empty": "Please enter a value.",
     "error_not_found": "No community matches this value.",
     "success_joined": "Community joined successfully"
+  },
+  "createCommunityForm": {
+    "title": "Create and manage your community",
+    "form-description": "Fill in the details to get started",
+    "submit": "Create Community",
+    "footerHelp": "You can edit all these details later from your community dashboard.",
+    "name": {
+      "label": "Community Name",
+      "placeholder": "Enter community name"
+    },
+    "tags": {
+      "label": "Type / Tags",
+      "placeholder": "Select community types"
+    },
+    "membership": {
+      "label": "Membership Type",
+      "free": "Free",
+      "freeTooltip": "Free mode is the only mode available atm",
+      "paid": "Paid",
+      "paidTooltip": "Paid mode for showing projection of what's Snowledge goal is",
+      "priceLabel": "Monthly price your subscribers will pay",
+      "pricePlaceholder": "0.00",
+      "revenueTitle": "Revenue Distribution",
+      "yourLabel": "Your %",
+      "communityLabel": "Community pool %",
+      "communityTooltip": "Rewarding your contributors",
+      "snowledgeLabel": "Snowledge %",
+      "platformFee": "Platform fee (fixed)",
+      "total": "Total:",
+      "editableHint": "You will be able to adjust these values later."
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Briefly describe your community"
+    },
+    "codeOfConduct": {
+      "label": "Code of Conduct",
+      "placeholder": "Enter your community's code of conduct",
+      "help": "Define the rules and expectations for your community members."
+    }
   }
 }

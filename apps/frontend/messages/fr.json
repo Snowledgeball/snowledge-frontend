@@ -136,41 +136,6 @@
     "contributor": "Contributeur",
     "create-community": "Créer une communauté"
   },
-  "createCommunity": {
-    "title": "Créer une communauté",
-    "name": {
-      "label": "Nom",
-      "placeholder": "Nom de la communauté",
-      "description": "Le nom de votre communauté."
-    },
-    "isFree": {
-      "label": "Gratuit",
-      "description": "Activez pour rendre la communauté gratuite. Désactivez pour indiquer un prix."
-    },
-    "price": {
-      "label": "Prix",
-      "placeholder": "Prix en €",
-      "description": "Prix d'accès à la communauté."
-    },
-    "tags": {
-      "label": "Type / Tags",
-      "placeholder": "Choisissez un type",
-      "groupLabel": "Types",
-      "description": "Sélectionnez le type principal de la communauté."
-    },
-    "description": {
-      "label": "Description",
-      "placeholder": "Décrivez votre communauté...",
-      "description": "Une description pour présenter la communauté."
-    },
-    "externalLinks": {
-      "label": "Liens externes",
-      "placeholder": "https://...",
-      "description": "Ajoutez un ou plusieurs liens externes (séparés par des virgules)."
-    },
-    "submit": "Créer la communauté",
-    "loading": "Création en cours..."
-  },
   "inviteModal": {
     "title": "Invitez des utilisateurs",
     "description": "Recherchez et sélectionnez des utilisateurs à inviter dans votre communauté.",
@@ -253,5 +218,45 @@
     "error_empty": "Veuillez renseigner une valeur.",
     "error_not_found": "Aucune communauté ne correspond à cette valeur.",
     "success_joined": "Communauté rejointe avec succès"
+  },
+  "createCommunityForm": {
+    "title": "Créer et gérer votre communauté",
+    "form-description": "Remplissez les informations pour commencer",
+    "submit": "Créer la communauté",
+    "footerHelp": "Vous pourrez modifier ces informations plus tard depuis le tableau de bord de votre communauté.",
+    "name": {
+      "label": "Nom de la communauté",
+      "placeholder": "Entrez le nom de la communauté"
+    },
+    "tags": {
+      "label": "Type / Tags",
+      "placeholder": "Sélectionnez les types de communauté"
+    },
+    "membership": {
+      "label": "Type d'adhésion",
+      "free": "Gratuit",
+      "freeTooltip": "Le mode gratuit est le seul disponible pour le moment",
+      "paid": "Payant",
+      "paidTooltip": "Le mode payant permet de projeter le modèle économique de Snowledge.",
+      "priceLabel": "Prix mensuel payé par vos abonnés",
+      "pricePlaceholder": "0.00",
+      "revenueTitle": "Répartition des revenus",
+      "yourLabel": "Votre %",
+      "communityLabel": "% pour la communauté",
+      "communityTooltip": "Récompense vos contributeurs",
+      "snowledgeLabel": "Snowledge %",
+      "platformFee": "Frais de plateforme (fixe)",
+      "total": "Total :",
+      "editableHint": "Vous pourrez ajuster ces valeurs plus tard."
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Décrivez brièvement votre communauté"
+    },
+    "codeOfConduct": {
+      "label": "Code de conduite",
+      "placeholder": "Entrez le code de conduite de votre communauté",
+      "help": "Définissez les règles et attentes pour les membres de votre communauté."
+    }
   }
 }

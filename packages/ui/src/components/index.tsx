@@ -17,6 +17,7 @@ export {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter,
 } from "./card";
 export { ChartContainer, ChartTooltip, ChartTooltipContent } from "./chart";
 export type { ChartConfig } from "./chart";
@@ -107,4 +108,18 @@ export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
 export { Textarea } from "./textarea";
 export { ToggleGroup, ToggleGroupItem } from "./toggle-group";
 export { Toggle, toggleVariants } from "./toggle";
-export { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
+export {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "./tooltip";
+export { RadioGroup, RadioGroupItem } from "./radio-group";
+export {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "./command";
