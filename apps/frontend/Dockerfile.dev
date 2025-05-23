@@ -18,6 +18,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY --from=prune /app/out/json .
+COPY apps/frontend/package*.json ./
 RUN npm install
 
 COPY --from=prune /app/out/full .
@@ -28,7 +29,7 @@ RUN npx turbo run dev --filter=frontend^... --no-cache
 FROM base AS runner
 WORKDIR /app
 COPY --from=installer /app .
-RUN npm install
+# RUN npm install
 
 # Exposer le port
 EXPOSE 3000
