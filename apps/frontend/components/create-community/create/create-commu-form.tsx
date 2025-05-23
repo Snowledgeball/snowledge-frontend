@@ -15,7 +15,6 @@ import {
 } from "@repo/ui";
 import { Input } from "@repo/ui";
 import { Label } from "@repo/ui";
-import { Textarea } from "@repo/ui";
 import { MultiSelect } from "./multi-select";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -23,9 +22,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { CommunityMembershipType } from "./CommunityMembershipType";
 import { CommunityRevenueDistribution } from "./CommunityRevenueDistribution";
+import { CommunityDescriptionField } from "./CommunityDescriptionField";
+import { CommunityCodeOfConductField } from "./CommunityCodeOfConductField";
+import { CommunityPriceField } from "./CommunityPriceField";
+import { CreateCommunityFormFooter } from "./CreateCommunityFormFooter";
 
 // Composant d'affichage d'erreur sous un champ
-function FormError({ error }: { error?: string }) {
+export function FormError({ error }: { error?: string }) {
   if (!error) return null;
   return <p className="text-xs text-red-500 mt-1">{error}</p>;
 }
@@ -188,37 +191,22 @@ export default function CreateCommunity() {
               </div>
 
               {/* Type d'adhésion (RadioGroup) */}
-              <div className="space-y-2">
-                <Label>{t("membership.label")}</Label>
-                <CommunityMembershipType
-                  value={communityType}
-                  onChange={handleCommunityTypeChange}
-                  error={errors.communityType?.message}
-                  t={t}
-                />
-              </div>
+              <CommunityMembershipType
+                value={communityType}
+                onChange={handleCommunityTypeChange}
+                error={errors.communityType?.message}
+                t={t}
+              />
 
               {/* Si paid, afficher le prix et la répartition */}
               {communityType === "paid" && (
                 <>
-                  <div className="space-y-2">
-                    <Label htmlFor="price">{t("membership.priceLabel")}</Label>
-                    <div className="relative">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
-                        $
-                      </span>
-                      <Input
-                        id="price"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        placeholder={t("membership.pricePlaceholder")}
-                        className="pl-7"
-                        {...register("price")}
-                      />
-                    </div>
-                    <FormError error={errors.price?.message} />
-                  </div>
+                  <CommunityPriceField
+                    register={register}
+                    error={errors.price?.message}
+                    t={t}
+                    price={price}
+                  />
                   <CommunityRevenueDistribution
                     price={price}
                     yourPercentage={yourPercentage}
@@ -234,44 +222,20 @@ export default function CreateCommunity() {
               )}
 
               {/* Description */}
-              <div className="space-y-2">
-                <Label htmlFor="description">{t("description.label")}</Label>
-                <Textarea
-                  id="description"
-                  placeholder={t("description.placeholder")}
-                  className="resize-none"
-                  rows={3}
-                  {...register("description")}
-                />
-                <FormError error={errors.description?.message} />
-              </div>
+              <CommunityDescriptionField
+                register={register}
+                error={errors.description?.message}
+                t={t}
+              />
 
               {/* Code de conduite */}
-              <div className="space-y-2">
-                <Label htmlFor="codeOfConduct">
-                  {t("codeOfConduct.label")}
-                </Label>
-                <Textarea
-                  id="codeOfConduct"
-                  placeholder={t("codeOfConduct.placeholder")}
-                  className="resize-none"
-                  rows={3}
-                  {...register("codeOfConduct")}
-                />
-                <FormError error={errors.codeOfConduct?.message} />
-                <p className="text-xs text-muted-foreground">
-                  {t("codeOfConduct.help")}
-                </p>
-              </div>
+              <CommunityCodeOfConductField
+                register={register}
+                error={errors.codeOfConduct?.message}
+                t={t}
+              />
 
-              <CardFooter className="flex flex-col gap-2">
-                <Button type="submit" className="w-full">
-                  {t("submit")}
-                </Button>
-                <p className="text-xs text-muted-foreground text-center">
-                  {t("footerHelp")}
-                </p>
-              </CardFooter>
+              <CreateCommunityFormFooter t={t} />
             </form>
           </CardContent>
         </TooltipProvider>
