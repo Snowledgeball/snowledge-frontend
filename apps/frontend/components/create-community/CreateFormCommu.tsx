@@ -37,6 +37,7 @@ import {
   FormSchema,
 } from "./hooks/use-community-form-schema";
 import { useCreateCommunity } from "./hooks/use-create-community";
+import { useCurrentCommunity } from "@/hooks/use-current-community";
 
 // Composant d'affichage d'erreur sous un champ
 export function FormError({ error }: { error?: string }) {

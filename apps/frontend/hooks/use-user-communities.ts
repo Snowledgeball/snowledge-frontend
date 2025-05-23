@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Community } from "../components/sidebar/community-context";
+import { Community } from "@/types/general";
 
 export function useUserCommunities(userId: number) {
   const {

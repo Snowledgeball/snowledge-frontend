@@ -23,7 +23,7 @@ import { useNavLearner } from "./hooks/useNavLearner";
 import { SidebarNavMain } from "./sidebar-nav";
 import { SidebarCreatorNav } from "./sidebar-creator-nav";
 
-import { useCurrentCommunity } from "./community-context";
+import { useCurrentCommunity } from "@/hooks/use-current-community";
 import { CommunitySwitcher } from "./team-switcher";
 import {
   Sidebar,

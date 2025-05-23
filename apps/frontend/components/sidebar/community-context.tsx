@@ -1,9 +1,9 @@
 "use client";
 import * as React from "react";
-import { useUserCommunities } from "../../hooks/useUserCommunities";
+import { useUserCommunities } from "../../hooks/use-user-communities";
 import { Community } from "@/types/general";
 
-const CommunityContext = React.createContext<{
+export const CommunityContext = React.createContext<{
   activeCommunity: Community | null;
   setActiveCommunity: (c: Community) => void;
   communities: Community[] | null;
@@ -37,13 +37,4 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
       {children}
     </CommunityContext.Provider>
   );
-}
-
-export function useCurrentCommunity() {
-  const ctx = React.useContext(CommunityContext);
-  if (!ctx)
-    throw new Error(
-      "useCurrentCommunity must be used within CommunityProvider"
-    );
-  return ctx;
 }
