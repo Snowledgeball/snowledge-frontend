@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { TooltipProvider } from "@repo/ui";
@@ -24,7 +24,15 @@ import { CommunityDescriptionField } from "./CommunityDescriptionField";
 import { CommunityCodeOfConductField } from "./CommunityCodeOfConductField";
 import { CommunityPriceField } from "./CommunityPriceField";
 import { CreateCommunityFormFooter } from "./CreateCommunityFormFooter";
+
 import { FormSchema, formSchema } from "./communityFormSchema";
+
+import ModalInvite from "../modal-invite";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { useCurrentCommunity } from "@/components/sidebar/community-context";
+import { Community } from "@/types/general";
 
 // Composant d'affichage d'erreur sous un champ
 export function FormError({ error }: { error?: string }) {
@@ -35,7 +43,10 @@ export function FormError({ error }: { error?: string }) {
 export default function CreateCommunity() {
   const t = useTranslations("createCommunityForm");
   const [communityType, setCommunityType] = useState("free");
-
+  const [openInvite, setOpenInvite] = useState(false);
+  const [community, setCommunity] = useState("");
+  const [communityUrl, setCommunityUrl] = useState("");
+  const router = useRouter();
   const communityTags = [
     { label: "Tech", value: "technology" },
     { label: "Business", value: "business" },
@@ -54,9 +65,9 @@ export default function CreateCommunity() {
       name: "",
       tags: [],
       communityType: "free",
-      price: "0.00",
-      yourPercentage: "70",
-      communityPercentage: "15",
+      price: 0.0,
+      yourPercentage: 70,
+      communityPercentage: 15,
       description: "",
       codeOfConduct: "",
     },
@@ -85,10 +96,79 @@ export default function CreateCommunity() {
     yourPercentage + communityPercentage + snowledgePercentage;
   const repartitionError = (errors as any)["repartition"]?.message;
 
+  const { setActiveCommunity } = useCurrentCommunity();
+  const [pendingCommunity, setPendingCommunity] = useState<Community | null>(
+    null
+  );
+
+  // Ajout de la mutation React Query
+  const { mutate: createCommunity } = useMutation({
+    mutationFn: async (data: FormSchema) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer fake-token-123", // TODO: get token
+          },
+          body: JSON.stringify({
+            ...data,
+            user: 2, // TODO: get user id
+          }),
+        }
+      );
+      if (!res.ok) {
+        let err;
+        try {
+          err = await res.json();
+        } catch {
+          err = { message: "Erreur inconnue" };
+        }
+        throw new Error(err.message || "Erreur lors de la création");
+      }
+      return res.json();
+    },
+    onSuccess: (data, variables) => {
+      toast.success("Communauté créée avec succès");
+      setCommunity(variables.name);
+      setOpenInvite(true);
+      setPendingCommunity(data);
+    },
+  });
+
+  // Effet qui attend la fermeture de la modal
+  useEffect(() => {
+    if (!openInvite && pendingCommunity) {
+      setActiveCommunity(pendingCommunity);
+      setTimeout(() => router.push(`/${pendingCommunity.slug}`), 500);
+      setPendingCommunity(null); // Reset
+    }
+  }, [openInvite, pendingCommunity, setActiveCommunity]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && community) {
+      setCommunityUrl(`${window.location.origin}/community/${community}`);
+    }
+  }, [community]);
+
   // Soumission du formulaire
   function onSubmit(values: FormSchema) {
-    // TODO: Remplacer par une mutation ou un appel API
-    alert(JSON.stringify(values, null, 2));
+    // On prépare un nouvel objet avec les conversions nécessaires
+    const payload = {
+      ...values,
+      price: values.price ? Number(values.price) : undefined,
+      yourPercentage: values.yourPercentage
+        ? Number(values.yourPercentage)
+        : undefined,
+      communityPercentage: values.communityPercentage
+        ? Number(values.communityPercentage)
+        : undefined,
+      user: 2, // TODO: get user id
+    };
+
+    console.log(JSON.stringify(payload));
+    createCommunity(payload);
   }
 
   return (
@@ -190,6 +270,11 @@ export default function CreateCommunity() {
           </CardContent>
         </TooltipProvider>
       </Card>
+      <ModalInvite
+        open={openInvite}
+        onOpenChange={setOpenInvite}
+        communityUrl={communityUrl}
+      />
     </div>
   );
 }

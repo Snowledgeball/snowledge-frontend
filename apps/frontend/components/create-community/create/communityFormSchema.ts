@@ -11,9 +11,9 @@ export const formSchema = z
     communityType: z.enum(["free", "paid"], {
       required_error: "Veuillez choisir un type d'adhésion.",
     }),
-    price: z.string().optional(),
-    yourPercentage: z.string().optional(),
-    communityPercentage: z.string().optional(),
+    price: z.any(), // On laisse en any pour laisser passer la valeur, puis la valider dans .superRefine avec le message personnalisé.
+    yourPercentage: z.any(), // On laisse en any pour laisser passer la valeur, puis la valider dans .superRefine avec le message personnalisé.
+    communityPercentage: z.any(), // On laisse en any pour laisser passer la valeur, puis la valider dans .superRefine avec le message personnalisé.
     description: z
       .string()
       .min(1, { message: "Veuillez ajouter une description." }),
@@ -23,7 +23,8 @@ export const formSchema = z
   })
   .superRefine((data, ctx) => {
     if (data.communityType === "paid") {
-      if (!data.price || isNaN(Number(data.price)) || Number(data.price) <= 0) {
+      const valPrice = Number(data.price);
+      if (!data.price || isNaN(valPrice) || valPrice <= 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["price"],
@@ -31,16 +32,42 @@ export const formSchema = z
             "Le prix doit être strictement supérieur à 0 pour une communauté payante.",
         });
       }
-      const your = Number(data.yourPercentage) || 0;
-      const comm = Number(data.communityPercentage) || 0;
-      const snowledgePercentage = 15;
-      const total = your + comm + snowledgePercentage;
-      if (total !== 100) {
+      const val = Number(data.yourPercentage);
+      if (!data.yourPercentage || isNaN(val) || val <= 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["repartition"],
-          message: "La somme des pourcentages doit faire exactement 100%.",
+          path: ["yourPercentage"],
+          message: "Veuillez renseigner votre pourcentage.",
         });
+      }
+      const valCommunity = Number(data.communityPercentage);
+      if (
+        !data.communityPercentage ||
+        isNaN(valCommunity) ||
+        valCommunity <= 0
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["communityPercentage"],
+          message: "Veuillez renseigner le pourcentage de la communauté.",
+        });
+      }
+      if (
+        typeof data.yourPercentage === "number" &&
+        typeof data.communityPercentage === "number" &&
+        !isNaN(data.yourPercentage) &&
+        !isNaN(data.communityPercentage)
+      ) {
+        const snowledgePercentage = 15;
+        const total =
+          data.yourPercentage + data.communityPercentage + snowledgePercentage;
+        if (total !== 100) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["repartition"],
+            message: "La somme des pourcentages doit faire exactement 100%.",
+          });
+        }
       }
     }
   });

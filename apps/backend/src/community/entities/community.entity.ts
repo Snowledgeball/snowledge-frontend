@@ -12,20 +12,26 @@ export class Community {
 	@Column({ length: 100 })
 	name: string;
 
-	@Column({ nullable: true })
-	tags?: string;
+	@Column({ type: 'json' })
+	tags: string[];
 
 	@Column()
-	isFree: boolean;
+	communityType: 'free' | 'paid';
 
-	@Column({ nullable: true })
-	price?: string;
+	@Column({ type: 'float', nullable: true })
+	price?: number;
 
-	@Column({ type: 'text', nullable: true })
-	description?: string;
+	@Column({ type: 'float', nullable: true })
+	yourPercentage?: number;
 
-	@Column({ nullable: true })
-	externalLinks?: string;
+	@Column({ type: 'float', nullable: true })
+	communityPercentage?: number;
+
+	@Column()
+	description: string;
+
+	@Column()
+	codeOfConduct: string;
 
 	@ManyToOne(() => User, (user) => user.communities, {
 		cascade: false,

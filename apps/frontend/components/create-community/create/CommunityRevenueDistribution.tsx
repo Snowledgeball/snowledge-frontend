@@ -2,6 +2,7 @@ import { Input } from "@repo/ui";
 import { Label } from "@repo/ui";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@repo/ui";
 import { Info } from "lucide-react";
+import { FormError } from "./create-commu-form";
 
 interface Props {
   price: number;
@@ -40,7 +41,7 @@ export function CommunityRevenueDistribution({
                 min="0"
                 max="85"
                 className="pr-8"
-                {...register("yourPercentage")}
+                {...register("yourPercentage", { valueAsNumber: true })}
               />
               <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">
                 %
@@ -54,6 +55,7 @@ export function CommunityRevenueDistribution({
               </span>
             </div>
           </div>
+          <FormError error={errors.yourPercentage?.message} />
         </div>
 
         <div className="space-y-2">
@@ -78,7 +80,7 @@ export function CommunityRevenueDistribution({
                 min="0"
                 max="85"
                 className="pr-8"
-                {...register("communityPercentage")}
+                {...register("communityPercentage", { valueAsNumber: true })}
               />
               <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">
                 %
@@ -92,6 +94,7 @@ export function CommunityRevenueDistribution({
               </span>
             </div>
           </div>
+            <FormError error={errors.communityPercentage?.message} />
         </div>
 
         <div className="space-y-2">

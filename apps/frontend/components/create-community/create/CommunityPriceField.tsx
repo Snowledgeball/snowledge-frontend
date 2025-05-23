@@ -16,7 +16,7 @@ export function CommunityPriceField({ register, error, t, price }: any) {
           step="0.01"
           placeholder={t("membership.pricePlaceholder")}
           className="pl-7"
-          {...register("price")}
+          {...register("price", { valueAsNumber: true })}
         />
       </div>
       <FormError error={error} />
