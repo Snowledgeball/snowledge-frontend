@@ -27,6 +27,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
+import { CommunityMembershipType } from "./CommunityMembershipType";
+import { CommunityRevenueDistribution } from "./CommunityRevenueDistribution";
 
 // Composant d'affichage d'erreur sous un champ
 function FormError({ error }: { error?: string }) {
@@ -86,9 +88,6 @@ type FormSchema = z.infer<typeof formSchema>;
 export default function CreateCommunity() {
   const t = useTranslations("createCommunityForm");
   const [communityType, setCommunityType] = useState("free");
-  const [selectedTags, setSelectedTags] = useState<
-    { label: string; value: string }[]
-  >([]);
 
   const communityTags = [
     { label: "Tech", value: "technology" },
@@ -117,14 +116,6 @@ export default function CreateCommunity() {
     mode: "onChange",
   });
 
-  useEffect(() => {
-    setValue(
-      "tags",
-      selectedTags.map((opt) => opt.value),
-      { shouldValidate: true }
-    );
-  }, [selectedTags, setValue]);
-
   // Synchronisation du type d'adhésion
   const handleCommunityTypeChange = (value: string) => {
     setCommunityType(value);
@@ -132,7 +123,10 @@ export default function CreateCommunity() {
   };
 
   // Synchronisation des tags (MultiSelect)
-  const tags = watch("tags");
+  const tags = watch("tags") || [];
+  const selectedOptions = communityTags.filter((opt) =>
+    tags.includes(opt.value)
+  );
 
   // Pour la projection
   const price = Number(watch("price")) || 0;
@@ -185,10 +179,14 @@ export default function CreateCommunity() {
                 <Label htmlFor="tags">{t("tags.label")}</Label>
                 <MultiSelect
                   options={communityTags}
-                  defaultValue={communityTags.filter((opt) =>
-                    tags?.includes(opt.value)
-                  )}
-                  onChange={setSelectedTags}
+                  value={selectedOptions}
+                  onChange={(options) =>
+                    setValue(
+                      "tags",
+                      options.map((opt) => opt.value),
+                      { shouldValidate: true }
+                    )
+                  }
                   placeholder={t("tags.placeholder")}
                 />
                 <input type="hidden" {...register("tags")} value={tags} />
@@ -198,46 +196,17 @@ export default function CreateCommunity() {
               {/* Type d'adhésion (RadioGroup) */}
               <div className="space-y-2">
                 <Label>{t("membership.label")}</Label>
-                <RadioGroup
+                <CommunityMembershipType
                   value={communityType}
-                  onValueChange={handleCommunityTypeChange}
-                  className="flex flex-col space-y-1"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="free" id="free" />
-                    <Label htmlFor="free" className="font-normal">
-                      {t("membership.free")}
-                    </Label>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{t("membership.freeTooltip")}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="paid" id="paid" />
-                    <Label htmlFor="paid" className="font-normal">
-                      {t("membership.paid")}
-                    </Label>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{t("membership.paidTooltip")}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                </RadioGroup>
-                <FormError error={errors.communityType?.message} />
+                  onChange={handleCommunityTypeChange}
+                  error={errors.communityType?.message}
+                  t={t}
+                />
               </div>
 
               {/* Si paid, afficher le prix et la répartition */}
               {communityType === "paid" && (
-                <div className="space-y-4">
+                <>
                   <div className="space-y-2">
                     <Label htmlFor="price">{t("membership.priceLabel")}</Label>
                     <div className="relative">
@@ -256,124 +225,18 @@ export default function CreateCommunity() {
                     </div>
                     <FormError error={errors.price?.message} />
                   </div>
-
-                  <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-                    <h4 className="text-sm font-medium">
-                      {t("membership.revenueTitle")}
-                    </h4>
-                    <div className="grid grid-cols-1 gap-3">
-                      <div className="space-y-2">
-                        <Label htmlFor="your-percentage">
-                          {t("membership.yourLabel")}
-                        </Label>
-                        <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <Input
-                              id="your-percentage"
-                              type="number"
-                              min="0"
-                              max="85"
-                              className="pr-8"
-                              {...register("yourPercentage")}
-                            />
-                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">
-                              %
-                            </span>
-                          </div>
-                          <div className="w-20 px-3 py-2 bg-background border rounded-md text-sm text-muted-foreground">
-                            <span>
-                              {price && yourPercentage
-                                ? `$${((price * yourPercentage) / 100).toFixed(2)}`
-                                : "$0.00"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor="community-percentage">
-                            {t("membership.communityLabel")}
-                          </Label>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>{t("membership.communityTooltip")}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                        <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <Input
-                              id="community-percentage"
-                              type="number"
-                              min="0"
-                              max="85"
-                              className="pr-8"
-                              {...register("communityPercentage")}
-                            />
-                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">
-                              %
-                            </span>
-                          </div>
-                          <div className="w-20 px-3 py-2 bg-background border rounded-md text-sm text-muted-foreground">
-                            <span>
-                              {price && communityPercentage
-                                ? `$${((price * communityPercentage) / 100).toFixed(2)}`
-                                : "$0.00"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="snowledge-percentage">
-                          {t("membership.snowledgeLabel")}
-                        </Label>
-                        <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <Input
-                              id="snowledge-percentage"
-                              type="number"
-                              value={snowledgePercentage}
-                              readOnly
-                              className="pr-8 bg-muted"
-                            />
-                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">
-                              %
-                            </span>
-                          </div>
-                          <div className="w-20 px-3 py-2 bg-muted border rounded-md text-sm text-muted-foreground">
-                            <span>
-                              {price
-                                ? `$${((price * snowledgePercentage) / 100).toFixed(2)}`
-                                : "$0.00"}
-                            </span>
-                          </div>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {t("membership.platformFee")}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="pt-2 border-t">
-                      <div className="flex justify-between text-sm">
-                        <span>{t("membership.total")}</span>
-                        <span className="font-medium">{totalRepartition}%</span>
-                      </div>
-                      {repartitionError && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {repartitionError}
-                        </p>
-                      )}
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {t("membership.editableHint")}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                  <CommunityRevenueDistribution
+                    price={price}
+                    yourPercentage={yourPercentage}
+                    communityPercentage={communityPercentage}
+                    snowledgePercentage={snowledgePercentage}
+                    errors={errors}
+                    register={register}
+                    t={t}
+                    totalRepartition={totalRepartition}
+                    repartitionError={repartitionError}
+                  />
+                </>
               )}
 
               {/* Description */}

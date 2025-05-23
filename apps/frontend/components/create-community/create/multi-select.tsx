@@ -16,7 +16,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
 
-type Option = {
+export type Option = {
   label: string;
   value: string;
 };
@@ -25,6 +25,7 @@ interface MultiSelectProps {
   options: Option[];
   placeholder?: string;
   defaultValue?: Option[];
+  value?: Option[];
   onChange?: (options: Option[]) => void;
 }
 
@@ -32,34 +33,37 @@ export function MultiSelect({
   options,
   placeholder = "Select options",
   defaultValue = [],
+  value,
   onChange,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
+  const isControlled = value !== undefined;
   const [selected, setSelected] = React.useState<Option[]>(defaultValue);
+  const selectedOptions = isControlled ? value! : selected;
 
   const handleSelect = React.useCallback(
     (option: Option) => {
-      setSelected((prev) => {
-        const isSelected = prev.some((item) => item.value === option.value);
-        const newSelected = isSelected
-          ? prev.filter((item) => item.value !== option.value)
-          : [...prev, option];
-        onChange?.(newSelected);
-        return newSelected;
-      });
+      const isSelected = selectedOptions.some(
+        (item) => item.value === option.value
+      );
+      const newSelected = isSelected
+        ? selectedOptions.filter((item) => item.value !== option.value)
+        : [...selectedOptions, option];
+      if (!isControlled) setSelected(newSelected);
+      onChange?.(newSelected);
     },
-    [onChange]
+    [isControlled, onChange, selectedOptions]
   );
 
   const handleRemove = React.useCallback(
     (option: Option) => {
-      setSelected((prev) => {
-        const newSelected = prev.filter((item) => item.value !== option.value);
-        onChange?.(newSelected);
-        return newSelected;
-      });
+      const newSelected = selectedOptions.filter(
+        (item) => item.value !== option.value
+      );
+      if (!isControlled) setSelected(newSelected);
+      onChange?.(newSelected);
     },
-    [onChange]
+    [isControlled, onChange, selectedOptions]
   );
 
   return (
@@ -71,9 +75,9 @@ export function MultiSelect({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {selected.length > 0 ? (
+          {selectedOptions.length > 0 ? (
             <div className="flex flex-wrap gap-1 mr-2">
-              {selected.map((option) => (
+              {selectedOptions.map((option) => (
                 <Badge
                   key={option.value}
                   variant="secondary"
@@ -96,7 +100,7 @@ export function MultiSelect({
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup className="text-left">
               {options.map((option) => {
-                const isSelected = selected.some(
+                const isSelected = selectedOptions.some(
                   (item) => item.value === option.value
                 );
                 return (
