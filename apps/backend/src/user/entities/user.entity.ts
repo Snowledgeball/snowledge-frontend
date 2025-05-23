@@ -11,7 +11,7 @@ import {
 
 
 import { randomUUID } from 'node:crypto';
-import { Gender } from 'src/shared/interface/enums/gender';
+import { Gender } from 'src/shared/enums/Gender';
 import { Email } from 'src/email/entities/email.entity';
 
 
@@ -38,8 +38,10 @@ export class User {
 	})
 	gender: Gender;
 	
-	@Column()
-	age: number;
+	@Column({
+		type: 'timestamp',
+	})
+	age: Date;
 
 	@Column()
 	password: string;
@@ -56,6 +58,9 @@ export class User {
 	@OneToMany(() => Email, (email) => email.user)
 	emails: Email[];
 	
+	@Column({ nullable: true })
+	refreshToken: string;
+
 	@CreateDateColumn({
 		type: 'timestamp',
 		default: () => 'CURRENT_TIMESTAMP(6)',

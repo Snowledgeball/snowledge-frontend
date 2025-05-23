@@ -28,14 +28,14 @@ export class AuthGuard implements CanActivate {
 		}
 
 		const request = context.switchToHttp().getRequest();
-		const token = this.extractTokenFromHeader(request);
+		const token = this.extractToken(request);
 
 		if (!token) {
 			throw new UnauthorizedException();
 		}
 		try {
 			const payload = await this.jwtService.verifyAsync(token, {
-				secret: jwtConstants.secret,
+				secret: process.env.JWT_ACCESS_SECRET,
 			});
 			// 💡 We're assigning the payload to the request object here
 			// so that we can access it in our route handlers
@@ -50,8 +50,10 @@ export class AuthGuard implements CanActivate {
 		return true;
 	}
 
-	private extractTokenFromHeader(request: Request): string | undefined {
-		const [type, token] = request.headers.authorization?.split(' ') ?? [];
-		return type === 'Bearer' ? token : undefined;
+	private extractToken(request: Request): string | undefined {
+		const [type, tokenFromHeader] = request.headers.authorization?.split(' ') ?? [];
+		if (type === 'Bearer' && tokenFromHeader) return tokenFromHeader;
+
+    	return request.cookies?.['access-token'];
 	}
 }

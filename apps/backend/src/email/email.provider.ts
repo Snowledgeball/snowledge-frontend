@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EmailService } from './email.service';
 import { EmailHelper } from './email.helper';
-import { EmailType } from 'src/shared/interface/enums/EmailType';
+import { EmailType } from 'src/shared/enums/EmailType';
 import { generateEightDigit } from 'src/shared/utils/generateEightDigit';
 
 @Injectable()
