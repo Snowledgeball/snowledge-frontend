@@ -221,6 +221,9 @@
     "success_joined": "Community joined successfully"
   },
   "createCommunityForm": {
+    "toast": {
+      "success": "Community created successfully"
+    },
     "title": "Create and manage your community",
     "form-description": "Fill in the details to get started",
     "submit": "Create Community",
@@ -258,6 +261,35 @@
       "label": "Code of Conduct",
       "placeholder": "Enter your community's code of conduct",
       "help": "Define the rules and expectations for your community members."
+    },
+    "errors": {
+      "name": {
+        "min": "The name must be at least 2 characters."
+      },
+      "tags": {
+        "min": "Please select at least one tag."
+      },
+      "communityType": {
+        "required": "Please choose a membership type."
+      },
+      "description": {
+        "min": "Please add a description."
+      },
+      "codeOfConduct": {
+        "min": "Please provide a code of conduct."
+      },
+      "price": {
+        "positive": "The price must be strictly greater than 0 for a paid community."
+      },
+      "yourPercentage": {
+        "required": "Please enter your percentage."
+      },
+      "communityPercentage": {
+        "required": "Please enter the community percentage."
+      },
+      "repartition": {
+        "total": "The sum of the percentages must be exactly 100%."
+      }
     }
   }
 }

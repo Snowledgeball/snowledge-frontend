@@ -220,6 +220,9 @@
     "success_joined": "Communauté rejointe avec succès"
   },
   "createCommunityForm": {
+    "toast": {
+      "success": "Communauté créée avec succès"
+    },
     "title": "Créer et gérer votre communauté",
     "form-description": "Remplissez les informations pour commencer",
     "submit": "Créer la communauté",
@@ -257,6 +260,35 @@
       "label": "Code de conduite",
       "placeholder": "Entrez le code de conduite de votre communauté",
       "help": "Définissez les règles et attentes pour les membres de votre communauté."
+    },
+    "errors": {
+      "name": {
+        "min": "Le nom doit faire au moins 2 caractères."
+      },
+      "tags": {
+        "min": "Veuillez sélectionner au moins un tag."
+      },
+      "communityType": {
+        "required": "Veuillez choisir un type d'adhésion."
+      },
+      "description": {
+        "min": "Veuillez ajouter une description."
+      },
+      "codeOfConduct": {
+        "min": "Veuillez renseigner un code de conduite."
+      },
+      "price": {
+        "positive": "Le prix doit être strictement supérieur à 0 pour une communauté payante."
+      },
+      "yourPercentage": {
+        "required": "Veuillez renseigner votre pourcentage."
+      },
+      "communityPercentage": {
+        "required": "Veuillez renseigner le pourcentage de la communauté."
+      },
+      "repartition": {
+        "total": "La somme des pourcentages doit faire exactement 100%."
+      }
     }
   }
 }

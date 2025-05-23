@@ -1,13 +1,14 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner"; // ou le toast que tu utilises
-import { FormSchema } from "../schemas/communityFormSchema";
-// Importe le type FormSchema si besoin
+import { FormSchema } from "./use-community-form-schema";
+import { useTranslations } from "next-intl";
 
 export function useCreateCommunity({
   onSuccess,
 }: {
   onSuccess?: (data: any, variables: any) => void;
 } = {}) {
+  const t = useTranslations("createCommunityForm");
   return useMutation({
     mutationFn: async (data: FormSchema) => {
       const res = await fetch(
@@ -36,7 +37,7 @@ export function useCreateCommunity({
       return res.json();
     },
     onSuccess: (data, variables) => {
-      toast.success("Communauté créée avec succès");
+      toast.success(t("toast.success"));
       onSuccess?.(data, variables);
     },
   });

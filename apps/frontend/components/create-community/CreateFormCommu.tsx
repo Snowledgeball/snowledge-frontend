@@ -16,8 +16,6 @@ import { Label } from "@repo/ui";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -31,10 +29,13 @@ import { CreateCommunityFormFooter } from "./CreateCommunityFormFooter";
 
 import ModalInvite from "./modals/ModalInvite";
 import { MultiSelect } from "./ui/MultiSelect";
-import { FormSchema, formSchema } from "./schemas/communityFormSchema";
 
-import { useCurrentCommunity } from "@/components/sidebar/community-context";
 import { Community } from "@/types/general";
+
+import {
+  useCommunityFormSchema,
+  FormSchema,
+} from "./hooks/use-community-form-schema";
 import { useCreateCommunity } from "./hooks/use-create-community";
 
 // Composant d'affichage d'erreur sous un champ
@@ -63,7 +64,7 @@ export default function CreateCommunity() {
     watch,
     formState: { errors },
   } = useForm<FormSchema>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(useCommunityFormSchema()),
     defaultValues: {
       name: "",
       tags: [],
