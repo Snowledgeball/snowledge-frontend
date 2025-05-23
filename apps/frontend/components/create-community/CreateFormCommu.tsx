@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { TooltipProvider } from "@repo/ui";
 import { Button } from "@repo/ui";
 import {
@@ -14,25 +12,30 @@ import {
 } from "@repo/ui";
 import { Input } from "@repo/ui";
 import { Label } from "@repo/ui";
-import { MultiSelect } from "./multi-select";
+
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { CommunityMembershipType } from "./CommunityMembershipType";
-import { CommunityRevenueDistribution } from "./CommunityRevenueDistribution";
-import { CommunityDescriptionField } from "./CommunityDescriptionField";
-import { CommunityCodeOfConductField } from "./CommunityCodeOfConductField";
-import { CommunityPriceField } from "./CommunityPriceField";
+
+import { CommunityMembershipType } from "./fields/CommunityMembershipType";
+import { CommunityRevenueDistribution } from "./fields/CommunityRevenueDistribution";
+import { CommunityDescriptionField } from "./fields/CommunityDescriptionField";
+import { CommunityCodeOfConductField } from "./fields/CommunityCodeOfConductField";
+import { CommunityPriceField } from "./fields/CommunityPriceField";
 import { CreateCommunityFormFooter } from "./CreateCommunityFormFooter";
 
-import { FormSchema, formSchema } from "./communityFormSchema";
+import ModalInvite from "./modals/ModalInvite";
+import { MultiSelect } from "./ui/MultiSelect";
+import { FormSchema, formSchema } from "./schemas/communityFormSchema";
 
-import ModalInvite from "../modal-invite";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
 import { useCurrentCommunity } from "@/components/sidebar/community-context";
 import { Community } from "@/types/general";
+import { useCreateCommunity } from "./hooks/use-create-community";
 
 // Composant d'affichage d'erreur sous un champ
 export function FormError({ error }: { error?: string }) {
@@ -96,41 +99,13 @@ export default function CreateCommunity() {
     yourPercentage + communityPercentage + snowledgePercentage;
   const repartitionError = (errors as any)["repartition"]?.message;
 
-  const { setActiveCommunity } = useCurrentCommunity();
   const [pendingCommunity, setPendingCommunity] = useState<Community | null>(
     null
   );
 
-  // Ajout de la mutation React Query
-  const { mutate: createCommunity } = useMutation({
-    mutationFn: async (data: FormSchema) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer fake-token-123", // TODO: get token
-          },
-          body: JSON.stringify({
-            ...data,
-            user: 2, // TODO: get user id
-          }),
-        }
-      );
-      if (!res.ok) {
-        let err;
-        try {
-          err = await res.json();
-        } catch {
-          err = { message: "Erreur inconnue" };
-        }
-        throw new Error(err.message || "Erreur lors de la création");
-      }
-      return res.json();
-    },
+  // Appel du hook useCreateCommunity
+  const { mutate: createCommunity } = useCreateCommunity({
     onSuccess: (data, variables) => {
-      toast.success("Communauté créée avec succès");
       setCommunity(variables.name);
       setOpenInvite(true);
       setPendingCommunity(data);
@@ -140,11 +115,10 @@ export default function CreateCommunity() {
   // Effet qui attend la fermeture de la modal
   useEffect(() => {
     if (!openInvite && pendingCommunity) {
-      setActiveCommunity(pendingCommunity);
       setTimeout(() => router.push(`/${pendingCommunity.slug}`), 500);
       setPendingCommunity(null); // Reset
     }
-  }, [openInvite, pendingCommunity, setActiveCommunity]);
+  }, [openInvite, pendingCommunity]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && community) {

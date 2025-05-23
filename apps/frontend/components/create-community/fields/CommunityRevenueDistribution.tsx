@@ -2,7 +2,7 @@ import { Input } from "@repo/ui";
 import { Label } from "@repo/ui";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@repo/ui";
 import { Info } from "lucide-react";
-import { FormError } from "./create-commu-form";
+import { FormError } from "../CreateFormCommu";
 
 interface Props {
   price: number;
@@ -94,7 +94,7 @@ export function CommunityRevenueDistribution({
               </span>
             </div>
           </div>
-            <FormError error={errors.communityPercentage?.message} />
+          <FormError error={errors.communityPercentage?.message} />
         </div>
 
         <div className="space-y-2">

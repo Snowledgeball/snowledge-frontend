@@ -1,5 +1,5 @@
 import { Label, Textarea } from "@repo/ui";
-import { FormError } from "./create-commu-form";
+import { FormError } from "../CreateFormCommu";
 
 export function CommunityDescriptionField({ register, error, t }: any) {
   return (
