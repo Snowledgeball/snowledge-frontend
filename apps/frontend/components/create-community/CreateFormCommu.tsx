@@ -51,6 +51,9 @@ export default function CreateCommunity() {
   const [openInvite, setOpenInvite] = useState(false);
   const [community, setCommunity] = useState("");
   const [communityUrl, setCommunityUrl] = useState("");
+
+  const { setActiveCommunity } = useCurrentCommunity();
+
   const router = useRouter();
   const communityTags = [
     { label: "Tech", value: "technology" },
@@ -111,6 +114,7 @@ export default function CreateCommunity() {
       setCommunity(variables.name);
       setOpenInvite(true);
       setPendingCommunity(data);
+      setActiveCommunity(data);
     },
   });
 
