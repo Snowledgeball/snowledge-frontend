@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { PlusCircle, Users } from "lucide-react";
 import { useState } from "react";
-
 import { Button } from "@repo/ui";
 import {
   Card,
@@ -16,6 +15,7 @@ import { Input } from "@repo/ui";
 import { useAllCommunities } from "@/hooks/useAllCommunities";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 export default function PostSignUp() {
   const [communityInput, setCommunityInput] = useState("");
@@ -23,6 +23,7 @@ export default function PostSignUp() {
   const [notFound, setNotFound] = useState(false);
   const { data: communities } = useAllCommunities();
   const router = useRouter();
+  const t = useTranslations("postSignUp");
 
   const handleJoinCommunity = () => {
     setInputError(false);
@@ -47,7 +48,7 @@ export default function PostSignUp() {
     }
 
     if (community) {
-      toast.success("Community joined successfully");
+      toast.success(t("success_joined"));
       router.push(`/${community.slug}`);
     } else {
       setNotFound(true);
@@ -58,22 +59,19 @@ export default function PostSignUp() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <Card className="mx-auto w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome to Snowledge</CardTitle>
-          <CardDescription>
-            Choose how you'd like to get started
-          </CardDescription>
+          <CardTitle className="text-2xl">{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
             <Button asChild size="lg" className="h-16 gap-2 text-lg">
               <Link href="/create-community">
                 <PlusCircle className="h-5 w-5" />
-                Create a community
+                {t("create_button")}
               </Link>
             </Button>
             <p className="text-sm text-muted-foreground px-1">
-              Start your own community and invite others to join. You'll be the
-              owner with full control.
+              {t("create_description")}
             </p>
           </div>
 
@@ -89,18 +87,17 @@ export default function PostSignUp() {
             >
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Join an existing community
+                {t("join_button")}
               </div>
             </Button>
             <p className="text-sm text-muted-foreground px-1">
-              Join a community someone has already created. You'll need the
-              community name or invite link.
+              {t("join_description")}
             </p>
           </div>
 
           <div className="mt-2">
             <Input
-              placeholder="Paste Community Name, Link, or ID"
+              placeholder={t("placeholder")}
               className={`w-full ${inputError ? "placeholder:text-red-600 font-bold" : ""}`}
               value={communityInput}
               onChange={(e) => {
@@ -109,9 +106,14 @@ export default function PostSignUp() {
                 setNotFound(false);
               }}
             />
+            {inputError && (
+              <p className="text-red-600 text-sm mt-1 font-semibold">
+                {t("error_empty")}
+              </p>
+            )}
             {notFound && (
               <p className="text-red-600 text-sm mt-1 font-semibold">
-                Aucune communauté ne correspond à cette valeur.
+                {t("error_not_found")}
               </p>
             )}
           </div>

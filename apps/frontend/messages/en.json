@@ -241,5 +241,17 @@
         "totalHint": "Total must be 100% for internal prize pool distribution."
       }
     }
+  },
+  "postSignUp": {
+    "title": "Welcome to Snowledge",
+    "description": "Choose how you'd like to get started",
+    "create_button": "Create a community",
+    "create_description": "Start your own community and invite others to join. You'll be the owner with full control.",
+    "join_button": "Join an existing community",
+    "join_description": "Join a community someone has already created. You'll need the community name or invite link.",
+    "placeholder": "Paste Community Name, Link, or ID",
+    "error_empty": "Please enter a value.",
+    "error_not_found": "No community matches this value.",
+    "success_joined": "Community joined successfully"
   }
 }
