@@ -6,6 +6,9 @@ import React from "react";
 import localFont from "next/font/local";
 import "../globals.css";
 import { Metadata } from "next";
+import { ReactQueryClientProvider } from "@/utils/react-query-provider";
+import { CommunityProvider } from "@/components/sidebar/community-context";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Snowledge",
@@ -82,9 +85,14 @@ export default async function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className="antialiased">
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
-        </NextIntlClientProvider>
+        <ReactQueryClientProvider>
+          <CommunityProvider>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              {children}
+              <Toaster />
+            </NextIntlClientProvider>
+          </CommunityProvider>
+        </ReactQueryClientProvider>
       </body>
     </html>
   );

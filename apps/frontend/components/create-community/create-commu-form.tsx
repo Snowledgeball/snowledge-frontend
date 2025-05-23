@@ -34,18 +34,12 @@ import { useTranslations } from "next-intl";
 
 import { features } from "@/config/features";
 import { notFound } from "next/navigation";
-import ModalInvite from "./ModalInvite";
-import { useUserCommunities } from "@/components/sidebar/hooks/useUserCommunities";
+import ModalInvite from "./modal-invite";
+import { useUserCommunities } from "@/hooks/useUserCommunities";
 import { useCurrentCommunity } from "@/components/sidebar/community-context";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-
-export type Community = {
-  name: string;
-  tags: string;
-  description: string;
-  slug: string;
-};
+import { Community } from "@/types/general";
 
 const formSchema = z.object({
   name: z
@@ -81,7 +75,7 @@ function useCommunityTypes() {
   });
 }
 
-export default function CreateCommunity() {
+export default function CreateCommunityForm() {
   if (!features.createCommunity.enabled) {
     notFound();
   }
