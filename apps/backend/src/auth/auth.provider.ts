@@ -74,6 +74,24 @@ export class AuthProvider {
 		};
 	}
 
+	async signOut(refreshToken: string) {
+		
+	try {
+		const payload = await this.jwtService.verify(refreshToken, {
+		secret: process.env.JWT_REFRESH_SECRET,
+		});
+
+		const user = await this.userService.findOneById(payload.userId);
+
+		if (user) {
+			await this.userService.update(user.id, { refreshToken: null });
+		}
+
+		return { success: true };
+	} catch (e) {
+		return { success: true };
+	}
+	}
 	async refreshToken(refreshToken: string): Promise<{ access_token: string }> {
 		const payload = this.jwtService.verify(refreshToken, { secret: process.env.JWT_REFRESH_SECRET, });
 
@@ -92,6 +110,7 @@ export class AuthProvider {
 		return { access_token: newAccessToken };
 	}
 	async verifyTokenEmail(token: string) {
+		// TODO réécrire pour passer par le providerEmail plutot que directement appelé le helper
 		try {
 			const payload = await this.jwtService.verifyAsync(token, {
 				secret: process.env.JWT_EMAIL_SECRET,

@@ -6,13 +6,13 @@ import { IAuthPayload } from '../shared/interface/IAuthPayload';
 export class AuthService {
 	constructor(private readonly jwtService: JwtService) {}
 
-	async createAccessToken(payload: IAuthPayload) {
+	createAccessToken(payload: IAuthPayload) {
 		return this.jwtService.sign(payload, { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '15m' });
 	}
 	async createRefreshToken(payload: IAuthPayload) {
 		return this.jwtService.sign(payload, { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' });
 	}
-	async createEmailVerificationToken(payload: { userId: number; email: string }) {
+	createEmailVerificationToken(payload: { userId: number; email: string }) {
 		return this.jwtService.sign(payload, {
 			secret: process.env.JWT_EMAIL_SECRET,
 			expiresIn: '1h', // ou 24h selon ton besoin
