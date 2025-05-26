@@ -9,7 +9,7 @@ on:
 permissions:
   contents: read
   deployments: write
-  
+
 jobs:
   deploy-v1-vercel:
     runs-on: ubuntu-latest
@@ -76,7 +76,7 @@ jobs:
             cd /home/debian/Snowledge
             git fetch origin
             git checkout staging
-            git pull origin staging
+            git reset --hard origin/staging
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
       - name: Déploiement sur OVH (prod)
@@ -93,5 +93,5 @@ jobs:
             cd /home/debian/Snowledge
             git fetch origin
             git checkout main
-            git pull origin main
+            git reset --hard origin/main
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
