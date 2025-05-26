@@ -34,7 +34,7 @@ export default function PartnersSection() {
                   alt={logo.alt}
                   width={160}
                   height={160}
-                  className="w-40 h-40 object-contain"
+                  className="w-40 h-auto object-contain"
                   priority={index === 0}
                   sizes="(max-width: 768px) 50vw, 160px"
                 />
