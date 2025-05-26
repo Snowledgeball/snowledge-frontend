@@ -8,5 +8,5 @@ export default function Page() {
   if (!features.community.creator.moderation) {
     notFound();
   }
-  return <div>Modération pour la communauté {community}</div>;
+  return <div>Page de modération pour la communauté {community}</div>;
 }
