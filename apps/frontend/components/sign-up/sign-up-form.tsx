@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/contexts/auth-context";
 import { Gender } from "@/shared/enums/Gender";
 import { FormDataSignUp, ISignUp } from "@/shared/interfaces/ISignUp";
 import { getEnumKeys } from "@/utils/get-enum-keys";
@@ -8,12 +9,13 @@ import { cn } from "@workspace/ui/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useState } from 'react';
 
 
 export default function SignUpForm() {
-    
+    const router = useRouter();
+    const { setAccessToken, validateFormSignUp } = useAuth();
     const [formData, setFormData] = useState<FormDataSignUp>({
         gender: undefined,
         firstname: '',
@@ -34,28 +36,16 @@ export default function SignUpForm() {
             [event.target.name]: event.target.value,
         });
     };
-    const validateForm = () => {
-        const { gender, firstname, lastname, pseudo, email, age, password, confirmPwd } = formData;
-        if (!gender || !firstname || !lastname || !pseudo || !email || !age || !password || !confirmPwd) {
-            return "All fields are required.";
-        }
-        if (password.length < 8) {
-            return "Password must be at least 8 characters.";
-        }
-        if (password !== confirmPwd) {
-            return "Passwords do not match.";
-        }
-        if (!termsAccepted) {
-            return "You must accept the Terms & Conditions.";
-        }
-        return null;
-    };
+
     const submitRegistration = async () => {
         console.log('submit')
         setError("");
         setSuccess("");
-
-        const validationError = validateForm();
+        if (!termsAccepted) {
+            return "You must accept the Terms & Conditions.";
+        }
+        const validationError = validateFormSignUp(formData);
+        
         if (validationError) {
             setError(validationError);
             return;
@@ -66,6 +56,7 @@ export default function SignUpForm() {
             const signUp: ISignUp = rest;
             const response = await fetch('http://localhost:4000/auth/sign-up', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -76,7 +67,8 @@ export default function SignUpForm() {
             }
             const data = await response.json();
             console.log(data);
-            redirect('/');
+            setAccessToken(data.access_token);
+            router.push('/');
             
         } catch (err: any) {
             setError(err.message || "An unexpected error occurred.");

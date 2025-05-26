@@ -9,42 +9,27 @@ import AdvancedSettingsForm from "@/components/settings/profile/advanced-setting
 import { Separator } from "@repo/ui";
 import EmailValidate from "@/components/settings/profile/email-validate";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
 
 
 
 export default function Settings() {
+    const { verifyToken } = useAuth();
+    const [validEmail, setValidEmail] = useState(false)
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
     useEffect(() => {
-        verifyToken()
-    }, [])
-    const verifyToken = async () => {
-            console.log('submit')
-    
-            try {
-                const response = await fetch('http://localhost:4000/auth/verify-token', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ token: token}),
-                });
-                if (!response.ok) {
-                    throw new Error("Failed. Please try again.");
-                }
-                const data = await response.json();
-                console.log(data);
-
-            } catch (err: any) {
-                setError(err.message || "An unexpected error occurred.");
-            }
+        if(token) {
+            verifyToken(token).then(res => setValidEmail(res));
         }
+    }, [])
+
     return (
         <>
           {/* Main content */}
             <main className="flex-1 overflow-y-auto">
-                {(token) && <EmailValidate />}
+                {(validEmail) && <EmailValidate />}
                 <div className="container mx-auto px-0 py-4 md:py-6 md:pl-6">
                     {/* Basic information section */}
                     <section className="grid grid-cols-1 lg:grid-cols-8 gap-4 mb-8">

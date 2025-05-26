@@ -1,12 +1,15 @@
 "use client";
 
+import { useAuth } from "@/contexts/auth-context";
 import { FormDataSignIn } from "@/shared/interfaces/ISignIn";
 import { Logo, Button, Checkbox, Input, Label } from "@repo/ui";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function SignInForm() {
+    const router = useRouter();
+    const { setAccessToken } = useAuth();
     const [formData, setFormData] = useState<FormDataSignIn>({
         email: '',
         password: '',
@@ -20,14 +23,15 @@ export default function SignInForm() {
             [event.target.name]: event.target.value,
         });
     };
+
     const submitSignIn = async () => {
-        console.log('submit')
         setError("");
         setSuccess("");
 
         try {
             const response = await fetch('http://localhost:4000/auth/sign-in', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -37,8 +41,9 @@ export default function SignInForm() {
                 throw new Error("Login failed. Please try again.");
             }
             const data = await response.json();
-            console.log(data);
-            redirect('/');
+            setAccessToken(data.access_token); 
+
+            router.push('/');
         } catch (err: any) {
             setError(err.message || "An unexpected error occurred.");
         }

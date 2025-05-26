@@ -17,7 +17,7 @@ import {
 
 import { NavMain } from "./nav-main";
 import { NavProjects } from "./nav-projects";
-import { NavUser } from "./nav-user";
+import NavUser from "./nav-user";
 import {
   CommunityProvider,
   CommunitySwitcher,
@@ -34,7 +34,7 @@ import {
 import { toSlug } from "@/utils/slug";
 import { features } from "@/config/features";
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <CommunityProvider>
       <Sidebar collapsible="icon" {...props}>
