@@ -18,5 +18,5 @@ export default function cloudflareLoader({
   if (quality) {
     params.push(`quality=${quality}`);
   }
-  return `/${normalizeSrc(src)}`;
+  return `/${normalizeSrc(src)}?${params.join(",")}`;
 }
