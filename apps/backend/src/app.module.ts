@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import postgresConfig from './config/postgres.config';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
+import { SnowTestRegisterModule } from './snow-test-register/snow-test-register.module';
 import mailingConfig from './config/mailing.config';
 
 @Module({
@@ -33,7 +34,8 @@ import mailingConfig from './config/mailing.config';
         }),
         AuthModule,
         EmailModule,
-        UserModule
+        UserModule,
+        SnowTestRegisterModule
     ],
     controllers: [AppController],
     providers: [AppService],

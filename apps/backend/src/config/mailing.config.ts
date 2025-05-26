@@ -6,8 +6,8 @@ export default registerAs('mailingConfig', (): MailingConfig => {
 		host: 'smtp-relay.brevo.com',
 		port: Number(587),
 		secure: false,
-		user: '', //
+		user: '8d2dfc001@smtp-brevo.com', //
 		pass: process.env.PASS_BREVO,
-		from: '"Behind The Gate" secure@behindthegate.io',
+		from: '"Swnoledge" secure@swnoledge.net',
 	};
 });
