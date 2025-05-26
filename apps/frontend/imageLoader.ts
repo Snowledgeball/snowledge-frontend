@@ -11,9 +11,9 @@ export default function cloudflareLoader({
   width: number;
   quality?: number;
 }) {
-  if (process.env.NODE_ENV === "development") {
-    return `/${normalizeSrc(src)}?width=${width}${quality ? `&quality=${quality}` : ""}`;
-  }
+  //   if (process.env.NODE_ENV === "development") {
+  //     return `/${normalizeSrc(src)}?width=${width}${quality ? `&quality=${quality}` : ""}`;
+  //   }
   const params = [`width=${width}`];
   if (quality) {
     params.push(`quality=${quality}`);
