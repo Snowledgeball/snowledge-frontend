@@ -10,9 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui";
-import { Input } from "@repo/ui";
-import { Label } from "@repo/ui";
-
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -28,7 +25,6 @@ import { CommunityPriceField } from "../shared/community/fields/CommunityPriceFi
 import { CreateCommunityFormFooter } from "./CreateCommunityFormFooter";
 
 import ModalInvite from "./modals/ModalInvite";
-import { MultiSelect } from "../shared/community/ui/MultiSelect";
 
 import { Community } from "@/types/general";
 
@@ -36,7 +32,7 @@ import {
   useCommunityFormSchema,
   FormSchema,
 } from "../shared/community/hooks/use-community-form-schema";
-import { useCreateCommunity } from "../shared/community/hooks/use-create-community";
+import { useCreateCommunity } from "./hooks/use-create-community";
 import { useCurrentCommunity } from "@/hooks/use-current-community";
 import CommunityName from "../shared/community/fields/CommunityName";
 import CommunityTags from "../shared/community/fields/CommunityTags";
@@ -57,11 +53,6 @@ export default function CreateCommunity() {
   const { setActiveCommunity } = useCurrentCommunity();
 
   const router = useRouter();
-  const communityTags = [
-    { label: "Tech", value: "technology" },
-    { label: "Business", value: "business" },
-    { label: "Finance", value: "finance" },
-  ];
 
   const {
     register,

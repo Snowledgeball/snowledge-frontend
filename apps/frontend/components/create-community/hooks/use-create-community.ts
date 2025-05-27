@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner"; // ou le toast que tu utilises
-import { FormSchema } from "./use-community-form-schema";
+import { FormSchema } from "../../shared/community/hooks/use-community-form-schema";
 import { useTranslations } from "next-intl";
 
 export function useCreateCommunity({
