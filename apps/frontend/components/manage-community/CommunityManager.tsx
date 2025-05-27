@@ -18,6 +18,10 @@ import { useRouter } from "next/navigation";
 import { useCurrentCommunity } from "@/hooks/use-current-community";
 import { Community } from "@/types/general";
 import { useUpdateCommunity } from "./hooks/use-update-community";
+import {
+  defaultCommunityForm,
+  communityToFormValues,
+} from "../shared/community/utils/calcul";
 
 export function CommunityManager() {
   const router = useRouter();
@@ -58,58 +62,17 @@ export function CommunityManager() {
     handleSubmit,
   } = useForm<FormSchema>({
     resolver: zodResolver(useCommunityFormSchema()),
-    defaultValues: {
-      name: "",
-      tags: [],
-      communityType: "free",
-      price: 0.0,
-      yourPercentage: 70,
-      communityPercentage: 15,
-      description: "",
-      codeOfConduct: "",
-    },
+    defaultValues: defaultCommunityForm,
   });
 
-  const [form, setForm] = useState({});
   const [communityType, setCommunityType] = useState("free");
 
   useEffect(() => {
     if (community) {
-      reset({
-        name: community.name ?? "",
-        tags: Array.isArray(community.tags)
-          ? community.tags
-          : typeof community.tags === "string" && community.tags
-            ? [community.tags]
-            : [],
-        communityType: community.communityType ?? "free",
-        price: community.price ?? 0.0,
-        yourPercentage: community.yourPercentage ?? 70,
-        communityPercentage: community.communityPercentage ?? 15,
-        description: community.description ?? "",
-        codeOfConduct: community.codeOfConduct ?? "",
-      });
+      reset(communityToFormValues(community));
       setCommunityType(community.communityType ?? "free");
     }
   }, [community, reset]);
-
-  // Pour la projection
-  const price = Number(watch("price")) || 0;
-  const yourPercentage = Number(watch("yourPercentage")) || 0;
-  const communityPercentage = Number(watch("communityPercentage")) || 0;
-  const snowledgePercentage = 15;
-
-  const totalRepartition =
-    yourPercentage + communityPercentage + snowledgePercentage;
-  const repartitionError = (errors as any)["repartition"]?.message;
-
-  useEffect(() => {
-    if (community) {
-      setForm({
-        community,
-      });
-    }
-  }, [community]);
 
   const t = useTranslations("manageCommunity");
 
@@ -122,6 +85,15 @@ export function CommunityManager() {
     setCommunityType(value);
     setValue("communityType", value as "free" | "paid");
   };
+
+  // Calculs pour CommunityGainsSection (directement dans le composant, pas dans un useState)
+  const price = Number(watch("price")) || 0;
+  const yourPercentage = Number(watch("yourPercentage")) || 0;
+  const communityPercentage = Number(watch("communityPercentage")) || 0;
+  const snowledgePercentage = 15;
+  const totalRepartition =
+    yourPercentage + communityPercentage + snowledgePercentage;
+  const repartitionError = (errors as any)["repartition"]?.message;
 
   return (
     <div className="min-h-screen bg-background">
@@ -149,13 +121,14 @@ export function CommunityManager() {
                 {features.community.creator.settings.gains &&
                   communityType === "paid" && (
                     <CommunityGainsSection
-                      form={form}
                       errors={errors}
                       register={register}
                       totalRepartition={totalRepartition}
                       repartitionError={repartitionError}
                       snowledgePercentage={snowledgePercentage}
                       price={price}
+                      yourPercentage={yourPercentage}
+                      communityPercentage={communityPercentage}
                     />
                   )}
                 <div className="flex justify-end">

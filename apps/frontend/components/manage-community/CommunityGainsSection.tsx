@@ -3,23 +3,25 @@ import { CommunityRevenueDistribution } from "../shared/community/fields/Communi
 import { CommunityPriceField } from "../shared/community/fields/CommunityPriceField";
 
 interface Props {
-  form: any;
   errors: any;
   register: any;
   totalRepartition: number;
   repartitionError: string;
   snowledgePercentage: number;
   price: number;
+  yourPercentage: number;
+  communityPercentage: number;
 }
 
 export function CommunityGainsSection({
-  form,
   errors,
   register,
   totalRepartition,
   repartitionError,
   snowledgePercentage,
   price,
+  yourPercentage,
+  communityPercentage,
 }: Props) {
   const t = useTranslations("communityForm");
 
@@ -45,9 +47,9 @@ export function CommunityGainsSection({
           register={register}
           t={t}
           totalRepartition={totalRepartition}
-          price={form.price}
-          yourPercentage={form.yourPercentage}
-          communityPercentage={form.communityPercentage}
+          price={price}
+          yourPercentage={yourPercentage}
+          communityPercentage={communityPercentage}
           snowledgePercentage={snowledgePercentage}
           repartitionError={repartitionError}
           errors={errors}

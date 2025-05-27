@@ -36,6 +36,10 @@ import { useCreateCommunity } from "./hooks/use-create-community";
 import { useCurrentCommunity } from "@/hooks/use-current-community";
 import CommunityName from "../shared/community/fields/CommunityName";
 import CommunityTags from "../shared/community/fields/CommunityTags";
+import {
+  defaultCommunityForm,
+  communityToFormValues,
+} from "../shared/community/utils/calcul";
 
 // Composant d'affichage d'erreur sous un champ
 export function FormError({ error }: { error?: string }) {
@@ -62,16 +66,7 @@ export default function CreateCommunity() {
     formState: { errors },
   } = useForm<FormSchema>({
     resolver: zodResolver(useCommunityFormSchema()),
-    defaultValues: {
-      name: "",
-      tags: [],
-      communityType: "free",
-      price: 0.0,
-      yourPercentage: 70,
-      communityPercentage: 15,
-      description: "",
-      codeOfConduct: "",
-    },
+    defaultValues: defaultCommunityForm,
     mode: "onChange",
   });
 
@@ -80,16 +75,6 @@ export default function CreateCommunity() {
     setCommunityType(value);
     setValue("communityType", value as "free" | "paid");
   };
-
-  // Pour la projection
-  const price = Number(watch("price")) || 0;
-  const yourPercentage = Number(watch("yourPercentage")) || 0;
-  const communityPercentage = Number(watch("communityPercentage")) || 0;
-  const snowledgePercentage = 15;
-
-  const totalRepartition =
-    yourPercentage + communityPercentage + snowledgePercentage;
-  const repartitionError = (errors as any)["repartition"]?.message;
 
   const [pendingCommunity, setPendingCommunity] = useState<Community | null>(
     null
@@ -118,6 +103,15 @@ export default function CreateCommunity() {
       setCommunityUrl(`${window.location.origin}/community/${community}`);
     }
   }, [community]);
+
+  // Calculs pour la projection (directement à partir de watch)
+  const price = Number(watch("price")) || 0;
+  const yourPercentage = Number(watch("yourPercentage")) || 0;
+  const communityPercentage = Number(watch("communityPercentage")) || 0;
+  const snowledgePercentage = 15;
+  const totalRepartition =
+    yourPercentage + communityPercentage + snowledgePercentage;
+  const repartitionError = (errors as any)["repartition"]?.message;
 
   // Soumission du formulaire
   function onSubmit(values: FormSchema) {
@@ -193,7 +187,7 @@ export default function CreateCommunity() {
                     register={register}
                     t={t}
                     totalRepartition={totalRepartition}
-                    repartitionError={repartitionError}
+                    repartitionError={repartitionError ?? ""}
                   />
                 </>
               )}
