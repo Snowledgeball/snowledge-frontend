@@ -5,12 +5,14 @@ import {
 	Body,
 	Param,
 	ConflictException,
+	Put,
 } from '@nestjs/common';
 import { CommunityService } from './community.service';
 import { Community } from './entities/community.entity';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from 'src/user/entities/user.entity';
+import { UpdateCommunityDto } from './dto/update-community.dto';
 
 @ApiTags('Communities')
 @Controller('communities')
@@ -53,5 +55,14 @@ export class CommunityController {
 			);
 		}
 		return this.communityService.create(createCommunityDto);
+	}
+
+	@Put(':id')
+	async update(
+		@Param('id') id: number,
+		@Body() updateCommunityDto: UpdateCommunityDto,
+	) {
+		console.log('updateCommunityDto', updateCommunityDto);
+		return this.communityService.update(id, updateCommunityDto);
 	}
 }

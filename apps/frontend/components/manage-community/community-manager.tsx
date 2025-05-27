@@ -2,7 +2,7 @@
 
 import { Button } from "@repo/ui";
 import { useTranslations } from "next-intl";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { CommunityHeader } from "./community-header";
@@ -10,25 +10,19 @@ import { CommunityGeneralSection } from "./community-general-section";
 import { CommunityAccessSection } from "./community-access-section";
 import { CommunityGainsSection } from "./community-gains-section";
 import { features } from "@/config/features";
-import { Community } from "@/types/general";
 import { useCommunityFormSchema } from "../shared/community/hooks/use-community-form-schema";
 import { FormSchema } from "../shared/community/hooks/use-community-form-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-
-const defaultForm = {
-  name: "",
-  tags: [],
-  communityType: "free",
-  price: 0.0,
-  yourPercentage: 70,
-  communityPercentage: 15,
-};
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useCurrentCommunity } from "@/hooks/use-current-community";
 
 export function CommunityManager() {
   const params = useParams();
   const communitySlug = params?.slug as string;
-
+  const router = useRouter();
+  const { setActiveCommunity } = useCurrentCommunity();
   const {
     data: community,
     isLoading,
@@ -45,12 +39,47 @@ export function CommunityManager() {
     },
     enabled: !!communitySlug,
   });
+
+  const { mutate: updateCommunity } = useMutation({
+    mutationFn: async (values: FormSchema) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${community.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer fake-token-123", // TODO: get token
+          },
+          body: JSON.stringify({
+            ...values,
+            user: 2, // TODO: get user id
+          }),
+        }
+      );
+      if (!res.ok)
+        throw new Error("Erreur lors de la mise à jour de la communauté");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      const slug = data.slug;
+      toast.success("Communauté mise à jour avec succès");
+      setTimeout(() => {
+        setActiveCommunity(data);
+        router.push(`/${slug}`);
+      }, 1000);
+    },
+    onError: () => {
+      toast.error("Erreur lors de la mise à jour de la communauté");
+    },
+  });
+
   const {
     setValue,
     register,
     watch,
     formState: { errors },
     reset,
+    handleSubmit,
   } = useForm<FormSchema>({
     resolver: zodResolver(useCommunityFormSchema()),
     defaultValues: {
@@ -108,10 +137,8 @@ export function CommunityManager() {
 
   const t = useTranslations("manageCommunity");
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    // TODO: call API
-    console.log(form);
+  function onSubmit(values: FormSchema) {
+    updateCommunity(values);
   }
 
   // Synchronisation du type d'adhésion
@@ -130,7 +157,7 @@ export function CommunityManager() {
         <div className="flex flex-col md:flex-row">
           <main className="flex-1 overflow-y-auto">
             <div className="container mx-auto px-0 py-4 md:py-6 md:pl-6">
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit(onSubmit)}>
                 {features.community.creator.settings.general && (
                   <CommunityGeneralSection
                     register={register}

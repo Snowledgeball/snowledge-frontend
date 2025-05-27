@@ -1,7 +1,8 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Community } from './entities/community.entity';
 import { CreateCommunityDto } from './dto/create-community.dto';
+import { UpdateCommunityDto } from './dto/update-community.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
 import { User } from 'src/user/entities/user.entity';
@@ -43,5 +44,22 @@ export class CommunityService {
 	async getCommunityCreatorFromSlug(slug: string): Promise<User> {
 		const community = await this.findOneBySlug(slug);
 		return community.user;
+	}
+
+	async update(id: number, data: UpdateCommunityDto): Promise<Community> {
+		const community = await this.communityRepository.findOne({
+			where: { id },
+		});
+		console.log(community);
+		if (!community) {
+			throw new NotFoundException('Community not found');
+		}
+		console.log('data', data);
+		const slug = slugify(data.name, { lower: true, strict: true });
+		return this.communityRepository.save({
+			...community,
+			...data,
+			slug,
+		});
 	}
 }
