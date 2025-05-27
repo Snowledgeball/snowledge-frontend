@@ -21,6 +21,8 @@ import { useUpdateCommunity } from "./hooks/use-update-community";
 import {
   defaultCommunityForm,
   communityToFormValues,
+  useCommunityType,
+  getCommunityProjection,
 } from "../shared/community/utils/calcul";
 
 export function CommunityManager() {
@@ -65,35 +67,30 @@ export function CommunityManager() {
     defaultValues: defaultCommunityForm,
   });
 
-  const [communityType, setCommunityType] = useState("free");
+  const [communityType, handleCommunityTypeChange] = useCommunityType(
+    watch,
+    setValue
+  );
+  const {
+    price,
+    yourPercentage,
+    communityPercentage,
+    snowledgePercentage,
+    totalRepartition,
+    repartitionError,
+  } = getCommunityProjection(watch, errors);
+
+  const t = useTranslations("manageCommunity");
 
   useEffect(() => {
     if (community) {
       reset(communityToFormValues(community));
-      setCommunityType(community.communityType ?? "free");
     }
   }, [community, reset]);
-
-  const t = useTranslations("manageCommunity");
 
   function onSubmit(values: FormSchema) {
     updateCommunity(values);
   }
-
-  // Synchronisation du type d'adhésion
-  const handleCommunityTypeChange = (value: string) => {
-    setCommunityType(value);
-    setValue("communityType", value as "free" | "paid");
-  };
-
-  // Calculs pour CommunityGainsSection (directement dans le composant, pas dans un useState)
-  const price = Number(watch("price")) || 0;
-  const yourPercentage = Number(watch("yourPercentage")) || 0;
-  const communityPercentage = Number(watch("communityPercentage")) || 0;
-  const snowledgePercentage = 15;
-  const totalRepartition =
-    yourPercentage + communityPercentage + snowledgePercentage;
-  const repartitionError = (errors as any)["repartition"]?.message;
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,7 +111,9 @@ export function CommunityManager() {
                 {features.community.creator.settings.access && (
                   <CommunityAccessSection
                     value={communityType}
-                    onChange={handleCommunityTypeChange}
+                    onChange={
+                      handleCommunityTypeChange as (value: string) => void
+                    }
                     errors={errors}
                   />
                 )}

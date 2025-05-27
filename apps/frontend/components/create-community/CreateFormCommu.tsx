@@ -39,6 +39,8 @@ import CommunityTags from "../shared/community/fields/CommunityTags";
 import {
   defaultCommunityForm,
   communityToFormValues,
+  useCommunityType,
+  getCommunityProjection,
 } from "../shared/community/utils/calcul";
 
 // Composant d'affichage d'erreur sous un champ
@@ -49,7 +51,6 @@ export function FormError({ error }: { error?: string }) {
 
 export default function CreateCommunity() {
   const t = useTranslations("ccommunityForm");
-  const [communityType, setCommunityType] = useState("free");
   const [openInvite, setOpenInvite] = useState(false);
   const [community, setCommunity] = useState("");
   const [communityUrl, setCommunityUrl] = useState("");
@@ -70,11 +71,18 @@ export default function CreateCommunity() {
     mode: "onChange",
   });
 
-  // Synchronisation du type d'adhésion
-  const handleCommunityTypeChange = (value: string) => {
-    setCommunityType(value);
-    setValue("communityType", value as "free" | "paid");
-  };
+  const [communityType, handleCommunityTypeChange] = useCommunityType(
+    watch,
+    setValue
+  );
+  const {
+    price,
+    yourPercentage,
+    communityPercentage,
+    snowledgePercentage,
+    totalRepartition,
+    repartitionError,
+  } = getCommunityProjection(watch, errors);
 
   const [pendingCommunity, setPendingCommunity] = useState<Community | null>(
     null
@@ -103,15 +111,6 @@ export default function CreateCommunity() {
       setCommunityUrl(`${window.location.origin}/community/${community}`);
     }
   }, [community]);
-
-  // Calculs pour la projection (directement à partir de watch)
-  const price = Number(watch("price")) || 0;
-  const yourPercentage = Number(watch("yourPercentage")) || 0;
-  const communityPercentage = Number(watch("communityPercentage")) || 0;
-  const snowledgePercentage = 15;
-  const totalRepartition =
-    yourPercentage + communityPercentage + snowledgePercentage;
-  const repartitionError = (errors as any)["repartition"]?.message;
 
   // Soumission du formulaire
   function onSubmit(values: FormSchema) {
@@ -164,7 +163,7 @@ export default function CreateCommunity() {
               {/* Type d'adhésion (RadioGroup) */}
               <CommunityMembershipType
                 value={communityType}
-                onChange={handleCommunityTypeChange}
+                onChange={handleCommunityTypeChange as (value: string) => void}
                 error={errors.communityType?.message}
                 t={t}
               />
