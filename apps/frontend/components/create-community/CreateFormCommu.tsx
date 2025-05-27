@@ -50,7 +50,7 @@ export function FormError({ error }: { error?: string }) {
 }
 
 export default function CreateCommunity() {
-  const t = useTranslations("ccommunityForm");
+  const t = useTranslations("communityForm");
   const [openInvite, setOpenInvite] = useState(false);
   const [community, setCommunity] = useState("");
   const [communityUrl, setCommunityUrl] = useState("");
@@ -142,8 +142,8 @@ export default function CreateCommunity() {
               </Link>
             </Button>
             <div>
-              <CardTitle className="text-2xl">{t("title")}</CardTitle>
-              <CardDescription>{t("form-description")}</CardDescription>
+              <CardTitle className="text-2xl">{t("create.title")}</CardTitle>
+              <CardDescription>{t("create.form-description")}</CardDescription>
             </div>
           </div>
         </CardHeader>

@@ -80,7 +80,7 @@ export function CommunityManager() {
     repartitionError,
   } = getCommunityProjection(watch, errors);
 
-  const t = useTranslations("manageCommunity");
+  const t = useTranslations("communityForm.manage");
 
   useEffect(() => {
     if (community) {

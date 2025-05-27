@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 
 export function CommunityHeader() {
-  const t = useTranslations("manageCommunity");
+  const t = useTranslations("communityForm.manage");
   return (
     <div className="bg-background border-b border-border">
       <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">

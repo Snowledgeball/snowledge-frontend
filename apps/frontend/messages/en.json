@@ -223,6 +223,7 @@
   "communityForm": {
     "manage": {
       "title": "Manage your community",
+      "save": "Save",
       "access": {
         "title": "Access settings",
         "description": "Define if access is free or paid."
@@ -236,15 +237,17 @@
         "intro": "Edit the main information of your community."
       }
     },
+    "create": {
+      "title": "Create and manage your community",
+      "form-description": "Fill in the details to get started",
+      "submit": "Create Community",
+      "footerHelp": "You can edit all these details later from your community dashboard."
+    },
     "toast": {
       "success": "Community created successfully",
       "unknownError": "Unknown error while creating the community.",
       "alreadyExists": "A community with this name already exists."
     },
-    "title": "Create and manage your community",
-    "form-description": "Fill in the details to get started",
-    "submit": "Create Community",
-    "footerHelp": "You can edit all these details later from your community dashboard.",
     "name": {
       "label": "Community Name",
       "placeholder": "Enter community name"
