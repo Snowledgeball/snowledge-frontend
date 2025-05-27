@@ -13,6 +13,9 @@ import {
 import { randomUUID } from 'node:crypto';
 import { Gender } from 'src/shared/enums/Gender';
 import { Email } from 'src/email/entities/email.entity';
+import { DiscordServer } from 'src/discord/entities/discord-server.entity';
+import { YouTubeChannel } from 'src/youtube/entities/youtube-channel.entity';
+import { AnalysisResult } from 'src/analysis/entities/analysis-result.entity';
 
 
 @Entity()
@@ -57,7 +60,16 @@ export class User {
 
 	@OneToMany(() => Email, (email) => email.user)
 	emails: Email[];
-	
+
+	@OneToMany(() => DiscordServer, (discordServer) => discordServer.user)
+	discords: DiscordServer[];
+
+	@OneToMany(() => YouTubeChannel, (youTubeChannel) => youTubeChannel.user)
+	youtubes: YouTubeChannel[];
+
+	@OneToMany(() => AnalysisResult, (analysis) => analysis.user)
+	analysis: AnalysisResult[];
+
 	@Column({ nullable: true })
 	refreshToken: string;
 
