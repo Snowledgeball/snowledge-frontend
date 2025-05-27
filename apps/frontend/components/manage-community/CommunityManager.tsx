@@ -3,7 +3,6 @@
 import { Button } from "@repo/ui";
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { CommunityHeader } from "./CommunityHeader";
 import { CommunityGeneralSection } from "./CommunityGeneralSection";
@@ -17,59 +16,36 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useCurrentCommunity } from "@/hooks/use-current-community";
+import { Community } from "@/types/general";
+import { useUpdateCommunity } from "./hooks/use-update-community";
 
 export function CommunityManager() {
-  const params = useParams();
-  const communitySlug = params?.slug as string;
   const router = useRouter();
-  const { setActiveCommunity } = useCurrentCommunity();
+  const [community, setCommunity] = useState<Community | null>(null);
   const {
-    data: community,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["community", communitySlug],
-    queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communitySlug}`
-      );
-      if (!res.ok)
-        throw new Error("Erreur lors du chargement de la communauté");
-      return res.json();
-    },
-    enabled: !!communitySlug,
-  });
+    setActiveCommunity,
+    activeCommunity,
+  }: {
+    setActiveCommunity: (community: Community) => void;
+    activeCommunity: Community | null;
+  } = useCurrentCommunity();
 
-  const { mutate: updateCommunity } = useMutation({
-    mutationFn: async (values: FormSchema) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${community.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer fake-token-123", // TODO: get token
-          },
-          body: JSON.stringify({
-            ...values,
-            user: 2, // TODO: get user id
-          }),
-        }
-      );
-      if (!res.ok)
-        throw new Error("Erreur lors de la mise à jour de la communauté");
-      return res.json();
-    },
+  useEffect(() => {
+    if (activeCommunity) {
+      console.log("activeCommunity", activeCommunity);
+      setCommunity(activeCommunity);
+    }
+  }, [activeCommunity]);
+
+  const { mutate: updateCommunity } = useUpdateCommunity(community?.id ?? 0, {
     onSuccess: (data) => {
-      const slug = data.slug;
-      toast.success("Communauté mise à jour avec succès");
       setTimeout(() => {
         setActiveCommunity(data);
-        router.push(`/${slug}`);
+        router.push(`/${data.slug}`);
       }, 1000);
     },
-    onError: () => {
-      toast.error("Erreur lors de la mise à jour de la communauté");
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -146,9 +122,6 @@ export function CommunityManager() {
     setCommunityType(value);
     setValue("communityType", value as "free" | "paid");
   };
-
-  if (isLoading) return <div>Chargement...</div>;
-  if (isError) return <div>Erreur lors du chargement</div>;
 
   return (
     <div className="min-h-screen bg-background">
