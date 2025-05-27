@@ -1,5 +1,5 @@
 import { Label, Input } from "@repo/ui";
-import { FormError } from "../CreateFormCommu";
+import { FormError } from "../../../create-community/CreateFormCommu";
 
 export function CommunityPriceField({ register, error, t, price }: any) {
   return (

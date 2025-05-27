@@ -20,24 +20,26 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 
-import { CommunityMembershipType } from "./fields/CommunityMembershipType";
-import { CommunityRevenueDistribution } from "./fields/CommunityRevenueDistribution";
-import { CommunityDescriptionField } from "./fields/CommunityDescriptionField";
-import { CommunityCodeOfConductField } from "./fields/CommunityCodeOfConductField";
-import { CommunityPriceField } from "./fields/CommunityPriceField";
+import { CommunityMembershipType } from "../shared/community/fields/CommunityMembershipType";
+import { CommunityRevenueDistribution } from "../shared/community/fields/CommunityRevenueDistribution";
+import { CommunityDescriptionField } from "../shared/community/fields/CommunityDescriptionField";
+import { CommunityCodeOfConductField } from "../shared/community/fields/CommunityCodeOfConductField";
+import { CommunityPriceField } from "../shared/community/fields/CommunityPriceField";
 import { CreateCommunityFormFooter } from "./CreateCommunityFormFooter";
 
 import ModalInvite from "./modals/ModalInvite";
-import { MultiSelect } from "./ui/MultiSelect";
+import { MultiSelect } from "../shared/community/ui/MultiSelect";
 
 import { Community } from "@/types/general";
 
 import {
   useCommunityFormSchema,
   FormSchema,
-} from "./hooks/use-community-form-schema";
-import { useCreateCommunity } from "./hooks/use-create-community";
+} from "../shared/community/hooks/use-community-form-schema";
+import { useCreateCommunity } from "../shared/community/hooks/use-create-community";
 import { useCurrentCommunity } from "@/hooks/use-current-community";
+import CommunityName from "../shared/community/fields/CommunityName";
+import CommunityTags from "../shared/community/fields/CommunityTags";
 
 // Composant d'affichage d'erreur sous un champ
 export function FormError({ error }: { error?: string }) {
@@ -46,7 +48,7 @@ export function FormError({ error }: { error?: string }) {
 }
 
 export default function CreateCommunity() {
-  const t = useTranslations("createCommunityForm");
+  const t = useTranslations("ccommunityForm");
   const [communityType, setCommunityType] = useState("free");
   const [openInvite, setOpenInvite] = useState(false);
   const [community, setCommunity] = useState("");
@@ -87,12 +89,6 @@ export default function CreateCommunity() {
     setCommunityType(value);
     setValue("communityType", value as "free" | "paid");
   };
-
-  // Synchronisation des tags (MultiSelect)
-  const tags = watch("tags") || [];
-  const selectedOptions = communityTags.filter((opt) =>
-    tags.includes(opt.value)
-  );
 
   // Pour la projection
   const price = Number(watch("price")) || 0;
@@ -171,35 +167,15 @@ export default function CreateCommunity() {
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Nom de la communauté */}
-              <div className="space-y-2">
-                <Label htmlFor="name">{t("name.label")}</Label>
-                <Input
-                  id="name"
-                  placeholder={t("name.placeholder")}
-                  {...register("name")}
-                />
-                <FormError error={errors.name?.message} />
-              </div>
+              <CommunityName register={register} errors={errors} />
 
               {/* Tags (MultiSelect) */}
-              <div className="space-y-2">
-                <Label htmlFor="tags">{t("tags.label")}</Label>
-                <MultiSelect
-                  options={communityTags}
-                  value={selectedOptions}
-                  onChange={(options) =>
-                    setValue(
-                      "tags",
-                      options.map((opt) => opt.value),
-                      { shouldValidate: true }
-                    )
-                  }
-                  placeholder={t("tags.placeholder")}
-                />
-                <input type="hidden" {...register("tags")} value={tags} />
-                <FormError error={errors.tags?.message} />
-              </div>
-
+              <CommunityTags
+                register={register}
+                errors={errors}
+                setValue={setValue}
+                watch={watch}
+              />
               {/* Type d'adhésion (RadioGroup) */}
               <CommunityMembershipType
                 value={communityType}

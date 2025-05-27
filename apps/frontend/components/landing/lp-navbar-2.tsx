@@ -57,13 +57,13 @@ export function LpNavbar2() {
   const tToggle = useTranslations("menu_toggle");
 
   const router = useRouter();
-  // const session = { user: { id: 2 } };
-  // const { data: communities, isLoading } = useUserCommunities(
-  //   session?.user?.id || 0
-  // );
+  const session = { user: { id: 2 } };
+  const { data: communities, isLoading } = useUserCommunities(
+    session?.user?.id || 0
+  );
 
-  const isLoading = false;
-  const communities: Community[] = [];
+  // const isLoading = false;
+  // const communities: Community[] = [];
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 

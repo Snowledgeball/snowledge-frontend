@@ -10,17 +10,20 @@ import { CommunityGeneralSection } from "./community-general-section";
 import { CommunityAccessSection } from "./community-access-section";
 import { CommunityGainsSection } from "./community-gains-section";
 import { features } from "@/config/features";
+import { Community } from "@/types/general";
+import { useCommunityFormSchema } from "../shared/community/hooks/use-community-form-schema";
+import { FormSchema } from "../shared/community/hooks/use-community-form-schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
-const communityTypes = [
-  { value: "immobilier", label: "Immobilier" },
-  { value: "bourse", label: "Bourse" },
-  { value: "crypto", label: "Cryptomonnaies" },
-  { value: "startups", label: "Startups" },
-  { value: "crowdfunding", label: "Crowdfunding" },
-  { value: "épargne", label: "Épargne" },
-  { value: "or", label: "Or & métaux précieux" },
-  { value: "nft", label: "NFT & actifs digitaux" },
-];
+const defaultForm = {
+  name: "",
+  tags: [],
+  communityType: "free",
+  price: 0.0,
+  yourPercentage: 70,
+  communityPercentage: 15,
+};
 
 export function CommunityManager() {
   const params = useParams();
@@ -42,69 +45,80 @@ export function CommunityManager() {
     },
     enabled: !!communitySlug,
   });
+  const {
+    setValue,
+    register,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm<FormSchema>({
+    resolver: zodResolver(useCommunityFormSchema()),
+    defaultValues: {
+      name: "",
+      tags: [],
+      communityType: "free",
+      price: 0.0,
+      yourPercentage: 70,
+      communityPercentage: 15,
+      description: "",
+      codeOfConduct: "",
+    },
+  });
 
-  const defaultForm = {
-    name: "Ma communauté",
-    tags: "",
-    description: "",
-    externalLinks: "",
-    isFree: true,
-    price: "",
-    adminShare: "60",
-    platformShare: "20",
-    prizePoolShare: "20",
-    prizeCreation: "40",
-    prizeRevision: "20",
-    prizeAnimation: "20",
-    prizeSharing: "20",
-  };
+  const [form, setForm] = useState({});
+  const [communityType, setCommunityType] = useState("free");
 
-  const [form, setForm] = useState(defaultForm);
-  const [isFree, setIsFree] = useState(true);
+  useEffect(() => {
+    if (community) {
+      reset({
+        name: community.name ?? "",
+        tags: Array.isArray(community.tags)
+          ? community.tags
+          : typeof community.tags === "string" && community.tags
+            ? [community.tags]
+            : [],
+        communityType: community.communityType ?? "free",
+        price: community.price ?? 0.0,
+        yourPercentage: community.yourPercentage ?? 70,
+        communityPercentage: community.communityPercentage ?? 15,
+        description: community.description ?? "",
+        codeOfConduct: community.codeOfConduct ?? "",
+      });
+      setCommunityType(community.communityType ?? "free");
+    }
+  }, [community, reset]);
+
+  // Pour la projection
+  const price = Number(watch("price")) || 0;
+  const yourPercentage = Number(watch("yourPercentage")) || 0;
+  const communityPercentage = Number(watch("communityPercentage")) || 0;
+  const snowledgePercentage = 15;
+
+  const totalRepartition =
+    yourPercentage + communityPercentage + snowledgePercentage;
+  const repartitionError = (errors as any)["repartition"]?.message;
 
   useEffect(() => {
     if (community) {
       setForm({
-        ...defaultForm,
-        ...community,
-        adminShare: community.adminShare ?? defaultForm.adminShare,
-        platformShare: community.platformShare ?? defaultForm.platformShare,
-        prizePoolShare: community.prizePoolShare ?? defaultForm.prizePoolShare,
-        prizeCreation: community.prizeCreation ?? defaultForm.prizeCreation,
-        prizeRevision: community.prizeRevision ?? defaultForm.prizeRevision,
-        prizeAnimation: community.prizeAnimation ?? defaultForm.prizeAnimation,
-        prizeSharing: community.prizeSharing ?? defaultForm.prizeSharing,
+        community,
       });
-      setIsFree(community.isFree ?? true);
     }
   }, [community]);
 
   const t = useTranslations("manageCommunity");
-
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) {
-    const { name, value, type } = e.target;
-    let newValue: string | boolean = value;
-    if (type === "checkbox" && e.target instanceof HTMLInputElement) {
-      newValue = e.target.checked;
-      if (name === "isFree") setIsFree(e.target.checked);
-    }
-    setForm((prev) => ({
-      ...prev,
-      [name]: newValue,
-    }));
-  }
-
-  function handleSelect(name: string, value: string) {
-    setForm((prev) => ({ ...prev, [name]: value }));
-  }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     // TODO: call API
     console.log(form);
   }
+
+  // Synchronisation du type d'adhésion
+  const handleCommunityTypeChange = (value: string) => {
+    setCommunityType(value);
+    setValue("communityType", value as "free" | "paid");
+  };
 
   if (isLoading) return <div>Chargement...</div>;
   if (isError) return <div>Erreur lors du chargement</div>;
@@ -119,26 +133,31 @@ export function CommunityManager() {
               <form onSubmit={handleSubmit}>
                 {features.community.creator.settings.general && (
                   <CommunityGeneralSection
-                    form={form}
-                    handleChange={handleChange}
-                    handleSelect={handleSelect}
-                    communityTypes={communityTypes}
+                    register={register}
+                    setValue={setValue}
+                    watch={watch}
+                    errors={errors}
                   />
                 )}
                 {features.community.creator.settings.access && (
                   <CommunityAccessSection
-                    isFree={isFree}
-                    form={form}
-                    handleChange={handleChange}
-                    setIsFree={setIsFree}
+                    value={communityType}
+                    onChange={handleCommunityTypeChange}
+                    errors={errors}
                   />
                 )}
-                {features.community.creator.settings.gains && (
-                  <CommunityGainsSection
-                    form={form}
-                    handleChange={handleChange}
-                  />
-                )}
+                {features.community.creator.settings.gains &&
+                  communityType === "paid" && (
+                    <CommunityGainsSection
+                      form={form}
+                      errors={errors}
+                      register={register}
+                      totalRepartition={totalRepartition}
+                      repartitionError={repartitionError}
+                      snowledgePercentage={snowledgePercentage}
+                      price={price}
+                    />
+                  )}
                 <div className="flex justify-end">
                   <Button type="submit">{t("save")}</Button>
                 </div>

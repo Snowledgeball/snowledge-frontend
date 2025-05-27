@@ -1,5 +1,5 @@
 import { Label, Textarea } from "@repo/ui";
-import { FormError } from "../CreateFormCommu";
+import { FormError } from "../../../create-community/CreateFormCommu";
 
 export function CommunityCodeOfConductField({ register, error, t }: any) {
   return (

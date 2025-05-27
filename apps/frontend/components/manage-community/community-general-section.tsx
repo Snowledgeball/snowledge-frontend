@@ -1,85 +1,54 @@
-import { Label, Input, Textarea } from "@repo/ui";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@repo/ui";
 import { useTranslations } from "next-intl";
+import CommunityName from "../shared/community/fields/CommunityName";
+import CommunityTags from "../shared/community/fields/CommunityTags";
+import { CommunityDescriptionField } from "../shared/community/fields/CommunityDescriptionField";
+import { CommunityCodeOfConductField } from "../shared/community/fields/CommunityCodeOfConductField";
 
 interface Props {
-  form: any;
-  handleChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => void;
-  handleSelect: (name: string, value: string) => void;
-  communityTypes: { value: string; label: string }[];
+  register: any;
+  errors: any;
+  setValue: any;
+  watch: any;
 }
 
 export function CommunityGeneralSection({
-  form,
-  handleChange,
-  handleSelect,
-  communityTypes,
+  register,
+  errors,
+  setValue,
+  watch,
 }: Props) {
-  const t = useTranslations("manageCommunity");
+  const t = useTranslations("communityForm");
 
   return (
     <section className="grid grid-cols-1 lg:grid-cols-8 gap-4 mb-8">
       <div className="col-span-8 lg:col-span-4">
-        <h2 className="text-lg font-semibold mb-1">{t("general.title")}</h2>
-        <p className="text-sm text-muted-foreground">{t("general.intro")}</p>
+        <h2 className="text-lg font-semibold mb-1">
+          {t("manage.general.title")}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {t("manage.general.intro")}
+        </p>
       </div>
       <div className="col-span-8 lg:col-span-4 space-y-4 md:space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="name">{t("general.name.label")}</Label>
-          <Input
-            id="name"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            placeholder={t("general.name.placeholder")}
+          <CommunityName register={register} errors={errors} />
+        </div>
+        <div className="space-y-2">
+          <CommunityTags
+            register={register}
+            errors={errors}
+            setValue={setValue}
+            watch={watch}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="tags">{t("general.tags.label")}</Label>
-          <Select
-            value={form.tags}
-            onValueChange={(v) => handleSelect("tags", v)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("general.tags.placeholder")} />
-            </SelectTrigger>
-            <SelectContent className="z-50">
-              {communityTypes.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <CommunityDescriptionField register={register} errors={errors} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="description">{t("general.description.label")}</Label>
-          <Textarea
-            id="description"
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            placeholder={t("general.description.placeholder")}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="externalLinks">
-            {t("general.externalLinks.label")}
-          </Label>
-          <Input
-            id="externalLinks"
-            name="externalLinks"
-            value={form.externalLinks}
-            onChange={handleChange}
-            placeholder={t("general.externalLinks.placeholder")}
+          <CommunityCodeOfConductField
+            register={register}
+            errors={errors}
+            t={t}
           />
         </div>
       </div>

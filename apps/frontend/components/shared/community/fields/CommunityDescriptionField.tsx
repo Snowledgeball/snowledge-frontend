@@ -1,7 +1,10 @@
 import { Label, Textarea } from "@repo/ui";
-import { FormError } from "../CreateFormCommu";
+import { FormError } from "../../../create-community/CreateFormCommu";
+import { useTranslations } from "next-intl";
 
-export function CommunityDescriptionField({ register, error, t }: any) {
+export function CommunityDescriptionField({ register, error }: any) {
+  const t = useTranslations("communityForm");
+
   return (
     <div className="space-y-2">
       <Label htmlFor="description">{t("description.label")}</Label>

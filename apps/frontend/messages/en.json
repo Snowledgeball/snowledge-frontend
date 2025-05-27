@@ -220,7 +220,22 @@
     "error_not_found": "No community matches this value.",
     "success_joined": "Community joined successfully"
   },
-  "createCommunityForm": {
+  "communityForm": {
+    "manage": {
+      "title": "Manage your community",
+      "access": {
+        "title": "Access settings",
+        "description": "Define if access is free or paid."
+      },
+      "gains": {
+        "title": "Gains distribution",
+        "description": "Set the share for admin, prize pool and platform (total = 100%)."
+      },
+      "general": {
+        "title": "General information",
+        "intro": "Edit the main information of your community."
+      }
+    },
     "toast": {
       "success": "Community created successfully",
       "unknownError": "Unknown error while creating the community.",

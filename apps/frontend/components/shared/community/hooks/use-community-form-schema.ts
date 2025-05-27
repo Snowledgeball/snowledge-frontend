@@ -2,7 +2,7 @@ import { z } from "zod";
 import { useTranslations } from "next-intl";
 
 export function useCommunityFormSchema() {
-  const t = useTranslations("createCommunityForm.errors");
+  const t = useTranslations("communityForm.errors");
 
   return z
     .object({

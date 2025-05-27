@@ -8,7 +8,7 @@ export function useCreateCommunity({
 }: {
   onSuccess?: (data: any, variables: any) => void;
 } = {}) {
-  const t = useTranslations("createCommunityForm.toast");
+  const t = useTranslations("communityForm.toast");
 
   return useMutation({
     mutationFn: async (data: FormSchema) => {

@@ -2,7 +2,7 @@ import { Input } from "@repo/ui";
 import { Label } from "@repo/ui";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@repo/ui";
 import { Info } from "lucide-react";
-import { FormError } from "../CreateFormCommu";
+import { FormError } from "../../../create-community/CreateFormCommu";
 
 interface Props {
   price: number;

@@ -219,7 +219,22 @@
     "error_not_found": "Aucune communauté ne correspond à cette valeur.",
     "success_joined": "Communauté rejointe avec succès"
   },
-  "createCommunityForm": {
+  "communityForm": {
+    "manage": {
+      "title": "Gérer votre communauté",
+      "access": {
+        "title": "Paramètres d'accès",
+        "description": "Définissez si l'accès est gratuit ou payant."
+      },
+      "gains": {
+        "title": "Répartition des gains",
+        "description": "Définissez la part des gains pour l'admin, le prize pool et la plateforme (total = 100%)."
+      },
+      "general": {
+        "title": "Informations générales",
+        "intro": "Modifiez les informations principales de votre communauté."
+      }
+    },
     "toast": {
       "success": "Communauté créée avec succès",
       "unknownError": "Erreur inconnue lors de la création de la communauté.",
