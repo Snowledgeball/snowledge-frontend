@@ -62,7 +62,6 @@ export class CommunityController {
 		@Param('id') id: number,
 		@Body() updateCommunityDto: UpdateCommunityDto,
 	) {
-		console.log('updateCommunityDto', updateCommunityDto);
 		return this.communityService.update(id, updateCommunityDto);
 	}
 }

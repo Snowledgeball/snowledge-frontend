@@ -50,11 +50,9 @@ export class CommunityService {
 		const community = await this.communityRepository.findOne({
 			where: { id },
 		});
-		console.log(community);
 		if (!community) {
 			throw new NotFoundException('Community not found');
 		}
-		console.log('data', data);
 		const slug = slugify(data.name, { lower: true, strict: true });
 		return this.communityRepository.save({
 			...community,
