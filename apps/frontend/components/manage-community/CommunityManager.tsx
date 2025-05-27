@@ -21,9 +21,9 @@ import { useUpdateCommunity } from "./hooks/use-update-community";
 import {
   defaultCommunityForm,
   communityToFormValues,
-  useCommunityType,
   getCommunityProjection,
 } from "../shared/community/utils/calcul";
+import { useCommunityType } from "../shared/community/hooks/useCommunityType";
 
 export function CommunityManager() {
   const router = useRouter();

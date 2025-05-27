@@ -59,18 +59,3 @@ export function getCommunityProjection(
     repartitionError,
   };
 }
-
-// Hook pour gérer le type d'adhésion (free/paid)
-export function useCommunityType(
-  watch: UseFormWatch<FormSchema>,
-  setValue: UseFormSetValue<FormSchema>
-) {
-  const [communityType, setCommunityType] = useState<"free" | "paid">(
-    watch("communityType") || "free"
-  );
-  const handleCommunityTypeChange = (value: "free" | "paid") => {
-    setCommunityType(value);
-    setValue("communityType", value);
-  };
-  return [communityType, handleCommunityTypeChange] as const;
-}

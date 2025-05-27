@@ -39,9 +39,9 @@ import CommunityTags from "../shared/community/fields/CommunityTags";
 import {
   defaultCommunityForm,
   communityToFormValues,
-  useCommunityType,
   getCommunityProjection,
 } from "../shared/community/utils/calcul";
+import { useCommunityType } from "../shared/community/hooks/useCommunityType";
 
 // Composant d'affichage d'erreur sous un champ
 export function FormError({ error }: { error?: string }) {
