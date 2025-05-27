@@ -31,9 +31,9 @@ import { Community } from "@/types/general";
 import {
   useCommunityFormSchema,
   FormSchema,
-} from "../shared/community/hooks/use-community-form-schema";
-import { useCreateCommunity } from "./hooks/use-create-community";
-import { useCurrentCommunity } from "@/hooks/use-current-community";
+} from "../shared/community/hooks/useCommunityFormSchema";
+import { useCreateCommunity } from "./hooks/useCreateCommunity";
+import { useCurrentCommunity } from "@/hooks/useCurrentCommunity";
 import CommunityName from "../shared/community/fields/CommunityName";
 import CommunityTags from "../shared/community/fields/CommunityTags";
 import {

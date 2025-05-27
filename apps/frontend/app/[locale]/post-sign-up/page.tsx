@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@repo/ui";
 import { Input } from "@repo/ui";
-import { useAllCommunities } from "@/hooks/use-all-communities";
+import { useAllCommunities } from "@/hooks/useAllCommunities";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";

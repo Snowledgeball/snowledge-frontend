@@ -9,15 +9,15 @@ import { CommunityGeneralSection } from "./CommunityGeneralSection";
 import { CommunityAccessSection } from "./CommunityAccessSection";
 import { CommunityGainsSection } from "./CommunityGainsSection";
 import { features } from "@/config/features";
-import { useCommunityFormSchema } from "../shared/community/hooks/use-community-form-schema";
-import { FormSchema } from "../shared/community/hooks/use-community-form-schema";
+import { useCommunityFormSchema } from "../shared/community/hooks/useCommunityFormSchema";
+import { FormSchema } from "../shared/community/hooks/useCommunityFormSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useCurrentCommunity } from "@/hooks/use-current-community";
+import { useCurrentCommunity } from "@/hooks/useCurrentCommunity";
 import { Community } from "@/types/general";
-import { useUpdateCommunity } from "./hooks/use-update-community";
+import { useUpdateCommunity } from "./hooks/useUpdateCommunity";
 import {
   defaultCommunityForm,
   communityToFormValues,

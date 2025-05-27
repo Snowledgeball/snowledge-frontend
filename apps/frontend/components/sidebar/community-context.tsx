@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useUserCommunities } from "../../hooks/use-user-communities";
+import { useUserCommunities } from "../../hooks/useUserCommunities";
 import { Community } from "@/types/general";
 
 export const CommunityContext = React.createContext<{

@@ -20,7 +20,7 @@ import { SocialIcon } from "react-social-icons";
 import { LanguageSwitcher } from "./shared/langage";
 import { PocForm } from "./shared/pocform";
 import { redirect, useRouter } from "next/navigation";
-import { useUserCommunities } from "@/hooks/use-user-communities";
+import { useUserCommunities } from "@/hooks/useUserCommunities";
 import { Community } from "@/types/general";
 
 interface NavMenuItemsProps {

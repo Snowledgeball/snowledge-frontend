@@ -8,7 +8,7 @@ import PartnersSection from "@/components/landing/partners";
 import { Footer2 } from "@/components/landing/footer-2";
 import { UpgradeBanner } from "@repo/ui/components/upgrade-banner";
 import { redirect } from "next/navigation";
-import { useUserCommunities } from "@/hooks/use-user-communities";
+import { useUserCommunities } from "@/hooks/useUserCommunities";
 
 export default function Home() {
   // const session = { user: { id: 2 } }; // TODO: remplacer par le user id

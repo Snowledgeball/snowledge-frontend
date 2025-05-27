@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { UseFormWatch, UseFormSetValue } from "react-hook-form";
-import { FormSchema } from "./use-community-form-schema";
+import { FormSchema } from "./useCommunityFormSchema";
 
 export function useCommunityType(
   watch: UseFormWatch<FormSchema>,

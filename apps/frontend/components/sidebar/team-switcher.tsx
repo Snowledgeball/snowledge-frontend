@@ -20,9 +20,9 @@ import {
 } from "@repo/ui/components/sidebar";
 import { toSlug } from "@/utils/slug";
 import { features } from "@/config/features";
-import { useCurrentCommunity } from "@/hooks/use-current-community";
+import { useCurrentCommunity } from "@/hooks/useCurrentCommunity";
 import { Community } from "@/types/general";
-import { useUserCommunities } from "@/hooks/use-user-communities";
+import { useUserCommunities } from "@/hooks/useUserCommunities";
 
 export function CommunitySwitcher() {
   const { activeCommunity, setActiveCommunity } = useCurrentCommunity();
