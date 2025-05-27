@@ -14,17 +14,30 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
   const [activeCommunity, setActiveCommunity] =
     React.useState<Community | null>(null);
 
-  // Set la première communauté quand le fetch réussit et qu'il y a des communautés
+  // Restaure la communauté active depuis le localStorage au montage
   React.useEffect(() => {
-    if (
-      isSuccess &&
-      communities &&
-      communities.length > 0 &&
-      !activeCommunity
-    ) {
-      setActiveCommunity(communities[0]);
+    if (isSuccess && communities && communities.length > 0) {
+      const savedId =
+        typeof window !== "undefined"
+          ? localStorage.getItem("activeCommunityId")
+          : null;
+      const found = savedId
+        ? communities.find((c) => String(c.id) === savedId)
+        : null;
+      if (found) {
+        setActiveCommunity(found);
+      } else {
+        setActiveCommunity(communities[0]);
+      }
     }
-  }, [isSuccess, communities, activeCommunity]);
+  }, [isSuccess, communities]);
+
+  // Sauvegarde l'id de la communauté active à chaque changement
+  React.useEffect(() => {
+    if (activeCommunity && typeof window !== "undefined") {
+      localStorage.setItem("activeCommunityId", String(activeCommunity.id));
+    }
+  }, [activeCommunity]);
 
   return (
     <CommunityContext.Provider
