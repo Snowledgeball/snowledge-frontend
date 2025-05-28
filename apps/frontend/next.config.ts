@@ -5,4 +5,8 @@ export default withNextIntl("./i18n/request.ts")({
   transpilePackages: ["@repo/ui"],
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, "../../"),
+  images: {
+    loader: "custom",
+    loaderFile: "./imageLoader.ts",
+  },
 });
