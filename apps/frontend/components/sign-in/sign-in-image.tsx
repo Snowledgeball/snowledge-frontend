@@ -8,7 +8,8 @@ export default function SignInImage() {
   return (
     <>
       {/* Right side: Image (hidden on mobile) */}
-      <Image
+      {/* Remplacer le img par un Image de next/image, dès qu'on met une image custom*/}
+      <img
         src="https://ui.shadcn.com/placeholder.svg"
         alt="Image"
         width="1800"
