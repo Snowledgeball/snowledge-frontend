@@ -3,7 +3,7 @@
 import { Logo } from "@repo/ui/components/logo";
 import { Button } from "@repo/ui/components/button";
 import { Menu, X, Zap } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import {
@@ -22,6 +22,7 @@ import { PocForm } from "./shared/pocform";
 import { redirect, useRouter } from "next/navigation";
 import { useUserCommunities } from "@/hooks/useUserCommunities";
 import { Community } from "@/types/general";
+import { useAuth } from "@/contexts/auth-context";
 
 interface NavMenuItemsProps {
   className?: string;
@@ -51,33 +52,38 @@ const NavMenuItems = ({ className }: NavMenuItemsProps) => {
 };
 
 export function LpNavbar2() {
+  const { user, fetchDataUser } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const tCTA = useTranslations("cta");
   const tForm = useTranslations("form");
   const tToggle = useTranslations("menu_toggle");
 
   const router = useRouter();
-  const session = { user: { id: 2 } };
-  const { data: communities, isLoading } = useUserCommunities(
-    session?.user?.id || 0
-  );
-
-  // const isLoading = false;
-  // const communities: Community[] = [];
+  const { data: communities, isLoading } = useUserCommunities(user?.id || 0);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
   const handleGoTest = () => {
     // TODO: A modifier, quand user fonctionne (login...) Rajouter un bouton dans le header, pour rediriger vers soit les commu rejoint soit le post-sign-up. En grois le bouton onclick appellera la logique juste en dessous
-    if (!isLoading && communities) {
+    if (!isLoading && communities && user) {
       if (communities.length > 0) {
         router.push(`/${communities[0].slug}`);
       } else {
         // TODO:  A MODIFIER VERS SIGN-UP / LOGIN
         router.push("/post-sign-up");
       }
+    } else {
+      router.push("/sign-in");
     }
   };
+
+  useEffect(() => {
+    fetchDataUser();
+  }, []);
+
+  useEffect(() => {
+    console.log("user", user);
+  }, [user]);
 
   return (
     <nav className="sticky top-0 z-50 bg-background py-3.5 md:py-4 isolate">
