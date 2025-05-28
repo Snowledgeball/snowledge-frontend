@@ -10,7 +10,7 @@ export default function Account() {
             <div className="container mx-auto px-0 py-4 md:py-6 md:pl-6">
                 <div className="flex flex-col gap-4 md:gap-6">
                     {/* Avatar Card */}
-                    <SettingsAvatar />
+                    {/* <SettingsAvatar /> */}
                     {/* Display Name Card */}
                     <DisplayName />
 

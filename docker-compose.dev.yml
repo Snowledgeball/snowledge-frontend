@@ -14,6 +14,7 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - NEXT_TELEMETRY_DISABLED=1
       - NODE_ENV=development
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:4000
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
     networks:
       - snowledge_network

@@ -13,10 +13,10 @@ export default function DisplayName() {
             <div className="px-4 py-4 md:px-6">
                 <div className="space-y-1">
                     <h2 className="text-lg md:text-xl font-semibold">
-                        Display name
+                        Pseudo
                     </h2>
                     <p className="text-sm text-muted-foreground">
-                        Enter your full name or a display name you'd like to
+                        Enter your pseudo you'd like to
                         use.
                     </p>
                 </div>
@@ -28,9 +28,9 @@ export default function DisplayName() {
                     />
                 </div>
             <div className="py-4 px-4 md:px-6 border-t flex flex-col md:flex-row items-start md:items-center gap-3 justify-between">
-                <p className="text-sm text-muted-foreground">
+                {/* <p className="text-sm text-muted-foreground">
                     Maximum allowed length is 32 characters.
-                </p>
+                </p> */}
                 <Button>Save</Button>
             </div>
         </Card>

@@ -7,6 +7,8 @@ import {
 	CreateDateColumn,
 	UpdateDateColumn,
 	BeforeInsert,
+	JoinColumn,
+	OneToOne,
 } from 'typeorm';
 
 
@@ -16,6 +18,8 @@ import { Email } from 'src/email/entities/email.entity';
 import { DiscordServer } from 'src/discord/entities/discord-server.entity';
 import { YouTubeChannel } from 'src/youtube/entities/youtube-channel.entity';
 import { AnalysisResult } from 'src/analysis/entities/analysis-result.entity';
+import { DiscordAccess } from 'src/discord/entities/discord-access.entity';
+import { Type } from 'class-transformer';
 
 
 @Entity()
@@ -52,11 +56,22 @@ export class User {
 	@Column({ default: false })
 	isActive: boolean;
 
+	@Column({ nullable: true, unique: true })
+	discordId: string;
+
+	@Column({ nullable: true, unique: true })
+	youtubeId: string;
+
 	@Column({ nullable: true })
 	referrer: string;
 
 	@Column({ unique: true })
 	referral: string;
+
+	@OneToOne(() => DiscordAccess)
+	@JoinColumn()
+	@Type(() => DiscordAccess)
+    discordAccess?: DiscordAccess;
 
 	@OneToMany(() => Email, (email) => email.user)
 	emails: Email[];

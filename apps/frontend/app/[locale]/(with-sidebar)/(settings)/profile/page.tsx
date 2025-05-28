@@ -45,7 +45,7 @@ export default function Settings() {
                         <ChangePasswordForm />
                     </section>
 
-                    <Separator className="my-6" />
+                    {/* <Separator className="my-6" /> */}
 
                     {/* Advanced settings section */}
                     <section className="grid grid-cols-1 lg:grid-cols-8 gap-4 mb-8">

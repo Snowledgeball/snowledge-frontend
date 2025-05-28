@@ -5,9 +5,11 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 
 type AuthContextType = {
   accessToken: string | null;
+  user: any | null;
   setAccessToken: (token: string | null) => void;
   authFetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
   refreshAccessToken: () => Promise<string | null>;
+  fetchDataUser: () => Promise<boolean>;
   validateFormSignUp: (formData: FormDataSignUp) => string | null;
   verifyToken: (token: string) => Promise<boolean>;
 };
@@ -15,6 +17,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
     const isJwtValid = (token: string) => {
         try {
@@ -66,14 +69,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         refreshAccessToken(); // Récupère le token au premier chargement
     }, [refreshAccessToken]);
-
+    const fetchDataUser = async () => {
+                try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user`, {
+                method: 'GET',
+                credentials: 'include',
+            });
+            if (!response.ok) {
+                throw new Error("Failed. Please try again.");
+            }
+            const data = await response.json();
+            console.log(data)
+            setUser(data.user)
+            return true;
+        } catch (err: any) {
+            throw new Error (err.message || "An unexpected error occurred.");
+        }
+    }
     const verifyToken = async (token: string) => {
         try {
-            const response = await fetch('http://localhost:4000/auth/verify-token', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/verify-token`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({ token: token}),
             });
             if (!response.ok) {
@@ -87,7 +107,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     const validateFormSignUp = (formData: FormDataSignUp) => {
         const { gender, firstname, lastname, pseudo, email, age, password, confirmPwd } = formData;
-        if ((gender != undefined) || !firstname || !lastname || !pseudo || !email || !age || !password || !confirmPwd) {
+        if ((gender == undefined) || !firstname || !lastname || !pseudo || !email || !age || !password || !confirmPwd) {
             return "All fields are required.";
         }
         if (password.length < 8) {
@@ -101,8 +121,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return (
         <AuthContext.Provider value={{ 
             accessToken, 
+            user,
             setAccessToken, 
-            authFetch, 
+            authFetch,
+            fetchDataUser,
             refreshAccessToken,
             validateFormSignUp,
             verifyToken

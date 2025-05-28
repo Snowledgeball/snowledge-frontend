@@ -1,6 +1,7 @@
 "use client";
 
 import {
+    Switch,
     Toggle,
     ToggleGroup
 } from "@repo/ui";
@@ -19,51 +20,19 @@ export default function NotificationGeneral() {
             </div>
 
             {[
-            "New messages",
-            "Account activity",
-            "Mentions in discussions",
-            "Application updates",
+            "New notification in app",
+            "receive emails",
             ].map((title) => (
                 <div
                     key={title}
                     className="flex flex-col md:flex-row items-start md:items-center gap-3 justify-between"
                 >
                     <span className="text-sm font-semibold">{title}</span>
-                    <ToggleGroup
-                        type="single"
-                        defaultValue="all"
+                    <div
                         className="space-x-1 md:flex-row"
                     >
-                        <Toggle
-                          value="all"
-                          variant="outline"
-                          className="px-3 h-10"
-                          defaultPressed
-                        >
-                            All
-                        </Toggle>
-                        <Toggle
-                          value="email"
-                          variant="outline"
-                          className="px-3 h-10"
-                        >
-                            Email
-                        </Toggle>
-                        <Toggle
-                          value="inapp"
-                          variant="outline"
-                          className="px-3 h-10"
-                        >
-                            In app
-                        </Toggle>
-                        <Toggle
-                          value="none"
-                          variant="outline"
-                          className="px-3 h-10"
-                        >
-                            None
-                        </Toggle>
-                    </ToggleGroup>
+                        <Switch id="airplane-mode" />
+                    </div>
                 </div>
             ))}
         </div>

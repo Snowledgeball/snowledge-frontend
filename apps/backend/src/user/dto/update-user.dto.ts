@@ -1,7 +1,8 @@
-import { ApiProperty, OmitType } from '@nestjs/swagger';
+import { ApiProperty, getSchemaPath, OmitType } from '@nestjs/swagger';
 import { SignUpDto } from '../../auth/dto';
-import { IsDate, IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsEmail, IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Gender } from 'src/shared/enums/Gender';
+import { DiscordAccess } from 'src/discord/entities/discord-access.entity';
 
 export class UpdateUserDto {
 	@ApiProperty({ 
@@ -65,4 +66,22 @@ export class UpdateUserDto {
 	@IsDate()
 	@IsOptional()
 	isActive?: boolean;
+
+	@IsString()
+	@ApiProperty({ type: String })
+	@IsOptional()
+	discordId?: string;
+
+	@IsString()
+	@ApiProperty({ type: String })
+	@IsOptional()
+	youtubeId?: string;
+
+	@ValidateNested()
+	@IsOptional()
+	@ApiProperty({
+		type: 'object',
+		additionalProperties: { $ref: getSchemaPath(DiscordAccess) },
+	})
+	discordAccess?: DiscordAccess;
 }

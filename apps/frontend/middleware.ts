@@ -69,10 +69,7 @@ export async function middleware(request: NextRequest) {
                     });
 
                     return res;
-                } else {
-                    return NextResponse.redirect(new URL(`/${currentLocale}/sign-up`, request.url));
-
-                }
+                } 
             } catch (e) {
                 console.error("Token refresh failed:", e);
             }

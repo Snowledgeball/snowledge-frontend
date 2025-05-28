@@ -24,11 +24,13 @@ export class UserService {
 	findOneById(id: number): Promise<User | null> {
 		return this.userRepository.findOne({
 			where: { id },
+			relations:  ['discordAccess']
 		});
 	}
 	findOneByEmail(email: string): Promise<User | null> {
 		return this.userRepository.findOne({
 			where: { email },
+			relations:  ['discordAccess']
 		});
 	}
 
