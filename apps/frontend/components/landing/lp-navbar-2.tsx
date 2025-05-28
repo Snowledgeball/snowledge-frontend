@@ -79,10 +79,6 @@ export function LpNavbar2() {
     fetchDataUser();
   }, []);
 
-  useEffect(() => {
-    console.log("user", user);
-  }, [user]);
-
   return (
     <nav className="sticky top-0 z-50 bg-background py-3.5 md:py-4 isolate">
       <div className="container gap-4 md:gap-6 px-6 flex flex-col md:flex-row md:items-center md:relative m-auto">
