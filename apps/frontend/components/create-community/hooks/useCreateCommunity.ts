@@ -18,12 +18,11 @@ export function useCreateCommunity({
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer fake-token-123", // TODO: get token
           },
           body: JSON.stringify({
             ...data,
-            user: 2, // TODO: get user id
           }),
+          credentials: "include",
         }
       );
       if (!res.ok) {

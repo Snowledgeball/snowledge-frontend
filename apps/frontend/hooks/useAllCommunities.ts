@@ -12,7 +12,10 @@ export function useAllCommunities() {
     queryKey: ["communities"],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/all`
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/all`,
+        {
+          credentials: "include",
+        }
       );
       if (!res.ok) throw new Error("Erreur lors du chargement des communautés");
       return res.json();

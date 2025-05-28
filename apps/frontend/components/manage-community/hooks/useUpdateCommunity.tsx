@@ -23,11 +23,11 @@ export function useUpdateCommunity(
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer fake-token-123", // TODO: get token
           },
           body: JSON.stringify({
             ...data,
           }),
+          credentials: "include",
         }
       );
       if (!res.ok) {

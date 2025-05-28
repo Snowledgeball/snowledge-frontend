@@ -18,7 +18,6 @@ export default function Home() {
   const { data: communities, isLoading } = useUserCommunities(user?.id || 0);
 
   // Redirection selon le résultat
-  // TODO: A modifier, quand user fonctionne (login...) Rajouter un bouton dans le header, pour rediriger vers soit les commu rejoint soit le post-sign-up. En grois le bouton onclick appellera la logique juste en dessous
   if (!isLoading && communities && !noRedirect) {
     if (communities.length > 0) {
       redirect(`/${communities[0].slug}`);

@@ -2,6 +2,8 @@
 import * as React from "react";
 import { useUserCommunities } from "../../hooks/useUserCommunities";
 import { Community } from "@/types/general";
+import { useAuth } from "@/contexts/auth-context";
+import { useEffect } from "react";
 
 export const CommunityContext = React.createContext<{
   activeCommunity: Community | null;
@@ -10,9 +12,14 @@ export const CommunityContext = React.createContext<{
 } | null>(null);
 
 export function CommunityProvider({ children }: { children: React.ReactNode }) {
-  const { data: communities, isSuccess } = useUserCommunities(2); // TODO: remplacer 2 par l'id réel de l'utilisateur
+  const { user, fetchDataUser } = useAuth();
+  const { data: communities, isSuccess } = useUserCommunities(user?.id || 0);
   const [activeCommunity, setActiveCommunity] =
     React.useState<Community | null>(null);
+
+  useEffect(() => {
+    fetchDataUser();
+  }, []);
 
   // Restaure la communauté active depuis le localStorage au montage
   React.useEffect(() => {

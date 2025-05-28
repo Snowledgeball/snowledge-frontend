@@ -74,23 +74,8 @@ function SidebarNavs() {
   const navContributeur = useNavContributor(activeCommunity ?? { name: "" });
   const navCreator = useNavCreator(activeCommunity ?? { name: "" });
 
-  const router = useRouter();
-
   return (
     <>
-      {/* TODO: supprimer quand y aura la page intermédiaire et que dcp on sera obligé d'etre dabns une communauté avant d'être dans cette page */}
-      {!activeCommunity && (
-        <div
-          className="flex items-center gap-2"
-          onClick={() => {
-            router.push("/create-community");
-          }}
-        >
-          <div className="text-muted-foreground font-medium">
-            TEMP Créer une commu
-          </div>
-        </div>
-      )}
       <SidebarNavMain items={[home]} label="" />
       <SidebarNavMain items={navLearner} label={tNavbar("learner")} />
       <SidebarNavMain items={navContributeur} label={tNavbar("contributor")} />

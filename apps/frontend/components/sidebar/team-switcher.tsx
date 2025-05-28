@@ -23,12 +23,18 @@ import { features } from "@/config/features";
 import { useCurrentCommunity } from "@/hooks/useCurrentCommunity";
 import { Community } from "@/types/general";
 import { useUserCommunities } from "@/hooks/useUserCommunities";
+import { useAuth } from "@/contexts/auth-context";
+import { useEffect } from "react";
 
 export function CommunitySwitcher() {
   const { activeCommunity, setActiveCommunity } = useCurrentCommunity();
   const router = useRouter();
   const { isMobile } = useSidebar();
-  const { data: communities } = useUserCommunities(2); // TODO: replace userId by the user id
+  const { user, fetchDataUser } = useAuth();
+  const { data: communities } = useUserCommunities(user?.id || 0);
+  useEffect(() => {
+    fetchDataUser();
+  }, []);
   if (!communities || !activeCommunity) return null;
   return (
     <SidebarMenu>

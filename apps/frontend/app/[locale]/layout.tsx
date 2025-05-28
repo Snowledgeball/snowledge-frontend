@@ -88,14 +88,14 @@ export default async function RootLayout({
       </head>
       <body className="antialiased">
         <ReactQueryClientProvider>
-          <CommunityProvider>
-            <NextIntlClientProvider locale={locale} messages={messages}>
-              <AuthProvider>
+          <AuthProvider>
+            <CommunityProvider>
+              <NextIntlClientProvider locale={locale} messages={messages}>
                 {children}
                 <Toaster />
-              </AuthProvider>
-            </NextIntlClientProvider>
-          </CommunityProvider>
+              </NextIntlClientProvider>
+            </CommunityProvider>
+          </AuthProvider>
         </ReactQueryClientProvider>
       </body>
     </html>

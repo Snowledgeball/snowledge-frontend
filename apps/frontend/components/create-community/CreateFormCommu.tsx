@@ -42,6 +42,7 @@ import {
   getCommunityProjection,
 } from "../shared/community/utils/calcul";
 import { useCommunityType } from "../shared/community/hooks/useCommunityType";
+import { useAuth } from "@/contexts/auth-context";
 
 // Composant d'affichage d'erreur sous un champ
 export function FormError({ error }: { error?: string }) {
@@ -54,7 +55,7 @@ export default function CreateCommunity() {
   const [openInvite, setOpenInvite] = useState(false);
   const [community, setCommunity] = useState("");
   const [communityUrl, setCommunityUrl] = useState("");
-
+  const { user, fetchDataUser } = useAuth();
   const { setActiveCommunity } = useCurrentCommunity();
 
   const router = useRouter();
@@ -98,6 +99,10 @@ export default function CreateCommunity() {
     },
   });
 
+  useEffect(() => {
+    fetchDataUser();
+  }, []);
+
   // Effet qui attend la fermeture de la modal
   useEffect(() => {
     if (!openInvite && pendingCommunity) {
@@ -124,7 +129,7 @@ export default function CreateCommunity() {
       communityPercentage: values.communityPercentage
         ? Number(values.communityPercentage)
         : undefined,
-      user: 2, // TODO: get user id
+      user: user?.id,
     };
 
     console.log(JSON.stringify(payload));
