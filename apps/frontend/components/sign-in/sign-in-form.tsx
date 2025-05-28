@@ -1,9 +1,53 @@
 "use client";
 
+import { useAuth } from "@/contexts/auth-context";
+import { FormDataSignIn } from "@/shared/interfaces/ISignIn";
 import { Logo, Button, Checkbox, Input, Label } from "@repo/ui";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function SignInForm() {
+    const router = useRouter();
+    const { setAccessToken } = useAuth();
+    const [formData, setFormData] = useState<FormDataSignIn>({
+        email: '',
+        password: '',
+    });
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({
+            ...formData,
+            [event.target.name]: event.target.value,
+        });
+    };
+
+    const submitSignIn = async () => {
+        setError("");
+        setSuccess("");
+
+        try {
+            const response = await fetch('http://localhost:4000/auth/sign-in', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+            if (!response.ok) {
+                throw new Error("Login failed. Please try again.");
+            }
+            const data = await response.json();
+            setAccessToken(data.access_token); 
+
+            router.push('/');
+        } catch (err: any) {
+            setError(err.message || "An unexpected error occurred.");
+        }
+    }
     return (
         <>
             <div className="md:w-1/2 flex items-center justify-center">
@@ -27,12 +71,26 @@ export default function SignInForm() {
                     {/* Email input */}
                     <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
-                        <Input id="email" placeholder="Email" type="email" />
+                        <Input 
+                            id="email" 
+                            name="email" 
+                            placeholder="Email" 
+                            type="email" 
+                            value={formData.email}
+                            onChange={handleInputChange}  
+                        />
                     </div>
                     {/* Password input */}
                     <div className="space-y-2">
                         <Label htmlFor="password">Password</Label>
-                        <Input id="password" placeholder="Password" type="password" />
+                        <Input
+                            id="password"
+                            name="password" 
+                            placeholder="Password"
+                            type="password"
+                            value={formData.password}
+                            onChange={handleInputChange} 
+                        />
                     </div>
                     {/* Remember me checkbox and Forgot password link */}
                     <div className="flex items-center justify-between">
@@ -52,7 +110,9 @@ export default function SignInForm() {
                 </div>
                 {/* Sign-in button and Sign-up link */}
                 <div className="flex flex-col space-y-4">
-                    <Button className="w-full">Sign in</Button>
+                    {error && <p className="text-sm text-red-500">{error}</p>}
+                    {success && <p className="text-sm text-green-600">{success}</p>}
+                    <Button className="w-full"  onClick={submitSignIn}>Sign in</Button>
                         <p className="text-sm text-center text-muted-foreground">
                             Don&apos;t have an account?{" "}
                         <Link className="underline text-foreground" href="/sign-up">

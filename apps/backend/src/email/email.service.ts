@@ -4,7 +4,7 @@ import { LessThan, Repository } from 'typeorm';
 import { Email } from './entities/email.entity';
 import { CreateCodeEmailDto } from './dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
-import { EmailType } from 'src/shared/interface/enums/EmailType';
+import { EmailType } from 'src/shared/enums/EmailType';
 
 @Injectable()
 export class EmailService {

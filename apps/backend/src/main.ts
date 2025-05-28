@@ -2,13 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 
 	const configService = app.get(ConfigService);
 	app.enableCors(configService.get('serverConfig.cors'));
-
+	app.use(cookieParser());
 	const swagger = process.env.SWAGGER ? JSON.parse(process.env.SWAGGER) : '';
 	console.log('swagger', swagger);
 	if (swagger) {

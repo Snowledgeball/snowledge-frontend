@@ -8,6 +8,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import postgresConfig from './config/postgres.config';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
+import { SnowTestRegisterModule } from './snow-test-register/snow-test-register.module';
+import { PlatformModule } from './platform/platform.module';
+import { DiscordModule } from './discord/discord.module';
+import { YoutubeModule } from './youtube/youtube.module';
+import { AnalysisModule } from './analysis/analysis.module';
 import mailingConfig from './config/mailing.config';
 import { CommunityModule } from './community/community.module';
 @Module({
@@ -34,6 +39,11 @@ import { CommunityModule } from './community/community.module';
 		AuthModule,
 		EmailModule,
 		UserModule,
+		SnowTestRegisterModule,
+		PlatformModule,
+		DiscordModule,
+		YoutubeModule,
+		AnalysisModule,
 		CommunityModule,
 	],
 	controllers: [AppController],

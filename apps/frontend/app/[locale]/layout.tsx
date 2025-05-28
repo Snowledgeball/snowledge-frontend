@@ -6,6 +6,7 @@ import React from "react";
 import localFont from "next/font/local";
 import "../globals.css";
 import { Metadata } from "next";
+import { AuthProvider } from "@/contexts/auth-context";
 import { ReactQueryClientProvider } from "@/utils/react-query-provider";
 import { CommunityProvider } from "@/components/sidebar/community-context";
 import { Toaster } from "sonner";
@@ -62,6 +63,7 @@ export default async function RootLayout({
   const messages = (await import(`../../messages/${locale}.json`)).default;
 
   if (!messages) notFound();
+
   return (
     <html
       lang={locale}
@@ -88,8 +90,10 @@ export default async function RootLayout({
         <ReactQueryClientProvider>
           <CommunityProvider>
             <NextIntlClientProvider locale={locale} messages={messages}>
-              {children}
-              <Toaster />
+              <AuthProvider>
+                {children}
+                <Toaster />
+              </AuthProvider>
             </NextIntlClientProvider>
           </CommunityProvider>
         </ReactQueryClientProvider>

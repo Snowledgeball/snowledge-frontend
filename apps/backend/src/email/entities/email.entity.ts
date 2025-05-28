@@ -7,7 +7,7 @@ import {
 	UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { EmailType } from 'src/shared/interface/enums/EmailType';
+import { EmailType } from 'src/shared/enums/EmailType';
 
 @Entity()
 export class Email {

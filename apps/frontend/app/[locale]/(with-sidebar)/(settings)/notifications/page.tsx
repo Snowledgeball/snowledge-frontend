@@ -1,7 +1,7 @@
 "use client";
 
 import NotificationGeneral from "@/components/settings/notifications/general";
-import NotificationSummary from "@/components/settings/notifications/summary";
+// import NotificationSummary from "@/components/settings/notifications/summary";
 import NotificationTitle from "@/components/settings/notifications/title";
 import { Separator } from "@repo/ui";
 
@@ -17,10 +17,10 @@ export default function Notifications() {
 
                     <NotificationGeneral />
 
-                    <Separator />
+                    {/* <Separator /> */}
 
                     {/* Summary notifications */}
-                    <NotificationSummary />
+                    {/* <NotificationSummary /> */}
                 </div>
             </div>
         </main>

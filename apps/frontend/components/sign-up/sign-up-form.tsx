@@ -1,15 +1,28 @@
 "use client";
 
-import { Logo, Button, Checkbox, Input, Label } from "@repo/ui";
+import { useAuth } from "@/contexts/auth-context";
+import { Gender } from "@/shared/enums/Gender";
+import { FormDataSignUp, ISignUp } from "@/shared/interfaces/ISignUp";
+import { getEnumKeys } from "@/utils/get-enum-keys";
+import { Logo, Button, Checkbox, Input, Label, Select, SelectTrigger, SelectValue, SelectItem, SelectContent, Popover, PopoverTrigger, PopoverContent, Calendar } from "@repo/ui";
+import { cn } from "@workspace/ui/lib/utils";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from 'react';
 
+
 export default function SignUpForm() {
-    const [formData, setFormData] = useState({
+    const router = useRouter();
+    const { setAccessToken, validateFormSignUp } = useAuth();
+    const [formData, setFormData] = useState<FormDataSignUp>({
+        gender: undefined,
         firstname: '',
         lastname: '',
         pseudo: '',
         email: '',
+        age: undefined,
         password: '',
         confirmPwd: '',
     });
@@ -23,46 +36,40 @@ export default function SignUpForm() {
             [event.target.name]: event.target.value,
         });
     };
-      const validateForm = () => {
-        const { firstname, lastname, pseudo, email, password, confirmPwd } = formData;
-        if (!firstname || !lastname || !pseudo || !email || !password || !confirmPwd) {
-            return "All fields are required.";
-        }
-        if (password.length < 8) {
-            return "Password must be at least 8 characters.";
-        }
-        if (password !== confirmPwd) {
-            return "Passwords do not match.";
-        }
-        if (!termsAccepted) {
-            return "You must accept the Terms & Conditions.";
-        }
-        return null;
-    };
+
     const submitRegistration = async () => {
         console.log('submit')
         setError("");
         setSuccess("");
-
-        const validationError = validateForm();
+        if (!termsAccepted) {
+            return "You must accept the Terms & Conditions.";
+        }
+        const validationError = validateFormSignUp(formData);
+        
         if (validationError) {
             setError(validationError);
             return;
         }
 
         try {
+            const { confirmPwd, ...rest } = formData;
+            const signUp: ISignUp = rest;
             const response = await fetch('http://localhost:4000/auth/sign-up', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(signUp),
             });
             if (!response.ok) {
                 throw new Error("Registration failed. Please try again.");
             }
             const data = await response.json();
             console.log(data);
+            setAccessToken(data.access_token);
+            router.push('/');
+            
         } catch (err: any) {
             setError(err.message || "An unexpected error occurred.");
         }
@@ -89,6 +96,28 @@ export default function SignUpForm() {
 
                     {/* Form inputs section */}
                     <div className="space-y-4">
+
+                        <Select 
+                            value={formData.gender !== undefined ? Gender[formData.gender] : ""} 
+                            onValueChange={(value: keyof typeof Gender) => 
+                                setFormData({
+                                    ...formData,
+                                    gender: Gender[value],
+                                }) 
+                            }
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a gender" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {
+                                    getEnumKeys(Gender).map((key, index) =>(
+                                        <SelectItem key={index} value={key}>{key}</SelectItem>
+                                    ))
+                                }
+                                {/* Add more states as needed */}
+                            </SelectContent>
+                        </Select>
                         {/* Name input field */}
                         <Input 
                             type="text" 
@@ -111,6 +140,31 @@ export default function SignUpForm() {
                             value={formData.pseudo}
                             onChange={handleInputChange} 
                         />
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "w-[240px] justify-start text-left font-normal",
+                                    !formData.age && "text-muted-foreground"
+                                )}
+                                >
+                                <CalendarIcon />
+                                {formData.age ? format(formData.age, "PPP") : <span>Pick a date</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={formData.age}
+                                    onSelect={value => setFormData({
+                                        ...formData,
+                                        age: value,
+                                    })}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
                         {/* Email input field */}
                         <Input 
                             type="email" 

@@ -35,7 +35,7 @@ import {
 
 import { toSlug } from "@/utils/slug";
 import { useTranslations } from "next-intl";
-import { NavUser } from "./nav-user";
+import NavUser from "./nav-user";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (

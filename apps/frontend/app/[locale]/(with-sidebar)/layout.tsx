@@ -1,6 +1,6 @@
 import "../../globals.css";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import Header from "@/components/header";
+import Header from "@/components/Header";
 import { SidebarInset, SidebarProvider } from "@repo/ui";
 
 export default function RootLayout({

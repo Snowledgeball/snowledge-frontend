@@ -1,10 +1,26 @@
 "use client";
 
+import { useRouter, useSearchParams } from 'next/navigation'
 import { 
   Button,
 } from "@repo/ui";
+import { useEffect } from 'react';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function AdvancedSettingsForm() {
+    const router = useRouter();
+    const verify = useSearchParams().get("verify");
+    const { user, fetchDataUser } = useAuth();
+    const routeDiscored = "https://discord.com/oauth2/authorize?client_id=1377001604179558491&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Fdiscord%2Flink&scope=identify+guilds+email+messages.read+connections";
+    const discordAuth = () => {
+        router.push(routeDiscored);
+    }
+    useEffect(()=>{
+        if(verify === 'discord'){
+            fetchDataUser();
+        }
+    }, [verify])
+
     return (
         <div className="col-span-8 lg:col-span-4 space-y-4 md:space-y-6">
             <div className="flex items-top space-x-2">
@@ -14,11 +30,11 @@ export default function AdvancedSettingsForm() {
                     htmlFor="data-export"
                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                    Data Export Access
+                    Discord Access
                 </label>
-                <p className="text-sm text-muted-foreground">
-                    Allow export of personal data and backups.
-                </p>
+                <button onClick={discordAuth} disabled={user?.discordAccess} className="text-sm text-muted-foreground">
+                    Connect discord
+                </button>
             </div>
             </div>
             <div className="flex items-top space-x-2">
@@ -28,10 +44,10 @@ export default function AdvancedSettingsForm() {
                         htmlFor="admin-add"
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
-                        Allow Admin to Add Members
+                        Youtube Access
                     </label>
                     <p className="text-sm text-muted-foreground">
-                        Admins can invite and manage members.
+                        Connect youtube
                     </p>
                 </div>
             </div>

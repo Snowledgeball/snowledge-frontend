@@ -6,12 +6,19 @@ import {
 	CreateDateColumn,
 	UpdateDateColumn,
 	BeforeInsert,
+	JoinColumn,
+	OneToOne,
 } from 'typeorm';
 
 import { randomUUID } from 'node:crypto';
-import { Gender } from 'src/shared/interface/enums/gender';
+import { Gender } from 'src/shared/enums/Gender';
 import { Email } from 'src/email/entities/email.entity';
 import { Community } from 'src/community/entities/community.entity';
+import { DiscordServer } from 'src/discord/entities/discord-server.entity';
+import { YouTubeChannel } from 'src/youtube/entities/youtube-channel.entity';
+import { AnalysisResult } from 'src/analysis/entities/analysis-result.entity';
+import { DiscordAccess } from 'src/discord/entities/discord-access.entity';
+import { Type } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -36,8 +43,10 @@ export class User {
 	})
 	gender: Gender;
 
-	@Column()
-	age: number;
+	@Column({
+		type: 'timestamp',
+	})
+	age: Date;
 
 	@Column()
 	password: string;
@@ -45,17 +54,40 @@ export class User {
 	@Column({ default: false })
 	isActive: boolean;
 
+	@Column({ nullable: true, unique: true })
+	discordId: string;
+
+	@Column({ nullable: true, unique: true })
+	youtubeId: string;
+
 	@Column({ nullable: true })
 	referrer: string;
 
 	@Column({ unique: true })
 	referral: string;
 
+	@OneToOne(() => DiscordAccess)
+	@JoinColumn()
+	@Type(() => DiscordAccess)
+	discordAccess?: DiscordAccess;
+
 	@OneToMany(() => Email, (email) => email.user)
 	emails: Email[];
 
 	@OneToMany(() => Community, (community) => community.user)
 	communities: Community[];
+
+	@OneToMany(() => DiscordServer, (discordServer) => discordServer.user)
+	discords: DiscordServer[];
+
+	@OneToMany(() => YouTubeChannel, (youTubeChannel) => youTubeChannel.user)
+	youtubes: YouTubeChannel[];
+
+	@OneToMany(() => AnalysisResult, (analysis) => analysis.user)
+	analysis: AnalysisResult[];
+
+	@Column({ nullable: true })
+	refreshToken: string;
 
 	@CreateDateColumn({
 		type: 'timestamp',

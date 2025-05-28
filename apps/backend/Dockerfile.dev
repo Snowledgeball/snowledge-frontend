@@ -24,7 +24,7 @@ RUN npm install
 COPY --from=prune /app/out/full/ .
 COPY turbo.json turbo.json
 
-RUN npx turbo run dev --filter=backend^... --no-cache
+RUN npx turbo run build --filter=backend^... --no-cache
 
 FROM base AS runner
 WORKDIR /app
