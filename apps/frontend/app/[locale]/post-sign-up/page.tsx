@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { PlusCircle, Users } from "lucide-react";
+import { ArrowLeft, PlusCircle, Users } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@repo/ui";
 import {
@@ -59,8 +59,17 @@ export default function PostSignUp() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <Card className="mx-auto w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">{t("title")}</CardTitle>
-          <CardDescription>{t("description")}</CardDescription>
+          <div className="flex items-center justify-center">
+            <Button variant="ghost" size="icon" asChild className="mr-2">
+              <Link href="/?no-redirect=true">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+            <div className="flex flex-col items-center justify-center">
+              <CardTitle className="text-2xl">{t("title")}</CardTitle>
+              <CardDescription>{t("description")}</CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">

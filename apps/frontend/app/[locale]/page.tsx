@@ -7,52 +7,52 @@ import { FaqSection1 } from "@/components/landing/faq-section-1";
 import PartnersSection from "@/components/landing/partners";
 import { Footer2 } from "@/components/landing/footer-2";
 import { UpgradeBanner } from "@repo/ui/components/upgrade-banner";
-import { redirect } from "next/navigation";
+import { redirect, useSearchParams } from "next/navigation";
 import { useUserCommunities } from "@/hooks/useUserCommunities";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function Home() {
-  // const session = { user: { id: 2 } }; // TODO: remplacer par le user id
-
+  const { user } = useAuth();
+  const noRedirect = useSearchParams().get("no-redirect");
   // Appelle le hook directement dans le composant
-  // const { data: communities, isLoading } = useUserCommunities(
-  //   session?.user?.id || 0
-  // );
+  const { data: communities, isLoading } = useUserCommunities(user?.id || 0);
 
   // Redirection selon le résultat
   // TODO: A modifier, quand user fonctionne (login...) Rajouter un bouton dans le header, pour rediriger vers soit les commu rejoint soit le post-sign-up. En grois le bouton onclick appellera la logique juste en dessous
-  // if (!isLoading && communities) {
-  //   if (communities.length > 0) {
-  //     redirect(`/${communities[0].slug}`);
-  //   } else {
-  //     redirect("/post-sign-up");
-  //   }
-  // }
+  if (!isLoading && communities && !noRedirect) {
+    if (communities.length > 0) {
+      redirect(`/${communities[0].slug}`);
+    } else {
+      redirect("/post-sign-up");
+    }
+  }
+  console.log("noRedirect", noRedirect);
 
   // Si pas connecté : affiche la landing page
-  // if (!session) {
-  return (
-    <>
-      <LpNavbar2 />
+  if (!user || noRedirect) {
+    return (
+      <>
+        <LpNavbar2 />
 
-      <div className="mt-4 md:mt-6 mb-0">
-        <UpgradeBanner />
-      </div>
-      <div className="bg-hero-gradient">
-        <HeroSection7 />
-      </div>
-      <section id="features" className="scroll-mt-24 bg-features">
-        <FeatureSection9 />
-      </section>
-      <section className="bg-faq">
-        <FaqSection1 />
-      </section>
-      <PartnersSection />
-      <div className="bg-footer-gradient">
-        <Footer2 />
-      </div>
-    </>
-  );
-  // }
+        <div className="mt-4 md:mt-6 mb-0">
+          <UpgradeBanner />
+        </div>
+        <div className="bg-hero-gradient">
+          <HeroSection7 />
+        </div>
+        <section id="features" className="scroll-mt-24 bg-features">
+          <FeatureSection9 />
+        </section>
+        <section className="bg-faq">
+          <FaqSection1 />
+        </section>
+        <PartnersSection />
+        <div className="bg-footer-gradient">
+          <Footer2 />
+        </div>
+      </>
+    );
+  }
 
-  // return null;
+  return null;
 }
