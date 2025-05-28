@@ -100,7 +100,7 @@ export function SidebarCreatorNav({
         ))}
         <Separator />
         <SidebarMenuItem>
-          <Link href="/">
+          <Link href="/?no-redirect=true">
             <SidebarMenuButton className="text-sidebar-foreground/70">
               <Home className="text-sidebar-foreground/70" />
               <span>Landing</span>

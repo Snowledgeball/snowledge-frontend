@@ -25,7 +25,6 @@ export default function Home() {
       redirect("/post-sign-up");
     }
   }
-  console.log("noRedirect", noRedirect);
 
   // Si pas connecté : affiche la landing page
   if (!user || noRedirect) {
