@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Learner } from './entities/learner/learner';
+import { Learner, LearnerStatus } from './entities/learner/learner';
 import { Repository } from 'typeorm';
 import { Community } from '../community/entities/community.entity';
 import { User } from '../user/entities/user.entity';
@@ -47,10 +47,15 @@ export class LearnerService {
 	async getLearnersByCommunitySlug(slug: string) {
 		const community = await this.communityRepository.findOne({
 			where: { slug },
-			relations: ['learners', 'learners.user'],
 		});
 		if (!community) throw new NotFoundException('Community not found');
-		return community.learners;
+		return this.learnerRepository.find({
+			where: {
+				community: { id: community.id },
+				status: LearnerStatus.MEMBER,
+			},
+			relations: ['user'],
+		});
 	}
 
 	async removeLearnerFromCommunity(slug: string, userId: number) {

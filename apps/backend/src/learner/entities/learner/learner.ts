@@ -9,6 +9,12 @@ import {
 import { User } from '../../../user/entities/user.entity';
 import { Community } from '../../../community/entities/community.entity';
 
+export enum LearnerStatus {
+	INVITED = 'invited',
+	MEMBER = 'member',
+	BANNED = 'banned',
+}
+
 @Entity()
 export class Learner {
 	@PrimaryGeneratedColumn()
@@ -24,6 +30,16 @@ export class Learner {
 
 	@Column({ default: false })
 	isContributor: boolean;
+
+	@Column({
+		type: 'enum',
+		enum: LearnerStatus,
+		default: LearnerStatus.MEMBER,
+	})
+	status: LearnerStatus;
+
+	@Column({ nullable: true })
+	invitedAt: Date;
 
 	@CreateDateColumn({
 		type: 'timestamp',
