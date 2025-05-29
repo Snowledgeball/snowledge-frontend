@@ -10,71 +10,35 @@ import {
 } from "@repo/ui/components/dialog";
 import { Input } from "@repo/ui/components/input";
 import { Button } from "@repo/ui/components/button";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@repo/ui/components/avatar";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { X, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { User } from "@/types/user";
 
-// Simule une base d'utilisateurs
-const MOCK_USERS = [
-  {
-    id: "1",
-    name: "Alice Martin",
-    email: "alice.martin@email.com",
-    avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-  },
-  {
-    id: "2",
-    name: "Bob Dupont",
-    email: "bob.dupont@email.com",
-    avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-  },
-  {
-    id: "3",
-    name: "Chloé Bernard",
-    email: "chloe.bernard@email.com",
-    avatar: "https://randomuser.me/api/portraits/women/3.jpg",
-  },
-  {
-    id: "4",
-    name: "David Leroy",
-    email: "david.leroy@email.com",
-    avatar: "https://randomuser.me/api/portraits/men/4.jpg",
-  },
-  // ...ajoute autant d'utilisateurs fictifs que tu veux
-];
-
-// Simule un appel API avec un délai
-function fetchUsers(search: string) {
-  return new Promise<typeof MOCK_USERS>((resolve) => {
-    setTimeout(() => {
-      const filtered = MOCK_USERS.filter(
-        (u) =>
-          u.name.toLowerCase().includes(search.toLowerCase()) ||
-          u.email.toLowerCase().includes(search.toLowerCase())
-      );
-      resolve(filtered);
-    }, 400);
-  });
+async function fetchUsers(search: string): Promise<User[]> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/user/all?search=${encodeURIComponent(search)}`,
+    { credentials: "include" }
+  );
+  if (!res.ok) throw new Error("Erreur lors de la recherche d'utilisateurs");
+  return res.json();
 }
 
 const ModalInvite = ({
   open,
   onOpenChange,
   communityUrl,
+  communitySlug,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   communityUrl: string;
+  communitySlug: string;
 }) => {
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<typeof MOCK_USERS>([]);
+  const [selected, setSelected] = useState<User[]>([]);
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["users", search],
     queryFn: () => fetchUsers(search),
@@ -85,24 +49,55 @@ const ModalInvite = ({
 
   const [copied, setCopied] = useState(false);
 
-  const handleSelect = (user: (typeof MOCK_USERS)[0]) => {
+  const inviteMutation = useMutation({
+    mutationFn: async (userIds: (string | number)[]) => {
+      console.log(userIds);
+      console.log(communitySlug);
+      await Promise.all(
+        userIds.map(async (userId) => {
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communitySlug}/learners/invite`,
+            {
+              method: "POST",
+              credentials: "include",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ userId }),
+            }
+          );
+          if (!res.ok) {
+            // On récupère le message d'erreur du backend
+            const errorData = await res.json();
+            throw new Error(errorData.message || "Erreur lors de l'invitation");
+          }
+        })
+      );
+    },
+    onSuccess: () => {
+      toast.success(
+        t("toast.success", { emails: selected.map((u) => u.email).join(", ") })
+      );
+      setSelected([]);
+      setSearch("");
+      onOpenChange(false);
+    },
+    onError: (error: any) => {
+      // Affiche le message du backend dans le toast
+      toast.error(error.message || "Erreur lors de l'envoi des invitations");
+    },
+  });
+
+  const handleSelect = (user: User) => {
     if (!selected.find((u) => u.id === user.id)) {
       setSelected((prev) => [...prev, user]);
     }
   };
 
-  const handleRemove = (userId: string) => {
+  const handleRemove = (userId: string | number) => {
     setSelected((prev) => prev.filter((u) => u.id !== userId));
   };
 
   const handleInvite = () => {
-    // Simule l'envoi d'invitations
-    toast.success(
-      t("toast.success", { emails: selected.map((u) => u.email).join(", ") })
-    );
-    setSelected([]);
-    setSearch("");
-    onOpenChange(false);
+    inviteMutation.mutate(selected.map((u) => u.id));
   };
 
   const handleCopy = async () => {
@@ -167,27 +162,19 @@ const ModalInvite = ({
                   {t("search.noResult")}
                 </div>
               ) : (
-                users.map((user) => (
+                users.map((user: User) => (
                   <button
                     key={user.id}
                     type="button"
                     className="flex items-center w-full px-3 py-2 hover:bg-accent transition"
                     onClick={() => handleSelect(user)}
                   >
-                    <Avatar className="h-7 w-7 mr-2">
-                      <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback>
-                        {user.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
                     <span className="flex-1 text-left">
-                      <span className="font-medium">{user.name}</span>
+                      <span className="font-medium">
+                        {user.firstname} {user.lastname}
+                      </span>
                       <span className="block text-xs text-muted-foreground">
-                        {user.email}
+                        {user.pseudo} · {user.email}
                       </span>
                     </span>
                   </button>
@@ -199,22 +186,15 @@ const ModalInvite = ({
           {/* Utilisateurs sélectionnés */}
           {selected.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
-              {selected.map((user) => (
+              {selected.map((user: User) => (
                 <span
                   key={user.id}
                   className="flex items-center bg-accent rounded-full px-3 py-1 text-sm"
                 >
-                  <Avatar className="h-5 w-5 mr-1">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback>
-                      {user.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  {user.name}
+                  {user.firstname} {user.lastname}{" "}
+                  <span className="ml-1 text-xs text-muted-foreground">
+                    ({user.pseudo})
+                  </span>
                   <button
                     type="button"
                     className="ml-1 text-muted-foreground hover:text-destructive"

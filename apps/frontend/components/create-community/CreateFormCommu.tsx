@@ -43,6 +43,7 @@ import {
 } from "../shared/community/utils/calcul";
 import { useCommunityType } from "../shared/community/hooks/useCommunityType";
 import { useAuth } from "@/contexts/auth-context";
+import { toSlug } from "@/utils/slug";
 
 // Composant d'affichage d'erreur sous un champ
 export function FormError({ error }: { error?: string }) {
@@ -219,6 +220,7 @@ export default function CreateCommunity() {
         open={openInvite}
         onOpenChange={setOpenInvite}
         communityUrl={communityUrl}
+        communitySlug={toSlug(community)}
       />
     </div>
   );

@@ -10,13 +10,23 @@ import {
 } from '@nestjs/common';
 import { LearnerService } from './learner.service';
 import { Community } from '../community/entities/community.entity';
-import { User } from '../user/entities/user.entity';
+import { User as UserEntity } from '../user/entities/user.entity';
+import { User as UserDecorator } from '../user/decorator';
 
 @Controller('communities/:slug/learners')
 export class LearnerController {
 	constructor(private readonly learnerService: LearnerService) {}
 
 	// Ajouter un user à une communauté
+	@Post('invite')
+	async inviteUser(
+		@Param('slug') slug: string,
+		@Body('userId') userId: number,
+		@UserDecorator() user: UserEntity,
+	) {
+		return this.learnerService.inviteUserToCommunity(slug, userId, user.id);
+	}
+
 	@Post(':userId')
 	async addLearner(
 		@Param('slug') slug: string,

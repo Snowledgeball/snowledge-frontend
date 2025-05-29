@@ -6,6 +6,7 @@ import {
 	Param,
 	Delete,
 	Logger,
+	Query,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -18,14 +19,12 @@ import { Public } from '../auth/auth.decorator';
 export class UserController {
 	private readonly logger = new Logger(UserController.name);
 
-	constructor(
-		private readonly userService: UserService,
-	) {}
+	constructor(private readonly userService: UserService) {}
 
 	@Public()
 	@Get('all')
-	findAll() {
-		return this.userService.findAll();
+	async findAllUsers(@Query('search') search?: string) {
+		return this.userService.findAll(search);
 	}
 
 	@Get()
@@ -35,10 +34,8 @@ export class UserController {
 		return { user };
 	}
 
-
 	@Delete('/by-email/:email')
 	byEmail(@Param('email') email: string) {
 		return this.userService.deleteByEmail(email);
 	}
-
 }

@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateUserDto } from './dto';
 import { randomUUID } from 'node:crypto';
 import { SignUpDto } from 'src/auth/dto';
+import { ILike } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -17,20 +18,31 @@ export class UserService {
 		const user = await this.userRepository.create(signUpDto);
 		return this.userRepository.save(user);
 	}
-	findAll(): Promise<User[]> {
+	async findAll(search?: string) {
+		if (search) {
+			return this.userRepository.find({
+				where: [
+					{ firstname: ILike(`%${search}%`) },
+					{ lastname: ILike(`%${search}%`) },
+					{ pseudo: ILike(`%${search}%`) },
+					{ email: ILike(`%${search}%`) },
+				],
+				take: 20, // limite le nombre de résultats
+			});
+		}
 		return this.userRepository.find();
 	}
 
 	findOneById(id: number): Promise<User | null> {
 		return this.userRepository.findOne({
 			where: { id },
-			relations:  ['discordAccess']
+			relations: ['discordAccess'],
 		});
 	}
 	findOneByEmail(email: string): Promise<User | null> {
 		return this.userRepository.findOne({
 			where: { email },
-			relations:  ['discordAccess']
+			relations: ['discordAccess'],
 		});
 	}
 
