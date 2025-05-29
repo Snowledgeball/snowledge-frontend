@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useCurrentCommunity } from "@/hooks/useCurrentCommunity";
-import { Community } from "@/types/general";
+import { Community } from "@/types/community";
 import { useUpdateCommunity } from "./hooks/useUpdateCommunity";
 import {
   defaultCommunityForm,

@@ -26,7 +26,7 @@ import { CreateCommunityFormFooter } from "./CreateCommunityFormFooter";
 
 import ModalInvite from "./modals/ModalInvite";
 
-import { Community } from "@/types/general";
+import { Community } from "@/types/community";
 
 import {
   useCommunityFormSchema,

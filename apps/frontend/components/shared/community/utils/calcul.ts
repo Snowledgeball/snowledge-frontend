@@ -1,7 +1,7 @@
 //
 
 // Utilitaires pour la gestion des formulaires de communauté
-import { Community } from "@/types/general";
+import { Community } from "@/types/community";
 import { FormSchema } from "../hooks/useCommunityFormSchema";
 import { useState } from "react";
 import { UseFormWatch, UseFormSetValue } from "react-hook-form";

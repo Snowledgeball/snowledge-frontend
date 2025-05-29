@@ -21,7 +21,7 @@ import { LanguageSwitcher } from "./shared/langage";
 import { PocForm } from "./shared/pocform";
 import { redirect, useRouter } from "next/navigation";
 import { useUserCommunities } from "@/hooks/useUserCommunities";
-import { Community } from "@/types/general";
+import { Community } from "@/types/community";
 import { useAuth } from "@/contexts/auth-context";
 
 interface NavMenuItemsProps {

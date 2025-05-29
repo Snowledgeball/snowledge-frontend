@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import { useUserCommunities } from "../../hooks/useUserCommunities";
-import { Community } from "@/types/general";
+import { Community } from "@/types/community";
 import { useAuth } from "@/contexts/auth-context";
 import { useEffect } from "react";
 

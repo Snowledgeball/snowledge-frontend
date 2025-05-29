@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Community } from "@/types/general";
+import { Community } from "@/types/community";
 
 export function useUserCommunities(userId: number) {
   return useQuery<Community[]>({
