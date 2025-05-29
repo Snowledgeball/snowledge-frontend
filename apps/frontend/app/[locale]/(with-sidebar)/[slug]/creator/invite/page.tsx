@@ -29,7 +29,11 @@ export default function Page() {
   const communityUrl = `${window.location.origin}/join/${slug}`;
 
   // Récupère les invitations en attente
-  const { data: invited = [], isLoading } = useQuery({
+  const {
+    data: invited = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["invited", slug],
     queryFn: async () => {
       const res = await fetch(
@@ -51,8 +55,8 @@ export default function Page() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-8">
-      <Card>
+    <div className="max-w-2xl w-full mx-auto p-8">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Inviter des utilisateurs</CardTitle>
         </CardHeader>
@@ -71,6 +75,7 @@ export default function Page() {
             onOpenChange={setModalOpen}
             communityUrl={communityUrl}
             communitySlug={slug as string}
+            refetch={refetch}
           />
           <h2 className="text-lg font-semibold mt-6 mb-2">
             Invitations en attente

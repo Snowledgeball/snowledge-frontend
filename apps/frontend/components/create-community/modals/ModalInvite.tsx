@@ -31,11 +31,13 @@ const ModalInvite = ({
   onOpenChange,
   communityUrl,
   communitySlug,
+  refetch,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   communityUrl: string;
   communitySlug: string;
+  refetch?: any;
 }) => {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<User[]>([]);
@@ -73,6 +75,8 @@ const ModalInvite = ({
       );
     },
     onSuccess: () => {
+      if (refetch) refetch();
+
       toast.success(
         t("toast.success", { emails: selected.map((u) => u.email).join(", ") })
       );
