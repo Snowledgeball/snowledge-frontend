@@ -65,4 +65,22 @@ export class LearnerService {
 		await this.learnerRepository.remove(learner);
 		return { success: true };
 	}
+
+	async updateLearnerContributor(
+		slug: string,
+		userId: number,
+		isContributor: boolean,
+	) {
+		const community = await this.communityRepository.findOne({
+			where: { slug },
+		});
+		if (!community) throw new NotFoundException('Community not found');
+		const learner = await this.learnerRepository.findOne({
+			where: { community: { id: community.id }, user: { id: userId } },
+			relations: ['user', 'community'],
+		});
+		if (!learner) throw new NotFoundException('Learner not found');
+		learner.isContributor = isContributor;
+		return this.learnerRepository.save(learner);
+	}
 }

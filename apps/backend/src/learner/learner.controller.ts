@@ -6,6 +6,7 @@ import {
 	Get,
 	Delete,
 	NotFoundException,
+	Patch,
 } from '@nestjs/common';
 import { LearnerService } from './learner.service';
 import { Community } from '../community/entities/community.entity';
@@ -42,5 +43,19 @@ export class LearnerController {
 		@Param('userId') userId: number,
 	) {
 		return this.learnerService.removeLearnerFromCommunity(slug, userId);
+	}
+
+	// PATCH pour promouvoir/rétrograder un learner
+	@Patch(':userId')
+	async updateLearner(
+		@Param('slug') slug: string,
+		@Param('userId') userId: number,
+		@Body('isContributor') isContributor: boolean,
+	) {
+		return this.learnerService.updateLearnerContributor(
+			slug,
+			userId,
+			isContributor,
+		);
 	}
 }

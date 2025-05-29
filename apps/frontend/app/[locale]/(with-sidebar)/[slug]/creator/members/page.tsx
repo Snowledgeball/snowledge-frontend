@@ -17,10 +17,14 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
 } from "@repo/ui";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { MoreVertical } from "lucide-react";
 
 type Member = {
   id: number;
@@ -38,7 +42,6 @@ export default function Page() {
   const { slug } = useParams();
   const [search, setSearch] = useState("");
   const queryClient = useQueryClient();
-  const router = useRouter();
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   const [selectedMemberName, setSelectedMemberName] = useState<string>("");
 
@@ -56,7 +59,7 @@ export default function Page() {
       );
       if (res.status == 401) {
         toast.error("Veuillez vous reconnecter pour accéder à cette page");
-        router.push("/");
+        window.location.href = "/";
       }
       if (!res.ok) throw new Error("Erreur lors du chargement des membres");
       return res.json();
@@ -74,6 +77,31 @@ export default function Page() {
         }
       );
       if (!res.ok) throw new Error("Erreur lors de la suppression");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["learners", slug] });
+    },
+  });
+
+  const promoteMutation = useMutation({
+    mutationFn: async ({
+      userId,
+      isContributor,
+    }: {
+      userId: number;
+      isContributor: boolean;
+    }) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${slug}/learners/${userId}`,
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isContributor }),
+        }
+      );
+      if (!res.ok) throw new Error("Erreur lors de la modification du statut");
       return res.json();
     },
     onSuccess: () => {
@@ -127,19 +155,40 @@ export default function Page() {
                 {new Date(member.created_at).toLocaleDateString("fr-FR")}
               </TableCell>
               <TableCell>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedMemberId(member.user.id);
-                    setSelectedMemberName(
-                      `${member.user.firstname} ${member.user.lastname}`
-                    );
-                  }}
-                  disabled={deleteMutation.isPending}
-                >
-                  Supprimer
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreVertical className="w-4 h-4" />
+                      <span className="sr-only">Ouvrir le menu d'actions</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        // mutation pour promouvoir/rétrograder
+                        promoteMutation.mutate({
+                          userId: member.user.id,
+                          isContributor: !member.isContributor,
+                        });
+                      }}
+                    >
+                      {member.isContributor
+                        ? "Rétrograder membre"
+                        : "Promouvoir contributeur"}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedMemberId(member.user.id);
+                        setSelectedMemberName(
+                          `${member.user.firstname} ${member.user.lastname}`
+                        );
+                      }}
+                      className="text-destructive"
+                    >
+                      Supprimer
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}
