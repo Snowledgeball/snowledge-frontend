@@ -14,9 +14,6 @@ import { randomUUID } from 'node:crypto';
 import { Gender } from 'src/shared/enums/Gender';
 import { Email } from 'src/email/entities/email.entity';
 import { Community } from 'src/community/entities/community.entity';
-import { DiscordServer } from 'src/discord/entities/discord-server.entity';
-import { YouTubeChannel } from 'src/youtube/entities/youtube-channel.entity';
-import { AnalysisResult } from 'src/analysis/entities/analysis-result.entity';
 import { DiscordAccess } from 'src/discord/entities/discord-access.entity';
 import { Type } from 'class-transformer';
 import { Learner } from '../../learner/entities/learner/learner';
@@ -77,15 +74,6 @@ export class User {
 
 	@OneToMany(() => Community, (community) => community.user)
 	communities: Community[];
-
-	@OneToMany(() => DiscordServer, (discordServer) => discordServer.user)
-	discords: DiscordServer[];
-
-	@OneToMany(() => YouTubeChannel, (youTubeChannel) => youTubeChannel.user)
-	youtubes: YouTubeChannel[];
-
-	@OneToMany(() => AnalysisResult, (analysis) => analysis.user)
-	analysis: AnalysisResult[];
 
 	@Column({ nullable: true })
 	refreshToken: string;
