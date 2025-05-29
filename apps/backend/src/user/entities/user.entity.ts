@@ -19,6 +19,7 @@ import { YouTubeChannel } from 'src/youtube/entities/youtube-channel.entity';
 import { AnalysisResult } from 'src/analysis/entities/analysis-result.entity';
 import { DiscordAccess } from 'src/discord/entities/discord-access.entity';
 import { Type } from 'class-transformer';
+import { Learner } from '../../learner/entities/learner/learner';
 
 @Entity()
 export class User {
@@ -101,6 +102,9 @@ export class User {
 		onUpdate: 'CURRENT_TIMESTAMP(6)',
 	})
 	updated_at: Date;
+
+	@OneToMany(() => Learner, (learner) => learner.user)
+	learners: Learner[];
 
 	@BeforeInsert()
 	lowercase() {

@@ -29,6 +29,7 @@ export {
 } from "./collapsible";
 export {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,

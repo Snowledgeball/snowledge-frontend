@@ -15,6 +15,7 @@ import { YoutubeModule } from './youtube/youtube.module';
 import { AnalysisModule } from './analysis/analysis.module';
 import mailingConfig from './config/mailing.config';
 import { CommunityModule } from './community/community.module';
+import { LearnerModule } from './learner/learner.module';
 @Module({
 	imports: [
 		ConfigModule.forRoot({
@@ -45,6 +46,7 @@ import { CommunityModule } from './community/community.module';
 		YoutubeModule,
 		AnalysisModule,
 		CommunityModule,
+		LearnerModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

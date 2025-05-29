@@ -1,5 +1,14 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+	Entity,
+	Column,
+	PrimaryGeneratedColumn,
+	ManyToOne,
+	OneToMany,
+	UpdateDateColumn,
+	CreateDateColumn,
+} from 'typeorm';
 import { User } from '../../user/entities/user.entity';
+import { Learner } from '../../learner/entities/learner/learner';
 
 @Entity()
 export class Community {
@@ -38,4 +47,20 @@ export class Community {
 		nullable: false,
 	})
 	user: User;
+
+	@OneToMany(() => Learner, (learner) => learner.community)
+	learners: Learner[];
+
+	@CreateDateColumn({
+		type: 'timestamp',
+		default: () => 'CURRENT_TIMESTAMP(6)',
+	})
+	created_at: Date;
+
+	@UpdateDateColumn({
+		type: 'timestamp',
+		default: () => 'CURRENT_TIMESTAMP(6)',
+		onUpdate: 'CURRENT_TIMESTAMP(6)',
+	})
+	updated_at: Date;
 }
