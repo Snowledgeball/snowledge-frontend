@@ -166,7 +166,14 @@
     "placeholder": "Collez le nom, le lien ou l'ID de la communauté",
     "error_empty": "Veuillez renseigner une valeur.",
     "error_not_found": "Aucune communauté ne correspond à cette valeur.",
-    "success_joined": "Communauté rejointe avec succès"
+    "success_joined": "Communauté rejointe avec succès",
+    "invitations_title": "Vos invitations en attente",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "loading": "Chargement...",
+    "no_invitations": "Aucune invitation en attente.",
+    "invitation_accepted": "Invitation acceptée !",
+    "invitation_declined": "Invitation refusée."
   },
   "communityForm": {
     "manage": {

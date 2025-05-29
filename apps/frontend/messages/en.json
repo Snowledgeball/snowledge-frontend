@@ -218,7 +218,14 @@
     "placeholder": "Paste Community Name, Link, or ID",
     "error_empty": "Please enter a value.",
     "error_not_found": "No community matches this value.",
-    "success_joined": "Community joined successfully"
+    "success_joined": "Community joined successfully",
+    "invitations_title": "Your pending invitations",
+    "accept": "Accept",
+    "decline": "Decline",
+    "loading": "Loading...",
+    "no_invitations": "No invitations pending.",
+    "invitation_accepted": "Invitation accepted!",
+    "invitation_declined": "Invitation declined."
   },
   "communityForm": {
     "manage": {

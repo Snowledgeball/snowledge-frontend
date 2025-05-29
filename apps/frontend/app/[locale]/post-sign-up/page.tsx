@@ -1,105 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, PlusCircle, Users } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@repo/ui";
+import { PlusCircle, ArrowLeft } from "lucide-react";
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@repo/ui";
-import { Input } from "@repo/ui";
 import { useAllCommunities } from "@/hooks/useAllCommunities";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Community } from "@/types/community";
-
-function useMyInvitations() {
-  return useQuery({
-    queryKey: ["my-invitations"],
-    queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/user/my-invitations`,
-        { credentials: "include" }
-      );
-      if (!res.ok) throw new Error("Erreur lors du chargement des invitations");
-      return res.json();
-    },
-  });
-}
-
-function useAcceptInvitation() {
-  return useMutation({
-    mutationFn: async (communitySlug: string) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communitySlug}/learners/accept-invitation`,
-        { method: "POST", credentials: "include" }
-      );
-      if (!res.ok) throw new Error("Erreur lors de l'acceptation");
-      return res.json();
-    },
-  });
-}
-
-function useDeclineInvitation() {
-  return useMutation({
-    mutationFn: async (communitySlug: string) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communitySlug}/learners/decline-invitation`,
-        { method: "POST", credentials: "include" }
-      );
-      if (!res.ok) throw new Error("Erreur lors du refus");
-      return res.json();
-    },
-  });
-}
+import { toast } from "sonner";
+import { useMyInvitations } from "@/components/post-sign-up/hooks/useMyInvitations";
+import { useAcceptInvitation } from "@/components/post-sign-up/hooks/useAcceptInvitation";
+import { useDeclineInvitation } from "@/components/post-sign-up/hooks/useDeclineInvitation";
+import { InvitationList } from "@/components/post-sign-up/InvitationList";
+import { CommunityJoinForm } from "@/components/post-sign-up/CommunityJoinForm";
 
 export default function PostSignUp() {
-  const [communityInput, setCommunityInput] = useState("");
-  const [inputError, setInputError] = useState(false);
-  const [notFound, setNotFound] = useState(false);
   const { data: communities } = useAllCommunities();
-  const router = useRouter();
   const t = useTranslations("postSignUp");
 
   const { data: invitations = [], isLoading, refetch } = useMyInvitations();
   const acceptInvitation = useAcceptInvitation();
   const declineInvitation = useDeclineInvitation();
-
-  const handleJoinCommunity = () => {
-    setInputError(false);
-    setNotFound(false);
-
-    const input = communityInput.trim();
-    if (!input) {
-      setInputError(true);
-      return;
-    }
-
-    let community =
-      communities?.find((c) => String(c.id) === input) ||
-      communities?.find((c) => c.name === input) ||
-      communities?.find((c) => c.slug === input);
-
-    if (!community) {
-      const match = input.match(/communities\/([^/\s]+)/i);
-      if (match && match[1]) {
-        community = communities?.find((c) => c.slug === match[1]);
-      }
-    }
-
-    if (community) {
-      toast.success(t("success_joined"));
-      router.push(`/${community.slug}`);
-    } else {
-      setNotFound(true);
-    }
-  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
@@ -130,97 +56,27 @@ export default function PostSignUp() {
             </p>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="h-16 gap-2 text-lg cursor-pointer"
-              onClick={() => {
-                handleJoinCommunity();
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                {t("join_button")}
-              </div>
-            </Button>
-            <p className="text-sm text-muted-foreground px-1">
-              {t("join_description")}
-            </p>
-          </div>
-
-          <div className="mt-2">
-            <Input
-              placeholder={t("placeholder")}
-              className={`w-full ${inputError ? "placeholder:text-red-600 font-bold" : ""}`}
-              value={communityInput}
-              onChange={(e) => {
-                setCommunityInput(e.target.value);
-                setInputError(false);
-                setNotFound(false);
-              }}
-            />
-            {inputError && (
-              <p className="text-red-600 text-sm mt-1 font-semibold">
-                {t("error_empty")}
-              </p>
-            )}
-            {notFound && (
-              <p className="text-red-600 text-sm mt-1 font-semibold">
-                {t("error_not_found")}
-              </p>
-            )}
-          </div>
+          <CommunityJoinForm communities={communities} t={t} />
 
           <div className="mt-8">
             <h3 className="text-lg font-semibold mb-2">
-              Vos invitations en attente ({invitations.length})
+              {t("invitations_title")} ({invitations.length})
             </h3>
-            {isLoading ? (
-              <p>Chargement...</p>
-            ) : invitations.length === 0 ? (
-              <p>Aucune invitation en attente.</p>
-            ) : (
-              <ul className="space-y-2">
-                {invitations.map((community: Community) => (
-                  <li
-                    key={community.id}
-                    className="flex items-center justify-between border rounded p-2"
-                  >
-                    <div>
-                      <span className="font-medium">{community.name}</span>
-                      <span className="ml-2 text-sm text-muted-foreground">
-                        ({community.slug})
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={async () => {
-                          await acceptInvitation.mutateAsync(community.slug);
-                          refetch();
-                          toast.success("Invitation acceptée !");
-                        }}
-                      >
-                        Accepter
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={async () => {
-                          await declineInvitation.mutateAsync(community.slug);
-                          refetch();
-                          toast.success("Invitation refusée.");
-                        }}
-                      >
-                        Refuser
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <InvitationList
+              invitations={invitations}
+              isLoading={isLoading}
+              onAccept={async (slug) => {
+                await acceptInvitation.mutateAsync(slug);
+                refetch();
+                toast.success(t("invitation_accepted"));
+              }}
+              onDecline={async (slug) => {
+                await declineInvitation.mutateAsync(slug);
+                refetch();
+                toast.success(t("invitation_declined"));
+              }}
+              t={t}
+            />
           </div>
         </CardContent>
       </Card>
