@@ -7,24 +7,28 @@ import { FaqSection1 } from "@/components/landing/faq-section-1";
 import PartnersSection from "@/components/landing/partners";
 import { Footer2 } from "@/components/landing/footer-2";
 import { UpgradeBanner } from "@repo/ui/components/upgrade-banner";
-import { redirect, useSearchParams } from "next/navigation";
+import { redirect, useSearchParams, useRouter } from "next/navigation";
 import { useUserCommunities } from "@/hooks/useUserCommunities";
 import { useAuth } from "@/contexts/auth-context";
+import { useEffect } from "react";
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, fetchDataUser } = useAuth();
   const noRedirect = useSearchParams().get("no-redirect");
+  const router = useRouter();
   // Appelle le hook directement dans le composant
   const { data: communities, isLoading } = useUserCommunities(user?.id || 0);
 
-  // Redirection selon le résultat
-  if (!isLoading && communities && !noRedirect) {
-    if (communities.length > 0) {
-      redirect(`/${communities[0].slug}`);
-    } else {
-      redirect("/post-sign-up");
+  useEffect(() => {
+    fetchDataUser();
+    if (!isLoading && communities && !noRedirect && user) {
+      if (communities.length > 0) {
+        router.push(`/${communities[0].slug}`);
+      } else {
+        router.push("/post-sign-up");
+      }
     }
-  }
+  }, [isLoading, communities, noRedirect, router]);
 
   // Si pas connecté : affiche la landing page
   if (!user || noRedirect) {

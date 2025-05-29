@@ -8,7 +8,6 @@ import React, {
   useCallback,
   useEffect,
 } from "react";
-import { getCookie } from "cookies-next";
 
 type AuthContextType = {
   accessToken: string | null;
@@ -35,7 +34,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
   const refreshAccessToken = useCallback(async () => {
-    const accessToken = getCookie("access-token");
     if (!accessToken) {
       return null;
     }
@@ -80,11 +78,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     refreshAccessToken(); // Récupère le token au premier chargement
   }, [refreshAccessToken]);
+
   const fetchDataUser = async () => {
-    const accessToken = getCookie("access-token");
-    if (!accessToken) {
-      return false;
-    }
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
@@ -94,9 +89,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       );
       if (!response.ok) {
-        throw new Error("Failed. Please try again.");
+        if (response.status === 401) return false;
+        else throw new Error("Failed. Please try again.");
       }
       const data = await response.json();
+      if (data.user) {
+        console.log(data);
+        setUser(data.user);
+      } else {
+        return false;
+      }
       console.log(data);
       setUser(data.user);
       return true;
