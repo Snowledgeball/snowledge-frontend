@@ -14,6 +14,7 @@ import slugify from 'slugify';
 import { User } from 'src/user/entities/user.entity';
 import { User as UserDecorator } from '../user/decorator';
 import { User as UserEntity } from '../user/entities/user.entity';
+import { LearnerStatus } from 'src/learner/entities/learner/learner';
 
 @Injectable()
 export class CommunityService {
@@ -27,9 +28,18 @@ export class CommunityService {
 	}
 
 	async findAllByUser(userId: number): Promise<Community[]> {
-		return this.communityRepository.find({
+		const ownedCommunities = await this.communityRepository.find({
 			where: { user: { id: userId } },
 		});
+		const learnerCommunities = await this.communityRepository.find({
+			where: {
+				learners: {
+					user: { id: userId },
+					status: LearnerStatus.MEMBER,
+				},
+			},
+		});
+		return [...ownedCommunities, ...learnerCommunities];
 	}
 
 	async create(data: CreateCommunityDto): Promise<Community> {

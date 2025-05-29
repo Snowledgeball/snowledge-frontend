@@ -18,6 +18,7 @@ import { useAcceptInvitation } from "@/components/post-sign-up/hooks/useAcceptIn
 import { useDeclineInvitation } from "@/components/post-sign-up/hooks/useDeclineInvitation";
 import { InvitationList } from "@/components/post-sign-up/InvitationList";
 import { CommunityJoinForm } from "@/components/post-sign-up/CommunityJoinForm";
+import { useRouter } from "next/navigation";
 
 export default function PostSignUp() {
   const { data: communities } = useAllCommunities();
@@ -26,7 +27,7 @@ export default function PostSignUp() {
   const { data: invitations = [], isLoading, refetch } = useMyInvitations();
   const acceptInvitation = useAcceptInvitation();
   const declineInvitation = useDeclineInvitation();
-
+  const router = useRouter();
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <Card className="mx-auto w-full max-w-md">
@@ -69,6 +70,7 @@ export default function PostSignUp() {
                 await acceptInvitation.mutateAsync(slug);
                 refetch();
                 toast.success(t("invitation_accepted"));
+                router.push(`/${slug}`);
               }}
               onDecline={async (slug) => {
                 await declineInvitation.mutateAsync(slug);
