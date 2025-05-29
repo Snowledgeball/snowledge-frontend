@@ -25,6 +25,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { MoreVertical } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type Member = {
   id: number;
@@ -44,6 +45,7 @@ export default function Page() {
   const queryClient = useQueryClient();
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   const [selectedMemberName, setSelectedMemberName] = useState<string>("");
+  const t = useTranslations("members");
 
   // Fetch des membres
   const {
@@ -120,10 +122,10 @@ export default function Page() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Gestion des membres</h1>
+      <h1 className="text-2xl font-bold mb-6">{t("title")}</h1>
       <div className="mb-4 flex items-center gap-4">
         <Input
-          placeholder="Rechercher un membre..."
+          placeholder={t("search_placeholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-64"
@@ -132,11 +134,11 @@ export default function Page() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Nom</TableHead>
+            <TableHead>{t("role_member")}</TableHead>
             <TableHead>Email</TableHead>
-            <TableHead>Rôle</TableHead>
-            <TableHead>Date d'ajout</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>{t("role_contributor")}</TableHead>
+            <TableHead>{t("added_on")}</TableHead>
+            <TableHead>{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -148,7 +150,9 @@ export default function Page() {
               <TableCell>{member.user.email}</TableCell>
               <TableCell>
                 <span className="capitalize">
-                  {member.isContributor ? "Contributeur" : "Membre"}
+                  {member.isContributor
+                    ? t("role_contributor")
+                    : t("role_member")}
                 </span>
               </TableCell>
               <TableCell>
@@ -159,22 +163,19 @@ export default function Page() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon">
                       <MoreVertical className="w-4 h-4" />
-                      <span className="sr-only">Ouvrir le menu d'actions</span>
+                      <span className="sr-only">{t("actions")}</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem
                       onClick={() => {
-                        // mutation pour promouvoir/rétrograder
                         promoteMutation.mutate({
                           userId: member.user.id,
                           isContributor: !member.isContributor,
                         });
                       }}
                     >
-                      {member.isContributor
-                        ? "Rétrograder membre"
-                        : "Promouvoir contributeur"}
+                      {member.isContributor ? t("demote") : t("promote")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
@@ -185,7 +186,7 @@ export default function Page() {
                       }}
                       className="text-destructive"
                     >
-                      Supprimer
+                      {t("delete")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -206,15 +207,14 @@ export default function Page() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogTitle>{t("confirm_delete_title")}</DialogTitle>
             <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer <b>{selectedMemberName}</b> de
-              la communauté ? Cette action est irréversible.
+              {t("confirm_delete_desc", { name: selectedMemberName })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Annuler</Button>
+              <Button variant="outline">{t("cancel")}</Button>
             </DialogClose>
             <Button
               variant="destructive"
@@ -227,22 +227,18 @@ export default function Page() {
               }}
               disabled={deleteMutation.isPending}
             >
-              Supprimer
+              {t("delete")}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
       {filteredMembers.length === 0 && !isLoading && (
         <div className="text-center text-muted-foreground mt-8">
-          Aucun membre trouvé.
+          {t("no_member")}
         </div>
       )}
-      {isLoading && <div>Chargement...</div>}
-      {isError && (
-        <div className="text-red-500 mt-4">
-          Erreur lors du chargement des membres.
-        </div>
-      )}
+      {isLoading && <div>{t("loading")}</div>}
+      {isError && <div className="text-red-500 mt-4">{t("error")}</div>}
     </div>
   );
 }

@@ -259,5 +259,22 @@
         "total": "La somme des pourcentages doit faire exactement 100%."
       }
     }
+  },
+  "members": {
+    "title": "Gestion des membres",
+    "search_placeholder": "Rechercher un membre...",
+    "role_contributor": "Contributeur",
+    "role_member": "Membre",
+    "added_on": "Date d'ajout",
+    "actions": "Actions",
+    "promote": "Promouvoir contributeur",
+    "demote": "Rétrograder membre",
+    "delete": "Supprimer",
+    "confirm_delete_title": "Confirmer la suppression",
+    "confirm_delete_desc": "Êtes-vous sûr de vouloir supprimer {name} de la communauté ? Cette action est irréversible.",
+    "no_member": "Aucun membre trouvé.",
+    "loading": "Chargement...",
+    "error": "Erreur lors du chargement des membres.",
+    "cancel": "Annuler"
   }
 }

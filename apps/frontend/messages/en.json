@@ -311,5 +311,22 @@
         "total": "The sum of the percentages must be exactly 100%."
       }
     }
+  },
+  "members": {
+    "title": "Member management",
+    "search_placeholder": "Search a member...",
+    "role_contributor": "Contributor",
+    "role_member": "Member",
+    "added_on": "Added on",
+    "actions": "Actions",
+    "promote": "Promote contributor",
+    "demote": "Demote member",
+    "delete": "Delete",
+    "confirm_delete_title": "Confirm deletion",
+    "confirm_delete_desc": "Are you sure you want to remove {name} from the community? This action is irreversible.",
+    "no_member": "No member found.",
+    "loading": "Loading...",
+    "error": "Error while loading members.",
+    "cancel": "Cancel"
   }
 }
