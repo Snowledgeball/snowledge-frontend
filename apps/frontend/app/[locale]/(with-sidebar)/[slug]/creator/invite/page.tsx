@@ -114,7 +114,7 @@ export default function Page() {
           </Table>
         </CardContent>
         <CardFooter>
-          {/* Optionnel : bouton pour relancer ou annuler une invitation */}
+          {/* Voir si on fait un bouton pour relancer ou annuler une invitation */}
         </CardFooter>
       </Card>
     </div>

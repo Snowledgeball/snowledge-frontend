@@ -5,7 +5,7 @@ export type Learner = {
   id: number;
   userId: number;
   communityId: number;
-  status: "member" | "invited" | "banned";
+  status: "member" | "invited" | "banned" | "invitation_rejected";
   isContributor: boolean;
   user: User;
   community: Community;

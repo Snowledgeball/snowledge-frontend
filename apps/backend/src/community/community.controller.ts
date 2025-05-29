@@ -13,6 +13,8 @@ import { CreateCommunityDto } from './dto/create-community.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from 'src/user/entities/user.entity';
 import { UpdateCommunityDto } from './dto/update-community.dto';
+import { User as UserDecorator } from 'src/user/decorator';
+import { User as UserEntity } from 'src/user/entities/user.entity';
 
 @ApiTags('Communities')
 @Controller('communities')
@@ -34,10 +36,10 @@ export class CommunityController {
 		return this.communityService.findOneBySlug(slug);
 	}
 
-	@Get(':name')
-	findOneByName(@Param('name') name: string): Promise<Community> {
-		return this.communityService.findOneByName(name);
-	}
+	// @Get(':name')
+	// findOneByName(@Param('name') name: string): Promise<Community> {
+	// 	return this.communityService.findOneByName(name);
+	// }
 
 	@Get(':slug/creator')
 	getCommunityCreatorFromSlug(@Param('slug') slug: string): Promise<User> {

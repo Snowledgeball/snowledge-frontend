@@ -16,6 +16,48 @@ import { useAllCommunities } from "@/hooks/useAllCommunities";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Community } from "@/types/community";
+
+function useMyInvitations() {
+  return useQuery({
+    queryKey: ["my-invitations"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/user/my-invitations`,
+        { credentials: "include" }
+      );
+      if (!res.ok) throw new Error("Erreur lors du chargement des invitations");
+      return res.json();
+    },
+  });
+}
+
+function useAcceptInvitation() {
+  return useMutation({
+    mutationFn: async (communityId: number) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/user/accept/${communityId}`,
+        { method: "POST", credentials: "include" }
+      );
+      if (!res.ok) throw new Error("Erreur lors de l'acceptation");
+      return res.json();
+    },
+  });
+}
+
+function useDeclineInvitation() {
+  return useMutation({
+    mutationFn: async (communityId: number) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/user/decline/${communityId}`,
+        { method: "POST", credentials: "include" }
+      );
+      if (!res.ok) throw new Error("Erreur lors du refus");
+      return res.json();
+    },
+  });
+}
 
 export default function PostSignUp() {
   const [communityInput, setCommunityInput] = useState("");
@@ -24,6 +66,10 @@ export default function PostSignUp() {
   const { data: communities } = useAllCommunities();
   const router = useRouter();
   const t = useTranslations("postSignUp");
+
+  const { data: invitations = [], isLoading, refetch } = useMyInvitations();
+  const acceptInvitation = useAcceptInvitation();
+  const declineInvitation = useDeclineInvitation();
 
   const handleJoinCommunity = () => {
     setInputError(false);
@@ -124,6 +170,56 @@ export default function PostSignUp() {
               <p className="text-red-600 text-sm mt-1 font-semibold">
                 {t("error_not_found")}
               </p>
+            )}
+          </div>
+
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-2">
+              Vos invitations en attente ({invitations.length})
+            </h3>
+            {isLoading ? (
+              <p>Chargement...</p>
+            ) : invitations.length === 0 ? (
+              <p>Aucune invitation en attente.</p>
+            ) : (
+              <ul className="space-y-2">
+                {invitations.map((community: Community) => (
+                  <li
+                    key={community.id}
+                    className="flex items-center justify-between border rounded p-2"
+                  >
+                    <div>
+                      <span className="font-medium">{community.name}</span>
+                      <span className="ml-2 text-sm text-muted-foreground">
+                        ({community.slug})
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          await acceptInvitation.mutateAsync(community.id);
+                          refetch();
+                          toast.success("Invitation acceptée !");
+                        }}
+                      >
+                        Accepter
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          await declineInvitation.mutateAsync(community.id);
+                          refetch();
+                          toast.success("Invitation refusée.");
+                        }}
+                      >
+                        Refuser
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         </CardContent>

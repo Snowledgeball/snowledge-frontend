@@ -13,6 +13,7 @@ export enum LearnerStatus {
 	INVITED = 'invited',
 	MEMBER = 'member',
 	BANNED = 'banned',
+	INVITATION_REJECTED = 'invitation_rejected',
 }
 
 @Entity()

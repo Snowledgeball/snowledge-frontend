@@ -1,4 +1,10 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import {
+	Injectable,
+	Inject,
+	NotFoundException,
+	Param,
+	Post,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Community } from './entities/community.entity';
 import { CreateCommunityDto } from './dto/create-community.dto';
@@ -6,6 +12,8 @@ import { UpdateCommunityDto } from './dto/update-community.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
 import { User } from 'src/user/entities/user.entity';
+import { User as UserDecorator } from '../user/decorator';
+import { User as UserEntity } from '../user/entities/user.entity';
 
 @Injectable()
 export class CommunityService {

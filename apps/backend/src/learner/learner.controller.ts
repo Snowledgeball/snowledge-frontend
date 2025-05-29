@@ -9,7 +9,6 @@ import {
 	Patch,
 } from '@nestjs/common';
 import { LearnerService } from './learner.service';
-import { Community } from '../community/entities/community.entity';
 import { User as UserEntity } from '../user/entities/user.entity';
 import { User as UserDecorator } from '../user/decorator';
 
