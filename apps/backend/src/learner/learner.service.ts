@@ -147,4 +147,18 @@ export class LearnerService {
 		});
 		return this.learnerRepository.save(learner);
 	}
+
+	async getInvitedUsersByCommunitySlug(slug: string) {
+		const community = await this.communityRepository.findOne({
+			where: { slug },
+		});
+		if (!community) throw new NotFoundException('Community not found');
+		return this.learnerRepository.find({
+			where: {
+				community: { id: community.id },
+				status: LearnerStatus.INVITED,
+			},
+			relations: ['user'],
+		});
+	}
 }

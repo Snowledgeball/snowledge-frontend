@@ -68,4 +68,9 @@ export class LearnerController {
 			isContributor,
 		);
 	}
+
+	@Get('invited')
+	async getInvitedUsers(@Param('slug') slug: string) {
+		return this.learnerService.getInvitedUsersByCommunitySlug(slug);
+	}
 }
