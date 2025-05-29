@@ -9,6 +9,7 @@ import {
   Frame,
   GalleryVerticalEnd,
   Home,
+  Link,
   LucideIcon,
   PieChart,
   Plus,
@@ -30,6 +31,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenuButton,
   SidebarRail,
 } from "@repo/ui/components/sidebar";
 
@@ -69,6 +71,11 @@ function SidebarNavs() {
     url: `/${slug}`,
     icon: Home,
   };
+  const landing = {
+    title: tNavbar("landing"),
+    url: "/?no-redirect=true",
+    icon: Home,
+  };
 
   const navLearner = useNavLearner(activeCommunity ?? { name: "" });
   const navContributeur = useNavContributor(activeCommunity ?? { name: "" });
@@ -80,6 +87,7 @@ function SidebarNavs() {
       <SidebarNavMain items={navLearner} label={tNavbar("learner")} />
       <SidebarNavMain items={navContributeur} label={tNavbar("contributor")} />
       <SidebarNavMain items={navCreator} label={tNavbar("creator")} />
+      <SidebarNavMain items={[landing]} label="" />
     </>
   );
 }

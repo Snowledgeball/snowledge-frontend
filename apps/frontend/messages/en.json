@@ -134,7 +134,8 @@
     "creator": "Creator",
     "learner": "Learner",
     "contributor": "Contributor",
-    "create-community": "Create a community"
+    "create-community": "Create a community",
+    "landing": "Landing"
   },
   "inviteModal": {
     "title": "Invite users",
