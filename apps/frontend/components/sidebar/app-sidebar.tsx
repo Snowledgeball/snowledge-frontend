@@ -79,7 +79,7 @@ function SidebarNavs() {
       <SidebarNavMain items={[home]} label="" />
       <SidebarNavMain items={navLearner} label={tNavbar("learner")} />
       <SidebarNavMain items={navContributeur} label={tNavbar("contributor")} />
-      <SidebarCreatorNav items={navCreator} label={tNavbar("creator")} />
+      <SidebarNavMain items={navCreator} label={tNavbar("creator")} />
     </>
   );
 }

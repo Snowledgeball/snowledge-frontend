@@ -1,4 +1,11 @@
-import { Settings2 } from "lucide-react";
+import {
+  Settings2,
+  Users,
+  UserRoundPlus,
+  DollarSign,
+  ShieldCheck,
+  FileText,
+} from "lucide-react";
 import { features } from "@/config/features";
 import { toSlug } from "@/utils/slug";
 import { useTranslations } from "next-intl";
@@ -9,36 +16,35 @@ export function useNavCreator(activeCommunity: { name: string }) {
   const tNavbar = useTranslations("navbar");
 
   return [
-    features.community.creator.enabled && {
-      title: tNavbar("creator"),
-      url: `/${slug}/creator`,
+    features.community.creator.settings && {
+      title: tNavbar("settings"),
+      url: `/${slug}/creator/settings`,
       icon: Settings2,
-      items: [
-        features.community.creator.settings && {
-          title: tNavbar("settings"),
-          url: `/${slug}/creator/settings`,
-        },
-        features.community.creator.members && {
-          title: tNavbar("members"),
-          url: `/${slug}/creator/members`,
-        },
-        features.community.creator.invite && {
-          title: tNavbar("invite"),
-          url: `/${slug}/creator/invite`,
-        },
-        features.community.creator.pricing && {
-          title: tNavbar("pricing"),
-          url: `/${slug}/creator/pricing`,
-        },
-        features.community.creator.moderation && {
-          title: tNavbar("moderation"),
-          url: `/${slug}/creator/moderation`,
-        },
-        features.community.creator.logs && {
-          title: tNavbar("logs"),
-          url: `/${slug}/creator/logs`,
-        },
-      ].filter(Boolean),
+    },
+    features.community.creator.members && {
+      title: tNavbar("members"),
+      url: `/${slug}/creator/members`,
+      icon: Users,
+    },
+    features.community.creator.invite && {
+      title: tNavbar("invite"),
+      url: `/${slug}/creator/invite`,
+      icon: UserRoundPlus,
+    },
+    features.community.creator.pricing && {
+      title: tNavbar("pricing"),
+      url: `/${slug}/creator/pricing`,
+      icon: DollarSign,
+    },
+    features.community.creator.moderation && {
+      title: tNavbar("moderation"),
+      url: `/${slug}/creator/moderation`,
+      icon: ShieldCheck,
+    },
+    features.community.creator.logs && {
+      title: tNavbar("logs"),
+      url: `/${slug}/creator/logs`,
+      icon: FileText,
     },
   ].filter(Boolean) as {
     title: string;
