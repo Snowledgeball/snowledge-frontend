@@ -44,20 +44,4 @@ export class UserController {
 	async getMyInvitations(@User() user: UserEntity) {
 		return this.userService.getInvitationsForUser(user.id);
 	}
-
-	@Post('accept/:communityId')
-	async acceptInvitation(
-		@Param('communityId') communityId: number,
-		@UserDecorator() user: UserEntity,
-	) {
-		return this.userService.acceptInvitation(communityId, user.id);
-	}
-
-	@Post('decline/:communityId')
-	async declineInvitation(
-		@Param('communityId') communityId: number,
-		@UserDecorator() user: UserEntity,
-	) {
-		return this.userService.declineInvitation(communityId, user.id);
-	}
 }

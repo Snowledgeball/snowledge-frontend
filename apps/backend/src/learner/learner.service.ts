@@ -161,4 +161,25 @@ export class LearnerService {
 			relations: ['user'],
 		});
 	}
+
+	async acceptInvitation(slug: string, userId: number) {
+		const learner = await this.learnerRepository.findOne({
+			where: { community: { slug }, user: { id: userId } },
+		});
+
+		if (!learner) throw new NotFoundException('Invitation non trouvée');
+		learner.status = LearnerStatus.MEMBER;
+		await this.learnerRepository.save(learner);
+		return { success: true };
+	}
+
+	async declineInvitation(slug: string, userId: number) {
+		const learner = await this.learnerRepository.findOne({
+			where: { community: { slug }, user: { id: userId } },
+		});
+
+		learner.status = LearnerStatus.INVITATION_REJECTED;
+		await this.learnerRepository.save(learner);
+		return { success: true };
+	}
 }

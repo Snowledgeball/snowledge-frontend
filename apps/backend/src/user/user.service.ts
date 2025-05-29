@@ -75,34 +75,4 @@ export class UserService {
 		}
 		return user.learners.map((learner) => learner.community);
 	}
-
-	async acceptInvitation(communityId: number, userId: number) {
-		const user = await this.userRepository.findOne({
-			where: { id: userId, learners: { status: LearnerStatus.INVITED } },
-			relations: ['learners', 'learners.community'],
-		});
-
-		const learner = user.learners.find(
-			(learner) => learner.community.id == communityId,
-		);
-
-		if (!learner) throw new NotFoundException('Invitation non trouvée');
-		learner.status = LearnerStatus.MEMBER;
-		await this.learnerRepository.save(learner);
-		return { success: true };
-	}
-
-	async declineInvitation(communityId: number, userId: number) {
-		const user = await this.userRepository.findOne({
-			where: { id: userId, learners: { status: LearnerStatus.INVITED } },
-			relations: ['learners', 'learners.community'],
-		});
-		const learner = user.learners.find(
-			(learner) => learner.community.id == communityId,
-		);
-
-		learner.status = LearnerStatus.INVITATION_REJECTED;
-		await this.learnerRepository.save(learner);
-		return { success: true };
-	}
 }

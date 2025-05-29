@@ -35,9 +35,9 @@ function useMyInvitations() {
 
 function useAcceptInvitation() {
   return useMutation({
-    mutationFn: async (communityId: number) => {
+    mutationFn: async (communitySlug: string) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/user/accept/${communityId}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communitySlug}/learners/accept-invitation`,
         { method: "POST", credentials: "include" }
       );
       if (!res.ok) throw new Error("Erreur lors de l'acceptation");
@@ -48,9 +48,9 @@ function useAcceptInvitation() {
 
 function useDeclineInvitation() {
   return useMutation({
-    mutationFn: async (communityId: number) => {
+    mutationFn: async (communitySlug: string) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/user/decline/${communityId}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communitySlug}/learners/decline-invitation`,
         { method: "POST", credentials: "include" }
       );
       if (!res.ok) throw new Error("Erreur lors du refus");
@@ -198,7 +198,7 @@ export default function PostSignUp() {
                       <Button
                         size="sm"
                         onClick={async () => {
-                          await acceptInvitation.mutateAsync(community.id);
+                          await acceptInvitation.mutateAsync(community.slug);
                           refetch();
                           toast.success("Invitation acceptée !");
                         }}
@@ -209,7 +209,7 @@ export default function PostSignUp() {
                         size="sm"
                         variant="outline"
                         onClick={async () => {
-                          await declineInvitation.mutateAsync(community.id);
+                          await declineInvitation.mutateAsync(community.slug);
                           refetch();
                           toast.success("Invitation refusée.");
                         }}

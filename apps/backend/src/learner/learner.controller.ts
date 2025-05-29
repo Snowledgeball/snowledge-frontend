@@ -26,6 +26,33 @@ export class LearnerController {
 		return this.learnerService.inviteUserToCommunity(slug, userId, user.id);
 	}
 
+	// Afficher tous les learners d'une communauté
+	@Get()
+	async getLearners(@Param('slug') slug: string) {
+		return this.learnerService.getLearnersByCommunitySlug(slug);
+	}
+
+	@Get('invited')
+	async getInvitedUsers(@Param('slug') slug: string) {
+		return this.learnerService.getInvitedUsersByCommunitySlug(slug);
+	}
+
+	@Post('accept-invitation')
+	async acceptInvitation(
+		@Param('slug') slug: string,
+		@UserDecorator() user: UserEntity,
+	) {
+		return this.learnerService.acceptInvitation(slug, user.id);
+	}
+
+	@Post('decline-invitation')
+	async declineInvitation(
+		@Param('slug') slug: string,
+		@UserDecorator() user: UserEntity,
+	) {
+		return this.learnerService.declineInvitation(slug, user.id);
+	}
+
 	@Post(':userId')
 	async addLearner(
 		@Param('slug') slug: string,
@@ -38,13 +65,6 @@ export class LearnerController {
 			isContributor,
 		);
 	}
-
-	// Afficher tous les learners d'une communauté
-	@Get()
-	async getLearners(@Param('slug') slug: string) {
-		return this.learnerService.getLearnersByCommunitySlug(slug);
-	}
-
 	// Supprimer un learner d'une communauté
 	@Delete(':userId')
 	async removeLearner(
@@ -66,10 +86,5 @@ export class LearnerController {
 			userId,
 			isContributor,
 		);
-	}
-
-	@Get('invited')
-	async getInvitedUsers(@Param('slug') slug: string) {
-		return this.learnerService.getInvitedUsersByCommunitySlug(slug);
 	}
 }
