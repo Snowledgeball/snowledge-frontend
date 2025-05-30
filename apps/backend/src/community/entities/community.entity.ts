@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Learner } from '../../learner/entities/learner/learner';
+import { Vote } from '../../vote/entities/vote/vote.entity';
 
 @Entity()
 export class Community {
@@ -50,6 +51,9 @@ export class Community {
 
 	@OneToMany(() => Learner, (learner) => learner.community)
 	learners: Learner[];
+
+	@OneToMany(() => Vote, (vote) => vote.community)
+	votes: Vote[];
 
 	@CreateDateColumn({
 		type: 'timestamp',

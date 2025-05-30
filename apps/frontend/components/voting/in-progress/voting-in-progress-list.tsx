@@ -5,6 +5,8 @@ import { useState } from "react";
 import VoteScreen from "./vote-screen";
 import { FileText } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useQuery } from "@tanstack/react-query";
+import { fetcher } from "@/lib/fetcher";
 
 // ============
 // Function: VotingInProgressList
@@ -13,6 +15,7 @@ import { useTranslations } from "next-intl";
 // PARAMS: None
 // RETURNS: JSX.Element (the voting list UI)
 // ============
+
 const mockVotes: Vote[] = [
   {
     id: "1",
@@ -77,6 +80,24 @@ const VotingInProgressList = () => {
   const t = useTranslations("voting");
   const [selectedVote, setSelectedVote] = useState<Vote | null>(null);
 
+  const {
+    data: votes,
+    isLoading,
+    isError,
+  } = useQuery<Vote[]>({
+    queryKey: ["votes", "in-progress"],
+    queryFn: async () => {
+      const res = await fetcher(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/votes/in-progress`,
+        { credentials: "include" }
+      );
+      return res;
+    },
+  });
+
+  if (isLoading) return <div>{t("loading")}</div>;
+  if (isError) return <div className="text-red-500">{t("error")}</div>;
+
   if (selectedVote) {
     return (
       <VoteScreen vote={selectedVote} onBack={() => setSelectedVote(null)} />
@@ -85,13 +106,17 @@ const VotingInProgressList = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      {mockVotes.map((vote: Vote) => (
-        <VotingCardRow
-          key={vote.id}
-          vote={vote}
-          onVoteNow={() => setSelectedVote(vote)}
-        />
-      ))}
+      {votes && votes.length > 0 ? (
+        votes.map((vote: Vote) => (
+          <VotingCardRow
+            key={vote.id}
+            vote={vote}
+            onVoteNow={() => setSelectedVote(vote)}
+          />
+        ))
+      ) : (
+        <div>{t("no_votes")}</div>
+      )}
     </div>
   );
 };

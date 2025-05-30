@@ -4,7 +4,10 @@ import {
 	Column,
 	CreateDateColumn,
 	UpdateDateColumn,
+	ManyToOne,
 } from 'typeorm';
+import { Community } from '../../../community/entities/community.entity';
+import { User } from '../../../user/entities/user.entity';
 
 @Entity('votes')
 export class Vote {
@@ -25,6 +28,18 @@ export class Vote {
 
 	@Column({ default: false, nullable: true })
 	isContributor?: boolean;
+
+	@ManyToOne(() => Community, (community) => community.votes, {
+		cascade: false,
+		nullable: false,
+	})
+	community: Community;
+
+	@ManyToOne(() => User, (user) => user.communities, {
+		cascade: false,
+		nullable: false,
+	})
+	submitter: User;
 
 	@CreateDateColumn()
 	createdAt: Date;

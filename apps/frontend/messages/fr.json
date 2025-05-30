@@ -379,6 +379,8 @@
       "comments_too_long": "Le commentaire ne doit pas dépasser 400 caractères."
     },
     "vote_submitted_successfully": "Vote soumis avec succès !",
-    "error_submitting_vote": "Erreur lors de la soumission du vote. Veuillez réessayer."
+    "error_submitting_vote": "Erreur lors de la soumission du vote. Veuillez réessayer.",
+    "loading": "Chargement...",
+    "error": "Erreur lors du chargement des votes."
   }
 }

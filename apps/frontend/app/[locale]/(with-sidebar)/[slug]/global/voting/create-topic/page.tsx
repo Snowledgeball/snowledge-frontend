@@ -1,6 +1,10 @@
+"use client";
+
 import CreateVoteScreen from "@/components/voting/create-topic/create-vote-screen";
 import React from "react";
+import { useParams } from "next/navigation";
 
 export default function CreateTopicPage() {
-  return <CreateVoteScreen />;
+  const { slug } = useParams();
+  return <CreateVoteScreen communitySlug={slug as string} />;
 }

@@ -431,6 +431,8 @@
       "comments_too_long": "Comment must not exceed 400 characters."
     },
     "vote_submitted_successfully": "Vote submitted successfully!",
-    "error_submitting_vote": "Error submitting vote. Please try again."
+    "error_submitting_vote": "Error submitting vote. Please try again.",
+    "loading": "Loading...",
+    "error": "Error while loading votes."
   }
 }

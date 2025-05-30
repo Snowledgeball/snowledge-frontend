@@ -5,6 +5,7 @@ import {
 	IsString,
 	MaxLength,
 	MinLength,
+	IsInt,
 } from 'class-validator';
 
 export class CreateVoteDto {
@@ -34,4 +35,10 @@ export class CreateVoteDto {
 	@IsOptional()
 	@IsBoolean()
 	isContributor?: boolean;
+
+	@IsInt()
+	communityId: number;
+
+	@IsInt()
+	submitterId: number;
 }

@@ -21,7 +21,7 @@ import SwitchContributeur from "./fields/SwitchContributeur";
 // RETURNS: JSX.Element (the voting creation form UI)
 // ============
 
-const CreateVoteScreen = () => {
+const CreateVoteScreen = ({ communitySlug }: { communitySlug: string }) => {
   const t = useTranslations("voting");
   const {
     register,
@@ -42,7 +42,7 @@ const CreateVoteScreen = () => {
   });
   const format = watch("format");
   const isContributor = watch("isContributor");
-  const createVote = useCreateVote();
+  const createVote = useCreateVote(communitySlug);
 
   const onSubmit = async (data: VoteFormValues) => {
     createVote.mutate(data, {

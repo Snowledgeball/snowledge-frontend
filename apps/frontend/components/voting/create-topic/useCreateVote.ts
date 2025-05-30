@@ -3,13 +3,14 @@ import { toast } from "sonner";
 import { VoteFormValues } from "./vote-schema";
 import { fetcher } from "@/lib/fetcher";
 import { useTranslations } from "next-intl";
+import { Vote } from "@/types/vote";
 
-export function useCreateVote() {
+export function useCreateVote(communitySlug: string) {
   const t = useTranslations("voting");
   return useMutation({
-    mutationFn: async (data: VoteFormValues) => {
+    mutationFn: async (data: VoteFormValues): Promise<Vote> => {
       const res = await fetcher(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/votes`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communitySlug}/votes`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
