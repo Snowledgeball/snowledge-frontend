@@ -30,8 +30,6 @@ export class UserController {
 
 	@Get()
 	async findOne(@User() user: UserEntity) {
-		console.log(user);
-
 		return { user };
 	}
 

@@ -94,12 +94,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       const data = await response.json();
       if (data.user) {
-        console.log(data);
+        // console.log(data);
         setUser(data.user);
       } else {
         return false;
       }
-      console.log(data);
+      // console.log(data);
       setUser(data.user);
       return true;
     } catch (err: any) {
