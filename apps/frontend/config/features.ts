@@ -9,19 +9,15 @@ export const features = {
   community: {
     enabled: true,
     // Groupe pour les créateurs (creator)
-    creator: {
+    myCommunity: {
       enabled: true,
-      logs: true,
-      moderation: true,
-      pricing: true,
-      invite: true,
+      generalInformations: true,
+      integrations: true,
+      trendsAnalytics: true,
+      topicsToValidate: true,
+      rewards: true,
+      invitations: true,
       members: true,
-      settings: {
-        enabled: true,
-        general: true,
-        access: true,
-        gains: true,
-      },
     },
     // Groupe pour les apprenants (learner)
     learner: {

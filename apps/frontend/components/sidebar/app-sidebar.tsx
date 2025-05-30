@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useNavContributor } from "./hooks/useNavContributor";
-import { useNavCreator } from "./hooks/useNavCreator";
+import { useNavMyCommunity } from "./hooks/useNavMyCommunity";
 import { useNavLearner } from "./hooks/useNavLearner";
 
 import { SidebarNavMain } from "./sidebar-nav";
@@ -79,14 +79,14 @@ function SidebarNavs() {
 
   // const navLearner = useNavLearner(activeCommunity ?? { name: "" });
   // const navContributeur = useNavContributor(activeCommunity ?? { name: "" });
-  const navCreator = useNavCreator(activeCommunity ?? { name: "" });
+  const navMyCommunity = useNavMyCommunity(activeCommunity ?? { name: "" });
 
   return (
     <>
       {/* <SidebarNavMain items={[home]} label="" />
       <SidebarNavMain items={navLearner} label={tNavbar("learner")} />
       <SidebarNavMain items={navContributeur} label={tNavbar("contributor")} /> */}
-      <SidebarNavMain items={navCreator} label={tNavbar("my-community")} />
+      <SidebarNavMain items={navMyCommunity} label={tNavbar("my-community")} />
       <SidebarNavMain items={[landing]} label="" />
     </>
   );
