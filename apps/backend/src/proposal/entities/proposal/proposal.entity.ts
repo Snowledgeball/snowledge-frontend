@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Community } from '../../../community/entities/community.entity';
 import { User } from '../../../user/entities/user.entity';
-import { Vote } from '../../../vote/entities/vote/vote.entity';
+import { Vote } from '../../../vote/entities/vote.entity';
 import { Expose } from 'class-transformer';
 
 @Entity('proposals')

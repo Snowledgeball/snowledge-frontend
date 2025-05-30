@@ -378,7 +378,7 @@
       "format_too_long": "Le format ne doit pas dépasser 40 caractères.",
       "comments_too_long": "Le commentaire ne doit pas dépasser 400 caractères."
     },
-    "vote_submitted_successfully": "Vote soumis avec succès !",
+    "vote_submitted_success": "Vote soumis avec succès !",
     "error_submitting_vote": "Erreur lors de la soumission du vote. Veuillez réessayer.",
     "loading": "Chargement...",
     "error": "Erreur lors du chargement des votes.",

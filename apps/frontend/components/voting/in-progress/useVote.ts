@@ -2,15 +2,12 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { VoteFormValues } from "./vote-schema";
 import { fetcher } from "@/lib/fetcher";
-import { useTranslations } from "next-intl";
-import { Proposal } from "@/types/proposal";
 
-export function useCreateVote(communitySlug: string) {
-  const t = useTranslations("voting");
+export function useVote() {
   return useMutation({
-    mutationFn: async (data: VoteFormValues): Promise<Proposal> => {
+    mutationFn: async (data: VoteFormValues) => {
       const res = await fetcher(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communitySlug}/proposals`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/proposal/${data.proposalId}/vote`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -21,10 +18,10 @@ export function useCreateVote(communitySlug: string) {
       return res;
     },
     onSuccess: () => {
-      toast.success(t("vote_submitted_success"));
+      toast.success("Vote submitted successfully!");
     },
     onError: (error: any) => {
-      toast.error(t("error_submitting_vote"));
+      toast.error(error.message || "Error submitting vote");
     },
   });
 }

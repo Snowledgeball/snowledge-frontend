@@ -2,12 +2,12 @@ import {
 	Entity,
 	PrimaryGeneratedColumn,
 	Column,
+	ManyToOne,
 	CreateDateColumn,
 	UpdateDateColumn,
-	ManyToOne,
 } from 'typeorm';
-import { Proposal } from '../../../proposal/entities/proposal/proposal.entity';
-import { User } from '../../../user/entities/user.entity';
+import { Proposal } from '../../proposal/entities/proposal/proposal.entity';
+import { User } from '../../user/entities/user.entity';
 
 @Entity('votes')
 export class Vote {
@@ -23,10 +23,16 @@ export class Vote {
 	user: User;
 
 	@Column({ length: 20 })
-	choice: string; // "for", "against", etc.
+	choice: string; // "for" | "against"
 
 	@Column({ length: 400, nullable: true })
 	comment?: string;
+
+	@Column({ length: 20, nullable: true })
+	formatChoice?: string; // "for" | "against"
+
+	@Column({ length: 400, nullable: true })
+	formatComment?: string;
 
 	@CreateDateColumn()
 	createdAt: Date;
