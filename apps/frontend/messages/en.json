@@ -433,6 +433,7 @@
     "vote_submitted_successfully": "Vote submitted successfully!",
     "error_submitting_vote": "Error submitting vote. Please try again.",
     "loading": "Loading...",
-    "error": "Error while loading votes."
+    "error": "Error while loading votes.",
+    "no_proposals": "No proposals available."
   }
 }

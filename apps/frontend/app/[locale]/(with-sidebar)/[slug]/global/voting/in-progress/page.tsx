@@ -6,5 +6,9 @@ import React from "react";
 
 export default function InProgressPage() {
   const { slug } = useParams();
-  return <VotingInProgressList communitySlug={slug as string} />;
+  return (
+    <div className="px-12 py-4 ">
+      <VotingInProgressList communitySlug={slug as string} />
+    </div>
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 import VotingCardRow from "@/components/voting/shared/voting-card-row";
-import type { Vote } from "@/components/voting/shared/voting-card-row";
+import type { Proposal } from "@/types/proposal";
 import { useState } from "react";
 import VoteScreen from "./vote-screen";
 import { FileText } from "lucide-react";
@@ -16,79 +16,19 @@ import { fetcher } from "@/lib/fetcher";
 // RETURNS: JSX.Element (the voting list UI)
 // ============
 
-const mockVotes: Vote[] = [
-  {
-    id: "1",
-    title: "Automation Strategies for Small Businesses",
-    description:
-      "Exploring how automation tools can save time, reduce errors, and scale operations — from CRM to marketing workflows.",
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    endDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // in 3 days
-    progress: 67,
-    participationLevel: "medium",
-    submitter: {
-      name: "Alice Johnson",
-      avatarUrl: "https://randomuser.me/api/portraits/women/44.jpg",
-      profileUrl: "#",
-    },
-    eligible: true,
-    alreadyVoted: false,
-    quorum: { current: 48, required: 70 },
-    format: "masterclass",
-  },
-  {
-    id: "2",
-    title: "Building a Personal Brand as a Knowledge Worker",
-    description:
-      "Understanding the key elements of visibility, credibility, and community-building to grow your audience and influence.",
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-    endDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // in 1 day
-    progress: 42,
-    participationLevel: "low",
-    submitter: {
-      name: "Bob Smith",
-      avatarUrl: "https://randomuser.me/api/portraits/men/32.jpg",
-      profileUrl: "#",
-    },
-    eligible: false,
-    alreadyVoted: true,
-    quorum: { current: 30, required: 70 },
-    format: "white paper",
-  },
-  {
-    id: "3",
-    title: "Structuring and Pricing Online Services Effectively",
-    description:
-      "Investigating best practices to package, price, and position digital services for freelancers, consultants, and creators.",
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // in 7 days
-    progress: 92,
-    participationLevel: "high",
-    submitter: {
-      name: "Carol Lee",
-      avatarUrl: "https://randomuser.me/api/portraits/women/68.jpg",
-      profileUrl: "#",
-    },
-    eligible: true,
-    alreadyVoted: false,
-    quorum: { current: 65, required: 70 },
-    format: "masterclass",
-  },
-];
-
 const VotingInProgressList = ({ communitySlug }: { communitySlug: string }) => {
   const t = useTranslations("voting");
-  const [selectedVote, setSelectedVote] = useState<Vote | null>(null);
+  const [selectedVote, setSelectedVote] = useState<Proposal | null>(null);
 
   const {
     data: votes,
     isLoading,
     isError,
-  } = useQuery<Vote[]>({
+  } = useQuery<Proposal[]>({
     queryKey: ["votes", "in-progress"],
     queryFn: async () => {
       const res = await fetcher(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communitySlug}/votes`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communitySlug}/proposals`,
         { credentials: "include" }
       );
       return res;
@@ -100,22 +40,25 @@ const VotingInProgressList = ({ communitySlug }: { communitySlug: string }) => {
 
   if (selectedVote) {
     return (
-      <VoteScreen vote={selectedVote} onBack={() => setSelectedVote(null)} />
+      <VoteScreen
+        proposal={selectedVote}
+        onBack={() => setSelectedVote(null)}
+      />
     );
   }
 
   return (
     <div className="flex flex-col gap-6">
       {votes && votes.length > 0 ? (
-        votes.map((vote: Vote) => (
+        votes.map((proposal: Proposal) => (
           <VotingCardRow
-            key={vote.id}
-            vote={vote}
-            onVoteNow={() => setSelectedVote(vote)}
+            key={proposal.id}
+            proposal={proposal}
+            onVoteNow={() => setSelectedVote(proposal)}
           />
         ))
       ) : (
-        <div>{t("no_votes")}</div>
+        <div>{t("no_proposals")}</div>
       )}
     </div>
   );

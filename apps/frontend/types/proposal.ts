@@ -1,4 +1,6 @@
-export type Vote = {
+import { User } from "./user";
+
+export type Proposal = {
   id: string;
   title: string;
   description: string;
@@ -6,8 +8,7 @@ export type Vote = {
   endDate: Date;
   progress: number;
   participationLevel: ParticipationLevel;
-  submitter: { name: string; avatarUrl: string; profileUrl: string };
-  eligible: boolean;
+  submitter: User;
   alreadyVoted: boolean;
   quorum: { current: number; required: number };
   format?: string;

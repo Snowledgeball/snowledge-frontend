@@ -6,7 +6,7 @@ import {
 	UpdateDateColumn,
 	ManyToOne,
 } from 'typeorm';
-import { Community } from '../../../community/entities/community.entity';
+import { Proposal } from '../../../proposal/entities/proposal/proposal.entity';
 import { User } from '../../../user/entities/user.entity';
 
 @Entity('votes')
@@ -14,32 +14,19 @@ export class Vote {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-	@Column({ length: 80 })
-	title: string;
+	@ManyToOne(() => Proposal, (proposal) => proposal.votes, {
+		nullable: false,
+	})
+	proposal: Proposal;
 
-	@Column({ length: 200 })
-	description: string;
+	@ManyToOne(() => User, (user) => user.votes, { nullable: false })
+	user: User;
 
-	@Column({ length: 40, nullable: true })
-	format?: string;
+	@Column({ length: 20 })
+	choice: string; // "for", "against", etc.
 
 	@Column({ length: 400, nullable: true })
-	comments?: string;
-
-	@Column({ default: false, nullable: true })
-	isContributor?: boolean;
-
-	@ManyToOne(() => Community, (community) => community.proposals, {
-		cascade: false,
-		nullable: false,
-	})
-	community: Community;
-
-	@ManyToOne(() => User, (user) => user.communities, {
-		cascade: false,
-		nullable: false,
-	})
-	submitter: User;
+	comment?: string;
 
 	@CreateDateColumn()
 	createdAt: Date;

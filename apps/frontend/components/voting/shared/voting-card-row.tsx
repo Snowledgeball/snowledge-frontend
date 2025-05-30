@@ -21,7 +21,8 @@ import {
   BookOpen,
 } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { useAuth } from "@/contexts/auth-context";
 
 // ============
 // Function: VotingCardRow
@@ -44,7 +45,9 @@ import { useTranslations } from "next-intl";
 // ============
 
 import { formatDistanceToNow, formatDistance } from "date-fns";
-import { Vote } from "@/types/vote";
+import { fr, enUS } from "date-fns/locale";
+
+import { Proposal } from "@/types/proposal";
 
 const getProgressColor = (progress: number, daysLeft: number) => {
   if (progress >= 100) return "bg-green-500";
@@ -55,7 +58,7 @@ const getProgressColor = (progress: number, daysLeft: number) => {
 };
 
 interface VotingCardRowProps {
-  vote: Vote;
+  proposal: Proposal;
   onVoteNow?: () => void;
 }
 
@@ -87,21 +90,30 @@ export const getFormatIconAndLabel = (format?: string) => {
   }
 };
 
-const VotingCardRow = ({ vote, onVoteNow }: VotingCardRowProps) => {
+const VotingCardRow = ({ proposal, onVoteNow }: VotingCardRowProps) => {
+  const { user } = useAuth();
   const t = useTranslations("voting");
+  const locale = useLocale();
+  const dateFnsLocale = locale === "fr" ? fr : enUS;
+  const endDate = proposal.endDate ? new Date(proposal.endDate) : null;
   const now = new Date();
-  console.log(vote);
-  const endDate = new Date(vote.endDate);
-  const startedAgo = formatDistanceToNow(new Date(vote.createdAt), {
-    addSuffix: true,
-  });
-  const endsIn = formatDistance(endDate, now, { addSuffix: true });
-  const progressColor = getProgressColor(
-    vote.progress,
-    Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-  );
-  const isQuorumReached = vote.progress >= 100;
-  const formatInfo = getFormatIconAndLabel(vote.format);
+  const startedAgo = proposal.createdAt
+    ? formatDistanceToNow(new Date(proposal.createdAt), {
+        addSuffix: true,
+        locale: dateFnsLocale,
+      })
+    : "";
+
+  let endsIn = "";
+  if (endDate && !isNaN(endDate.getTime())) {
+    endsIn = formatDistance(endDate, now, {
+      addSuffix: true,
+      locale: dateFnsLocale,
+    });
+  }
+
+  const isQuorumReached = proposal.progress >= 100;
+  const formatInfo = getFormatIconAndLabel(proposal.format);
 
   return (
     <Card className="flex flex-col md:flex-row items-center gap-4 p-4 shadow-md border border-muted-foreground/10">
@@ -111,9 +123,9 @@ const VotingCardRow = ({ vote, onVoteNow }: VotingCardRowProps) => {
             href="#"
             className="font-bold text-lg hover:underline truncate"
             tabIndex={0}
-            aria-label={t("view_details", { title: vote.title })}
+            aria-label={t("view_details", { title: proposal.title })}
           >
-            {vote.title}
+            {proposal.title}
           </Link>
           {isQuorumReached && (
             <CheckCircle className="w-5 h-5 text-green-500" />
@@ -126,17 +138,17 @@ const VotingCardRow = ({ vote, onVoteNow }: VotingCardRowProps) => {
           </span>
         )}
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          {vote.description.length > 150 ? (
+          {proposal.description.length > 150 ? (
             <Tooltip>
               <TooltipTrigger asChild>
                 <span className="truncate max-w-xs cursor-pointer">
-                  {vote.description.slice(0, 150) + "…"}
+                  {proposal.description.slice(0, 150) + "…"}
                 </span>
               </TooltipTrigger>
-              <TooltipContent>{vote.description}</TooltipContent>
+              <TooltipContent>{proposal.description}</TooltipContent>
             </Tooltip>
           ) : (
-            <span className="truncate max-w-xs">{vote.description}</span>
+            <span className="truncate max-w-xs">{proposal.description}</span>
           )}
         </div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
@@ -147,9 +159,7 @@ const VotingCardRow = ({ vote, onVoteNow }: VotingCardRowProps) => {
           <span className="mx-1">–</span>
           <span className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
-            <span>
-              {endsIn.replace("in ", "")} {t("left")}
-            </span>
+            <span>{endsIn.replace("in ", "")}</span>
           </span>
         </div>
         <div className="flex items-center gap-3 mt-2">
@@ -163,45 +173,32 @@ const VotingCardRow = ({ vote, onVoteNow }: VotingCardRowProps) => {
                 <TooltipContent>{t("completion_tooltip")}</TooltipContent>
               </Tooltip>
               <span className="text-xs text-muted-foreground">
-                {vote.quorum.current} / {vote.quorum.required} {t("required")}
+                {proposal.quorum.current} / {proposal.quorum.required}{" "}
+                {t("required")}
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <Progress value={vote.progress} className="w-40 h-2" />
+              <Progress value={proposal.progress} className="w-40 h-2" />
               <span className="text-xs font-semibold min-w-[40px]">
-                {vote.progress}%
+                {proposal.progress}%
               </span>
             </div>
             <span className="text-xs text-muted-foreground">
-              {vote.progress}% {t("of_required_voters")}
+              {proposal.progress}% {t("of_required_voters")}
             </span>
           </div>
         </div>
       </div>
-      <div className="flex flex-col items-center gap-2 min-w-[120px]">
-        <Link
-          href={vote.submitter.profileUrl}
-          className="flex items-center gap-2 hover:underline"
-          tabIndex={0}
-          aria-label={t("view_profile", { name: vote.submitter.name })}
-        >
-          <Avatar>
-            <AvatarImage
-              src={vote.submitter.avatarUrl}
-              alt={vote.submitter.name}
-            />
-            <AvatarFallback>{vote.submitter.name[0]}</AvatarFallback>
-          </Avatar>
-          <span className="font-medium text-sm truncate max-w-[80px]">
-            {vote.submitter.name}
-          </span>
-        </Link>
+      <div className="flex flex-col items-center gap-2 min-w-[150px]">
+        <span className="font-medium text-sm truncate max-w-[150px]">
+          {proposal.submitter.firstname} {proposal.submitter.lastname}
+        </span>
         <span className="text-xs text-muted-foreground">{t("submitter")}</span>
-        {vote.eligible && !vote.alreadyVoted ? (
+        {proposal.submitter.id !== user.id && !proposal.alreadyVoted ? (
           <Button size="sm" className="mt-2" onClick={onVoteNow}>
             {t("vote_now")}
           </Button>
-        ) : vote.alreadyVoted ? (
+        ) : proposal.alreadyVoted ? (
           <span className="text-green-600 text-xs font-semibold mt-2 flex items-center gap-1">
             <CheckCircle className="w-4 h-4" />
             {t("already_voted")}
@@ -217,5 +214,3 @@ const VotingCardRow = ({ vote, onVoteNow }: VotingCardRowProps) => {
 };
 
 export default VotingCardRow;
-
-export type { Vote };

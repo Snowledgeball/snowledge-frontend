@@ -18,15 +18,15 @@ import {
   GraduationCap,
   BookOpen,
 } from "lucide-react";
-import Link from "next/link";
-import type { Vote } from "@/components/voting/shared/voting-card-row";
+import type { Proposal } from "@/types/proposal";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
 } from "@repo/ui/components/tooltip";
 import { formatDistanceToNow, formatDistance } from "date-fns";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { fr, enUS } from "date-fns/locale";
 
 // ============
 // Function: VoteScreen
@@ -72,7 +72,13 @@ const getFormatIconAndLabel = (format?: string) => {
   }
 };
 
-function VoteScreen({ vote, onBack }: { vote: Vote; onBack?: () => void }) {
+function VoteScreen({
+  proposal,
+  onBack,
+}: {
+  proposal: Proposal;
+  onBack?: () => void;
+}) {
   const t = useTranslations("voting");
   const [choice, setChoice] = useState<"for" | "against" | null>(null);
   const [formatChoice, setFormatChoice] = useState<boolean | null>(null);
@@ -85,16 +91,27 @@ function VoteScreen({ vote, onBack }: { vote: Vote; onBack?: () => void }) {
   const [error, setError] = useState("");
   const [formatError, setFormatError] = useState("");
 
+  const locale = useLocale();
+  const dateFnsLocale = locale === "fr" ? fr : enUS;
+
+  const endDate = proposal.endDate ? new Date(proposal.endDate) : null;
   const now = new Date();
-  const daysLeft = Math.ceil(
-    (vote.endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-  );
-  const startedAgo = formatDistanceToNow(new Date(vote.createdAt), {
-    addSuffix: true,
-  });
-  const endsIn = formatDistance(vote.endDate, now, { addSuffix: true });
-  const progressColor = getProgressColor(vote.progress, daysLeft);
-  const isQuorumReached = vote.progress >= 100;
+  const startedAgo = proposal.createdAt
+    ? formatDistanceToNow(new Date(proposal.createdAt), {
+        addSuffix: true,
+        locale: dateFnsLocale,
+      })
+    : "";
+
+  let endsIn = "";
+  if (endDate && !isNaN(endDate.getTime())) {
+    endsIn = formatDistance(endDate, now, {
+      addSuffix: true,
+      locale: dateFnsLocale,
+    });
+  }
+
+  const isQuorumReached = proposal.progress >= 100;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,13 +149,13 @@ function VoteScreen({ vote, onBack }: { vote: Vote; onBack?: () => void }) {
     <section className="w-full max-w-2xl mx-auto flex flex-col gap-8">
       <header className="pt-4 pb-2">
         <div className="flex items-center gap-2 mb-2">
-          <h1 className="text-2xl font-bold truncate">{vote.title}</h1>
+          <h1 className="text-2xl font-bold truncate">{proposal.title}</h1>
           {isQuorumReached && (
             <CheckCircle className="w-5 h-5 text-green-500" />
           )}
         </div>
         <p className="text-muted-foreground max-w-xl mb-2">
-          {vote.description}
+          {proposal.description}
         </p>
         <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
           <Clock className="w-4 h-4" />
@@ -148,9 +165,7 @@ function VoteScreen({ vote, onBack }: { vote: Vote; onBack?: () => void }) {
           <span className="mx-1">–</span>
           <span className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
-            <span>
-              {endsIn.replace("in ", "")} {t("left")}
-            </span>
+            <span>{endsIn.replace("in ", "")}</span>
           </span>
         </div>
         <div className="flex flex-col gap-1 mb-2">
@@ -163,37 +178,25 @@ function VoteScreen({ vote, onBack }: { vote: Vote; onBack?: () => void }) {
               <TooltipContent>{t("completion_tooltip")}</TooltipContent>
             </Tooltip>
             <span className="text-xs text-muted-foreground">
-              {vote.quorum.current} / {vote.quorum.required} {t("required")}
+              {proposal.quorum.current} / {proposal.quorum.required}{" "}
+              {t("required")}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Progress value={vote.progress} className="w-40 h-2" />
+            <Progress value={proposal.progress} className="w-40 h-2" />
             <span className="text-xs font-semibold min-w-[40px]">
-              {vote.progress}%
+              {proposal.progress}%
             </span>
           </div>
           <span className="text-xs text-muted-foreground">
-            {vote.progress}% {t("of_required_voters")}
+            {proposal.progress}% {t("of_required_voters")}
           </span>
         </div>
         <div className="flex items-center gap-2 mt-2">
-          <Link
-            href={vote.submitter.profileUrl}
-            className="flex items-center gap-2 hover:underline"
-            tabIndex={0}
-            aria-label={t("view_profile", { name: vote.submitter.name })}
-          >
-            <Avatar>
-              <AvatarImage
-                src={vote.submitter.avatarUrl}
-                alt={vote.submitter.name}
-              />
-              <AvatarFallback>{vote.submitter.name[0]}</AvatarFallback>
-            </Avatar>
-            <span className="font-medium text-sm truncate max-w-[80px]">
-              {vote.submitter.name}
-            </span>
-          </Link>
+          <span className="font-medium text-sm truncate max-w-[80px]">
+            {proposal.submitter.firstname} {proposal.submitter.lastname}
+          </span>
+
           <span className="text-xs text-muted-foreground">
             {t("submitter")}
           </span>
@@ -279,7 +282,7 @@ function VoteScreen({ vote, onBack }: { vote: Vote; onBack?: () => void }) {
         </div>
       </form>
       {/* Bloc 2 : Vote pour le format */}
-      {vote.format && (
+      {proposal.format && (
         <form
           className="flex flex-col gap-6 border-t pt-6"
           onSubmit={handleFormatSubmit}
@@ -288,13 +291,13 @@ function VoteScreen({ vote, onBack }: { vote: Vote; onBack?: () => void }) {
           <div className="font-semibold text-base mb-1 flex items-center gap-2">
             {t("vote_for_format")}
             {(() => {
-              const info = getFormatIconAndLabel(vote.format);
+              const info = getFormatIconAndLabel(proposal.format);
               return info ? info.icon : null;
             })()}
             <span className="text-sm font-normal text-muted-foreground">
               {(() => {
-                const info = getFormatIconAndLabel(vote.format);
-                return info ? info.label : vote.format;
+                const info = getFormatIconAndLabel(proposal.format);
+                return info ? info.label : proposal.format;
               })()}
             </span>
           </div>

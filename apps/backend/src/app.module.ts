@@ -14,6 +14,7 @@ import mailingConfig from './config/mailing.config';
 import { CommunityModule } from './community/community.module';
 import { LearnerModule } from './learner/learner.module';
 import { ProposalModule } from './proposal/proposal.module';
+import { VoteModule } from './vote/vote.module';
 @Module({
 	imports: [
 		ConfigModule.forRoot({
@@ -43,6 +44,7 @@ import { ProposalModule } from './proposal/proposal.module';
 		CommunityModule,
 		LearnerModule,
 		ProposalModule,
+		VoteModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

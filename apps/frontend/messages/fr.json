@@ -305,7 +305,7 @@
   },
   "voting": {
     "view_details": "Voir les détails pour {title}",
-    "started": "Commencé il y a",
+    "started": "Commencé",
     "left": "restant",
     "completion": "Avancement",
     "completion_tooltip": "Pourcentage de votants requis ayant participé.",
@@ -381,6 +381,7 @@
     "vote_submitted_successfully": "Vote soumis avec succès !",
     "error_submitting_vote": "Erreur lors de la soumission du vote. Veuillez réessayer.",
     "loading": "Chargement...",
-    "error": "Erreur lors du chargement des votes."
+    "error": "Erreur lors du chargement des votes.",
+    "no_proposals": "Aucun sujet de vote disponible."
   }
 }

@@ -17,6 +17,8 @@ import { Community } from 'src/community/entities/community.entity';
 import { DiscordAccess } from 'src/discord/entities/discord-access.entity';
 import { Type } from 'class-transformer';
 import { Learner } from '../../learner/entities/learner/learner';
+import { Vote } from 'src/vote/entities/vote/vote.entity';
+import { Proposal } from 'src/proposal/entities/proposal/proposal.entity';
 
 @Entity()
 export class User {
@@ -93,6 +95,12 @@ export class User {
 
 	@OneToMany(() => Learner, (learner) => learner.user)
 	learners: Learner[];
+
+	@OneToMany(() => Vote, (vote) => vote.user)
+	votes: Vote[];
+
+	@OneToMany(() => Proposal, (proposal) => proposal.submitter)
+	proposals: Proposal[];
 
 	@BeforeInsert()
 	lowercase() {
