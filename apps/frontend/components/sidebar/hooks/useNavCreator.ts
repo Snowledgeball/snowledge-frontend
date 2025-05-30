@@ -2,11 +2,11 @@ import {
   Settings2,
   Users,
   UserRoundPlus,
-  DollarSign,
-  ShieldCheck,
-  FileText,
+  BarChart3,
+  Link2,
+  CheckSquare,
+  Gift,
 } from "lucide-react";
-import { features } from "@/config/features";
 import { toSlug } from "@/utils/slug";
 import { useTranslations } from "next-intl";
 import { LucideIcon } from "lucide-react";
@@ -16,35 +16,40 @@ export function useNavCreator(activeCommunity: { name: string }) {
   const tNavbar = useTranslations("navbar");
 
   return [
-    features.community.creator.settings && {
-      title: tNavbar("settings"),
-      url: `/${slug}/creator/settings`,
+    {
+      title: tNavbar("general-informations"),
+      url: `/${slug}/my-community/general-informations`,
       icon: Settings2,
     },
-    features.community.creator.members && {
+    {
+      title: tNavbar("integrations"),
+      url: `/${slug}/my-community/integrations`,
+      icon: Link2,
+    },
+    {
+      title: tNavbar("trends-analytics"),
+      url: `/${slug}/my-community/trends-analytics`,
+      icon: BarChart3,
+    },
+    {
+      title: tNavbar("rewards"),
+      url: `/${slug}/my-community/rewards`,
+      icon: Gift,
+    },
+    {
+      title: tNavbar("topics-to-validate"),
+      url: `/${slug}/my-community/topics-to-validate`,
+      icon: CheckSquare,
+    },
+    {
       title: tNavbar("members"),
-      url: `/${slug}/creator/members`,
+      url: `/${slug}/my-community/members`,
       icon: Users,
     },
-    features.community.creator.invite && {
-      title: tNavbar("invite"),
-      url: `/${slug}/creator/invite`,
+    {
+      title: tNavbar("invitations"),
+      url: `/${slug}/my-community/invitations`,
       icon: UserRoundPlus,
-    },
-    features.community.creator.pricing && {
-      title: tNavbar("pricing"),
-      url: `/${slug}/creator/pricing`,
-      icon: DollarSign,
-    },
-    features.community.creator.moderation && {
-      title: tNavbar("moderation"),
-      url: `/${slug}/creator/moderation`,
-      icon: ShieldCheck,
-    },
-    features.community.creator.logs && {
-      title: tNavbar("logs"),
-      url: `/${slug}/creator/logs`,
-      icon: FileText,
     },
   ].filter(Boolean) as {
     title: string;

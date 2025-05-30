@@ -77,16 +77,16 @@ function SidebarNavs() {
     icon: Home,
   };
 
-  const navLearner = useNavLearner(activeCommunity ?? { name: "" });
-  const navContributeur = useNavContributor(activeCommunity ?? { name: "" });
+  // const navLearner = useNavLearner(activeCommunity ?? { name: "" });
+  // const navContributeur = useNavContributor(activeCommunity ?? { name: "" });
   const navCreator = useNavCreator(activeCommunity ?? { name: "" });
 
   return (
     <>
-      <SidebarNavMain items={[home]} label="" />
+      {/* <SidebarNavMain items={[home]} label="" />
       <SidebarNavMain items={navLearner} label={tNavbar("learner")} />
-      <SidebarNavMain items={navContributeur} label={tNavbar("contributor")} />
-      <SidebarNavMain items={navCreator} label={tNavbar("creator")} />
+      <SidebarNavMain items={navContributeur} label={tNavbar("contributor")} /> */}
+      <SidebarNavMain items={navCreator} label={tNavbar("my-community")} />
       <SidebarNavMain items={[landing]} label="" />
     </>
   );
