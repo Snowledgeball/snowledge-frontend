@@ -138,7 +138,12 @@
     "topics-to-validate": "Thèmes à valider",
     "integrations": "Intégrations",
     "invitations": "Invitations",
-    "pricing": "Tarifs"
+    "pricing": "Tarifs",
+    "global": "Global",
+    "voting": "Voting",
+    "create-topic": "Créer un sujet",
+    "in-progress": "En cours",
+    "done": "Terminé"
   },
   "inviteModal": {
     "title": "Invitez des utilisateurs",

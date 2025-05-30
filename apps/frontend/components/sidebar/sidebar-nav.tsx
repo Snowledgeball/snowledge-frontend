@@ -27,7 +27,7 @@ export function SidebarNavMain({
 }: {
   items: {
     title: string;
-    url: string;
+    url?: string;
     icon?: LucideIcon;
     isActive?: boolean;
     items?: {
@@ -62,7 +62,9 @@ export function SidebarNavMain({
                     tooltip={item.title}
                     onClick={() => {
                       if (!item.items) {
-                        router.push(item.url);
+                        if (item.url) {
+                          router.push(item.url);
+                        }
                       }
                     }}
                   >

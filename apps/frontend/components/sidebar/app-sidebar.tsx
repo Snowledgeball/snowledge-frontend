@@ -38,6 +38,7 @@ import {
 import { toSlug } from "@/utils/slug";
 import { useTranslations } from "next-intl";
 import NavUser from "./nav-user";
+import { useNavGlobal } from "./hooks/useNavGlobal";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -80,12 +81,14 @@ function SidebarNavs() {
   // const navLearner = useNavLearner(activeCommunity ?? { name: "" });
   // const navContributeur = useNavContributor(activeCommunity ?? { name: "" });
   const navMyCommunity = useNavMyCommunity(activeCommunity ?? { name: "" });
+  const navGlobal = useNavGlobal(activeCommunity ?? { name: "" });
 
   return (
     <>
       {/* <SidebarNavMain items={[home]} label="" />
       <SidebarNavMain items={navLearner} label={tNavbar("learner")} />
       <SidebarNavMain items={navContributeur} label={tNavbar("contributor")} /> */}
+      <SidebarNavMain items={navGlobal} label={tNavbar("global")} />
       <SidebarNavMain items={navMyCommunity} label={tNavbar("my-community")} />
       <SidebarNavMain items={[landing]} label="" />
     </>
