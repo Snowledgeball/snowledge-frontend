@@ -1,5 +1,6 @@
+import CreateVoteScreen from "@/components/voting/create-topic/create-vote-screen";
 import React from "react";
 
-export default function page() {
-  return <div>page</div>;
+export default function CreateTopicPage() {
+  return <CreateVoteScreen />;
 }

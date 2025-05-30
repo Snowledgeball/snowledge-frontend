@@ -91,6 +91,7 @@ function SidebarNavs() {
       <SidebarNavMain items={navGlobal} label={tNavbar("global")} />
       <SidebarNavMain items={navMyCommunity} label={tNavbar("my-community")} />
       <SidebarNavMain items={[landing]} label="" />
+      {/* <NavProjects projects={data.projects} /> */}
     </>
   );
 }
