@@ -1,43 +1,43 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Vote } from './entities/vote/vote.entity';
-import { CreateVoteDto } from './dto/create-vote.dto/create-vote.dto';
+import { Proposal } from './entities/proposal/proposal.entity';
+import { CreateProposalDto } from './dto/create-proposal.dto/create-proposal.dto';
 import { Community } from '../community/entities/community.entity';
 import { User } from '../user/entities/user.entity';
 
 @Injectable()
-export class VoteService {
+export class ProposalService {
 	constructor(
-		@InjectRepository(Vote)
-		private voteRepository: Repository<Vote>,
+		@InjectRepository(Proposal)
+		private proposalRepository: Repository<Proposal>,
 		@InjectRepository(Community)
 		private communityRepository: Repository<Community>,
 		@InjectRepository(User)
 		private userRepository: Repository<User>,
 	) {}
 
-	async findAllForACommunityBySlug(communitySlug: string): Promise<Vote[]> {
-		return this.voteRepository.find({
+	async findAllForACommunityBySlug(communitySlug: string): Promise<Proposal[]> {
+		return this.proposalRepository.find({
 			where: { community: { slug: communitySlug } },
 			relations: ['community', 'submitter'],
 		});
 	}
 
-	async findOne(id: number, communitySlug: string): Promise<Vote> {
-		const vote = await this.voteRepository.findOne({
+	async findOne(id: number, communitySlug: string): Promise<Proposal> {
+		const proposal = await this.proposalRepository.findOne({
 			where: { id, community: { slug: communitySlug } },
 			relations: ['community', 'submitter'],
 		});
-		if (!vote) throw new NotFoundException('Vote not found');
-		return vote;
+		if (!proposal) throw new NotFoundException('Proposal not found');
+		return proposal;
 	}
 
 	async create(
-		createVoteDto: CreateVoteDto,
+		createProposalDto: CreateProposalDto,
 		communitySlug: string,
-	): Promise<Vote> {
-		const { communityId, submitterId, ...rest } = createVoteDto;
+	): Promise<Proposal> {
+		const { communityId, submitterId, ...rest } = createProposalDto;
 		const community = await this.communityRepository.findOne({
 			where: { slug: communitySlug },
 			relations: ['user'],
@@ -52,11 +52,11 @@ export class VoteService {
 			!submitter.communities.some((c) => c.id === community.id)
 		)
 			throw new NotFoundException('Community or user not found');
-		const vote = this.voteRepository.create({
+		const proposal = this.proposalRepository.create({
 			...rest,
 			community,
 			submitter,
 		});
-		return this.voteRepository.save(vote);
+		return this.proposalRepository.save(proposal);
 	}
 }

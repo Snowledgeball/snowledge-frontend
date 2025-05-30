@@ -8,7 +8,7 @@ import {
 	IsInt,
 } from 'class-validator';
 
-export class CreateVoteDto {
+export class CreateProposalDto {
 	@IsString()
 	@IsNotEmpty()
 	@MinLength(5)

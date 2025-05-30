@@ -9,8 +9,8 @@ import {
 import { Community } from '../../../community/entities/community.entity';
 import { User } from '../../../user/entities/user.entity';
 
-@Entity('votes')
-export class Vote {
+@Entity('proposals')
+export class Proposal {
 	@PrimaryGeneratedColumn()
 	id: number;
 
