@@ -287,5 +287,15 @@
     "loading": "Chargement...",
     "error": "Erreur lors du chargement des membres.",
     "cancel": "Annuler"
+  },
+  "join": {
+    "badge": "Invitation",
+    "private": "Communauté privée",
+    "title": "Rejoins la communauté {communityName} !",
+    "description": "Tu es invité·e à rejoindre la communauté {communityName} sur Snowledge. Ici, tu vas co-construire des contenus avec d'autres membres autour d'un créateur dans la tech ou l'investissement. Participe, partage tes idées, et sois récompensé·e pour ta contribution à l'intelligence collective !",
+    "button": "Rejoindre la communauté",
+    "success": "Bienvenue dans la communauté !",
+    "error": "Une erreur est survenue. Veuillez réessayer.",
+    "loading": "Rejoint..."
   }
 }

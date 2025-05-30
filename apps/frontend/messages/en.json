@@ -338,5 +338,15 @@
     "loading": "Loading...",
     "error": "Error while loading members.",
     "cancel": "Cancel"
+  },
+  "join": {
+    "badge": "Invitation",
+    "private": "Private community",
+    "title": "Join the {communityName} community!",
+    "description": "You are invited to join the {communityName} community on Snowledge. Here, you'll co-create content with other members around a creator in tech or investing. Take part, share your ideas, and get rewarded for your contribution to collective intelligence!",
+    "button": "Join the community",
+    "success": "Welcome to the community!",
+    "error": "An error occurred. Please try again.",
+    "loading": "Joining..."
   }
 }

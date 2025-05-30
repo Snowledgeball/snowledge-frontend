@@ -19,7 +19,8 @@ export async function fetcher(input: RequestInfo, init?: RequestInit) {
   }
 
   if (!res.ok) {
-    throw new Error(await res.text());
+    const errorObj = await res.json();
+    throw new Error(JSON.stringify(errorObj));
   }
 
   return res.json();

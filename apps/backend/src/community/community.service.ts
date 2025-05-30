@@ -12,8 +12,6 @@ import { UpdateCommunityDto } from './dto/update-community.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
 import { User } from 'src/user/entities/user.entity';
-import { User as UserDecorator } from '../user/decorator';
-import { User as UserEntity } from '../user/entities/user.entity';
 import { LearnerStatus } from 'src/learner/entities/learner/learner';
 
 @Injectable()

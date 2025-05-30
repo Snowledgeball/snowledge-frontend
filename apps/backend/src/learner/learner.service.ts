@@ -27,6 +27,7 @@ export class LearnerService {
 	) {
 		const community = await this.communityRepository.findOne({
 			where: { slug },
+			relations: ['user'],
 		});
 		if (!community) throw new NotFoundException('Community not found');
 		const user = await this.userRepository.findOne({
@@ -34,11 +35,15 @@ export class LearnerService {
 		});
 		if (!user) throw new NotFoundException('User not found');
 
+		//Vérifie si c'est pas le créateur de la communauté
+		if (community.user.id === user.id)
+			throw new BadRequestException('You cannot join your own community');
+
 		// Vérifie si déjà membre
 		const existing = await this.learnerRepository.findOne({
 			where: { community: { id: community.id }, user: { id: user.id } },
 		});
-		if (existing) return existing;
+		if (existing) throw new BadRequestException('User already a member');
 
 		const learner = this.learnerRepository.create({
 			community,
