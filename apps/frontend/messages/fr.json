@@ -167,7 +167,7 @@
     "create_description": "Créez votre propre communauté et invitez d'autres personnes à rejoindre. Vous serez le propriétaire avec un contrôle total.",
     "join_button": "Rejoindre une communauté existante",
     "join_description": "Rejoignez une communauté déjà créée. Vous aurez besoin du nom ou du lien d'invitation.",
-    "placeholder": "Collez le nom, le lien ou l'ID de la communauté",
+    "placeholder": "Entrez le nom de la communauté",
     "error_empty": "Veuillez renseigner une valeur.",
     "error_not_found": "Aucune communauté ne correspond à cette valeur.",
     "success_joined": "Communauté rejointe avec succès",

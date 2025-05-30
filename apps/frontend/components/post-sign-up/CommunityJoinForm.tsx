@@ -1,9 +1,10 @@
 import { Input, Button } from "@repo/ui";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { Users } from "lucide-react";
 import { Community } from "@/types/community";
+import { toSlug } from "@/utils/slug";
+import { useAddLearnerToCommunity } from "./hooks/useAddLearnerToCommunity";
 
 interface CommunityJoinFormProps {
   communities: Community[] | undefined;
@@ -16,6 +17,8 @@ export function CommunityJoinForm({ communities, t }: CommunityJoinFormProps) {
   const [notFound, setNotFound] = useState(false);
   const router = useRouter();
 
+  const { mutate: addLearnerToCommunity } = useAddLearnerToCommunity();
+
   const handleJoinCommunity = () => {
     setInputError(false);
     setNotFound(false);
@@ -27,19 +30,12 @@ export function CommunityJoinForm({ communities, t }: CommunityJoinFormProps) {
     }
 
     let community =
-      communities?.find((c) => String(c.id) === input) ||
       communities?.find((c) => c.name === input) ||
+      communities?.find((c) => c.slug === toSlug(input)) ||
       communities?.find((c) => c.slug === input);
 
-    if (!community) {
-      const match = input.match(/communities\/([^/\s]+)/i);
-      if (match && match[1]) {
-        community = communities?.find((c) => c.slug === match[1]);
-      }
-    }
-
     if (community) {
-      toast.success(t("success_joined"));
+      addLearnerToCommunity({ communitySlug: community.slug });
       router.push(`/${community.slug}`);
     } else {
       setNotFound(true);
