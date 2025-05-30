@@ -22,7 +22,7 @@ const mockVotes: Vote[] = [
     title: "Automation Strategies for Small Businesses",
     description:
       "Exploring how automation tools can save time, reduce errors, and scale operations — from CRM to marketing workflows.",
-    startDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
     endDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // in 3 days
     progress: 67,
     participationLevel: "medium",
@@ -41,7 +41,7 @@ const mockVotes: Vote[] = [
     title: "Building a Personal Brand as a Knowledge Worker",
     description:
       "Understanding the key elements of visibility, credibility, and community-building to grow your audience and influence.",
-    startDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
     endDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // in 1 day
     progress: 42,
     participationLevel: "low",
@@ -60,7 +60,7 @@ const mockVotes: Vote[] = [
     title: "Structuring and Pricing Online Services Effectively",
     description:
       "Investigating best practices to package, price, and position digital services for freelancers, consultants, and creators.",
-    startDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
     endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // in 7 days
     progress: 92,
     participationLevel: "high",
@@ -76,7 +76,7 @@ const mockVotes: Vote[] = [
   },
 ];
 
-const VotingInProgressList = () => {
+const VotingInProgressList = ({ communitySlug }: { communitySlug: string }) => {
   const t = useTranslations("voting");
   const [selectedVote, setSelectedVote] = useState<Vote | null>(null);
 
@@ -88,7 +88,7 @@ const VotingInProgressList = () => {
     queryKey: ["votes", "in-progress"],
     queryFn: async () => {
       const res = await fetcher(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/votes/in-progress`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communitySlug}/votes`,
         { credentials: "include" }
       );
       return res;

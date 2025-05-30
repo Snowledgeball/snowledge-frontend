@@ -1,10 +1,16 @@
 export type Vote = {
-  id: number;
+  id: string;
   title: string;
   description: string;
-  format?: string;
-  comments?: string;
-  isContributor?: boolean;
   createdAt: Date;
-  updatedAt: Date;
+  endDate: Date;
+  progress: number;
+  participationLevel: ParticipationLevel;
+  submitter: { name: string; avatarUrl: string; profileUrl: string };
+  eligible: boolean;
+  alreadyVoted: boolean;
+  quorum: { current: number; required: number };
+  format?: string;
 };
+
+type ParticipationLevel = "low" | "medium" | "high";

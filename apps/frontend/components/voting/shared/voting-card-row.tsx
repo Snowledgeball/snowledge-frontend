@@ -44,23 +44,7 @@ import { useTranslations } from "next-intl";
 // ============
 
 import { formatDistanceToNow, formatDistance } from "date-fns";
-
-type ParticipationLevel = "low" | "medium" | "high";
-
-interface Vote {
-  id: string;
-  title: string;
-  description: string;
-  startDate: Date;
-  endDate: Date;
-  progress: number;
-  participationLevel: ParticipationLevel;
-  submitter: { name: string; avatarUrl: string; profileUrl: string };
-  eligible: boolean;
-  alreadyVoted: boolean;
-  quorum: { current: number; required: number };
-  format?: string;
-}
+import { Vote } from "@/types/vote";
 
 const getProgressColor = (progress: number, daysLeft: number) => {
   if (progress >= 100) return "bg-green-500";
@@ -106,12 +90,16 @@ export const getFormatIconAndLabel = (format?: string) => {
 const VotingCardRow = ({ vote, onVoteNow }: VotingCardRowProps) => {
   const t = useTranslations("voting");
   const now = new Date();
-  const daysLeft = Math.ceil(
-    (vote.endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+  console.log(vote);
+  const endDate = new Date(vote.endDate);
+  const startedAgo = formatDistanceToNow(new Date(vote.createdAt), {
+    addSuffix: true,
+  });
+  const endsIn = formatDistance(endDate, now, { addSuffix: true });
+  const progressColor = getProgressColor(
+    vote.progress,
+    Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
   );
-  const startedAgo = formatDistanceToNow(vote.startDate, { addSuffix: true });
-  const endsIn = formatDistance(vote.endDate, now, { addSuffix: true });
-  const progressColor = getProgressColor(vote.progress, daysLeft);
   const isQuorumReached = vote.progress >= 100;
   const formatInfo = getFormatIconAndLabel(vote.format);
 

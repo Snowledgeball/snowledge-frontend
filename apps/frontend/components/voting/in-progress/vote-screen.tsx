@@ -89,7 +89,9 @@ function VoteScreen({ vote, onBack }: { vote: Vote; onBack?: () => void }) {
   const daysLeft = Math.ceil(
     (vote.endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
   );
-  const startedAgo = formatDistanceToNow(vote.startDate, { addSuffix: true });
+  const startedAgo = formatDistanceToNow(new Date(vote.createdAt), {
+    addSuffix: true,
+  });
   const endsIn = formatDistance(vote.endDate, now, { addSuffix: true });
   const progressColor = getProgressColor(vote.progress, daysLeft);
   const isQuorumReached = vote.progress >= 100;
