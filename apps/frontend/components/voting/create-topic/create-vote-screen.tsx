@@ -94,11 +94,6 @@ const CreateVoteScreen = () => {
             {t("vote_submitted_error")}
           </div>
         )}
-        {createVote.isSuccess && (
-          <div className="text-green-600 text-sm" role="status">
-            {t("vote_submitted_success")}
-          </div>
-        )}
         <Button
           type="submit"
           disabled={isSubmitting || createVote.isPending}

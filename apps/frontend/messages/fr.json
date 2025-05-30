@@ -323,7 +323,6 @@
     "against": "Contre",
     "leave_comment_optional": "Laisser un commentaire (optionnel)",
     "feedback_on_choice": "Commentaire sur votre choix",
-    "vote_submitted_success": "Vote enregistré avec succès !",
     "submitting": "Envoi en cours...",
     "submit_my_vote": "Soumettre mon vote",
     "back_to_list": "Retour à la liste",
@@ -378,6 +377,8 @@
       "format_too_short": "Le format doit faire au moins 2 caractères.",
       "format_too_long": "Le format ne doit pas dépasser 40 caractères.",
       "comments_too_long": "Le commentaire ne doit pas dépasser 400 caractères."
-    }
+    },
+    "vote_submitted_successfully": "Vote soumis avec succès !",
+    "error_submitting_vote": "Erreur lors de la soumission du vote. Veuillez réessayer."
   }
 }

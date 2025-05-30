@@ -13,6 +13,7 @@ import { DiscordModule } from './discord/discord.module';
 import mailingConfig from './config/mailing.config';
 import { CommunityModule } from './community/community.module';
 import { LearnerModule } from './learner/learner.module';
+import { VoteModule } from './vote/vote.module';
 @Module({
 	imports: [
 		ConfigModule.forRoot({
@@ -41,6 +42,7 @@ import { LearnerModule } from './learner/learner.module';
 		DiscordModule,
 		CommunityModule,
 		LearnerModule,
+		VoteModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

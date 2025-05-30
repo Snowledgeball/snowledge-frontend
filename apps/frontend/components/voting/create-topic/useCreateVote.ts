@@ -2,8 +2,10 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { VoteFormValues } from "./vote-schema";
 import { fetcher } from "@/lib/fetcher";
+import { useTranslations } from "next-intl";
 
 export function useCreateVote() {
+  const t = useTranslations("voting");
   return useMutation({
     mutationFn: async (data: VoteFormValues) => {
       const res = await fetcher(
@@ -15,22 +17,13 @@ export function useCreateVote() {
           credentials: "include",
         }
       );
-      if (!res.ok) {
-        let err;
-        try {
-          err = await res.json();
-        } catch {
-          err = { message: "Unknown error" };
-        }
-        throw new Error(err.message || "Unknown error");
-      }
-      return res.json();
+      return res;
     },
     onSuccess: () => {
-      toast.success("Vote submitted successfully!");
+      toast.success(t("vote_submitted_successfully"));
     },
     onError: (error: any) => {
-      toast.error(error.message || "Error submitting vote");
+      toast.error(t("error_submitting_vote"));
     },
   });
 }

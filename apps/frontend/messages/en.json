@@ -429,6 +429,8 @@
       "format_too_short": "Format must be at least 2 characters.",
       "format_too_long": "Format must not exceed 40 characters.",
       "comments_too_long": "Comment must not exceed 400 characters."
-    }
+    },
+    "vote_submitted_successfully": "Vote submitted successfully!",
+    "error_submitting_vote": "Error submitting vote. Please try again."
   }
 }
