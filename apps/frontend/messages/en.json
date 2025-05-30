@@ -375,6 +375,7 @@
     "leave_comment_optional": "Leave a comment (optional)",
     "feedback_on_choice": "Feedback on your choice",
     "vote_submitted_success": "Vote submitted successfully!",
+    "vote_submitted_error": "Error submitting vote. Please try again.",
     "submitting": "Submitting...",
     "submit_my_vote": "Submit my vote",
     "back_to_list": "Back to list",
@@ -417,6 +418,17 @@
     "by_expiration": "By expiration",
     "low": "Low",
     "medium": "Medium",
-    "high": "High"
+    "high": "High",
+    "errors": {
+      "title_required": "Title is required.",
+      "title_too_short": "Title must be at least 5 characters.",
+      "title_too_long": "Title must not exceed 80 characters.",
+      "description_required": "Description is required.",
+      "description_too_short": "Description must be at least 10 characters.",
+      "description_too_long": "Description must not exceed 200 characters.",
+      "format_too_short": "Format must be at least 2 characters.",
+      "format_too_long": "Format must not exceed 40 characters.",
+      "comments_too_long": "Comment must not exceed 400 characters."
+    }
   }
 }

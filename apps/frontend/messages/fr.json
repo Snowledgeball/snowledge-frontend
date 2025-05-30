@@ -366,6 +366,18 @@
     "by_expiration": "Par expiration",
     "low": "Faible",
     "medium": "Moyenne",
-    "high": "Élevée"
+    "high": "Élevée",
+    "vote_submitted_error": "Erreur lors de l'envoi du vote. Veuillez réessayer.",
+    "errors": {
+      "title_required": "Le titre est requis.",
+      "title_too_short": "Le titre doit faire au moins 5 caractères.",
+      "title_too_long": "Le titre ne doit pas dépasser 80 caractères.",
+      "description_required": "La description est requise.",
+      "description_too_short": "La description doit faire au moins 10 caractères.",
+      "description_too_long": "La description ne doit pas dépasser 200 caractères.",
+      "format_too_short": "Le format doit faire au moins 2 caractères.",
+      "format_too_long": "Le format ne doit pas dépasser 40 caractères.",
+      "comments_too_long": "Le commentaire ne doit pas dépasser 400 caractères."
+    }
   }
 }
