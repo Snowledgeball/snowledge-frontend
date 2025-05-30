@@ -5,8 +5,8 @@ import { notFound } from "next/navigation";
 
 export default function Page() {
   const { slug } = useParams();
-  if (!features.community.creator.moderation) {
+  if (!features.community.myCommunity.topicsToValidate) {
     notFound();
   }
-  return <div>Modération pour la communauté {slug}</div>;
+  return <div>Thèmes à valider pour la communauté {slug}</div>;
 }

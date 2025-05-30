@@ -100,7 +100,7 @@ export function CommunityManager() {
           <main className="flex-1 overflow-y-auto">
             <div className="container mx-auto px-0 py-4 md:py-6 md:pl-6">
               <form onSubmit={handleSubmit(onSubmit)}>
-                {features.community.creator.settings.general && (
+                {features.community.myCommunity.generalInformations && (
                   <CommunityGeneralSection
                     register={register}
                     setValue={setValue}
@@ -108,7 +108,7 @@ export function CommunityManager() {
                     errors={errors}
                   />
                 )}
-                {features.community.creator.settings.access && (
+                {features.community.myCommunity.integrations && (
                   <CommunityAccessSection
                     value={communityType}
                     onChange={
@@ -117,7 +117,7 @@ export function CommunityManager() {
                     errors={errors}
                   />
                 )}
-                {features.community.creator.settings.gains &&
+                {features.community.myCommunity.rewards &&
                   communityType === "paid" && (
                     <CommunityGainsSection
                       errors={errors}

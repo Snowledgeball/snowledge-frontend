@@ -15,9 +15,14 @@ import { useMemberMutations } from "@/components/manage-members/hooks/useMemberM
 import { MemberActions } from "@/components/manage-members/MemberActions";
 import { useMembersQuery } from "@/components/manage-members/hooks/useMembersQuery";
 import { Member } from "@/types/member";
+import { features } from "@/config/features";
+import { notFound } from "next/navigation";
 
 export default function Page() {
   const { slug } = useParams();
+  if (!features.community.myCommunity.members) {
+    notFound();
+  }
   const [search, setSearch] = useState("");
   const t = useTranslations("members");
 

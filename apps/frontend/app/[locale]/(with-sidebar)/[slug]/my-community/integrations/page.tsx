@@ -5,8 +5,8 @@ import { notFound } from "next/navigation";
 
 export default function Page() {
   const { slug } = useParams();
-  if (!features.community.creator.logs) {
+  if (!features.community.myCommunity.integrations) {
     notFound();
   }
-  return <div>Logs d&apos;administration pour la communauté {slug}</div>;
+  return <div>Intégrations pour la communauté {slug}</div>;
 }

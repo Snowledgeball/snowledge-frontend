@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 
 export default function Page() {
   const { slug } = useParams();
-  if (!features.community.creator.enabled) {
+  if (!features.community.myCommunity.enabled) {
     notFound();
   }
   return <div>Administration de la communauté {slug}</div>;

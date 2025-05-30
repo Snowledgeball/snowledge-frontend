@@ -6,8 +6,8 @@ import { notFound } from "next/navigation";
 
 export default function Page() {
   const { slug } = useParams();
-  if (!features.community.creator.pricing) {
+  if (!features.community.myCommunity.rewards) {
     notFound();
   }
-  return <div>Tarifs d&apos;administration pour la communauté {slug}</div>;
+  return <div>Récompenses pour la communauté {slug}</div>;
 }

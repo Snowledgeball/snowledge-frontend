@@ -22,9 +22,14 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import ModalInvite from "@/components/create-community/modals/ModalInvite";
 import { Learner } from "@/types/learner";
+import { features } from "@/config/features";
+import { notFound } from "next/navigation";
 
 export default function Page() {
   const { slug } = useParams();
+  if (!features.community.myCommunity.invitations) {
+    notFound();
+  }
   const [modalOpen, setModalOpen] = useState(false);
   const communityUrl = `${window.location.origin}/join/${slug}`;
 
