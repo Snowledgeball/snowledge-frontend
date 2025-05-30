@@ -4,6 +4,7 @@ import type { Vote } from "@/components/voting/shared/voting-card-row";
 import { useState } from "react";
 import VoteScreen from "./vote-screen";
 import { FileText } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 // ============
 // Function: VotingInProgressList
@@ -73,6 +74,7 @@ const mockVotes: Vote[] = [
 ];
 
 const VotingInProgressList = () => {
+  const t = useTranslations("voting");
   const [selectedVote, setSelectedVote] = useState<Vote | null>(null);
 
   if (selectedVote) {

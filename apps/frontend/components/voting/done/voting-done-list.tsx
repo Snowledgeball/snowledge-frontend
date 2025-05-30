@@ -11,6 +11,7 @@ import {
 } from "@/components/voting/shared/voting-card-row";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 // ============
 // Function: VotingDoneList
@@ -137,13 +138,21 @@ const PARTICIPATION_LABELS = {
 };
 
 const VotingDoneList = () => {
+  const t = useTranslations("voting");
   return (
     <div className="flex flex-col gap-6">
       {doneVotes.map((vote) => {
         const formatInfo = getFormatIconAndLabel(vote.format);
-        const status = STATUS_LABELS[vote.status];
-        const reason = REASON_LABELS[vote.reason];
+        const status =
+          vote.status === "validated"
+            ? { ...STATUS_LABELS.validated, label: t("validated") }
+            : { ...STATUS_LABELS.invalidated, label: t("invalidated") };
+        const reason =
+          vote.reason === "vote"
+            ? { ...REASON_LABELS.vote, label: t("by_vote") }
+            : { ...REASON_LABELS.expiration, label: t("by_expiration") };
         const participation = PARTICIPATION_LABELS[vote.participationLevel];
+        participation.label = t(participation.label.toLowerCase());
         return (
           <Card
             key={vote.id}
@@ -174,18 +183,19 @@ const VotingDoneList = () => {
               </div>
               <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
                 <span>
-                  Ended {formatDistanceToNow(vote.endDate, { addSuffix: true })}
+                  {t("ended")}{" "}
+                  {formatDistanceToNow(vote.endDate, { addSuffix: true })}
                 </span>
                 <span className="mx-1">–</span>
                 <span className="flex items-center gap-1">
-                  Quorum:{" "}
+                  {t("quorum")}:
                   <span className="font-semibold">
                     {vote.quorum.current} / {vote.quorum.required}
                   </span>
                 </span>
                 <span className="mx-1">–</span>
                 <span className="flex items-center gap-1">
-                  Participation: {participation.icon}
+                  {t("participation")}:{participation.icon}
                   <span className="font-semibold">{vote.progress}%</span>
                 </span>
               </div>
@@ -195,7 +205,7 @@ const VotingDoneList = () => {
                 href={vote.submitter.profileUrl}
                 className="flex items-center gap-2 hover:underline"
                 tabIndex={0}
-                aria-label={`View profile of ${vote.submitter.name}`}
+                aria-label={t("view_profile", { name: vote.submitter.name })}
               >
                 <Avatar>
                   <AvatarImage
@@ -208,7 +218,9 @@ const VotingDoneList = () => {
                   {vote.submitter.name}
                 </span>
               </Link>
-              <span className="text-xs text-muted-foreground">Submitter</span>
+              <span className="text-xs text-muted-foreground">
+                {t("submitter")}
+              </span>
             </div>
           </Card>
         );

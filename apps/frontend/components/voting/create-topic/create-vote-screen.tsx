@@ -14,6 +14,7 @@ import {
 } from "@repo/ui/components/select";
 import { Switch } from "@repo/ui/components/switch";
 import { FileText } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 // ============
 // Function: CreateVoteScreen
@@ -23,6 +24,7 @@ import { FileText } from "lucide-react";
 // RETURNS: JSX.Element (the voting creation form UI)
 // ============
 const CreateVoteScreen = () => {
+  const t = useTranslations("voting");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [format, setFormat] = useState("");
@@ -56,70 +58,69 @@ const CreateVoteScreen = () => {
       <header className="pt-4 pb-2">
         <div className="flex items-center gap-3 mb-2">
           <FileText className="h-7 w-7 text-primary" aria-hidden="true" />
-          <h1 className="text-2xl font-bold">Create a new vote</h1>
+          <h1 className="text-2xl font-bold">{t("create_vote_title")}</h1>
         </div>
         <p className="text-muted-foreground max-w-xl">
-          Share your idea and let the community decide. Fill in the details
-          below to propose a new voting subject.
+          {t("create_vote_description")}
         </p>
       </header>
       <form
         className="w-full flex flex-col gap-6 px-0 md:px-8 py-8"
         onSubmit={handleSubmit}
-        aria-label="Create a new vote"
+        aria-label={t("create_vote_aria_label")}
       >
         <h2 className="text-2xl font-bold mb-2 text-center">
-          Submit a subject
+          {t("submit_subject")}
         </h2>
         <div className="flex flex-col gap-2">
           <Label htmlFor="title">
-            Title <span className="text-red-500">*</span>
+            {t("title_label")} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter the subject title"
+            placeholder={t("title_placeholder")}
             required
             aria-required="true"
-            aria-label="Vote title"
+            aria-label={t("vote_title")}
             tabIndex={0}
             maxLength={80}
             className=""
           />
           <span className="text-xs text-muted-foreground">
-            Max 80 characters
+            {t("max_80_characters")}
           </span>
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="description">
-            Description <span className="text-red-500">*</span>
+            {t("description_label")} <span className="text-red-500">*</span>
           </Label>
           <Textarea
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Short description of the subject"
+            placeholder={t("description_placeholder")}
             required
             aria-required="true"
-            aria-label="Vote description"
+            aria-label={t("vote_description")}
             tabIndex={0}
             maxLength={200}
             className="min-h-[60px]"
           />
           <span className="text-xs text-muted-foreground">
-            Max 200 characters
+            {t("max_200_characters")}
           </span>
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="format">Format (optional)</Label>
+          <Label htmlFor="format">{t("format_label")}</Label>
           <Select value={format} onValueChange={setFormat}>
-            <SelectTrigger id="format" aria-label="Format">
-              <SelectValue placeholder="Select a format (optional)" />
+            <SelectTrigger id="format" aria-label={t("format_label")}>
+              <SelectValue placeholder={t("format_placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="masterclass">Masterclass</SelectItem>
-              <SelectItem value="whitepaper">White paper</SelectItem>
+              <SelectItem value="masterclass">{t("masterclass")}</SelectItem>
+              <SelectItem value="whitepaper">{t("white_paper")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -128,20 +129,20 @@ const CreateVoteScreen = () => {
             id="contributor"
             checked={isContributor}
             onCheckedChange={setIsContributor}
-            aria-label="I want to be a contributor"
+            aria-label={t("i_want_to_be_contributor")}
           />
           <Label htmlFor="contributor" className="cursor-pointer select-none">
-            I want to be a contributor
+            {t("i_want_to_be_contributor")}
           </Label>
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="comments">Comments (optional)</Label>
+          <Label htmlFor="comments">{t("comments_label")}</Label>
           <Textarea
             id="comments"
             value={comments}
             onChange={(e) => setComments(e.target.value)}
-            placeholder="Add any additional comments (optional)"
-            aria-label="Comments"
+            placeholder={t("comments_placeholder")}
+            aria-label={t("comments_label")}
             tabIndex={0}
             maxLength={400}
             className="min-h-[80px]"
@@ -149,12 +150,12 @@ const CreateVoteScreen = () => {
         </div>
         {error && (
           <div className="text-red-500 text-sm" role="alert">
-            {error}
+            {t(error)}
           </div>
         )}
         {success && (
           <div className="text-green-600 text-sm" role="status">
-            Vote submitted successfully!
+            {t("vote_submitted_success")}
           </div>
         )}
         <Button
@@ -162,7 +163,7 @@ const CreateVoteScreen = () => {
           disabled={isSubmitting || !title.trim() || !description.trim()}
           aria-disabled={isSubmitting || !title.trim() || !description.trim()}
         >
-          {isSubmitting ? "Submitting..." : "Submit"}
+          {isSubmitting ? t("submitting") : t("submit")}
         </Button>
       </form>
     </section>

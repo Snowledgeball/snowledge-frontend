@@ -21,6 +21,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 // ============
 // Function: VotingCardRow
@@ -103,6 +104,7 @@ export const getFormatIconAndLabel = (format?: string) => {
 };
 
 const VotingCardRow = ({ vote, onVoteNow }: VotingCardRowProps) => {
+  const t = useTranslations("voting");
   const now = new Date();
   const daysLeft = Math.ceil(
     (vote.endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
@@ -121,7 +123,7 @@ const VotingCardRow = ({ vote, onVoteNow }: VotingCardRowProps) => {
             href="#"
             className="font-bold text-lg hover:underline truncate"
             tabIndex={0}
-            aria-label={`View details for ${vote.title}`}
+            aria-label={t("view_details", { title: vote.title })}
           >
             {vote.title}
           </Link>
@@ -151,27 +153,29 @@ const VotingCardRow = ({ vote, onVoteNow }: VotingCardRowProps) => {
         </div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
           <Clock className="w-4 h-4" />
-          <span>Started {startedAgo}</span>
+          <span>
+            {t("started")} {startedAgo}
+          </span>
           <span className="mx-1">–</span>
           <span className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
-            <span>{endsIn.replace("in ", "")} left</span>
+            <span>
+              {endsIn.replace("in ", "")} {t("left")}
+            </span>
           </span>
         </div>
         <div className="flex items-center gap-3 mt-2">
           <div className="flex-1 flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium">Completion</span>
+              <span className="text-xs font-medium">{t("completion")}</span>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Info className="w-3 h-3 text-muted-foreground cursor-pointer" />
                 </TooltipTrigger>
-                <TooltipContent>
-                  Percentage of required voters who have participated.
-                </TooltipContent>
+                <TooltipContent>{t("completion_tooltip")}</TooltipContent>
               </Tooltip>
               <span className="text-xs text-muted-foreground">
-                {vote.quorum.current} / {vote.quorum.required} required
+                {vote.quorum.current} / {vote.quorum.required} {t("required")}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -181,7 +185,7 @@ const VotingCardRow = ({ vote, onVoteNow }: VotingCardRowProps) => {
               </span>
             </div>
             <span className="text-xs text-muted-foreground">
-              {vote.progress}% of required voters have participated
+              {vote.progress}% {t("of_required_voters")}
             </span>
           </div>
         </div>
@@ -191,7 +195,7 @@ const VotingCardRow = ({ vote, onVoteNow }: VotingCardRowProps) => {
           href={vote.submitter.profileUrl}
           className="flex items-center gap-2 hover:underline"
           tabIndex={0}
-          aria-label={`View profile of ${vote.submitter.name}`}
+          aria-label={t("view_profile", { name: vote.submitter.name })}
         >
           <Avatar>
             <AvatarImage
@@ -204,19 +208,19 @@ const VotingCardRow = ({ vote, onVoteNow }: VotingCardRowProps) => {
             {vote.submitter.name}
           </span>
         </Link>
-        <span className="text-xs text-muted-foreground">Submitter</span>
+        <span className="text-xs text-muted-foreground">{t("submitter")}</span>
         {vote.eligible && !vote.alreadyVoted ? (
           <Button size="sm" className="mt-2" onClick={onVoteNow}>
-            Vote now
+            {t("vote_now")}
           </Button>
         ) : vote.alreadyVoted ? (
           <span className="text-green-600 text-xs font-semibold mt-2 flex items-center gap-1">
             <CheckCircle className="w-4 h-4" />
-            Already voted
+            {t("already_voted")}
           </span>
         ) : (
           <span className="text-gray-400 text-xs font-semibold mt-2">
-            Not eligible
+            {t("not_eligible")}
           </span>
         )}
       </div>
