@@ -2,7 +2,7 @@
 import React from "react";
 import { UserPlus } from "lucide-react";
 import { BackgroundGradient } from "@repo/ui/components/background-gradient";
-import { notFound, useParams, useRouter } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { fromSlug } from "@/utils/slug";
 import { useMutation } from "@tanstack/react-query";
@@ -16,7 +16,6 @@ export default function JoinPage() {
   const t = useTranslations("join");
   const communityName = fromSlug(slug as string);
   const { user } = useAuth();
-  const router = useRouter();
 
   //il faut vérifier que la communauté existe avant d'afficher  quoi que ce soit
   const { data: community, isLoading, isError } = useCommunity(slug as string);
@@ -38,7 +37,7 @@ export default function JoinPage() {
     onSuccess: () => {
       toast.success(t("success"));
       setTimeout(() => {
-        router.push(`/${slug}`);
+        window.location.href = `/${slug}`;
       }, 1200);
     },
     onError: (err) => {

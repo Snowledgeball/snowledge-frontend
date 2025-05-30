@@ -1,6 +1,5 @@
 import { Input, Button } from "@repo/ui";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Users } from "lucide-react";
 import { Community } from "@/types/community";
 import { toSlug } from "@/utils/slug";
@@ -15,7 +14,6 @@ export function CommunityJoinForm({ communities, t }: CommunityJoinFormProps) {
   const [communityInput, setCommunityInput] = useState("");
   const [inputError, setInputError] = useState(false);
   const [notFound, setNotFound] = useState(false);
-  const router = useRouter();
 
   const { mutate: addLearnerToCommunity } = useAddLearnerToCommunity();
 
@@ -36,7 +34,7 @@ export function CommunityJoinForm({ communities, t }: CommunityJoinFormProps) {
 
     if (community) {
       addLearnerToCommunity({ communitySlug: community.slug });
-      router.push(`/${community.slug}`);
+      window.location.href = `/${community.slug}`;
     } else {
       setNotFound(true);
     }
