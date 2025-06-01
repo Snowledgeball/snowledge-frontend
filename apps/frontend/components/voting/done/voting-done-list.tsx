@@ -90,7 +90,7 @@ const VotingDoneList = ({ communitySlug }: { communitySlug: string }) => {
                   ? "medium"
                   : "high"
             ];
-          participation.label = t(participation.label);
+          const participationLabel = t(participation.label);
           return (
             <Card
               key={proposal.id}
@@ -137,6 +137,7 @@ const VotingDoneList = ({ communitySlug }: { communitySlug: string }) => {
                   <span className="flex items-center gap-1">
                     {t("participation")}:{participation.icon}
                     <span className="font-semibold">{proposal.progress}%</span>
+                    <span className="ml-1">{participationLabel}</span>
                   </span>
                 </div>
               </div>
