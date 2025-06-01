@@ -1,12 +1,12 @@
 "use client";
-import VotingCardRow from "@/components/voting/shared/voting-card-row";
+import VotingCardRow from "@/components/voting/in-progress/voting-card-row";
 import type { Proposal } from "@/types/proposal";
 import { useState } from "react";
 import VoteScreen from "./vote-screen";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
-import { useVotedProposalIds } from "@/components/voting/in-progress/useVotedProposalIds";
+import { useVotedProposalIds } from "@/components/voting/in-progress/hooks/useVotedProposalIds";
 import type { Vote } from "@/types/vote";
 import { useAuth } from "@/contexts/auth-context";
 
@@ -65,6 +65,7 @@ const VotingInProgressList = ({ communitySlug }: { communitySlug: string }) => {
   if (selectedVote) {
     return (
       <VoteScreen
+        closeVoteScreen={() => setSelectedVote(null)}
         communitySlug={communitySlug}
         proposal={selectedVote}
         onBack={() => setSelectedVote(null)}

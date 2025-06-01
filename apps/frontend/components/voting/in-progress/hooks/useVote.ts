@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { VoteFormValues } from "./vote-schema";
+import { VoteFormValues } from "../vote-schema";
 import { fetcher } from "@/lib/fetcher";
 import { useTranslations } from "next-intl";
 

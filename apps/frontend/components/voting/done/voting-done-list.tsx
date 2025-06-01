@@ -8,7 +8,7 @@ import { CheckCircle, XCircle, Clock, Flame } from "lucide-react";
 import {
   getFormatIconAndLabel,
   type Vote,
-} from "@/components/voting/shared/voting-card-row";
+} from "@/components/voting/in-progress/voting-card-row";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
