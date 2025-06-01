@@ -107,7 +107,10 @@ export default function CreateCommunity() {
   // Effet qui attend la fermeture de la modal
   useEffect(() => {
     if (!openInvite && pendingCommunity) {
-      setTimeout(() => router.push(`/${pendingCommunity.slug}`), 500);
+      setTimeout(
+        () => window.location.replace(`/${pendingCommunity.slug}`),
+        500
+      );
       setPendingCommunity(null); // Reset
     }
   }, [openInvite, pendingCommunity]);
