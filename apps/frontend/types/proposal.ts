@@ -12,6 +12,7 @@ export type Proposal = {
   quorum: { current: number; required: number };
   format?: string;
   status: "in_progress" | "accepted" | "rejected";
+  reason?: "by_vote" | "by_expiration" | null;
 };
 
 type ParticipationLevel = "low" | "medium" | "high";

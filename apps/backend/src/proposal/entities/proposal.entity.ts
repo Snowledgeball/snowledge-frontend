@@ -73,4 +73,13 @@ export class Proposal {
 		const current = this.votes ? this.votes.length : 0;
 		return Math.round((current / required) * 100) || 0;
 	}
+
+	@Expose()
+	get reason() {
+		return this.status === 'accepted'
+			? 'by_vote'
+			: this.status === 'rejected' && this.endDate < new Date()
+				? 'by_expiration'
+				: null;
+	}
 }

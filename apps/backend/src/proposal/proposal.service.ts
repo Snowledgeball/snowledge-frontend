@@ -20,7 +20,7 @@ export class ProposalService {
 	async findAllForACommunityBySlug(
 		communitySlug: string,
 	): Promise<Proposal[]> {
-		return this.proposalRepository.find({
+		const proposals = await this.proposalRepository.find({
 			where: { community: { slug: communitySlug } },
 			relations: [
 				'community',
@@ -29,6 +29,18 @@ export class ProposalService {
 				'votes',
 			],
 		});
+		const now = new Date();
+		const toUpdate: Proposal[] = [];
+		proposals.forEach((proposal) => {
+			if (proposal.status === 'in_progress' && proposal.endDate < now) {
+				proposal.status = 'rejected';
+				toUpdate.push(proposal);
+			}
+		});
+		if (toUpdate.length > 0) {
+			await this.proposalRepository.save(toUpdate);
+		}
+		return proposals;
 	}
 
 	async findOne(id: number, communitySlug: string): Promise<Proposal> {
@@ -37,6 +49,16 @@ export class ProposalService {
 			relations: ['community', 'submitter'],
 		});
 		if (!proposal) throw new NotFoundException('Proposal not found');
+
+		// Expiration automatique à la lecture
+		if (
+			proposal.status === 'in_progress' &&
+			proposal.endDate < new Date()
+		) {
+			proposal.status = 'rejected';
+			await this.proposalRepository.save(proposal);
+		}
+
 		return proposal;
 	}
 

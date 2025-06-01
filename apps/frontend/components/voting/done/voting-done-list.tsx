@@ -33,6 +33,17 @@ const STATUS_LABELS = {
   },
 };
 
+const REASON_LABELS = {
+  by_vote: {
+    label: "by_vote",
+    icon: <CheckCircle className="w-4 h-4 text-green-500" />,
+  },
+  by_expiration: {
+    label: "by_expiration",
+    icon: <Clock className="w-4 h-4 text-yellow-500" />,
+  },
+};
+
 const PARTICIPATION_LABELS = {
   low: {
     label: "low",
@@ -91,6 +102,8 @@ const VotingDoneList = ({ communitySlug }: { communitySlug: string }) => {
                   : "high"
             ];
           const participationLabel = t(participation.label);
+          const reason = REASON_LABELS[proposal.reason || "by_vote"];
+          const reasonLabel = t(reason.label);
           return (
             <Card
               key={proposal.id}
@@ -106,6 +119,10 @@ const VotingDoneList = ({ communitySlug }: { communitySlug: string }) => {
                   >
                     {status.icon}
                     {t(status.label)}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full w-fit ml-2 bg-muted text-muted-foreground border border-muted-foreground/10">
+                    {reason.icon}
+                    {reasonLabel}
                   </span>
                 </div>
                 {formatInfo && (
