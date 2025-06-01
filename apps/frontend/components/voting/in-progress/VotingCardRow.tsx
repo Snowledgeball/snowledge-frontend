@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@repo/ui/components/card";
+import { Card } from "@repo/ui/components/card";
 import { Progress } from "@repo/ui/components/progress";
 import { Button } from "@repo/ui/components/button";
 import {
@@ -6,41 +6,13 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@repo/ui/components/tooltip";
-import {
-  Info,
-  Flame,
-  Clock,
-  CheckCircle,
-  FileText,
-  GraduationCap,
-  BookOpen,
-} from "lucide-react";
+import { Info, Clock, CheckCircle } from "lucide-react";
 import Link from "next/link";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/contexts/auth-context";
 import { getFormatIconAndLabel } from "@/components/voting/shared/utils/format-utils";
 import { useProposalDates } from "@/components/voting/shared/hooks/useProposalDates";
 import { Proposal } from "@/types/proposal";
-
-// ============
-// Function: VotingCardRow
-// ------------
-// DESCRIPTION: Displays a single vote as a data card row with all required info and actions.
-// PARAMS: vote: {
-//   id: string,
-//   title: string,
-//   description: string,
-//   startDate: Date,
-//   endDate: Date,
-//   progress: number,
-//   participationLevel: 'low' | 'medium' | 'high',
-//   submitter: { name: string, avatarUrl: string, profileUrl: string },
-//   eligible: boolean,
-//   alreadyVoted: boolean,
-//   quorum: { current: number, required: number },
-// }
-// RETURNS: JSX.Element (the voting card row UI)
-// ============
 
 interface VotingCardRowProps {
   proposal: Proposal;

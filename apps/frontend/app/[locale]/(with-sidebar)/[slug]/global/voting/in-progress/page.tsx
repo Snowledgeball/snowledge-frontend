@@ -1,6 +1,6 @@
 "use client";
 
-import VotingInProgressList from "@/components/voting/in-progress/voting-in-progress-list";
+import VotingInProgressList from "@/components/voting/in-progress/VotingInProgressList";
 import { useParams } from "next/navigation";
 import React from "react";
 

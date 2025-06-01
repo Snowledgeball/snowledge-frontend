@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { voteSchema, VoteFormValues } from "./vote-schema";
-import { useCreateProposal } from "./useCreateProposal";
+import { useCreateProposal } from "./hooks/useCreateProposal";
 import TitleField from "./fields/TitleField";
 import DescriptionField from "./fields/DescriptionField";
 import FormatField from "./fields/FormatField";

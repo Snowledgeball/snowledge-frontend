@@ -1,8 +1,8 @@
 "use client";
-import VotingCardRow from "@/components/voting/in-progress/voting-card-row";
+import VotingCardRow from "@/components/voting/in-progress/VotingCardRow";
 import type { Proposal } from "@/types/proposal";
 import { useState } from "react";
-import VoteScreen from "./vote-screen";
+import VoteScreen from "./VoteScreen";
 import { useTranslations } from "next-intl";
 import { useVotedProposalIds } from "@/components/voting/in-progress/hooks/useVotedProposalIds";
 import { useAuth } from "@/contexts/auth-context";

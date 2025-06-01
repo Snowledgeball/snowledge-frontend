@@ -1,8 +1,7 @@
 import { Button } from "@repo/ui/components/button";
 import { ArrowLeft } from "lucide-react";
 import type { Proposal } from "@/types/proposal";
-import { useTranslations, useLocale } from "next-intl";
-import { fr, enUS } from "date-fns/locale";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { voteSchema, VoteFormValues } from "./vote-schema";
@@ -24,14 +23,12 @@ function VoteScreen({
   onBack?: () => void;
 }) {
   const t = useTranslations("voting");
-  const locale = useLocale();
-  const dateFnsLocale = locale === "fr" ? fr : enUS;
   const { user } = useAuth();
   const voteMutation = useVote(communitySlug);
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
     reset,
     setValue,
     watch,
