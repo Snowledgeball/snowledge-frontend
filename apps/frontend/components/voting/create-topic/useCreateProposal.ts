@@ -4,9 +4,11 @@ import { VoteFormValues } from "./vote-schema";
 import { fetcher } from "@/lib/fetcher";
 import { useTranslations } from "next-intl";
 import { Proposal } from "@/types/proposal";
+import { useAuth } from "@/contexts/auth-context";
 
-export function useCreateVote(communitySlug: string) {
+export function useCreateProposal(communitySlug: string) {
   const t = useTranslations("voting");
+  const { user } = useAuth();
   return useMutation({
     mutationFn: async (data: VoteFormValues): Promise<Proposal> => {
       const res = await fetcher(
@@ -14,17 +16,22 @@ export function useCreateVote(communitySlug: string) {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify({
+            ...data,
+            communityId: communitySlug,
+            submitterId: user?.id,
+          }),
           credentials: "include",
         }
       );
       return res;
     },
     onSuccess: () => {
-      toast.success(t("vote_submitted_success"));
+      toast.success(t("proposal_submitted_success"));
     },
     onError: (error: any) => {
-      toast.error(t("error_submitting_vote"));
+      console.log("error", error);
+      toast.error(t("error_submitting_proposal"));
     },
   });
 }

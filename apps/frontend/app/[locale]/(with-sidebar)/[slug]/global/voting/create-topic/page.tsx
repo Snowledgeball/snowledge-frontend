@@ -1,6 +1,6 @@
 "use client";
 
-import CreateVoteScreen from "@/components/voting/create-topic/create-vote-screen";
+import CreateVoteScreen from "@/components/voting/create-topic/create-proposal-screen";
 import React from "react";
 import { useParams } from "next/navigation";
 

@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { voteSchema, VoteFormValues } from "./vote-schema";
-import { useCreateVote } from "./useCreateVote";
+import { useCreateProposal } from "./useCreateProposal";
 import TitleField from "./fields/TitleField";
 import DescriptionField from "./fields/DescriptionField";
 import FormatField from "./fields/FormatField";
@@ -21,7 +21,7 @@ import SwitchContributeur from "./fields/SwitchContributeur";
 // RETURNS: JSX.Element (the voting creation form UI)
 // ============
 
-const CreateVoteScreen = ({ communitySlug }: { communitySlug: string }) => {
+const CreateProposalScreen = ({ communitySlug }: { communitySlug: string }) => {
   const t = useTranslations("voting");
   const {
     register,
@@ -42,10 +42,10 @@ const CreateVoteScreen = ({ communitySlug }: { communitySlug: string }) => {
   });
   const format = watch("format");
   const isContributor = watch("isContributor");
-  const createVote = useCreateVote(communitySlug);
+  const createProposal = useCreateProposal(communitySlug);
 
   const onSubmit = async (data: VoteFormValues) => {
-    createVote.mutate(data, {
+    createProposal.mutate(data, {
       onSuccess: () => {
         reset();
       },
@@ -89,21 +89,23 @@ const CreateVoteScreen = ({ communitySlug }: { communitySlug: string }) => {
           t={t}
         />
         <CommentsField register={register} error={errors.comments} t={t} />
-        {createVote.isError && (
+        {createProposal.isError && (
           <div className="text-red-500 text-sm" role="alert">
             {t("vote_submitted_error")}
           </div>
         )}
         <Button
           type="submit"
-          disabled={isSubmitting || createVote.isPending}
-          aria-disabled={isSubmitting || createVote.isPending}
+          disabled={isSubmitting || createProposal.isPending}
+          aria-disabled={isSubmitting || createProposal.isPending}
         >
-          {isSubmitting || createVote.isPending ? t("submitting") : t("submit")}
+          {isSubmitting || createProposal.isPending
+            ? t("submitting")
+            : t("submit")}
         </Button>
       </form>
     </section>
   );
 };
 
-export default CreateVoteScreen;
+export default CreateProposalScreen;

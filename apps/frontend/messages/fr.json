@@ -381,6 +381,8 @@
     },
     "vote_submitted_success": "Vote soumis avec succès !",
     "error_submitting_vote": "Erreur lors de la soumission du vote. Veuillez réessayer.",
+    "proposal_submitted_success": "Projet soumis avec succès !",
+    "error_submitting_proposal": "Erreur lors de la soumission du sujet. Veuillez réessayer.",
     "loading": "Chargement...",
     "error": "Erreur lors du chargement des votes.",
     "no_proposals": "Aucun sujet de vote disponible."

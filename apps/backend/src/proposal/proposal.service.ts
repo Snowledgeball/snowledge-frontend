@@ -17,7 +17,9 @@ export class ProposalService {
 		private userRepository: Repository<User>,
 	) {}
 
-	async findAllForACommunityBySlug(communitySlug: string): Promise<Proposal[]> {
+	async findAllForACommunityBySlug(
+		communitySlug: string,
+	): Promise<Proposal[]> {
 		return this.proposalRepository.find({
 			where: { community: { slug: communitySlug } },
 			relations: ['community', 'submitter'],
@@ -44,14 +46,18 @@ export class ProposalService {
 		});
 		const submitter = await this.userRepository.findOne({
 			where: { id: submitterId },
-			relations: ['communities'],
+			relations: ['communities', 'learners'],
 		});
 		if (
 			!community ||
 			!submitter ||
-			!submitter.communities.some((c) => c.id === community.id)
-		)
+			(!submitter.communities.some((c) => c.id === community.id) &&
+				!submitter.learners.some(
+					(l) => l.community.id === community.id,
+				))
+		) {
 			throw new NotFoundException('Community or user not found');
+		}
 		const proposal = this.proposalRepository.create({
 			...rest,
 			community,
