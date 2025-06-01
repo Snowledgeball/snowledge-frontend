@@ -9,4 +9,4 @@ export const REASON_LABELS = {
     label: "by_expiration",
     icon: <Clock className="w-4 h-4 text-yellow-500" />,
   },
-} as const; 
+} as const;

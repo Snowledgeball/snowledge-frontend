@@ -13,14 +13,6 @@ import FormatField from "./fields/FormatField";
 import CommentsField from "./fields/CommentsField";
 import SwitchContributeur from "./fields/SwitchContributeur";
 
-// ============
-// Function: CreateVoteScreen
-// ------------
-// DESCRIPTION: Displays a form for users to propose a voting subject with title, description, format, comments, and submit button. Handles validation and feedback.
-// PARAMS: None
-// RETURNS: JSX.Element (the voting creation form UI)
-// ============
-
 const CreateProposalScreen = ({ communitySlug }: { communitySlug: string }) => {
   const t = useTranslations("voting");
   const {
@@ -29,7 +21,7 @@ const CreateProposalScreen = ({ communitySlug }: { communitySlug: string }) => {
     setValue,
     watch,
     reset,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
   } = useForm<VoteFormValues>({
     resolver: zodResolver(voteSchema(t)),
     defaultValues: {
@@ -57,16 +49,16 @@ const CreateProposalScreen = ({ communitySlug }: { communitySlug: string }) => {
       <header className="pt-4 pb-2">
         <div className="flex items-center gap-3 mb-2">
           <FileText className="h-7 w-7 text-primary" aria-hidden="true" />
-          <h1 className="text-2xl font-bold">{t("create_vote_title")}</h1>
+          <h1 className="text-2xl font-bold">{t("create_subject_title")}</h1>
         </div>
         <p className="text-muted-foreground max-w-xl">
-          {t("create_vote_description")}
+          {t("create_subject_description")}
         </p>
       </header>
       <form
         className="w-full flex flex-col gap-6 px-0 md:px-8 py-8"
         onSubmit={handleSubmit(onSubmit)}
-        aria-label={t("create_vote_aria_label")}
+        aria-label={t("create_subject_aria_label")}
       >
         <h2 className="text-2xl font-bold mb-2 text-center">
           {t("submit_subject")}

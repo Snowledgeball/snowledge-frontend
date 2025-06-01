@@ -16,4 +16,4 @@ export const PARTICIPATION_LABELS = {
     color: "bg-green-500",
     icon: <Flame className="w-4 h-4 text-green-500" />,
   },
-} as const; 
+} as const;

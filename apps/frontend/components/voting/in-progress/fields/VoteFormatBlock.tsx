@@ -1,27 +1,7 @@
 import { Button } from "@repo/ui/components/button";
 import { Textarea } from "@repo/ui/components/textarea";
-import { Check, X, FileText, GraduationCap, BookOpen } from "lucide-react";
-
-const getFormatIconAndLabel = (format?: string) => {
-  if (!format) return null;
-  switch (format.toLowerCase()) {
-    case "masterclass":
-      return {
-        icon: <GraduationCap className="mr-2 w-4 h-4 text-indigo-500" />,
-        label: "Masterclass",
-      };
-    case "white paper":
-      return {
-        icon: <BookOpen className="mr-2 w-4 h-4 text-emerald-600" />,
-        label: "White paper",
-      };
-    default:
-      return {
-        icon: <FileText className="mr-2 w-4 h-4 text-muted-foreground" />,
-        label: format.charAt(0).toUpperCase() + format.slice(1),
-      };
-  }
-};
+import { Check, X } from "lucide-react";
+import { getFormatIconAndLabel } from "@/components/voting/shared/utils/format-utils";
 
 function VoteFormatBlock({
   t,

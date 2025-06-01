@@ -1,16 +1,8 @@
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
 import type { Proposal } from "@/types/proposal";
 import VotingDoneCard from "./VotingDoneCard";
-
-// ============
-// Function: VotingDoneList
-// ------------
-// DESCRIPTION: Displays a list of finished votes (validated or invalidated), with reason (vote or expiration) and metrics.
-// PARAMS: None (uses mock data for now)
-// RETURNS: JSX.Element (the done voting list UI)
-// ============
 
 const VotingDoneList = ({ communitySlug }: { communitySlug: string }) => {
   const t = useTranslations("voting");

@@ -64,11 +64,7 @@ function VoteScreen({
         <ArrowLeft className="w-5 h-5" />
       </Button>
       <section className="w-full max-w-2xl mx-auto flex flex-col gap-8">
-        <ProposalHeader
-          proposal={proposal}
-          t={t}
-          dateFnsLocale={dateFnsLocale}
-        />
+        <ProposalHeader proposal={proposal} t={t} />
         <form className="flex flex-col gap-8" onSubmit={handleSubmit(onSubmit)}>
           <VoteSubjectBlock
             t={t}

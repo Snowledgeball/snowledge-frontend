@@ -18,6 +18,9 @@ import {
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/contexts/auth-context";
+import { getFormatIconAndLabel } from "@/components/voting/shared/utils/format-utils";
+import { useProposalDates } from "@/components/voting/shared/hooks/useProposalDates";
+import { Proposal } from "@/types/proposal";
 
 // ============
 // Function: VotingCardRow
@@ -39,44 +42,11 @@ import { useAuth } from "@/contexts/auth-context";
 // RETURNS: JSX.Element (the voting card row UI)
 // ============
 
-import { formatDistanceToNow, formatDistance } from "date-fns";
-import { fr, enUS } from "date-fns/locale";
-
-import { Proposal } from "@/types/proposal";
-
 interface VotingCardRowProps {
   proposal: Proposal;
   onVoteNow?: () => void;
   alreadyVoted?: boolean;
 }
-
-// ============
-// Function: getFormatIconAndLabel
-// ------------
-// DESCRIPTION: Returns the icon (JSX) and label for a given format.
-// PARAMS: format: string (the vote format)
-// RETURNS: { icon: JSX.Element, label: string }
-// ============
-export const getFormatIconAndLabel = (format?: string) => {
-  if (!format) return null;
-  switch (format.toLowerCase()) {
-    case "masterclass":
-      return {
-        icon: <GraduationCap className="w-4 h-4 text-indigo-500" />,
-        label: "Masterclass",
-      };
-    case "white paper":
-      return {
-        icon: <BookOpen className="w-4 h-4 text-emerald-600" />,
-        label: "White paper",
-      };
-    default:
-      return {
-        icon: <FileText className="w-4 h-4 text-muted-foreground" />,
-        label: format.charAt(0).toUpperCase() + format.slice(1),
-      };
-  }
-};
 
 const VotingCardRow = ({
   proposal,
@@ -85,24 +55,7 @@ const VotingCardRow = ({
 }: VotingCardRowProps) => {
   const { user } = useAuth();
   const t = useTranslations("voting");
-  const locale = useLocale();
-  const dateFnsLocale = locale === "fr" ? fr : enUS;
-  const endDate = proposal.endDate ? new Date(proposal.endDate) : null;
-  const now = new Date();
-  const startedAgo = proposal.createdAt
-    ? formatDistanceToNow(new Date(proposal.createdAt), {
-        addSuffix: true,
-        locale: dateFnsLocale,
-      })
-    : "";
-
-  let endsIn = "";
-  if (endDate && !isNaN(endDate.getTime())) {
-    endsIn = formatDistance(endDate, now, {
-      addSuffix: true,
-      locale: dateFnsLocale,
-    });
-  }
+  const { startedAgo, endsIn } = useProposalDates(proposal);
 
   const isQuorumReached = proposal.progress >= 100;
   const formatInfo = getFormatIconAndLabel(proposal.format);

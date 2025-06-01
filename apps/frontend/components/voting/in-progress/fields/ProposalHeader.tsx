@@ -5,33 +5,11 @@ import {
   TooltipContent,
 } from "@repo/ui/components/tooltip";
 import { Info, Clock, CheckCircle } from "lucide-react";
-import { formatDistanceToNow, formatDistance } from "date-fns";
 import type { Proposal } from "@/types/proposal";
+import { useProposalDates } from "@/components/voting/shared/hooks/useProposalDates";
 
-function ProposalHeader({
-  proposal,
-  t,
-  dateFnsLocale,
-}: {
-  proposal: Proposal;
-  t: any;
-  dateFnsLocale: any;
-}) {
-  const endDate = proposal.endDate ? new Date(proposal.endDate) : null;
-  const now = new Date();
-  const startedAgo = proposal.createdAt
-    ? formatDistanceToNow(new Date(proposal.createdAt), {
-        addSuffix: true,
-        locale: dateFnsLocale,
-      })
-    : "";
-  let endsIn = "";
-  if (endDate && !isNaN(endDate.getTime())) {
-    endsIn = formatDistance(endDate, now, {
-      addSuffix: true,
-      locale: dateFnsLocale,
-    });
-  }
+function ProposalHeader({ proposal, t }: { proposal: Proposal; t: any }) {
+  const { startedAgo, endsIn } = useProposalDates(proposal);
   const isQuorumReached = proposal.progress >= 100;
   return (
     <header className="pt-4 pb-2">

@@ -1,23 +1,17 @@
 import { Card } from "@repo/ui/components/card";
-import { CheckCircle, XCircle, Clock, Flame } from "lucide-react";
-import { getFormatIconAndLabel } from "@/components/voting/in-progress/voting-card-row";
-import { formatDistanceToNow } from "date-fns";
-import { enUS, fr } from "date-fns/locale";
+import { getFormatIconAndLabel } from "@/components/voting/shared/utils/format-utils";
 import type { Proposal } from "@/types/proposal";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import React from "react";
 import { STATUS_LABELS } from "./labels/status-labels";
 import { REASON_LABELS } from "./labels/reason-labels";
 import { PARTICIPATION_LABELS } from "./labels/participation-labels";
+import { useProposalDates } from "@/components/voting/shared/hooks/useProposalDates";
 
 function getParticipationLabel(progress: number) {
   if (progress < 50) return "low";
   if (progress < 80) return "medium";
   return "high";
-}
-
-function getDateFnsLocale(locale: string) {
-  return locale === "fr" ? fr : enUS;
 }
 
 type VotingDoneCardProps = {
@@ -26,7 +20,6 @@ type VotingDoneCardProps = {
 
 const VotingDoneCard: React.FC<VotingDoneCardProps> = ({ proposal }) => {
   const t = useTranslations("voting");
-  const locale = useLocale();
   const formatInfo = getFormatIconAndLabel(proposal.format);
   const status = STATUS_LABELS[proposal.status];
   const participationKey = getParticipationLabel(proposal.progress);
@@ -36,7 +29,7 @@ const VotingDoneCard: React.FC<VotingDoneCardProps> = ({ proposal }) => {
     REASON_LABELS[proposal.reason as keyof typeof REASON_LABELS] ||
     REASON_LABELS.by_vote;
   const reasonLabel = t(reason.label);
-  const dateFnsLocale = getDateFnsLocale(locale);
+  const { endsIn: endedAgo } = useProposalDates(proposal);
 
   return (
     <Card
@@ -68,11 +61,7 @@ const VotingDoneCard: React.FC<VotingDoneCardProps> = ({ proposal }) => {
         </div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
           <span>
-            {t("ended")}{" "}
-            {formatDistanceToNow(new Date(proposal.endDate), {
-              addSuffix: true,
-              locale: dateFnsLocale,
-            })}
+            {t("ended")} {endedAgo}
           </span>
           <span className="mx-1">–</span>
           <span className="flex items-center gap-1">
