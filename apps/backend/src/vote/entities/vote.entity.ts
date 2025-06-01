@@ -6,7 +6,7 @@ import {
 	CreateDateColumn,
 	UpdateDateColumn,
 } from 'typeorm';
-import { Proposal } from '../../proposal/entities/proposal/proposal.entity';
+import { Proposal } from '../../proposal/entities/proposal.entity';
 import { User } from '../../user/entities/user.entity';
 
 @Entity('votes')

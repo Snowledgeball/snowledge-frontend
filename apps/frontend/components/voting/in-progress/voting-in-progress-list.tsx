@@ -76,14 +76,16 @@ const VotingInProgressList = ({ communitySlug }: { communitySlug: string }) => {
   return (
     <div className="flex flex-col gap-6">
       {proposals && proposals.length > 0 ? (
-        proposals.map((proposal: Proposal) => (
-          <VotingCardRow
-            key={proposal.id}
-            proposal={proposal}
-            alreadyVoted={votedProposalIds.has(proposal.id)}
-            onVoteNow={() => setSelectedVote(proposal)}
-          />
-        ))
+        proposals
+          .filter((proposal: Proposal) => proposal.status === "in_progress")
+          .map((proposal: Proposal) => (
+            <VotingCardRow
+              key={proposal.id}
+              proposal={proposal}
+              alreadyVoted={votedProposalIds.has(proposal.id)}
+              onVoteNow={() => setSelectedVote(proposal)}
+            />
+          ))
       ) : (
         <div>{t("no_proposals")}</div>
       )}

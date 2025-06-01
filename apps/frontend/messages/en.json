@@ -438,6 +438,9 @@
     "error_submitting_proposal": "Error submitting proposal. Please try again.",
     "loading": "Loading...",
     "error": "Error while loading votes.",
-    "no_proposals": "No proposals available."
+    "no_proposals": "No proposals available.",
+    "no_proposals_done": "No proposals have been completed yet.",
+    "accepted": "Accepted",
+    "rejected": "Rejected"
   }
 }

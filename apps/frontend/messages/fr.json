@@ -386,6 +386,9 @@
     "error_submitting_proposal": "Erreur lors de la soumission du sujet. Veuillez réessayer.",
     "loading": "Chargement...",
     "error": "Erreur lors du chargement des votes.",
-    "no_proposals": "Aucun sujet de vote disponible."
+    "no_proposals": "Aucun sujet de vote disponible.",
+    "no_proposals_done": "Aucun sujet de vote terminé.",
+    "accepted": "Accepté",
+    "rejected": "Rejeté"
   }
 }

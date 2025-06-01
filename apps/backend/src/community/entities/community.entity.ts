@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Learner } from '../../learner/entities/learner/learner';
-import { Proposal } from '../../proposal/entities/proposal/proposal.entity';
+import { Proposal } from '../../proposal/entities/proposal.entity';
 
 @Entity()
 export class Community {

@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { ProposalService } from './proposal.service';
 import { CreateProposalDto } from './dto/create-proposal.dto/create-proposal.dto';
-import { Proposal } from './entities/proposal/proposal.entity';
+import { Proposal } from './entities/proposal.entity';
 
 @Controller('communities/:communitySlug/proposals')
 export class ProposalController {
@@ -9,7 +9,9 @@ export class ProposalController {
 
 	// GET /proposals
 	@Get()
-	findAll(@Param('communitySlug') communitySlug: string): Promise<Proposal[]> {
+	findAll(
+		@Param('communitySlug') communitySlug: string,
+	): Promise<Proposal[]> {
 		return this.proposalService.findAllForACommunityBySlug(communitySlug);
 	}
 

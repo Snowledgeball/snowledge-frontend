@@ -18,7 +18,7 @@ import { DiscordAccess } from 'src/discord/entities/discord-access.entity';
 import { Type } from 'class-transformer';
 import { Learner } from '../../learner/entities/learner/learner';
 import { Vote } from 'src/vote/entities/vote.entity';
-import { Proposal } from 'src/proposal/entities/proposal/proposal.entity';
+import { Proposal } from 'src/proposal/entities/proposal.entity';
 
 @Entity()
 export class User {

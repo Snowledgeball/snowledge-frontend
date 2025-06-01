@@ -7,9 +7,9 @@ import {
 	ManyToOne,
 	OneToMany,
 } from 'typeorm';
-import { Community } from '../../../community/entities/community.entity';
-import { User } from '../../../user/entities/user.entity';
-import { Vote } from '../../../vote/entities/vote.entity';
+import { Community } from '../../community/entities/community.entity';
+import { User } from '../../user/entities/user.entity';
+import { Vote } from '../../vote/entities/vote.entity';
 import { Expose } from 'class-transformer';
 
 @Entity('proposals')
@@ -31,6 +31,12 @@ export class Proposal {
 
 	@Column({ default: false, nullable: true })
 	isContributor?: boolean;
+
+	@Column({ default: 'in_progress' })
+	status: 'in_progress' | 'accepted' | 'rejected';
+
+	@Column({ nullable: false })
+	endDate: Date;
 
 	@ManyToOne(() => Community, (community) => community.proposals, {
 		cascade: false,
@@ -66,12 +72,5 @@ export class Proposal {
 		const required = this.quorum.required;
 		const current = this.votes ? this.votes.length : 0;
 		return Math.round((current / required) * 100) || 0;
-	}
-
-	@Expose()
-	get endDate(): Date {
-		const end = new Date(this.createdAt);
-		end.setDate(end.getDate() + 5);
-		return end;
 	}
 }

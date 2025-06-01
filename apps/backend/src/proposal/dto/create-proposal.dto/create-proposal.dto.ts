@@ -6,6 +6,7 @@ import {
 	MaxLength,
 	MinLength,
 	IsInt,
+	IsDateString,
 } from 'class-validator';
 
 export class CreateProposalDto {
@@ -35,6 +36,10 @@ export class CreateProposalDto {
 	@IsOptional()
 	@IsBoolean()
 	isContributor?: boolean;
+
+	@IsOptional()
+	@IsDateString()
+	endDate?: string;
 
 	@IsInt()
 	communityId: number;

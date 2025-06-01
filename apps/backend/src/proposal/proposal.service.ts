@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Proposal } from './entities/proposal/proposal.entity';
+import { Proposal } from './entities/proposal.entity';
 import { CreateProposalDto } from './dto/create-proposal.dto/create-proposal.dto';
 import { Community } from '../community/entities/community.entity';
 import { User } from '../user/entities/user.entity';
@@ -58,11 +58,48 @@ export class ProposalService {
 		) {
 			throw new NotFoundException('Community or user not found');
 		}
+
+		// Si endDate n'est pas fourni, on met J+5 à partir de maintenant
+		const endDate = createProposalDto.endDate
+			? new Date(createProposalDto.endDate)
+			: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
+
 		const proposal = this.proposalRepository.create({
 			...rest,
 			community,
 			submitter,
+			endDate,
 		});
 		return this.proposalRepository.save(proposal);
+	}
+
+	async updateProposalStatus(proposal: Proposal, community: Community) {
+		const now = new Date();
+		const totalLearners = community.learners.length;
+		const votes = proposal.votes.length;
+		console.log('votes', votes);
+		console.log('totalLearners', totalLearners);
+		const quorumReached = votes > totalLearners / 2;
+		const timeOver = now > new Date(proposal.endDate);
+		console.log('quorumReached', quorumReached);
+		// console.log('timeOver', timeOver);
+		// console.log('AZAZAZAZ');
+
+		if (proposal.status !== 'in_progress') return proposal; // déjà terminé
+
+		if (quorumReached || timeOver) {
+			const yesVotes = proposal.votes.filter(
+				(v) => v.choice === 'for',
+				console.log('yesVotes'),
+			).length;
+			const noVotes = proposal.votes.filter(
+				(v) => v.choice === 'against',
+				console.log('noVotes'),
+			).length;
+			proposal.status = yesVotes > noVotes ? 'accepted' : 'rejected';
+			await this.proposalRepository.save(proposal);
+			console.log('proposal.status');
+		}
+		return proposal;
 	}
 }
