@@ -299,7 +299,8 @@
     },
     "errors": {
       "name": {
-        "min": "The name must be at least 2 characters."
+        "min": "The name must be at least 2 characters.",
+        "noParentheses": "The name must not contain parentheses."
       },
       "tags": {
         "min": "Please select at least one tag."

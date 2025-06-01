@@ -6,7 +6,12 @@ export function useCommunityFormSchema() {
 
   return z
     .object({
-      name: z.string().min(2, { message: t("name.min") }),
+      name: z
+        .string()
+        .min(2, { message: t("name.min") })
+        .refine((val) => !/[()]/.test(val), {
+          message: t("name.noParentheses"),
+        }),
       tags: z.array(z.string()).min(1, { message: t("tags.min") }),
       communityType: z.enum(["free", "paid"], {
         required_error: t("communityType.required"),
