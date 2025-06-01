@@ -1,10 +1,5 @@
 import { Card, CardContent } from "@repo/ui/components/card";
 import { Progress } from "@repo/ui/components/progress";
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-} from "@repo/ui/components/avatar";
 import { Button } from "@repo/ui/components/button";
 import {
   Tooltip,
@@ -49,17 +44,10 @@ import { fr, enUS } from "date-fns/locale";
 
 import { Proposal } from "@/types/proposal";
 
-const getProgressColor = (progress: number, daysLeft: number) => {
-  if (progress >= 100) return "bg-green-500";
-  if (progress >= 70) return "bg-green-400";
-  if (progress >= 50) return "bg-orange-400";
-  if (daysLeft <= 1 && progress < 100) return "bg-red-500";
-  return "bg-gray-300";
-};
-
 interface VotingCardRowProps {
   proposal: Proposal;
   onVoteNow?: () => void;
+  alreadyVoted?: boolean;
 }
 
 // ============
@@ -90,7 +78,11 @@ export const getFormatIconAndLabel = (format?: string) => {
   }
 };
 
-const VotingCardRow = ({ proposal, onVoteNow }: VotingCardRowProps) => {
+const VotingCardRow = ({
+  proposal,
+  onVoteNow,
+  alreadyVoted,
+}: VotingCardRowProps) => {
   const { user } = useAuth();
   const t = useTranslations("voting");
   const locale = useLocale();
@@ -194,19 +186,24 @@ const VotingCardRow = ({ proposal, onVoteNow }: VotingCardRowProps) => {
           {proposal.submitter.firstname} {proposal.submitter.lastname}
         </span>
         <span className="text-xs text-muted-foreground">{t("submitter")}</span>
-        {proposal.submitter.id !== user.id && !proposal.alreadyVoted ? (
+        {proposal.submitter.id !== user.id && !alreadyVoted ? (
           <Button size="sm" className="mt-2" onClick={onVoteNow}>
             {t("vote_now")}
           </Button>
-        ) : proposal.alreadyVoted ? (
+        ) : alreadyVoted ? (
           <span className="text-green-600 text-xs font-semibold mt-2 flex items-center gap-1">
             <CheckCircle className="w-4 h-4" />
             {t("already_voted")}
           </span>
         ) : (
-          <span className="text-gray-400 text-xs font-semibold mt-2">
-            {t("not_eligible")}
-          </span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-gray-400 text-xs font-semibold mt-2 cursor-not-allowed">
+                {t("not_eligible")}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{t("not_eligible_reason")}</TooltipContent>
+          </Tooltip>
         )}
       </div>
     </Card>

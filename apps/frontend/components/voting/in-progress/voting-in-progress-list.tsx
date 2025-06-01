@@ -3,10 +3,12 @@ import VotingCardRow from "@/components/voting/shared/voting-card-row";
 import type { Proposal } from "@/types/proposal";
 import { useState } from "react";
 import VoteScreen from "./vote-screen";
-import { FileText } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
+import { useVotedProposalIds } from "@/components/voting/in-progress/useVotedProposalIds";
+import type { Vote } from "@/types/vote";
+import { useAuth } from "@/contexts/auth-context";
 
 // ============
 // Function: VotingInProgressList
@@ -19,13 +21,14 @@ import { fetcher } from "@/lib/fetcher";
 const VotingInProgressList = ({ communitySlug }: { communitySlug: string }) => {
   const t = useTranslations("voting");
   const [selectedVote, setSelectedVote] = useState<Proposal | null>(null);
+  const { user } = useAuth();
 
   const {
-    data: votes,
+    data: proposals,
     isLoading,
     isError,
   } = useQuery<Proposal[]>({
-    queryKey: ["votes", "in-progress"],
+    queryKey: ["proposals", "in-progress"],
     queryFn: async () => {
       const res = await fetcher(
         `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communitySlug}/proposals`,
@@ -35,12 +38,34 @@ const VotingInProgressList = ({ communitySlug }: { communitySlug: string }) => {
     },
   });
 
-  if (isLoading) return <div>{t("loading")}</div>;
-  if (isError) return <div className="text-red-500">{t("error")}</div>;
+  // Récupère les votes de l'utilisateur courant
+  const {
+    data: userVotes,
+    isLoading: isLoadingVotes,
+    isError: isErrorVotes,
+  } = useQuery<Vote[]>({
+    queryKey: ["votes", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const res = await fetcher(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/communities/${communitySlug}/votes`,
+        { credentials: "include" }
+      );
+      return res;
+    },
+    enabled: !!user?.id,
+  });
+
+  const votedProposalIds = useVotedProposalIds(userVotes || []);
+
+  if (isLoading || isLoadingVotes) return <div>{t("loading")}</div>;
+  if (isError || isErrorVotes)
+    return <div className="text-red-500">{t("error")}</div>;
 
   if (selectedVote) {
     return (
       <VoteScreen
+        communitySlug={communitySlug}
         proposal={selectedVote}
         onBack={() => setSelectedVote(null)}
       />
@@ -49,11 +74,12 @@ const VotingInProgressList = ({ communitySlug }: { communitySlug: string }) => {
 
   return (
     <div className="flex flex-col gap-6">
-      {votes && votes.length > 0 ? (
-        votes.map((proposal: Proposal) => (
+      {proposals && proposals.length > 0 ? (
+        proposals.map((proposal: Proposal) => (
           <VotingCardRow
             key={proposal.id}
             proposal={proposal}
+            alreadyVoted={votedProposalIds.has(proposal.id)}
             onVoteNow={() => setSelectedVote(proposal)}
           />
         ))

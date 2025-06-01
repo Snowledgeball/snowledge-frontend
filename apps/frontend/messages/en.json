@@ -368,6 +368,7 @@
     "vote_now": "Vote now",
     "already_voted": "Already voted",
     "not_eligible": "Not eligible",
+    "not_eligible_reason": "You cannot vote for your own proposal.",
     "vote_for_subject": "Vote for the subject",
     "vote_for": "Vote for",
     "vote_against": "Vote against",

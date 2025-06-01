@@ -9,7 +9,6 @@ export type Proposal = {
   progress: number;
   participationLevel: ParticipationLevel;
   submitter: User;
-  alreadyVoted: boolean;
   quorum: { current: number; required: number };
   format?: string;
 };

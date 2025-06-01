@@ -12,9 +12,11 @@ import VoteSubjectBlock from "./fields/VoteSubjectBlock";
 import VoteFormatBlock from "./fields/VoteFormatBlock";
 
 function VoteScreen({
+  communitySlug,
   proposal,
   onBack,
 }: {
+  communitySlug: string;
   proposal: Proposal;
   onBack?: () => void;
 }) {
@@ -22,7 +24,7 @@ function VoteScreen({
   const locale = useLocale();
   const dateFnsLocale = locale === "fr" ? fr : enUS;
   const { user } = useAuth();
-  const voteMutation = useVote();
+  const voteMutation = useVote(communitySlug);
   const {
     register,
     handleSubmit,

@@ -19,4 +19,23 @@ export class VoteService {
 		});
 		return this.voteRepository.save(vote);
 	}
+
+	async findAllByUserId(communitySlug: string, userId: number) {
+		return this.voteRepository.find({
+			where: {
+				proposal: {
+					community: {
+						slug: communitySlug,
+					},
+				},
+				user: {
+					id: userId,
+				},
+			},
+			relations: {
+				proposal: true,
+				user: true,
+			},
+		});
+	}
 }
