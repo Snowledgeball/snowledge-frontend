@@ -1,11 +1,13 @@
 import { Card } from "@repo/ui/components/card";
 import { CheckCircle, XCircle, Clock, Flame } from "lucide-react";
 import { getFormatIconAndLabel } from "@/components/voting/in-progress/voting-card-row";
-import { formatDistanceToNow } from "date-fns";
-import { useTranslations } from "next-intl";
+import { formatDistance, formatDistanceToNow } from "date-fns";
+import { useLocale, useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
 import type { Proposal } from "@/types/proposal";
+import { enUS } from "date-fns/locale";
+import { fr } from "date-fns/locale";
 
 // ============
 // Function: VotingDoneList
@@ -104,6 +106,10 @@ const VotingDoneList = ({ communitySlug }: { communitySlug: string }) => {
           const participationLabel = t(participation.label);
           const reason = REASON_LABELS[proposal.reason || "by_vote"];
           const reasonLabel = t(reason.label);
+
+          const locale = useLocale();
+          const dateFnsLocale = locale === "fr" ? fr : enUS;
+
           return (
             <Card
               key={proposal.id}
@@ -141,7 +147,8 @@ const VotingDoneList = ({ communitySlug }: { communitySlug: string }) => {
                     {t("ended")}{" "}
                     {formatDistanceToNow(new Date(proposal.endDate), {
                       addSuffix: true,
-                    })}
+                      locale: dateFnsLocale,
+                    })}{" "}
                   </span>
                   <span className="mx-1">–</span>
                   <span className="flex items-center gap-1">
@@ -158,8 +165,8 @@ const VotingDoneList = ({ communitySlug }: { communitySlug: string }) => {
                   </span>
                 </div>
               </div>
-              <div className="flex flex-col items-center gap-2 min-w-[120px]">
-                <span className="font-medium text-sm truncate max-w-[80px]">
+              <div className="flex flex-col items-center gap-2 min-w-[150px]">
+                <span className="font-medium text-sm truncate max-w-[150px]">
                   {proposal.submitter.firstname} {proposal.submitter.lastname}
                 </span>
                 <span className="text-xs text-muted-foreground">

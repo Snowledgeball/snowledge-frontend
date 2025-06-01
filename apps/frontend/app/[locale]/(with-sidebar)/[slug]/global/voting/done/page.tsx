@@ -6,5 +6,9 @@ import React from "react";
 
 export default function DonePage() {
   const { slug } = useParams();
-  return <VotingDoneList communitySlug={slug as string} />;
+  return (
+    <div className="px-12 py-4 ">
+      <VotingDoneList communitySlug={slug as string} />
+    </div>
+  );
 }
