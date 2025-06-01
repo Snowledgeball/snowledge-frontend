@@ -309,7 +309,7 @@
     "started": "Commencé",
     "left": "restant",
     "completion": "Avancement",
-    "completion_tooltip": "Pourcentage de votants requis ayant participé.",
+    "completion_tooltip": "Nombre de votants requis ayant participé.",
     "required": "requis",
     "of_required_voters": "des votants requis ont participé",
     "view_profile": "Voir le profil de {name}",

@@ -22,7 +22,12 @@ export class ProposalService {
 	): Promise<Proposal[]> {
 		return this.proposalRepository.find({
 			where: { community: { slug: communitySlug } },
-			relations: ['community', 'submitter'],
+			relations: [
+				'community',
+				'submitter',
+				'community.learners',
+				'votes',
+			],
 		});
 	}
 

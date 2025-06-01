@@ -360,7 +360,7 @@
     "started": "Started",
     "left": "left",
     "completion": "Completion",
-    "completion_tooltip": "Percentage of required voters who have participated.",
+    "completion_tooltip": "Number of required voters who have participated.",
     "required": "required",
     "of_required_voters": "of required voters have participated",
     "view_profile": "View profile of {name}",
