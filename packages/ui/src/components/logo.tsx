@@ -5,7 +5,7 @@ import Image from "next/image";
 export function Logo() {
   return (
     <Image
-      src="/Logo - bleu.png"
+      src="/Logo-bleu.png"
       alt="Snowledge logo"
       width={48}
       height={48}

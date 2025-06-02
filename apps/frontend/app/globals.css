@@ -139,3 +139,7 @@
   color: klch(0.81 0.1729 163.24) !important;
   fill: klch(0.81 0.1729 163.24) !important;
 }
+
+button {
+  cursor: pointer;
+}

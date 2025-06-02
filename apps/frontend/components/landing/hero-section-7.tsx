@@ -73,7 +73,7 @@ export function HeroSection7() {
           </div>
         </div>
         <AspectRatio ratio={16 / 9}>
-          <div className="relative w-full h-full bg-gradient-to-b from-background/80 to-transparent rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 to-transparent rounded-xl overflow-hidden">
             <Image
               src="/image.png"
               alt="Hero section visual"
