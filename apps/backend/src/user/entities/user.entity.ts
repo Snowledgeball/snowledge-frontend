@@ -1,4 +1,3 @@
-
 import {
 	Entity,
 	Column,
@@ -11,16 +10,15 @@ import {
 	OneToOne,
 } from 'typeorm';
 
-
 import { randomUUID } from 'node:crypto';
 import { Gender } from 'src/shared/enums/Gender';
 import { Email } from 'src/email/entities/email.entity';
-import { DiscordServer } from 'src/discord/entities/discord-server.entity';
-import { YouTubeChannel } from 'src/youtube/entities/youtube-channel.entity';
-import { AnalysisResult } from 'src/analysis/entities/analysis-result.entity';
+import { Community } from 'src/community/entities/community.entity';
 import { DiscordAccess } from 'src/discord/entities/discord-access.entity';
 import { Type } from 'class-transformer';
-
+import { Learner } from '../../learner/entities/learner/learner';
+import { Vote } from 'src/vote/entities/vote.entity';
+import { Proposal } from 'src/proposal/entities/proposal.entity';
 
 @Entity()
 export class User {
@@ -40,11 +38,11 @@ export class User {
 	pseudo: string;
 
 	@Column({
-		type: "enum",
-        enum: Gender,
+		type: 'enum',
+		enum: Gender,
 	})
 	gender: Gender;
-	
+
 	@Column({
 		type: 'timestamp',
 	})
@@ -71,19 +69,13 @@ export class User {
 	@OneToOne(() => DiscordAccess)
 	@JoinColumn()
 	@Type(() => DiscordAccess)
-    discordAccess?: DiscordAccess;
+	discordAccess?: DiscordAccess;
 
 	@OneToMany(() => Email, (email) => email.user)
 	emails: Email[];
 
-	@OneToMany(() => DiscordServer, (discordServer) => discordServer.user)
-	discords: DiscordServer[];
-
-	@OneToMany(() => YouTubeChannel, (youTubeChannel) => youTubeChannel.user)
-	youtubes: YouTubeChannel[];
-
-	@OneToMany(() => AnalysisResult, (analysis) => analysis.user)
-	analysis: AnalysisResult[];
+	@OneToMany(() => Community, (community) => community.user)
+	communities: Community[];
 
 	@Column({ nullable: true })
 	refreshToken: string;
@@ -100,6 +92,15 @@ export class User {
 		onUpdate: 'CURRENT_TIMESTAMP(6)',
 	})
 	updated_at: Date;
+
+	@OneToMany(() => Learner, (learner) => learner.user)
+	learners: Learner[];
+
+	@OneToMany(() => Vote, (vote) => vote.user)
+	votes: Vote[];
+
+	@OneToMany(() => Proposal, (proposal) => proposal.submitter)
+	proposals: Proposal[];
 
 	@BeforeInsert()
 	lowercase() {

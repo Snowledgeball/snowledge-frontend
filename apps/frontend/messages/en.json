@@ -1,34 +1,34 @@
 {
-    "menu": {
-      "snowledge": "Snowledge",
-      "features": "Features",
-      "faq": "FAQ",
-      "partners": "Partners"
-    },
-    "cta": {
-      "test": "Try Snowledge"
-    },
-    "form": {
-      "title": "Snowledge POC Registration",
-      "firstname": "First name",
-      "lastname": "Last name",
-      "email": "Email address",
-      "expertise": "Expertise",
-      "expertise_placeholder": "Choose an expertise",
-      "community_size": "Community size",
-      "community_size_placeholder": "Choose a size",
-      "platforms": "Platforms used",
-      "platforms_placeholder": "Select platforms",
-      "submit": "Try Snowledge",
-      "close": "Close",
-      "community_size_less_than_100": "Less than 100",
-      "community_size_more_than_100": "More than 100"
-    },
-    "menu_toggle": {
-      "open": "Open menu",
-      "close": "Close menu"
-    },
-    "hero": {
+  "menu": {
+    "snowledge": "Snowledge",
+    "features": "Features",
+    "faq": "FAQ",
+    "partners": "Partners"
+  },
+  "cta": {
+    "test": "Try Snowledge"
+  },
+  "form": {
+    "title": "Snowledge POC Registration",
+    "firstname": "First name",
+    "lastname": "Last name",
+    "email": "Email address",
+    "expertise": "Expertise",
+    "expertise_placeholder": "Choose an expertise",
+    "community_size": "Community size",
+    "community_size_placeholder": "Choose a size",
+    "platforms": "Platforms used",
+    "platforms_placeholder": "Select platforms",
+    "submit": "Try Snowledge",
+    "close": "Close",
+    "community_size_less_than_100": "Less than 100",
+    "community_size_more_than_100": "More than 100"
+  },
+  "menu_toggle": {
+    "open": "Open menu",
+    "close": "Close menu"
+  },
+  "hero": {
     "title_start": "No more content created",
     "title_blind": "blindly",
     "title_and": "and",
@@ -37,54 +37,410 @@
     "description": "Save time, engage your members, and create quality content through collective intelligence. Snowledge transforms every community interaction into a growth opportunity.",
     "cta": "Try Snowledge",
     "discover": "Discover Snowledge"
+  },
+  "features": {
+    "title_start": "Rely on your community to",
+    "title_create": "create",
+    "title_and": "and",
+    "title_sell": "sell",
+    "title_end": "more and better!",
+    "description": "On Snowledge, ideas come from creators or the community. Needs are automatically detected, the right contributors are mobilized, creation is orchestrated, and revenues are distributed according to each person's contribution.",
+    "card_1_title": "Needs measurement and analysis",
+    "card_1_text": "Snowledge analyzes Discord exchanges to identify trends and needs. Members can also submit ideas and vote, helping you prioritize what deserves to be created.",
+    "card_2_title": "Co-creation orchestration",
+    "card_2_text": "Snowledge mobilizes the right contributors at the right time, organizes collaborative work, and facilitates the emergence of quality resources, without you having to manage everything yourself.",
+    "card_3_title": "Revenue sharing",
+    "card_3_text": "Contributions are tracked, their impact measured, and revenues automatically shared. No need to manage anything: everyone gets their share, thus strengthening engagement."
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "description": "We have compiled the most important information to help you get the most out of your experience.",
+    "not_found": "Can't find what you're looking for?",
+    "contact": "Contact us.",
+    "item_1_question": "Why does Snowledge focus on community co-creation?",
+    "item_1_answer": "Because the best educational content is not created alone. Snowledge allows creators to involve their community from the idea stage, to validate what deserves to be produced, mobilize the right profiles, and share the value created. It's fairer, more efficient, and more sustainable.",
+    "item_2_question": "What is the role of artificial intelligence in Snowledge?",
+    "item_2_answer": "AI analyzes your community's exchanges to extract clear signals: recurring needs, emerging topics, concrete expectations. It helps you detect what to produce, with whom, and for whom without having to read every message or launch manual surveys.",
+    "item_3_question": "Why integrate blockchain into an educational platform?",
+    "item_3_answer": "Because recognition, traceability, and fair distribution are essential. Thanks to blockchain, Snowledge automatically records who contributes to what, how, and when, then distributes revenues transparently, without intermediaries.",
+    "item_4_question": "What is the deeper purpose behind Snowledge?",
+    "item_4_answer": "We want to help change the 'lone creator' dynamic. Too many talents create alone, hope to sell, and burn out. Snowledge is based on a belief: collective intelligence can produce more useful, fairer, and better-paid content. Our mission is to make this model possible—technically, economically, and humanly.",
+    "cta_title": "Do our approach and product resonate with you?",
+    "cta_description": "Contact us to become one of our first ambassadors!",
+    "cta_button": "Contact us"
+  },
+  "partners": {
+    "title": "Partners",
+    "description": "They trust us and support us in our journey."
+  },
+  "footer": {
+    "home": "Home",
+    "about": "About us",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use",
+    "copyright": "All rights reserved."
+  },
+  "upgrade_banner": {
+    "description_start": "click the button",
+    "description_cta": "Try Snowledge",
+    "description_end": "to register for the test phase",
+    "button_text": "In development"
+  },
+  "navbar": {
+    "dashboard": "Dashboard",
+    "investisseurs-fous": "Investors Fools",
+    "crypto-club": "Crypto Club",
+    "immo-pro": "Immo Pro",
+    "overview": "Overview",
+    "details": "Detailed stats",
+    "content": "Content",
+    "articles": "Articles",
+    "videos": "Videos",
+    "podcasts": "Podcasts",
+    "discussions": "Discussions",
+    "forum": "Forum",
+    "chat": "General chat",
+    "resources": "Resources",
+    "documents": "Documents",
+    "links": "Useful links",
+    "ideas": "Ideas",
+    "propose": "Propose an idea",
+    "my-ideas": "My ideas",
+    "calendar": "Calendar",
+    "events": "Events",
+    "my-events": "My meetings",
+    "notifications": "Notifications",
+    "faq": "FAQ",
+    "support": "Support",
+    "contribute": "Contribute",
+    "my-contributions": "My contributions",
+    "validate-ideas": "Ideas to validate",
+    "collaborations": "Collaborations",
+    "ressources-contrib": "Contributor resources",
+    "tutorials": "Contribution tutorials",
+    "history": "Contribution history",
+    "leaderboard": "Contributor leaderboard",
+    "tools": "Contributor tools",
+    "badges": "My badges",
+    "validation-requests": "Validation requests",
+    "stats": "Contribution stats",
+    "members": "Members",
+    "learner": "Learner",
+    "contributor": "Contributor",
+    "create-community": "Create a community",
+    "landing": "Landing",
+    "my-community": "My community",
+    "general-informations": "General informations",
+    "trends-analytics": "Trends & Analytics",
+    "rewards": "Rewards",
+    "topics-to-validate": "Topics to validate",
+    "integrations": "Integrations",
+    "invitations": "Invitations",
+    "pricing": "Pricing",
+    "global": "Global",
+    "voting": "Voting",
+    "create-topic": "Create topic",
+    "in-progress": "In progress",
+    "done": "Done"
+  },
+  "inviteModal": {
+    "title": "Invite users",
+    "description": "Search and select users to invite to your community.",
+    "search": {
+      "placeholder": "Search for a user (name or email)",
+      "loading": "Searching...",
+      "noResult": "No user found"
     },
-    "features": {
-      "title_start": "Rely on your community to",
-      "title_create": "create",
-      "title_and": "and",
-      "title_sell": "sell",
-      "title_end": "more and better!",
-      "description": "On Snowledge, ideas come from creators or the community. Needs are automatically detected, the right contributors are mobilized, creation is orchestrated, and revenues are distributed according to each person's contribution.",
-      "card_1_title": "Needs measurement and analysis",
-      "card_1_text": "Snowledge analyzes Discord exchanges to identify trends and needs. Members can also submit ideas and vote, helping you prioritize what deserves to be created.",
-      "card_2_title": "Co-creation orchestration",
-      "card_2_text": "Snowledge mobilizes the right contributors at the right time, organizes collaborative work, and facilitates the emergence of quality resources, without you having to manage everything yourself.",
-      "card_3_title": "Revenue sharing",
-      "card_3_text": "Contributions are tracked, their impact measured, and revenues automatically shared. No need to manage anything: everyone gets their share, thus strengthening engagement."
+    "toast": {
+      "success": "Invitations sent to: {emails}"
     },
-    "faq": {
-      "title": "Frequently Asked Questions",
-      "description": "We have compiled the most important information to help you get the most out of your experience.",
-      "not_found": "Can't find what you're looking for?",
-      "contact": "Contact us.",
-      "item_1_question": "Why does Snowledge focus on community co-creation?",
-      "item_1_answer": "Because the best educational content is not created alone. Snowledge allows creators to involve their community from the idea stage, to validate what deserves to be produced, mobilize the right profiles, and share the value created. It's fairer, more efficient, and more sustainable.",
-      "item_2_question": "What is the role of artificial intelligence in Snowledge?",
-      "item_2_answer": "AI analyzes your community's exchanges to extract clear signals: recurring needs, emerging topics, concrete expectations. It helps you detect what to produce, with whom, and for whom without having to read every message or launch manual surveys.",
-      "item_3_question": "Why integrate blockchain into an educational platform?",
-      "item_3_answer": "Because recognition, traceability, and fair distribution are essential. Thanks to blockchain, Snowledge automatically records who contributes to what, how, and when, then distributes revenues transparently, without intermediaries.",
-      "item_4_question": "What is the deeper purpose behind Snowledge?",
-      "item_4_answer": "We want to help change the 'lone creator' dynamic. Too many talents create alone, hope to sell, and burn out. Snowledge is based on a belief: collective intelligence can produce more useful, fairer, and better-paid content. Our mission is to make this model possible—technically, economically, and humanly.",
-      "cta_title": "Do our approach and product resonate with you?",
-      "cta_description": "Contact us to become one of our first ambassadors!",
-      "cta_button": "Contact us"
+    "copy": {
+      "button": "Copy community link",
+      "copied": "Copied!",
+      "success": "Link copied to clipboard!",
+      "error": "Error copying the link."
     },
-    "partners": {
-      "title": "Partners",
-      "description": "They trust us and support us in our journey."
+    "submit": "Send invitations",
+    "loading": "Sending invitations..."
+  },
+  "manageCommunity": {
+    "title": "Community management",
+    "save": "Save",
+    "general": {
+      "title": "General information",
+      "intro": "Edit the main information of your community.",
+      "name": {
+        "label": "Name",
+        "placeholder": "Community name"
+      },
+      "tags": {
+        "label": "Type / Tags",
+        "placeholder": "Choose a type"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Describe the community..."
+      },
+      "externalLinks": {
+        "label": "External links",
+        "placeholder": "https://..."
+      }
     },
-    "footer": {
-      "home": "Home",
-      "about": "About us",
-      "contact": "Contact",
-      "privacy": "Privacy Policy",
-      "terms": "Terms of Use",
-      "copyright": "All rights reserved."
+    "access": {
+      "title": "Access settings",
+      "description": "Define if access is free or paid.",
+      "isFree": {
+        "label": "Free",
+        "description": "Enable to make the community free. Disable to set a price."
+      },
+      "price": {
+        "label": "Price",
+        "placeholder": "Price in €"
+      }
     },
-    "upgrade_banner": {
-      "description_start": "click the button",
-      "description_cta": "Try Snowledge",
-      "description_end": "to register for the test phase",
-      "button_text": "In development"
+    "gains": {
+      "title": "Gains distribution",
+      "description": "Set the share for admin, prize pool and platform (total = 100%).",
+      "adminShare": { "label": "Admin share (%)" },
+      "prizePoolShare": { "label": "Prize pool share (%)" },
+      "platformShare": { "label": "Platform share (%)" },
+      "totalHint": "Total must be 100%.",
+      "internal": {
+        "title": "Internal prize pool distribution",
+        "prizeCreation": { "label": "Creation (%)" },
+        "prizeRevision": { "label": "Revision (%)" },
+        "prizeAnimation": { "label": "Animation (%)" },
+        "prizeSharing": { "label": "Sharing / Invitations (%)" },
+        "totalHint": "Total must be 100% for internal prize pool distribution."
+      }
     }
+  },
+  "postSignUp": {
+    "title": "Welcome to Snowledge",
+    "description": "Choose how you'd like to get started",
+    "create_button": "Create a community",
+    "create_description": "Start your own community and invite others to join. You'll be the owner with full control.",
+    "join_button": "Join an existing community",
+    "join_description": "Join a community someone has already created. You'll need the community name or invite link.",
+    "placeholder": "Enter community name",
+    "error_empty": "Please enter a value.",
+    "error_not_found": "No community matches this value.",
+    "success_joined": "Community joined successfully",
+    "invitations_title": "Your pending invitations",
+    "accept": "Accept",
+    "decline": "Decline",
+    "loading": "Loading...",
+    "no_invitations": "No invitations pending.",
+    "invitation_accepted": "Invitation accepted!",
+    "invitation_declined": "Invitation declined."
+  },
+  "communityForm": {
+    "manage": {
+      "title": "Manage your community",
+      "save": "Save",
+      "access": {
+        "title": "Access settings",
+        "description": "Define if access is free or paid."
+      },
+      "gains": {
+        "title": "Gains distribution",
+        "description": "Set the share for admin, prize pool and platform (total = 100%)."
+      },
+      "general": {
+        "title": "General information",
+        "intro": "Edit the main information of your community."
+      }
+    },
+    "create": {
+      "title": "Create and manage your community",
+      "form-description": "Fill in the details to get started",
+      "submit": "Create Community",
+      "footerHelp": "You can edit all these details later from your community dashboard."
+    },
+    "toast": {
+      "success": "Community created successfully",
+      "unknownError": "Unknown error while creating the community.",
+      "alreadyExists": "A community with this name already exists."
+    },
+    "name": {
+      "label": "Community Name",
+      "placeholder": "Enter community name"
+    },
+    "tags": {
+      "label": "Type / Tags",
+      "placeholder": "Select community types"
+    },
+    "membership": {
+      "label": "Membership Type",
+      "free": "Free",
+      "freeTooltip": "Free mode is the only mode available atm",
+      "paid": "Paid",
+      "paidTooltip": "Paid mode for showing projection of what's Snowledge goal is",
+      "priceLabel": "Monthly price your subscribers will pay",
+      "pricePlaceholder": "0.00",
+      "revenueTitle": "Revenue Distribution",
+      "yourLabel": "Your %",
+      "communityLabel": "Community pool %",
+      "communityTooltip": "Rewarding your contributors",
+      "snowledgeLabel": "Snowledge %",
+      "platformFee": "Platform fee (fixed)",
+      "total": "Total:",
+      "editableHint": "You will be able to adjust these values later."
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Briefly describe your community"
+    },
+    "codeOfConduct": {
+      "label": "Code of Conduct",
+      "placeholder": "Enter your community's code of conduct",
+      "help": "Define the rules and expectations for your community members."
+    },
+    "errors": {
+      "name": {
+        "min": "The name must be at least 2 characters.",
+        "noParentheses": "The name must not contain parentheses."
+      },
+      "tags": {
+        "min": "Please select at least one tag."
+      },
+      "communityType": {
+        "required": "Please choose a membership type."
+      },
+      "description": {
+        "min": "Please add a description."
+      },
+      "codeOfConduct": {
+        "min": "Please provide a code of conduct."
+      },
+      "price": {
+        "positive": "The price must be strictly greater than 0 for a paid community."
+      },
+      "yourPercentage": {
+        "required": "Please enter your percentage."
+      },
+      "communityPercentage": {
+        "required": "Please enter the community percentage."
+      },
+      "repartition": {
+        "total": "The sum of the percentages must be exactly 100%."
+      }
+    }
+  },
+  "members": {
+    "title": "Member management",
+    "search_placeholder": "Search a member...",
+    "role_contributor": "Contributor",
+    "role_member": "Member",
+    "added_on": "Added on",
+    "actions": "Actions",
+    "promote": "Promote contributor",
+    "demote": "Demote member",
+    "delete": "Delete",
+    "confirm_delete_title": "Confirm deletion",
+    "confirm_delete_desc": "Are you sure you want to remove {name} from the community? This action is irreversible.",
+    "no_member": "No member found.",
+    "loading": "Loading...",
+    "error": "Error while loading members.",
+    "cancel": "Cancel"
+  },
+  "join": {
+    "badge": "Invitation",
+    "private": "Private community",
+    "title": "Join the {communityName} community!",
+    "description": "You are invited to join the {communityName} community on Snowledge. Here, you'll co-create content with other members around a creator in tech or investing. Take part, share your ideas, and get rewarded for your contribution to collective intelligence!",
+    "button": "Join the community",
+    "success": "Welcome to the community!",
+    "error": "An error occurred. Please try again.",
+    "loading": "Joining..."
+  },
+  "voting": {
+    "view_details": "View details for {title}",
+    "started": "Started",
+    "left": "left",
+    "completion": "Completion",
+    "completion_tooltip": "Number of required voters who have participated.",
+    "required": "required",
+    "of_required_voters": "of required voters have participated",
+    "view_profile": "View profile of {name}",
+    "submitter": "Submitter",
+    "vote_now": "Vote now",
+    "already_voted": "Already voted",
+    "not_eligible": "Not eligible",
+    "not_eligible_reason": "You cannot vote for your own proposal.",
+    "vote_for_subject": "Vote for the subject",
+    "vote_for": "Vote for",
+    "vote_against": "Vote against",
+    "for": "For",
+    "against": "Against",
+    "leave_comment_optional": "Leave a comment (optional)",
+    "feedback_on_choice": "Feedback on your choice",
+    "vote_submitted_success": "Vote submitted successfully!",
+    "vote_submitted_error": "Error submitting vote. Please try again.",
+    "submitting": "Submitting...",
+    "submit_my_vote": "Submit my vote",
+    "back_to_list": "Back to list",
+    "back": "Back",
+    "vote_for_format": "Vote for the format",
+    "yes_for_format": "Yes for format",
+    "no_for_format": "No for format",
+    "yes": "Yes",
+    "no": "No",
+    "leave_comment_format_optional": "Leave a comment about the format (optional)",
+    "feedback_on_format": "Feedback on the format",
+    "format_vote_submitted_success": "Format vote submitted successfully!",
+    "submit_format_vote": "Submit format vote",
+    "create_subject_title": "Propose a new subject",
+    "create_subject_description": "Share your idea and let the community decide. Fill in the details below to propose a new voting subject.",
+    "create_subject_aria_label": "Propose a new subject",
+    "submit_subject": "Submit a subject",
+    "title_label": "Title",
+    "title_placeholder": "Enter the subject title",
+    "vote_title": "Vote title",
+    "max_80_characters": "Max 80 characters",
+    "description_label": "Description",
+    "description_placeholder": "Short description of the subject",
+    "vote_description": "Vote description",
+    "max_200_characters": "Max 200 characters",
+    "format_label": "Format (optional)",
+    "format_placeholder": "Select a format (optional)",
+    "masterclass": "Masterclass",
+    "white_paper": "White paper",
+    "i_want_to_be_contributor": "I want to be a contributor",
+    "comments_label": "Comments (optional)",
+    "comments_placeholder": "Add any additional comments (optional)",
+    "submit": "Submit",
+    "ended": "Ended",
+    "quorum": "Quorum",
+    "participation": "Participation",
+    "validated": "Validated",
+    "invalidated": "Invalidated",
+    "by_vote": "By vote",
+    "by_expiration": "By expiration",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "errors": {
+      "title_required": "Title is required.",
+      "title_too_short": "Title must be at least 5 characters.",
+      "title_too_long": "Title must not exceed 80 characters.",
+      "description_required": "Description is required.",
+      "description_too_short": "Description must be at least 10 characters.",
+      "description_too_long": "Description must not exceed 200 characters.",
+      "format_too_short": "Format must be at least 2 characters.",
+      "format_too_long": "Format must not exceed 40 characters.",
+      "comments_too_long": "Comment must not exceed 400 characters."
+    },
+    "vote_submitted_successfully": "Vote submitted successfully!",
+    "error_submitting_vote": "Error submitting vote. Please try again.",
+    "proposal_submitted_success": "Proposal submitted successfully!",
+    "error_submitting_proposal": "Error submitting proposal. Please try again.",
+    "loading": "Loading...",
+    "error": "Error while loading votes.",
+    "no_proposals": "No proposals available.",
+    "no_proposals_done": "No proposals have been completed yet.",
+    "accepted": "Accepted",
+    "rejected": "Rejected"
   }
+}

@@ -107,7 +107,7 @@ export async function POST(request, { params }) {
         },
       });
     } else {
-      // Créer un nouveau vote
+      // Proposer un nouveau sujet
       await prisma.community_proposal_votes.create({
         data: {
           proposal_id: proposalIdInt,

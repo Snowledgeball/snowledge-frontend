@@ -2,8 +2,8 @@
 
 import { Logo } from "@repo/ui/components/logo";
 import { Button } from "@repo/ui/components/button";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import {
@@ -19,6 +19,10 @@ import {
 import { SocialIcon } from "react-social-icons";
 import { LanguageSwitcher } from "./shared/langage";
 import { PocForm } from "./shared/pocform";
+import { redirect, useRouter } from "next/navigation";
+import { useUserCommunities } from "@/hooks/useUserCommunities";
+import { Community } from "@/types/community";
+import { useAuth } from "@/contexts/auth-context";
 
 interface NavMenuItemsProps {
   className?: string;
@@ -48,12 +52,32 @@ const NavMenuItems = ({ className }: NavMenuItemsProps) => {
 };
 
 export function LpNavbar2() {
+  const { user, fetchDataUser } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const tCTA = useTranslations("cta");
   const tForm = useTranslations("form");
   const tToggle = useTranslations("menu_toggle");
 
+  const router = useRouter();
+  const { data: communities, isLoading } = useUserCommunities(user?.id || 0);
+
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+
+  const handleGoTest = () => {
+    if (!isLoading && communities && user) {
+      if (communities.length > 0) {
+        router.push(`/${communities[0].slug}`);
+      } else {
+        router.push("/post-sign-up");
+      }
+    } else {
+      router.push("/sign-in");
+    }
+  };
+
+  useEffect(() => {
+    fetchDataUser();
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 bg-background py-3.5 md:py-4 isolate">
@@ -138,7 +162,7 @@ export function LpNavbar2() {
           </div>
         )}
 
-        {/* Bouton CTA + Language Switcher */}
+        {/* Bouton CTA + Language Switcher + Bouton éclair */}
         <div className="hidden md:flex md:ml-auto items-center gap-2">
           <Credenza>
             <CredenzaTrigger asChild>
@@ -158,6 +182,14 @@ export function LpNavbar2() {
               </CredenzaFooter>
             </CredenzaContent>
           </Credenza>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleGoTest}
+            aria-label="Go test"
+          >
+            <Zap className="w-5 h-5 text-yellow-400" />
+          </Button>
           <LanguageSwitcher />
         </div>
       </div>

@@ -86,5 +86,309 @@
     "description_cta": "Testez Snowledge",
     "description_end": "pour vous inscrire à la phase de test",
     "button_text": "Développement en cours"
+  },
+  "navbar": {
+    "dashboard": "Tableau de bord",
+    "investisseurs-fous": "Investisseurs Fous",
+    "crypto-club": "Crypto Club",
+    "immo-pro": "Immo Pro",
+    "overview": "Vue globale",
+    "details": "Statistiques détaillées",
+    "content": "Contenu",
+    "articles": "Articles",
+    "videos": "Vidéos",
+    "podcasts": "Podcasts",
+    "discussions": "Discussions",
+    "forum": "Forum",
+    "chat": "Chat général",
+    "resources": "Ressources",
+    "documents": "Documents",
+    "links": "Liens utiles",
+    "ideas": "Idées",
+    "propose": "Proposer une idée",
+    "my-ideas": "Mes idées",
+    "calendar": "Calendrier",
+    "events": "Événements",
+    "my-events": "Mes rendez-vous",
+    "notifications": "Notifications",
+    "faq": "FAQ",
+    "support": "Support",
+    "contribute": "Contribuer",
+    "my-contributions": "Mes contributions",
+    "validate-ideas": "Idées à valider",
+    "collaborations": "Collaborations",
+    "ressources-contrib": "Ressources Contributeur",
+    "tutorials": "Tutoriels de contribution",
+    "history": "Historique des contributions",
+    "leaderboard": "Classement des contributeurs",
+    "tools": "Outils Contributeur",
+    "badges": "Mes badges",
+    "validation-requests": "Demandes de validation",
+    "stats": "Statistiques de contribution",
+    "members": "Membres",
+    "creator": "Créateur",
+    "learner": "Apprenant",
+    "contributor": "Contributeur",
+    "create-community": "Créer une communauté",
+    "landing": "Landing",
+    "my-community": "Ma communauté",
+    "general-informations": "Informations générales",
+    "trends-analytics": "Tendances & Analytics",
+    "rewards": "Récompenses",
+    "topics-to-validate": "Thèmes à valider",
+    "integrations": "Intégrations",
+    "invitations": "Invitations",
+    "pricing": "Tarifs",
+    "global": "Global",
+    "voting": "Voting",
+    "create-topic": "Créer un sujet",
+    "in-progress": "En cours",
+    "done": "Terminé"
+  },
+  "inviteModal": {
+    "title": "Invitez des utilisateurs",
+    "description": "Recherchez et sélectionnez des utilisateurs à inviter dans votre communauté.",
+    "search": {
+      "placeholder": "Rechercher un utilisateur (nom ou email)",
+      "loading": "Recherche...",
+      "noResult": "Aucun utilisateur trouvé"
+    },
+    "toast": {
+      "success": "Invitations envoyées à : {emails}"
+    },
+    "copy": {
+      "button": "Copier le lien de la communauté",
+      "copied": "Copié !",
+      "success": "Lien copié dans le presse-papier !",
+      "error": "Erreur lors de la copie du lien."
+    },
+    "submit": "Envoyer les invitations"
+  },
+
+  "postSignUp": {
+    "title": "Bienvenue sur Snowledge",
+    "description": "Choisissez comment vous souhaitez commencer",
+    "create_button": "Créer une communauté",
+    "create_description": "Créez votre propre communauté et invitez d'autres personnes à rejoindre. Vous serez le propriétaire avec un contrôle total.",
+    "join_button": "Rejoindre une communauté existante",
+    "join_description": "Rejoignez une communauté déjà créée. Vous aurez besoin du nom ou du lien d'invitation.",
+    "placeholder": "Entrez le nom de la communauté",
+    "error_empty": "Veuillez renseigner une valeur.",
+    "error_not_found": "Aucune communauté ne correspond à cette valeur.",
+    "success_joined": "Communauté rejointe avec succès",
+    "invitations_title": "Vos invitations en attente",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "loading": "Chargement...",
+    "no_invitations": "Aucune invitation en attente.",
+    "invitation_accepted": "Invitation acceptée !",
+    "invitation_declined": "Invitation refusée."
+  },
+  "communityForm": {
+    "manage": {
+      "title": "Gérer votre communauté",
+      "access": {
+        "title": "Paramètres d'accès",
+        "description": "Définissez si l'accès est gratuit ou payant."
+      },
+      "gains": {
+        "title": "Répartition des gains",
+        "description": "Définissez la part des gains pour l'admin, le prize pool et la plateforme (total = 100%)."
+      },
+      "general": {
+        "title": "Informations générales",
+        "intro": "Modifiez les informations principales de votre communauté."
+      },
+      "save": "Enregistrer"
+    },
+    "create": {
+      "title": "Créer et gérer votre communauté",
+      "form-description": "Remplissez les informations pour commencer",
+      "submit": "Créer la communauté",
+      "footerHelp": "Vous pourrez modifier ces informations plus tard depuis le tableau de bord de votre communauté."
+    },
+    "toast": {
+      "success": "Communauté créée avec succès",
+      "unknownError": "Erreur inconnue lors de la création de la communauté.",
+      "alreadyExists": "Une communauté avec ce nom existe déjà."
+    },
+    "name": {
+      "label": "Nom de la communauté",
+      "placeholder": "Entrez le nom de la communauté"
+    },
+    "tags": {
+      "label": "Type / Tags",
+      "placeholder": "Sélectionnez les types de communauté"
+    },
+    "membership": {
+      "label": "Type d'adhésion",
+      "free": "Gratuit",
+      "freeTooltip": "Le mode gratuit est le seul disponible pour le moment",
+      "paid": "Payant",
+      "paidTooltip": "Le mode payant permet de projeter le modèle économique de Snowledge.",
+      "priceLabel": "Prix mensuel payé par vos abonnés",
+      "pricePlaceholder": "0.00",
+      "revenueTitle": "Répartition des revenus",
+      "yourLabel": "Votre %",
+      "communityLabel": "% pour la communauté",
+      "communityTooltip": "Récompense vos contributeurs",
+      "snowledgeLabel": "Snowledge %",
+      "platformFee": "Frais de plateforme (fixe)",
+      "total": "Total :",
+      "editableHint": "Vous pourrez ajuster ces valeurs plus tard."
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Décrivez brièvement votre communauté"
+    },
+    "codeOfConduct": {
+      "label": "Code de conduite",
+      "placeholder": "Entrez le code de conduite de votre communauté",
+      "help": "Définissez les règles et attentes pour les membres de votre communauté."
+    },
+    "errors": {
+      "name": {
+        "min": "Le nom doit faire au moins 2 caractères.",
+        "noParentheses": "Le nom ne doit pas contenir de parenthèses."
+      },
+      "tags": {
+        "min": "Veuillez sélectionner au moins un tag."
+      },
+      "communityType": {
+        "required": "Veuillez choisir un type d'adhésion."
+      },
+      "description": {
+        "min": "Veuillez ajouter une description."
+      },
+      "codeOfConduct": {
+        "min": "Veuillez renseigner un code de conduite."
+      },
+      "price": {
+        "positive": "Le prix doit être strictement supérieur à 0 pour une communauté payante."
+      },
+      "yourPercentage": {
+        "required": "Veuillez renseigner votre pourcentage."
+      },
+      "communityPercentage": {
+        "required": "Veuillez renseigner le pourcentage de la communauté."
+      },
+      "repartition": {
+        "total": "La somme des pourcentages doit faire exactement 100%."
+      }
+    }
+  },
+  "members": {
+    "title": "Gestion des membres",
+    "search_placeholder": "Rechercher un membre...",
+    "role_contributor": "Contributeur",
+    "role_member": "Membre",
+    "added_on": "Date d'ajout",
+    "actions": "Actions",
+    "promote": "Promouvoir contributeur",
+    "demote": "Rétrograder membre",
+    "delete": "Supprimer",
+    "confirm_delete_title": "Confirmer la suppression",
+    "confirm_delete_desc": "Êtes-vous sûr de vouloir supprimer {name} de la communauté ? Cette action est irréversible.",
+    "no_member": "Aucun membre trouvé.",
+    "loading": "Chargement...",
+    "error": "Erreur lors du chargement des membres.",
+    "cancel": "Annuler"
+  },
+  "join": {
+    "badge": "Invitation",
+    "private": "Communauté privée",
+    "title": "Rejoins la communauté {communityName} !",
+    "description": "Tu es invité·e à rejoindre la communauté {communityName} sur Snowledge. Ici, tu vas co-construire des contenus avec d'autres membres autour d'un créateur dans la tech ou l'investissement. Participe, partage tes idées, et sois récompensé·e pour ta contribution à l'intelligence collective !",
+    "button": "Rejoindre la communauté",
+    "success": "Bienvenue dans la communauté !",
+    "error": "Une erreur est survenue. Veuillez réessayer.",
+    "loading": "Rejoint..."
+  },
+  "voting": {
+    "view_details": "Voir les détails pour {title}",
+    "started": "Commencé",
+    "left": "restant",
+    "completion": "Avancement",
+    "completion_tooltip": "Nombre de votants requis ayant participé.",
+    "required": "requis",
+    "of_required_voters": "des votants requis ont participé",
+    "view_profile": "Voir le profil de {name}",
+    "submitter": "Proposant",
+    "vote_now": "Voter",
+    "already_voted": "Déjà voté",
+    "not_eligible": "Non éligible",
+    "not_eligible_reason": "Vous ne pouvez pas voter pour votre propre proposition.",
+    "vote_for_subject": "Vote pour le sujet",
+    "vote_for": "Voter pour",
+    "vote_against": "Voter contre",
+    "for": "Pour",
+    "against": "Contre",
+    "leave_comment_optional": "Laisser un commentaire (optionnel)",
+    "feedback_on_choice": "Commentaire sur votre choix",
+    "submitting": "Envoi en cours...",
+    "submit_my_vote": "Soumettre mon vote",
+    "back_to_list": "Retour à la liste",
+    "back": "Retour",
+    "vote_for_format": "Vote pour le format",
+    "yes_for_format": "Oui pour le format",
+    "no_for_format": "Non pour le format",
+    "yes": "Oui",
+    "no": "Non",
+    "leave_comment_format_optional": "Laisser un commentaire sur le format (optionnel)",
+    "feedback_on_format": "Commentaire sur le format",
+    "format_vote_submitted_success": "Vote sur le format enregistré !",
+    "submit_format_vote": "Soumettre le vote format",
+    "create_subject_title": "Proposez un nouveau sujet",
+    "create_subject_description": "Partagez votre idée et laissez la communauté décider. Remplissez les informations ci-dessous pour proposer un nouveau sujet de vote.",
+    "create_subject_aria_label": "Proposer un nouveau sujet",
+    "submit_subject": "Proposer un sujet",
+    "title_label": "Titre",
+    "title_placeholder": "Saisir le titre du sujet",
+    "vote_title": "Titre du vote",
+    "max_80_characters": "80 caractères max",
+    "description_label": "Description",
+    "description_placeholder": "Courte description du sujet",
+    "vote_description": "Description du vote",
+    "max_200_characters": "200 caractères max",
+    "format_label": "Format (optionnel)",
+    "format_placeholder": "Sélectionner un format (optionnel)",
+    "masterclass": "Masterclass",
+    "white_paper": "Livre blanc",
+    "i_want_to_be_contributor": "Je souhaite être contributeur·rice",
+    "comments_label": "Commentaires (optionnel)",
+    "comments_placeholder": "Ajouter un commentaire (optionnel)",
+    "submit": "Soumettre",
+    "ended": "Terminé",
+    "quorum": "Quorum",
+    "participation": "Participation",
+    "validated": "Validé",
+    "invalidated": "Invalidé",
+    "by_vote": "Par vote",
+    "by_expiration": "Par expiration",
+    "low": "Faible",
+    "medium": "Moyenne",
+    "high": "Élevée",
+    "vote_submitted_error": "Erreur lors de l'envoi du vote. Veuillez réessayer.",
+    "errors": {
+      "title_required": "Le titre est requis.",
+      "title_too_short": "Le titre doit faire au moins 5 caractères.",
+      "title_too_long": "Le titre ne doit pas dépasser 80 caractères.",
+      "description_required": "La description est requise.",
+      "description_too_short": "La description doit faire au moins 10 caractères.",
+      "description_too_long": "La description ne doit pas dépasser 200 caractères.",
+      "format_too_short": "Le format doit faire au moins 2 caractères.",
+      "format_too_long": "Le format ne doit pas dépasser 40 caractères.",
+      "comments_too_long": "Le commentaire ne doit pas dépasser 400 caractères."
+    },
+    "vote_submitted_success": "Vote soumis avec succès !",
+    "error_submitting_vote": "Erreur lors de la soumission du vote. Veuillez réessayer.",
+    "proposal_submitted_success": "Projet soumis avec succès !",
+    "error_submitting_proposal": "Erreur lors de la soumission du sujet. Veuillez réessayer.",
+    "loading": "Chargement...",
+    "error": "Erreur lors du chargement des votes.",
+    "no_proposals": "Aucun sujet de vote disponible.",
+    "no_proposals_done": "Aucun sujet de vote terminé.",
+    "accepted": "Accepté",
+    "rejected": "Rejeté"
   }
 }
