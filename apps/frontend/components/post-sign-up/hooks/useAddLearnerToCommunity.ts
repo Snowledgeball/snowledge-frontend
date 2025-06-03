@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import { fetcher } from "@/lib/fetcher";
 import { useAuth } from "@/contexts/auth-context";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -9,7 +8,7 @@ type AddLearnerToCommunityParams = {
 };
 
 export function useAddLearnerToCommunity() {
-  const { user } = useAuth();
+  const { user, fetcher } = useAuth();
   const t = useTranslations("postSignUp");
 
   return useMutation({

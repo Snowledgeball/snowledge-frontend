@@ -21,12 +21,12 @@ export default function RootLayout({
 
   const { data: communities, isLoading } = useUserCommunities(user?.id || 0);
 
-  useEffect(() => {
-    if (communities) {
-      const community = communities.find((c) => c.slug === slug);
-      if (!community) notFound();
-    }
-  }, [communities]);
+  // useEffect(() => {
+  //   if (communities) {
+  //     const community = communities.find((c) => c.slug === slug);
+  //     if (!community) notFound();
+  //   }
+  // }, [communities]);
 
   if (!features.community.enabled) {
     notFound();

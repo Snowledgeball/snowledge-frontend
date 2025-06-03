@@ -29,7 +29,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@repo/ui/components/sidebar";
-import { useRouter } from "next/navigation";
 
 export default function NavUser({
   user,
@@ -40,11 +39,10 @@ export default function NavUser({
     avatar: string;
   };
 }) {
-  const router = useRouter();
   const { isMobile } = useSidebar();
   const signOut = async () => {
     try {
-      const response = await fetch("http://localhost:4000/auth/session", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/session`, {
         method: "DELETE",
         credentials: "include",
       });

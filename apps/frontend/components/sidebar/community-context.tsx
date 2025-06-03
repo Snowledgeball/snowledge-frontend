@@ -12,13 +12,16 @@ export const CommunityContext = React.createContext<{
 } | null>(null);
 
 export function CommunityProvider({ children }: { children: React.ReactNode }) {
-  const { user, fetchDataUser } = useAuth();
+  const { user, accessToken, fetchDataUser } = useAuth();
   const { data: communities, isSuccess } = useUserCommunities(user?.id || 0);
   const [activeCommunity, setActiveCommunity] =
     React.useState<Community | null>(null);
 
   useEffect(() => {
-    fetchDataUser();
+    //TODO verifier le comportement
+    if(accessToken) {
+      fetchDataUser();
+    }
   }, []);
 
   // Restaure la communauté active depuis le localStorage au montage

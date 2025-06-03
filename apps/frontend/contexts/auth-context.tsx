@@ -8,12 +8,13 @@ import React, {
   useCallback,
   useEffect,
 } from "react";
+import { toast } from "sonner";
 
 type AuthContextType = {
   accessToken: string | null;
   user: any | null;
   setAccessToken: (token: string | null) => void;
-  authFetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+  fetcher: (input: RequestInfo, init?: RequestInit) => Promise<any>;
   refreshAccessToken: () => Promise<string | null>;
   fetchDataUser: () => Promise<boolean>;
   validateFormSignUp: (formData: FormDataSignUp) => string | null;
@@ -38,7 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return null;
     }
     try {
-      const res = await fetch("http://localhost:4000/auth/refresh-token", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,8 +47,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         },
         credentials: "include",
       });
-      if (!res.ok) throw new Error("Refresh failed");
+      if (!res.ok) {
+        toast.error("Votre accès a expiré, veuillez vous reconnecter.", {
+          position: "top-center",
+        });
+
+        if (typeof window !== "undefined") {
+          setTimeout(() => {
+            window.location.href = "/sign-in";
+          }, 4000);
+        }
+      }
+
+
       const data = await res.json();
+
       setAccessToken(data.access_token);
       return data.access_token;
     } catch (err) {
@@ -56,21 +70,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  const authFetch = useCallback(
+  const fetcher = useCallback(
     async (input: RequestInfo, init: RequestInit = {}) => {
       let token = accessToken;
       if (!token || !isJwtValid(token)) {
         token = await refreshAccessToken();
-        if (!token) throw new Error("No token");
+        if (!token) {
+          toast.error("Votre session a expiré, veuillez vous reconnecter.", {
+            position: "top-center",
+          });
+        }
+
+        if (typeof window !== "undefined") {
+          setTimeout(() => {
+            window.location.href = "/sign-in";
+          }, 4000);
+        }
       }
 
-      return fetch(input, {
+      const res = await fetch(input, {
         ...init,
         headers: {
           ...(init.headers || {}),
-          Authorization: `Bearer ${token}`,
         },
+        credentials: 'include',
       });
+      if (!res.ok) {
+        if (res.status === 401) return false;
+        else throw new Error("Failed. Please try again.");
+      }
+      return res.json();
     },
     [accessToken, refreshAccessToken]
   );
@@ -81,25 +110,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchDataUser = async () => {
     try {
-      const response = await fetch(
+      const data = await fetcher(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
         {
           method: "GET",
           credentials: "include",
         }
       );
-      if (!response.ok) {
-        if (response.status === 401) return false;
-        else throw new Error("Failed. Please try again.");
-      }
-      const data = await response.json();
+
+      
       if (data.user) {
-        // console.log(data);
         setUser(data.user);
       } else {
         return false;
       }
-      // console.log(data);
       setUser(data.user);
       return true;
     } catch (err: any) {
@@ -122,7 +146,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!response.ok) {
         throw new Error("Failed. Please try again.");
       }
-      const data = await response.json();
       return true;
     } catch (err: any) {
       throw new Error(err.message || "An unexpected error occurred.");
@@ -165,7 +188,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         accessToken,
         user,
         setAccessToken,
-        authFetch,
+        fetcher,
         fetchDataUser,
         refreshAccessToken,
         validateFormSignUp,

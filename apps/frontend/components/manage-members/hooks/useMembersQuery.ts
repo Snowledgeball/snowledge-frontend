@@ -1,7 +1,9 @@
-import { fetcher } from "@/lib/fetcher";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/auth-context";
 
 export function useMembersQuery(slug: string) {
+  const { fetcher } = useAuth();
+  
   return useQuery({
     queryKey: ["learners", slug],
     queryFn: async () => {

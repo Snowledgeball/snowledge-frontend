@@ -6,7 +6,6 @@ import { notFound, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { fromSlug } from "@/utils/slug";
 import { useMutation } from "@tanstack/react-query";
-import { fetcher } from "@/lib/fetcher";
 import { useAuth } from "@/contexts/auth-context";
 import { toast } from "sonner";
 import { useCommunity } from "@/hooks/useCommunity";
@@ -15,7 +14,7 @@ export default function JoinPage() {
   const { slug } = useParams();
   const t = useTranslations("join");
   const communityName = fromSlug(slug as string);
-  const { user } = useAuth();
+  const { user, fetcher } = useAuth();
 
   //il faut vérifier que la communauté existe avant d'afficher  quoi que ce soit
   const { data: community, isLoading, isError } = useCommunity(slug as string);

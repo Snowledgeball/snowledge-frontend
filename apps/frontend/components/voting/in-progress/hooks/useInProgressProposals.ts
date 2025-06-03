@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetcher } from "@/lib/fetcher";
 import type { Proposal } from "@/types/proposal";
+import { useAuth } from "@/contexts/auth-context";
 
 export function useInProgressProposals(communitySlug: string) {
+    const { fetcher } = useAuth();
+
   return useQuery<Proposal[]>({
     queryKey: ["proposals", "in-progress", communitySlug],
     queryFn: async () => {

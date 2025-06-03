@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetcher } from "@/lib/fetcher";
 import type { Vote } from "@/types/vote";
+import { useAuth } from "@/contexts/auth-context";
 
 export function useUserVotes(communitySlug: string, userId?: string) {
+    const { fetcher } = useAuth();
+
   return useQuery<Vote[]>({
     queryKey: ["votes", userId, communitySlug],
     queryFn: async () => {
