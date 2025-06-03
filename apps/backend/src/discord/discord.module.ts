@@ -5,9 +5,14 @@ import { DiscordProvider } from './discord.provider';
 import { UserModule } from 'src/user/user.module';
 import { DiscordAccess } from './entities/discord-access.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CommunityModule } from 'src/community/community.module';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([DiscordAccess]), UserModule],
+	imports: [
+		TypeOrmModule.forFeature([DiscordAccess]), 
+		CommunityModule,
+		UserModule,
+	],
 	controllers: [DiscordController],
 	providers: [DiscordProvider, DiscordService],
 })

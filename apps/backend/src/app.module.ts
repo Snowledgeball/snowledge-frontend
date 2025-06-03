@@ -15,12 +15,13 @@ import { CommunityModule } from './community/community.module';
 import { LearnerModule } from './learner/learner.module';
 import { ProposalModule } from './proposal/proposal.module';
 import { VoteModule } from './vote/vote.module';
+import discordConfig from './config/discord.config';
 @Module({
 	imports: [
 		ConfigModule.forRoot({
 			envFilePath: ['.env.dev', '.env.prod'],
 			isGlobal: true,
-			load: [mailingConfig, postgresConfig, serverConfig],
+			load: [discordConfig, mailingConfig, postgresConfig, serverConfig],
 		}),
 		TypeOrmModule.forRootAsync({
 			imports: [ConfigModule],

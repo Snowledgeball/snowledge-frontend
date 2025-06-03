@@ -55,6 +55,9 @@ export class Community {
 	@OneToMany(() => Proposal, (proposal) => proposal.community)
 	proposals: Proposal[];
 
+	@Column({ nullable: true, unique: true })
+	guildId: string;
+
 	@CreateDateColumn({
 		type: 'timestamp',
 		default: () => 'CURRENT_TIMESTAMP(6)',
