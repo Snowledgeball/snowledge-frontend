@@ -22,7 +22,7 @@ export class DiscordController {
 
 	@HttpCode(HttpStatus.OK)
 	@Get('link')
-	async getVerifyToken(@Res() res: Response, @User() user: UserEntity, @Query('code') code: string, @Query('state') state: string) {
+	async getVerifyToken(@Res() res: Response, @User() user: UserEntity, @Query('code') code: string, @Query('state') state?: string) {
 		const { communityId } = JSON.parse(state);
 		if(code){
 			await this.discordProvider.linkDiscord(code, user, communityId);
