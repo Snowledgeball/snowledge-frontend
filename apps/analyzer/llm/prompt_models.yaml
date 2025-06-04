@@ -1,0 +1,101 @@
+prompt_models:
+  discord_sentiment:
+    platform: discord
+    description: "Classify general sentiment across a batch of Discord messages."
+    temperature: 0.3
+    top_p: 0.8
+    messages:
+      - role: system
+        content: >
+          You are a sentiment analyst. Based on the tone, choice of words, and emotional cues in the following Discord messages,
+          determine the OVERALL sentiment expressed by the community.
+          Each message is formatted as: [DATE TIME] USER: MESSAGE
+          Consider message context and user interactions. Ignore isolated emotional outliers unless they dominate the overall tone.
+      - role: user
+        content: "{{messages}}"
+    response_format:
+      type: json_schema
+      json_schema:
+        name: DiscordSentiment
+        schema:
+          title: DiscordSentiment
+          type: object
+          properties:
+            sentiment:
+              type: string
+              enum: [Positive, Neutral, Negative]
+            confidence:
+              type: string
+              enum: [High, Medium, Low]
+            reasoning:
+              type: string
+          required: [sentiment, confidence, reasoning]
+
+  discord_trends:
+    platform: discord
+    description: "Extract trending discussion topics and overall sentiment from Discord messages."
+    temperature: 0.5
+    top_p: 0.85
+    messages:
+      - role: system
+        content: >
+          You are an expert community analyst. Your task is to extract the top 3 trending discussion topics from a list of Discord messages
+          and assess the overall sentiment of the conversation.
+          Each message is formatted as: [DATE TIME] USER: MESSAGE
+          Analyze:
+          1. The most discussed subjects, clustering similar subtopics.
+          2. The sentiment tone (overall emotion) expressed by the majority of users.
+          3. Consider the temporal context of messages and user interactions.
+          Be concise and avoid repetition. Group related messages together to form coherent topics.
+      - role: user
+        content: "{{messages}}"
+    response_format:
+      type: json_schema
+      json_schema:
+        name: DiscordTrends
+        schema:
+          title: DiscordTrends
+          type: object
+          properties:
+            topics:
+              type: array
+              items:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    title: Topic Title
+                  summary:
+                    type: string
+                    title: Topic Summary
+                required: [title, summary]
+              minItems: 3
+              maxItems: 3
+            sentiment:
+              type: string
+              enum: [Positive, Neutral, Negative]
+            confidence:
+              type: string
+              enum: [High, Medium, Low]
+          required: [topics, sentiment, confidence]
+
+  math_reasoning:
+    platform: math
+    description: "Solve math equations and return the answer in JSON format."
+    messages:
+      - role: system
+        content: "You are a helpful math tutor. Help the user solve equations and provide the answer in JSON format."
+      - role: user
+        content: "{{question}}"
+    response_format:
+      type: json_schema
+      json_schema:
+        name: MathReasoning
+        schema:
+          title: MathReasoning
+          type: object
+          properties:
+            final_answer:
+              title: Final Answer
+              type: string
+          required: [final_answer]

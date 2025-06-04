@@ -19,7 +19,6 @@ services:
     networks:
       - snowledge_network
   # Service pour le backend
-
   backend:
     build:
       context: .
@@ -40,6 +39,21 @@ services:
       - PGSQL_DB=snowledge
       - PGSQL_NAME=postgres
       - PGSQL_PWD=postgres
+      - MG_NAME=social_data
+      - MG_HOST=mongo
+      - MG_PORT=27017
+      - MG_USER=admin
+      - MG_PASSWORD=adminpass
+  analyzer:
+    build:
+      context: .
+      dockerfile: ./apps/analyzer/Dockerfile.dev
+    environment:
+      - MG_NAME=social_data
+      - MG_HOST=localhost
+      - MG_PORT=27017
+      - MG_USER=admin
+      - MG_PASSWORD=adminpass
   pgadmin:
     image: dpage/pgadmin4 
     restart: always 
@@ -52,6 +66,7 @@ services:
       - postgres
     networks:
       - snowledge_network
+
 networks:
   snowledge_network:
     external: true

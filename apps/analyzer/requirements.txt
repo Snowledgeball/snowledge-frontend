@@ -1,0 +1,9 @@
+fastapi
+nextcord
+pydantic
+pymongo
+python-dateutil
+python-dotenv
+PyYAML
+requests
+uvicorn

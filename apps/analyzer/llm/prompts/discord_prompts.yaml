@@ -1,0 +1,51 @@
+discord_prompts:
+  discord_trends:
+    description: >
+      Identify the top 3 discussion topics and overall sentiment from a batch of Discord messages.
+    template: |-
+      You are an expert community analyst. Your task is to extract the top 3 trending discussion topics from a list of Discord messages 
+      and assess the overall sentiment of the conversation.
+
+      Each message is formatted as: [DATE TIME] USER: MESSAGE
+
+      Analyze:
+      1. The most discussed subjects, clustering similar subtopics.
+      2. The sentiment tone (overall emotion) expressed by the majority of users.
+      3. Consider the temporal context of messages and user interactions.
+
+      Messages to analyze:
+      {{messages}}
+
+      Respond ONLY in this strict JSON format:
+      {
+        "topics": [
+          {"title": "<topic_1>", "summary": "<brief explanation of what users are saying>"},
+          {"title": "<topic_2>", "summary": "<brief explanation of what users are saying>"},
+          {"title": "<topic_3>", "summary": "<brief explanation of what users are saying>"}
+        ],
+        "sentiment": "<Positive|Neutral|Negative>",
+        "confidence": "<High|Medium|Low>"
+      }
+
+      Be concise and avoid repetition. Group related messages together to form coherent topics.
+
+  discord_sentiment:
+    description: >
+      Classify general sentiment across a batch of Discord messages.
+    template: |-
+      You are a sentiment analyst. Based on the tone, choice of words, and emotional cues in the following Discord messages, 
+      determine the OVERALL sentiment expressed by the community.
+
+      Each message is formatted as: [DATE TIME] USER: MESSAGE
+
+      Messages to analyze:
+      {{messages}}
+
+      Respond in JSON format:
+      {
+        "sentiment": "<Positive|Neutral|Negative>",
+        "confidence": "<High|Medium|Low>",
+        "reasoning": "<brief explanation of your analysis>"
+      }
+
+      Consider message context and user interactions. Ignore isolated emotional outliers unless they dominate the overall tone.
