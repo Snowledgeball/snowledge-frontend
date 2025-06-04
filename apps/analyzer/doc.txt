@@ -1,0 +1,42 @@
+standalone_version/
+  collectors/
+    discord_collector.py
+    youtube_collector.py
+    x_collector.py
+    base_collector.py
+  storage/
+    mongo_storage.py
+  processing/
+    prompt_builder.py
+    llm_client.py
+  api/
+    harvesting_api.py
+  scripts/
+    harvesting.py
+
+{
+  "discordId": "607857449315336214",
+  "serverId": 1328288256172888115,
+  "channels": [1328288256172888118,1370827580051165315,1370827620651896832],
+  "after": null,
+  "before": null
+}
+
+
+bot (Snowflake: 649369247843090442)
+1. test (Snowflake: 740165582506426369)
+2. parti1 (Snowflake: 740165756125446235)
+3. test-toto (Snowflake: 649369247843090445)
+4. général (Snowflake: 933408950156664844)
+5. accueil-conteur (Snowflake: 1228645854932369409)
+6. welcome (Snowflake: 1236980410815352903)
+7. adventure-of-alphonse (Snowflake: 1251298726564204634)
+0. Quitter
+
+Banger (Snowflake: 1374405352073990204)
+1. général (Snowflake: 1374405352585691138)
+
+Snowledge (Snowflake: 1328288256172888115)
+1. tech (Snowflake: 1328288256172888118)
+2. marketing (Snowflake: 1370827580051165315)
+3. business (Snowflake: 1370827620651896832)
