@@ -54,11 +54,6 @@ export class DiscordBotService implements OnModuleInit {
 			Events.InteractionCreate,
 			async (interaction: Interaction) => {
 				if (
-					interaction.isChatInputCommand() &&
-					interaction.commandName === 'setup'
-				) {
-					await this.handleSetup(interaction);
-				} else if (
 					interaction.isButton() &&
 					interaction.customId === 'proposer_idee'
 				) {
@@ -202,53 +197,6 @@ export class DiscordBotService implements OnModuleInit {
 	}
 
 	// === HANDLERS ===
-	// Gère la commande /setup : poste le message d'accueil dans #idees
-	private async handleSetup(interaction: any) {
-		const salonIdees = this.getTextChannelByName(
-			interaction.guild,
-			'idees',
-		);
-		if (!salonIdees) {
-			return interaction.reply({
-				content: "❌ Le salon #idees n'existe pas.",
-				ephemeral: true,
-			});
-		}
-		// Supprime tous les messages du salon (si possible)
-		let deleted = false;
-		try {
-			const fetched = await salonIdees.messages.fetch({ limit: 100 });
-			if (fetched.size > 0) {
-				await salonIdees.bulkDelete(fetched, true);
-				deleted = true;
-			}
-		} catch (e) {}
-		// Message explicatif + bouton pour proposer une idée
-		const explication =
-			'🎉 **Proposez vos idées !**\n\n' +
-			'Pour proposer une idée :\n' +
-			'1. Cliquez sur le bouton **📝 Proposer une idée** ci-dessous.\n' +
-			'2. Saisissez le sujet de votre idée.\n' +
-			'3. Sélectionnez le format souhaité (**Whitepaper** ou **Masterclass**).\n\n' +
-			'Votre proposition sera ensuite envoyée dans le salon <#votes-idees> pour que tout le monde puisse voter !';
-		const button = new ButtonBuilder()
-			.setCustomId('proposer_idee')
-			.setLabel('📝 Proposer une idée')
-			.setStyle(ButtonStyle.Primary);
-		const row = new ActionRowBuilder().addComponents(button);
-		const sent = await salonIdees.send({
-			content: explication,
-			components: [row],
-		});
-		try {
-			await sent.pin();
-		} catch (e) {}
-		await interaction.reply({
-			content: `✅ Message d'accueil posté dans #idees${deleted ? ' (anciens messages supprimés)' : ''}`,
-			ephemeral: true,
-		});
-	}
-
 	// Gère le clic sur le bouton "Proposer une idée" : ouvre un modal pour saisir le sujet
 	private async handleProposerIdee(interaction: any) {
 		const modal = new ModalBuilder()
@@ -423,6 +371,140 @@ export class DiscordBotService implements OnModuleInit {
 			}
 		} catch (e) {
 			this.logger.error('Error in MessageReactionAdd:', e);
+		}
+	}
+
+	/**
+	 * Crée les channels textuels s'ils n'existent pas déjà sur le serveur Discord
+	 */
+	async createChannelsIfNotExist(
+		guildId: string,
+		proposeName: string,
+		voteName: string,
+		resultName: string,
+	) {
+		try {
+			const guild = await this.client.guilds.fetch(guildId);
+			await guild.fetch(); // S'assure que les channels sont bien chargés
+			const created: string[] = [];
+			const existing: string[] = [];
+			const names = [proposeName, voteName, resultName];
+			let salonIdees = null;
+			for (const name of names) {
+				const found = guild.channels.cache.find(
+					(ch) =>
+						ch.type === ChannelType.GuildText && ch.name === name,
+				);
+				if (found) {
+					existing.push(name);
+					if (name === proposeName) salonIdees = found;
+				} else {
+					const createdChannel = await guild.channels.create({
+						name,
+						type: ChannelType.GuildText,
+					});
+					created.push(name);
+					if (name === proposeName) salonIdees = createdChannel;
+				}
+			}
+			// Effectue le setup dans le salon de propositions
+			if (salonIdees) {
+				try {
+					const fetched = await salonIdees.messages.fetch({
+						limit: 100,
+					});
+					if (fetched.size > 0)
+						await salonIdees.bulkDelete(fetched, true);
+				} catch (e) {}
+				const explication =
+					'🎉 **Proposez vos idées !**\n\n' +
+					'Pour proposer une idée :\n' +
+					'1. Cliquez sur le bouton **📝 Proposer une idée** ci-dessous.\n' +
+					'2. Saisissez le sujet de votre idée.\n' +
+					'3. Sélectionnez le format souhaité (**Whitepaper** ou **Masterclass**).\n\n' +
+					'Votre proposition sera ensuite envoyée dans le salon <#votes-idees> pour que tout le monde puisse voter !';
+				const button = new ButtonBuilder()
+					.setCustomId('proposer_idee')
+					.setLabel('📝 Proposer une idée')
+					.setStyle(ButtonStyle.Primary);
+				const row = new ActionRowBuilder().addComponents(button);
+				const sent = await salonIdees.send({
+					content: explication,
+					components: [row],
+				});
+				try {
+					await sent.pin();
+				} catch (e) {}
+			}
+			return { created, existing };
+		} catch (e) {
+			const err = e as Error;
+			this.logger.error('Erreur création channels Discord :', err);
+			return {
+				error: 'Erreur lors de la création des channels',
+				details: err.message,
+			};
+		}
+	}
+
+	/**
+	 * Renomme les channels textuels existants
+	 */
+	async renameChannels(
+		guildId: string,
+		oldNames: { propose: string; vote: string; result: string },
+		newNames: { propose: string; vote: string; result: string },
+	) {
+		try {
+			const guild = await this.client.guilds.fetch(guildId);
+			await guild.fetch();
+			const results = [];
+			const pairs = [
+				{ old: oldNames.propose, new: newNames.propose },
+				{ old: oldNames.vote, new: newNames.vote },
+				{ old: oldNames.result, new: newNames.result },
+			];
+			for (const { old, new: newName } of pairs) {
+				const channel = guild.channels.cache.find(
+					(ch) =>
+						ch.type === ChannelType.GuildText && ch.name === old,
+				);
+				if (channel && channel.isTextBased()) {
+					await channel.edit({ name: newName });
+					results.push({ old, new: newName, status: 'renamed' });
+				} else {
+					results.push({ old, new: newName, status: 'not_found' });
+				}
+			}
+			return { results };
+		} catch (e) {
+			const err = e as Error;
+			this.logger.error('Erreur renommage channels Discord :', err);
+			return {
+				error: 'Erreur lors du renommage des channels',
+				details: err.message,
+			};
+		}
+	}
+
+	/**
+	 * Liste les channels textuels du serveur Discord
+	 */
+	async listTextChannels(guildId: string) {
+		try {
+			const guild = await this.client.guilds.fetch(guildId);
+			await guild.fetch();
+			const channels = guild.channels.cache
+				.filter((ch) => ch.type === ChannelType.GuildText)
+				.map((ch) => ({ id: ch.id, name: ch.name }));
+			return { channels };
+		} catch (e) {
+			const err = e as Error;
+			this.logger.error('Erreur listing channels Discord :', err);
+			return {
+				error: 'Erreur lors du listing des channels',
+				details: err.message,
+			};
 		}
 	}
 }

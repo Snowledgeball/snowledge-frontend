@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
   }
   const protectedRoutes =
     /^\/(fr|en)\/(community|create-community|profile)(\/|$)/;
-  console.log("All cooies", request.cookies.getAll());
+  // console.log("All cooies", request.cookies.getAll());
   if (protectedRoutes.test(pathname)) {
     const accessToken = request.cookies.get("access-token")?.value;
     const refreshToken = request.cookies.get("refresh-token")?.value;
