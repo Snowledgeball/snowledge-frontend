@@ -15,6 +15,7 @@ import { CommunityModule } from './community/community.module';
 import { LearnerModule } from './learner/learner.module';
 import { ProposalModule } from './proposal/proposal.module';
 import { VoteModule } from './vote/vote.module';
+import { DiscordBotModule } from './discord-bot/discord-bot.module';
 @Module({
 	imports: [
 		ConfigModule.forRoot({
@@ -45,6 +46,7 @@ import { VoteModule } from './vote/vote.module';
 		LearnerModule,
 		ProposalModule,
 		VoteModule,
+		DiscordBotModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
