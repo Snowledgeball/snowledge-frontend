@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
 
 interface Props {
-  guildId: string;
+  communityId: number;
 }
 
 interface Channel {
@@ -15,6 +15,15 @@ interface ChannelNames {
   propose: string;
   vote: string;
   result: string;
+}
+
+interface DiscordServer {
+  id: number;
+  discordGuildId: string;
+  proposeChannelId?: string;
+  voteChannelId?: string;
+  resultChannelId?: string;
+  communityId: number;
 }
 
 // Utilitaire pour l'URL de l'API backend
@@ -69,7 +78,48 @@ function useRenameChannels() {
   });
 }
 
-export const ManageIntegrations: React.FC<Props> = ({ guildId }) => {
+// Hook pour récupérer le mapping DiscordServer d'une communauté
+function useDiscordServer(communityId: number) {
+  return useQuery({
+    queryKey: ["discord-server", communityId],
+    queryFn: async () => {
+      const res = await fetcher(
+        `${API_URL}/discord-server/by-community/${communityId}`
+      );
+      // On suppose qu'il n'y a qu'un mapping par communauté (sinon, prendre le premier)
+      return Array.isArray(res) ? res[0] : res;
+    },
+    enabled: !!communityId,
+  });
+}
+
+// Hook pour créer le mapping DiscordServer
+function useCreateDiscordServer() {
+  return useMutation({
+    mutationFn: async (params: Omit<DiscordServer, "id">) => {
+      return await fetcher(`${API_URL}/discord-server`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(params),
+      });
+    },
+  });
+}
+
+// Hook pour mettre à jour le mapping DiscordServer
+function useUpdateDiscordServer() {
+  return useMutation({
+    mutationFn: async (params: { id: number } & Partial<DiscordServer>) => {
+      return await fetcher(`${API_URL}/discord-server/${params.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(params),
+      });
+    },
+  });
+}
+
+export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
   // États pour le mode de sélection (select ou création)
   const [proposeMode, setProposeMode] = useState<"select" | "new">("select");
   const [voteMode, setVoteMode] = useState<"select" | "new">("select");
@@ -84,14 +134,23 @@ export const ManageIntegrations: React.FC<Props> = ({ guildId }) => {
   });
   const [oldChannels, setOldChannels] = useState<ChannelNames>(channels);
 
-  // Query pour lister les channels
+  // Query pour récupérer le mapping DiscordServer d'une communauté
+  const {
+    data: discordServerData,
+    isLoading: isLoadingDiscordServer,
+    isError: isErrorDiscordServer,
+    error: errorDiscordServer,
+    refetch: refetchDiscordServer,
+  } = useDiscordServer(communityId);
+
+  // Query pour lister les channels (on attend d'avoir le guildId du mapping DiscordServer)
   const {
     data: listData,
     isLoading: isLoadingList,
     isError: isErrorList,
     error: errorList,
     refetch: refetchList,
-  } = useListChannels(guildId);
+  } = useListChannels(discordServerData?.discordGuildId || "");
 
   // Mutation pour créer les channels
   const {
@@ -113,9 +172,46 @@ export const ManageIntegrations: React.FC<Props> = ({ guildId }) => {
     reset: resetRename,
   } = useRenameChannels();
 
+  // Mutation pour créer le mapping DiscordServer
+  const {
+    mutate: createDiscordServer,
+    isPending: isLoadingCreateDiscordServer,
+    isError: isErrorCreateDiscordServer,
+    error: errorCreateDiscordServer,
+  } = useCreateDiscordServer();
+
+  // Mutation pour mettre à jour le mapping DiscordServer
+  const {
+    mutate: updateDiscordServer,
+    isPending: isLoadingUpdateDiscordServer,
+    isError: isErrorUpdateDiscordServer,
+    error: errorUpdateDiscordServer,
+  } = useUpdateDiscordServer();
+
   // Met à jour les champs à partir des données récupérées
   useEffect(() => {
     if (
+      listData &&
+      listData.channels &&
+      discordServerData &&
+      (discordServerData.proposeChannelId ||
+        discordServerData.voteChannelId ||
+        discordServerData.resultChannelId)
+    ) {
+      // On pré-sélectionne les channels par leur ID stocké en base
+      const getName = (id?: string) =>
+        listData.channels.find((ch: Channel) => ch.id === id)?.name || "";
+      setChannels({
+        propose: getName(discordServerData.proposeChannelId),
+        vote: getName(discordServerData.voteChannelId),
+        result: getName(discordServerData.resultChannelId),
+      });
+      setOldChannels({
+        propose: getName(discordServerData.proposeChannelId),
+        vote: getName(discordServerData.voteChannelId),
+        result: getName(discordServerData.resultChannelId),
+      });
+    } else if (
       listData &&
       listData.channels &&
       !channels.propose &&
@@ -133,28 +229,39 @@ export const ManageIntegrations: React.FC<Props> = ({ guildId }) => {
         result: listData.channels[2]?.name || "",
       });
     }
-    // Sinon, on ne touche pas à la sélection utilisateur !
     // eslint-disable-next-line
-  }, [listData]);
+  }, [listData, discordServerData]);
 
   // Création des channels si besoin
   const handleCreateChannels = () => {
     resetCreate();
-    // On prend le nom saisi si mode 'new', sinon la valeur du select
     const proposeName = proposeMode === "new" ? newPropose : channels.propose;
     const voteName = voteMode === "new" ? newVote : channels.vote;
     const resultName = resultMode === "new" ? newResult : channels.result;
+    if (!discordServerData?.discordGuildId) return;
     createChannels(
       {
-        guildId,
+        guildId: discordServerData.discordGuildId,
         proposeName,
         voteName,
         resultName,
       },
       {
-        onSuccess: () => {
-          refetchList();
-          // Après création, repasse en mode select et sélectionne le nouveau salon
+        onSuccess: async () => {
+          const newList = await refetchList();
+          const channelsList = newList.data?.channels || [];
+          const getId = (name: string) =>
+            channelsList.find((ch: Channel) => ch.name === name)?.id ||
+            undefined;
+          console.log("getId(proposeName)", getId(proposeName));
+          console.log("getId(voteName)", getId(voteName));
+          console.log("getId(resultName)", getId(resultName));
+          updateDiscordServer({
+            id: discordServerData.id,
+            proposeChannelId: getId(proposeName),
+            voteChannelId: getId(voteName),
+            resultChannelId: getId(resultName),
+          });
           if (proposeMode === "new") {
             setChannels((c) => ({ ...c, propose: proposeName }));
             setProposeMode("select");
@@ -178,16 +285,29 @@ export const ManageIntegrations: React.FC<Props> = ({ guildId }) => {
   // Renommage des channels
   const handleRenameChannels = () => {
     resetRename();
+    if (!discordServerData?.discordGuildId) return;
     renameChannels(
       {
-        guildId,
+        guildId: discordServerData.discordGuildId,
         oldNames: oldChannels,
         newNames: channels,
       },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           setOldChannels({ ...channels });
-          refetchList();
+          await refetchList();
+          // Synchronisation du mapping DiscordServer en base
+          if (listData?.channels) {
+            const getId = (name: string) =>
+              listData.channels.find((ch: Channel) => ch.name === name)?.id ||
+              undefined;
+            updateDiscordServer({
+              id: discordServerData.id,
+              proposeChannelId: getId(channels.propose),
+              voteChannelId: getId(channels.vote),
+              resultChannelId: getId(channels.result),
+            });
+          }
         },
       }
     );
@@ -207,7 +327,13 @@ export const ManageIntegrations: React.FC<Props> = ({ guildId }) => {
     }
   };
 
-  const loading = isLoadingList || isLoadingCreate || isLoadingRename;
+  const loading =
+    isLoadingList ||
+    isLoadingCreate ||
+    isLoadingRename ||
+    isLoadingDiscordServer ||
+    isLoadingCreateDiscordServer ||
+    isLoadingUpdateDiscordServer;
 
   return (
     <div className="max-w-xl mx-auto p-4 border rounded bg-white shadow">
@@ -345,6 +471,33 @@ export const ManageIntegrations: React.FC<Props> = ({ guildId }) => {
       {(createData?.error || renameData?.error) && (
         <div className="mt-4 text-red-700">
           {createData?.error || renameData?.error}
+        </div>
+      )}
+      {isErrorDiscordServer && (
+        <div className="mt-4 text-red-700">
+          {(errorDiscordServer as Error)?.message ||
+            "Erreur lors de la récupération du mapping DiscordServer"}
+        </div>
+      )}
+      {isErrorCreateDiscordServer && (
+        <div className="mt-4 text-red-700">
+          {(errorCreateDiscordServer as Error)?.message ||
+            "Erreur lors de la création du mapping DiscordServer"}
+        </div>
+      )}
+      {isErrorUpdateDiscordServer && (
+        <div className="mt-4 text-red-700">
+          {(errorUpdateDiscordServer as Error)?.message ||
+            "Erreur lors de la mise à jour du mapping DiscordServer"}
+        </div>
+      )}
+      {(discordServerData?.error ||
+        errorCreateDiscordServer ||
+        errorUpdateDiscordServer) && (
+        <div className="mt-4 text-red-700">
+          {discordServerData?.error ||
+            errorCreateDiscordServer ||
+            errorUpdateDiscordServer}
         </div>
       )}
     </div>

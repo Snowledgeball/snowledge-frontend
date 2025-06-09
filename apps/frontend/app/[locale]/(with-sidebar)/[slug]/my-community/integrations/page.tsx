@@ -16,7 +16,7 @@ export default function Page() {
   return (
     <div>
       <div>Intégrations pour la communauté {activeCommunity?.name}</div>
-      <ManageIntegrations guildId={activeCommunity?.discordGuildId as string} />
+      <ManageIntegrations communityId={activeCommunity?.id as number} />
     </div>
   );
 }

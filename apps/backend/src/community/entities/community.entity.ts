@@ -10,6 +10,7 @@ import {
 import { User } from '../../user/entities/user.entity';
 import { Learner } from '../../learner/entities/learner/learner';
 import { Proposal } from '../../proposal/entities/proposal.entity';
+import { DiscordServer } from '../../discord-server/entities/discord-server-entity';
 
 @Entity()
 export class Community {
@@ -55,8 +56,8 @@ export class Community {
 	@OneToMany(() => Proposal, (proposal) => proposal.community)
 	proposals: Proposal[];
 
-	@Column({ type: 'varchar', length: 32, nullable: true })
-	discordGuildId?: string;
+	@OneToMany(() => DiscordServer, (discordServer) => discordServer.community)
+	discordServers: DiscordServer[];
 
 	@CreateDateColumn({
 		type: 'timestamp',
