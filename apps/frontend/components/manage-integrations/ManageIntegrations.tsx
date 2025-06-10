@@ -7,6 +7,15 @@ import { useUpdateDiscordServer } from "./hooks/useUpdateDiscordServer";
 import { Channel, ChannelNames } from "./types";
 import { ChannelSelect } from "./components/ChannelSelect";
 import { Feedback } from "./components/Feedback";
+// shadcn/ui
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@repo/ui/components/card";
+import { Button } from "@repo/ui/components/button";
 
 interface Props {
   communityId: number;
@@ -216,9 +225,11 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     isLoadingUpdateDiscordServer;
 
   return (
-    <div className="max-w-xl mx-auto p-4 border rounded bg-white shadow">
-      <h2 className="text-lg font-bold mb-4">Gestion des channels Discord</h2>
-      <div className="space-y-3">
+    <Card className="max-w-xl mx-auto mt-8">
+      <CardHeader>
+        <CardTitle>Gestion des channels Discord</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
         <ChannelSelect
           label="Channel propositions"
           mode={proposeMode}
@@ -252,39 +263,43 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
           setNewValue={setNewResult}
           loading={loading}
         />
-      </div>
-      <div className="flex gap-2 mt-4">
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
-          onClick={handleCreateChannels}
-          disabled={loading}
-        >
-          Créer les channels
-        </button>
-        <button
-          className="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50"
-          onClick={handleRenameChannels}
-          disabled={loading}
-        >
-          Renommer les channels
-        </button>
-      </div>
-      <Feedback
-        isErrorList={isErrorList}
-        errorList={errorList}
-        isErrorCreate={isErrorCreate}
-        errorCreate={errorCreate}
-        isErrorRename={isErrorRename}
-        errorRename={errorRename}
-        createData={createData}
-        renameData={renameData}
-        isErrorDiscordServer={isErrorDiscordServer}
-        errorDiscordServer={errorDiscordServer}
-        isErrorUpdateDiscordServer={isErrorUpdateDiscordServer}
-        errorUpdateDiscordServer={errorUpdateDiscordServer}
-        discordServerData={discordServerData}
-      />
-    </div>
+      </CardContent>
+      <CardFooter className="flex flex-col gap-4">
+        <div className="flex gap-2 w-full">
+          <Button
+            className="flex-1"
+            onClick={handleCreateChannels}
+            disabled={loading}
+            variant="default"
+          >
+            Créer les channels
+          </Button>
+          <Button
+            className="flex-1"
+            onClick={handleRenameChannels}
+            disabled={loading}
+            variant="secondary"
+          >
+            Renommer les channels
+          </Button>
+        </div>
+        <Feedback
+          isErrorList={isErrorList}
+          errorList={errorList}
+          isErrorCreate={isErrorCreate}
+          errorCreate={errorCreate}
+          isErrorRename={isErrorRename}
+          errorRename={errorRename}
+          createData={createData}
+          renameData={renameData}
+          isErrorDiscordServer={isErrorDiscordServer}
+          errorDiscordServer={errorDiscordServer}
+          isErrorUpdateDiscordServer={isErrorUpdateDiscordServer}
+          errorUpdateDiscordServer={errorUpdateDiscordServer}
+          discordServerData={discordServerData}
+        />
+      </CardFooter>
+    </Card>
   );
 };
 

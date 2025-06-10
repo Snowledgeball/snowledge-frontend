@@ -68,11 +68,6 @@ export const Feedback: React.FC<FeedbackProps> = (props) => (
           "Erreur lors de la mise à jour du mapping DiscordServer"}
       </div>
     )}
-    {props.discordServerData && !props.discordServerData.error && (
-      <div className="mt-4 text-green-700">
-        Mapping DiscordServer: {props.discordServerData.discordGuildId}
-      </div>
-    )}
     {(props.discordServerData?.error || props.errorUpdateDiscordServer) && (
       <div className="mt-4 text-red-700">
         {props.discordServerData?.error || props.errorUpdateDiscordServer}
