@@ -1,122 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { fetcher } from "@/lib/fetcher";
+import { useListChannels } from "./hooks/useListChannels";
+import { useCreateChannels } from "./hooks/useCreateChannels";
+import { useRenameChannels } from "./hooks/useRenameChannels";
+import { useDiscordServer } from "./hooks/useDiscordServer";
+import { useUpdateDiscordServer } from "./hooks/useUpdateDiscordServer";
+import { Channel, ChannelNames } from "./types";
+import { ChannelSelect } from "./components/ChannelSelect";
+import { Feedback } from "./components/Feedback";
 
 interface Props {
   communityId: number;
-}
-
-interface Channel {
-  id: string;
-  name: string;
-}
-
-interface ChannelNames {
-  propose: string;
-  vote: string;
-  result: string;
-}
-
-interface DiscordServer {
-  id: number;
-  discordGuildId: string;
-  proposeChannelId?: string;
-  voteChannelId?: string;
-  resultChannelId?: string;
-  communityId: number;
-}
-
-// Utilitaire pour l'URL de l'API backend
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-
-// Hook pour lister les channels Discord
-function useListChannels(guildId: string) {
-  return useQuery({
-    queryKey: ["discord-channels", guildId],
-    queryFn: async () => {
-      const res = await fetcher(
-        `${API_URL}/discord-bot/list-channels?guildId=${encodeURIComponent(guildId)}`
-      );
-      return res;
-    },
-    enabled: !!guildId,
-  });
-}
-
-// Hook pour créer les channels
-function useCreateChannels() {
-  return useMutation({
-    mutationFn: async (params: {
-      guildId: string;
-      proposeName: string;
-      voteName: string;
-      resultName: string;
-    }) => {
-      return await fetcher(`${API_URL}/discord-bot/create-channels`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
-      });
-    },
-  });
-}
-
-// Hook pour renommer les channels
-function useRenameChannels() {
-  return useMutation({
-    mutationFn: async (params: {
-      guildId: string;
-      oldNames: ChannelNames;
-      newNames: ChannelNames;
-    }) => {
-      return await fetcher(`${API_URL}/discord-bot/rename-channels`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
-      });
-    },
-  });
-}
-
-// Hook pour récupérer le mapping DiscordServer d'une communauté
-function useDiscordServer(communityId: number) {
-  return useQuery({
-    queryKey: ["discord-server", communityId],
-    queryFn: async () => {
-      const res = await fetcher(
-        `${API_URL}/discord-server/by-community/${communityId}`
-      );
-      // On suppose qu'il n'y a qu'un mapping par communauté (sinon, prendre le premier)
-      return Array.isArray(res) ? res[0] : res;
-    },
-    enabled: !!communityId,
-  });
-}
-
-// Hook pour créer le mapping DiscordServer
-function useCreateDiscordServer() {
-  return useMutation({
-    mutationFn: async (params: Omit<DiscordServer, "id">) => {
-      return await fetcher(`${API_URL}/discord-server`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
-      });
-    },
-  });
-}
-
-// Hook pour mettre à jour le mapping DiscordServer
-function useUpdateDiscordServer() {
-  return useMutation({
-    mutationFn: async (params: { id: number } & Partial<DiscordServer>) => {
-      return await fetcher(`${API_URL}/discord-server/${params.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
-      });
-    },
-  });
 }
 
 export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
@@ -140,7 +33,6 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     isLoading: isLoadingDiscordServer,
     isError: isErrorDiscordServer,
     error: errorDiscordServer,
-    refetch: refetchDiscordServer,
   } = useDiscordServer(communityId);
 
   // Query pour lister les channels (on attend d'avoir le guildId du mapping DiscordServer)
@@ -171,14 +63,6 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     data: renameData,
     reset: resetRename,
   } = useRenameChannels();
-
-  // Mutation pour créer le mapping DiscordServer
-  const {
-    mutate: createDiscordServer,
-    isPending: isLoadingCreateDiscordServer,
-    isError: isErrorCreateDiscordServer,
-    error: errorCreateDiscordServer,
-  } = useCreateDiscordServer();
 
   // Mutation pour mettre à jour le mapping DiscordServer
   const {
@@ -253,9 +137,6 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
           const getId = (name: string) =>
             channelsList.find((ch: Channel) => ch.name === name)?.id ||
             undefined;
-          console.log("getId(proposeName)", getId(proposeName));
-          console.log("getId(voteName)", getId(voteName));
-          console.log("getId(resultName)", getId(resultName));
           updateDiscordServer({
             id: discordServerData.id,
             proposeChannelId: getId(proposeName),
@@ -332,91 +213,45 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     isLoadingCreate ||
     isLoadingRename ||
     isLoadingDiscordServer ||
-    isLoadingCreateDiscordServer ||
     isLoadingUpdateDiscordServer;
 
   return (
     <div className="max-w-xl mx-auto p-4 border rounded bg-white shadow">
       <h2 className="text-lg font-bold mb-4">Gestion des channels Discord</h2>
       <div className="space-y-3">
-        {/* Propose */}
-        <div>
-          <label className="block font-medium">Channel propositions</label>
-          <select
-            className="border rounded px-2 py-1 w-full"
-            value={proposeMode === "new" ? "__new__" : channels.propose}
-            onChange={(e) => handleSelect("propose", e.target.value)}
-            disabled={loading}
-          >
-            {listData?.channels.map((ch: Channel) => (
-              <option key={ch.id} value={ch.name}>
-                {ch.name}
-              </option>
-            ))}
-            <option value="__new__">Créer un nouveau salon...</option>
-          </select>
-          {proposeMode === "new" && (
-            <input
-              className="border rounded px-2 py-1 w-full mt-2"
-              placeholder="Nom du nouveau salon"
-              value={newPropose}
-              onChange={(e) => setNewPropose(e.target.value)}
-              disabled={loading}
-            />
-          )}
-        </div>
-        {/* Vote */}
-        <div>
-          <label className="block font-medium">Channel votes</label>
-          <select
-            className="border rounded px-2 py-1 w-full"
-            value={voteMode === "new" ? "__new__" : channels.vote}
-            onChange={(e) => handleSelect("vote", e.target.value)}
-            disabled={loading}
-          >
-            {listData?.channels.map((ch: Channel) => (
-              <option key={ch.id} value={ch.name}>
-                {ch.name}
-              </option>
-            ))}
-            <option value="__new__">Créer un nouveau salon...</option>
-          </select>
-          {voteMode === "new" && (
-            <input
-              className="border rounded px-2 py-1 w-full mt-2"
-              placeholder="Nom du nouveau salon"
-              value={newVote}
-              onChange={(e) => setNewVote(e.target.value)}
-              disabled={loading}
-            />
-          )}
-        </div>
-        {/* Result */}
-        <div>
-          <label className="block font-medium">Channel résultats</label>
-          <select
-            className="border rounded px-2 py-1 w-full"
-            value={resultMode === "new" ? "__new__" : channels.result}
-            onChange={(e) => handleSelect("result", e.target.value)}
-            disabled={loading}
-          >
-            {listData?.channels.map((ch: Channel) => (
-              <option key={ch.id} value={ch.name}>
-                {ch.name}
-              </option>
-            ))}
-            <option value="__new__">Créer un nouveau salon...</option>
-          </select>
-          {resultMode === "new" && (
-            <input
-              className="border rounded px-2 py-1 w-full mt-2"
-              placeholder="Nom du nouveau salon"
-              value={newResult}
-              onChange={(e) => setNewResult(e.target.value)}
-              disabled={loading}
-            />
-          )}
-        </div>
+        <ChannelSelect
+          label="Channel propositions"
+          mode={proposeMode}
+          value={channels.propose}
+          onModeChange={setProposeMode}
+          onValueChange={(v) => setChannels((c) => ({ ...c, propose: v }))}
+          channels={listData?.channels || []}
+          newValue={newPropose}
+          setNewValue={setNewPropose}
+          loading={loading}
+        />
+        <ChannelSelect
+          label="Channel votes"
+          mode={voteMode}
+          value={channels.vote}
+          onModeChange={setVoteMode}
+          onValueChange={(v) => setChannels((c) => ({ ...c, vote: v }))}
+          channels={listData?.channels || []}
+          newValue={newVote}
+          setNewValue={setNewVote}
+          loading={loading}
+        />
+        <ChannelSelect
+          label="Channel résultats"
+          mode={resultMode}
+          value={channels.result}
+          onModeChange={setResultMode}
+          onValueChange={(v) => setChannels((c) => ({ ...c, result: v }))}
+          channels={listData?.channels || []}
+          newValue={newResult}
+          setNewValue={setNewResult}
+          loading={loading}
+        />
       </div>
       <div className="flex gap-2 mt-4">
         <button
@@ -434,72 +269,21 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
           Renommer les channels
         </button>
       </div>
-      {/* Feedback utilisateur */}
-      {isErrorList && (
-        <div className="mt-4 text-red-700">
-          {(errorList as Error)?.message ||
-            "Erreur lors du chargement des channels Discord"}
-        </div>
-      )}
-      {isErrorCreate && (
-        <div className="mt-4 text-red-700">
-          {(errorCreate as Error)?.message ||
-            "Erreur lors de la création des channels Discord"}
-        </div>
-      )}
-      {isErrorRename && (
-        <div className="mt-4 text-red-700">
-          {(errorRename as Error)?.message ||
-            "Erreur lors du renommage des channels Discord"}
-        </div>
-      )}
-      {createData && !createData.error && (
-        <div className="mt-4 text-green-700">
-          Channels créés: {createData.created?.join(", ") || "aucun"}. Déjà
-          existants: {createData.existing?.join(", ") || "aucun"}
-        </div>
-      )}
-      {renameData && !renameData.error && (
-        <div className="mt-4 text-green-700">
-          {renameData.results
-            ? renameData.results
-                .map((r: any) => `${r.old} → ${r.new} : ${r.status}`)
-                .join(" | ")
-            : "Renommage effectué"}
-        </div>
-      )}
-      {(createData?.error || renameData?.error) && (
-        <div className="mt-4 text-red-700">
-          {createData?.error || renameData?.error}
-        </div>
-      )}
-      {isErrorDiscordServer && (
-        <div className="mt-4 text-red-700">
-          {(errorDiscordServer as Error)?.message ||
-            "Erreur lors de la récupération du mapping DiscordServer"}
-        </div>
-      )}
-      {isErrorCreateDiscordServer && (
-        <div className="mt-4 text-red-700">
-          {(errorCreateDiscordServer as Error)?.message ||
-            "Erreur lors de la création du mapping DiscordServer"}
-        </div>
-      )}
-      {isErrorUpdateDiscordServer && (
-        <div className="mt-4 text-red-700">
-          {(errorUpdateDiscordServer as Error)?.message ||
-            "Erreur lors de la mise à jour du mapping DiscordServer"}
-        </div>
-      )}
-      {(discordServerData?.error ||
-        errorCreateDiscordServer ||
-        errorUpdateDiscordServer) && (
-        <div className="mt-4 text-red-700">
-          {discordServerData?.error ||
-            errorCreateDiscordServer ||
-            errorUpdateDiscordServer}
-        </div>
-      )}
+      <Feedback
+        isErrorList={isErrorList}
+        errorList={errorList}
+        isErrorCreate={isErrorCreate}
+        errorCreate={errorCreate}
+        isErrorRename={isErrorRename}
+        errorRename={errorRename}
+        createData={createData}
+        renameData={renameData}
+        isErrorDiscordServer={isErrorDiscordServer}
+        errorDiscordServer={errorDiscordServer}
+        isErrorUpdateDiscordServer={isErrorUpdateDiscordServer}
+        errorUpdateDiscordServer={errorUpdateDiscordServer}
+        discordServerData={discordServerData}
+      />
     </div>
   );
 };
