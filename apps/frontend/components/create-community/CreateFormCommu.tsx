@@ -101,7 +101,9 @@ export default function CreateCommunity() {
   });
 
   useEffect(() => {
-    fetchDataUser();
+    if(!user){
+      fetchDataUser();
+    }
   }, []);
 
   // Effet qui attend la fermeture de la modal

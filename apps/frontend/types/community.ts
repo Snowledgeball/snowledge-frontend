@@ -10,6 +10,7 @@ export type Community = {
   yourPercentage: number;
   communityPercentage: number;
   codeOfConduct: string;
+  guildId: string;
   createdAt: Date;
   updatedAt: Date;
 };

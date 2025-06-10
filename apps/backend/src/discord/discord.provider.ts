@@ -5,6 +5,7 @@ import { UserService } from 'src/user/user.service';
 import discordConfig from 'src/config/discord.config';
 import { ConfigType } from '@nestjs/config';
 import { CommunityService } from 'src/community/community.service';
+import { Community } from 'src/community/entities/community.entity';
 
 @Injectable()
 export class DiscordProvider {
@@ -19,6 +20,7 @@ export class DiscordProvider {
 
     async linkDiscord(code: string, user: User, communityId?: number) {		
 		let data;
+		let community: Community;
 		console.log(communityId)
 		try {
 			const response = await fetch('https://discord.com/api/oauth2/token', {
@@ -65,7 +67,8 @@ export class DiscordProvider {
 			if(userInfo){
 				if(communityId) {
 					try {
-						await this.communityService.updateDiscordGuildId(communityId, data.guild.id);
+						community = await this.communityService.updateDiscordGuildId(communityId, data.guild.id);
+						
 					} catch (error) {
 						this.logger.error(error)	
 					}
@@ -76,6 +79,6 @@ export class DiscordProvider {
 		} else {
 			this.logger.error('Error client information')
 		}
-	
+		return community;
     }
 }

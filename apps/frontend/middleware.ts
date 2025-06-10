@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`${newUrl}`, request.url));
   }
   const protectedRoutes =
-    /^\/(fr|en)\/(community|create-community|profile)(\/|$)/;
+    /^\/(fr|en)\/(community|create-community|dev-trooper|profile)(\/|$)/;
   console.log("All cooies", request.cookies.getAll());
   if (protectedRoutes.test(pathname)) {
     const accessToken = request.cookies.get("access-token")?.value;
@@ -52,7 +52,7 @@ export async function middleware(request: NextRequest) {
 
     if (!accessToken && refreshToken) {
       try {
-        const response = await fetch("http://backend:4000/auth/refresh-token", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/refresh-token`, {
           method: "POST",
           credentials: "include",
           headers: {

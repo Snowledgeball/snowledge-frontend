@@ -25,8 +25,12 @@ export class DiscordController {
 	async getVerifyToken(@Res() res: Response, @User() user: UserEntity, @Query('code') code: string, @Query('state') state?: string) {
 		const { communityId } = JSON.parse(state);
 		if(code){
-			await this.discordProvider.linkDiscord(code, user, communityId);
-			res.redirect('http://localhost:3000/profile?verify=discord');
+			const response = await this.discordProvider.linkDiscord(code, user, communityId);
+			if(response){
+				res.redirect(`http://localhost:3000/${response.slug}?verify=discord`);
+			} else {
+				res.redirect(`http://localhost:3000/profile?verify=discord`);
+			}
 		} else {
 			res.redirect('http://localhost:3000/profile');
 		}

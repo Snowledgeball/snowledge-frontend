@@ -20,6 +20,7 @@ import {
 } from "@repo/ui/components/sidebar";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export function SidebarNavMain({
   items,
@@ -69,9 +70,9 @@ export function SidebarNavMain({
                     }}
                   >
                     {item.icon && <item.icon />}
-                    <a href={item.url}>
+                    <Link href={item.url || ''}>
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                     {item.items && (
                       <ChevronRight className="cursor-pointer ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     )}
@@ -83,9 +84,9 @@ export function SidebarNavMain({
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
-                            <a href={subItem.url}>
+                            <Link href={subItem.url}>
                               <span>{subItem.title}</span>
-                            </a>
+                            </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       ))}

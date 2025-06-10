@@ -1,6 +1,7 @@
 "use client";
 
 import { FormDataSignUp } from "@/shared/interfaces/ISignUp";
+import { usePathname, useRouter } from "next/navigation";
 import React, {
   createContext,
   useContext,
@@ -24,8 +25,12 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+    const pathname = usePathname();
+  const router = useRouter();
+  
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+
   const isJwtValid = (token: string) => {
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
@@ -34,12 +39,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return false;
     }
   };
+
   const refreshAccessToken = useCallback(async () => {
-    if (!accessToken) {
-      return null;
-    }
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/refresh-token`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -47,14 +50,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         },
         credentials: "include",
       });
-      if (!res.ok) {
+      if (!res.ok && !pathname.split('/').includes('sign-in')) {
         toast.error("Votre accès a expiré, veuillez vous reconnecter.", {
           position: "top-center",
         });
 
-        if (typeof window !== "undefined") {
+        if (typeof window !== "undefined" ) {
           setTimeout(() => {
-            window.location.href = "/sign-in";
+            router.push("/sign-in");
           }, 4000);
         }
       }
@@ -76,15 +79,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!token || !isJwtValid(token)) {
         token = await refreshAccessToken();
         if (!token) {
-          toast.error("Votre session a expiré, veuillez vous reconnecter.", {
-            position: "top-center",
-          });
-        }
-
-        if (typeof window !== "undefined") {
-          setTimeout(() => {
-            window.location.href = "/sign-in";
-          }, 4000);
+          if(!pathname.split('/').includes('sign-in')) {
+              toast.error("Votre session a expiré, veuillez vous reconnecter.", {
+                position: "top-center",
+              });
+            
+    
+            if (typeof window !== "undefined") {
+              setTimeout(() => {
+                router.push("/sign-in");
+              }, 4000);
+            }
+          }
         }
       }
 
@@ -104,9 +110,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     [accessToken, refreshAccessToken]
   );
 
-  useEffect(() => {
-    refreshAccessToken(); // Récupère le token au premier chargement
-  }, [refreshAccessToken]);
+  // useEffect(() => {
+  //   refreshAccessToken(); // Récupère le token au premier chargement
+  // }, [refreshAccessToken]);
 
   const fetchDataUser = async () => {
     try {
@@ -182,6 +188,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     return null;
   };
+
+   useEffect(() => {
+    const cookie = document.cookie.match(/(?:^| )access-token=([^;]*)/);
+    const token = cookie ? decodeURIComponent(cookie[1]) : null;
+
+    if (token) {
+      setAccessToken(token);
+    } else {
+      refreshAccessToken();
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{

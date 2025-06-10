@@ -50,10 +50,10 @@ export function SidebarCreatorNav({
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
+              <Link href={item.url}>
                 <item.icon />
                 <span>{item.title}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
             {/* Sous-items (admin) */}
             {item.items && item.items.length > 0 && (
@@ -61,9 +61,9 @@ export function SidebarCreatorNav({
                 {item.items.map((sub) => (
                   <li key={sub.title}>
                     <SidebarMenuButton asChild size="sm">
-                      <a href={sub.url} className="pl-2">
+                      <Link href={sub.url} className="pl-2">
                         <span>{sub.title}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </li>
                 ))}

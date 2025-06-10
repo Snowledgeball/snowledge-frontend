@@ -93,21 +93,25 @@ export class AuthProvider {
 	}
 	}
 	async refreshToken(refreshToken: string): Promise<{ access_token: string }> {
-		const payload = this.jwtService.verify(refreshToken, { secret: process.env.JWT_REFRESH_SECRET, });
+		try {
+			const payload = this.jwtService.verify(refreshToken, { secret: process.env.JWT_REFRESH_SECRET, });
 
-		const user = await this.userService.findOneById(payload.userId);
-		const isValid = await bcrypt.compare(refreshToken, user.refreshToken);
+			const user = await this.userService.findOneById(payload.userId);
+			const isValid = await bcrypt.compare(refreshToken, user.refreshToken);
 
-		if (!user || !isValid) {
-			throw new UnauthorizedException('Invalid refresh token');
+			if (!user || !isValid) {
+				throw new UnauthorizedException('Invalid refresh token');
+			}
+
+			const newAccessToken = this.jwtService.sign(
+				{ sub: user.id, email: user.email },
+				{ expiresIn: '15m' },
+			);
+
+			return { access_token: newAccessToken };
+		} catch (error) {
+			this.logger.error(error)
 		}
-
-		const newAccessToken = this.jwtService.sign(
-			{ sub: user.id, email: user.email },
-			{ expiresIn: '15m' },
-		);
-
-		return { access_token: newAccessToken };
 	}
 	async verifyTokenEmail(token: string) {
 		// TODO réécrire pour passer par le providerEmail plutot que directement appelé le helper

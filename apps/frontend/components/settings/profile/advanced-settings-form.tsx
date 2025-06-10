@@ -12,7 +12,15 @@ export default function AdvancedSettingsForm() {
     const verify = useSearchParams().get("verify");
     const { user, fetchDataUser } = useAuth();
     const state = encodeURIComponent(JSON.stringify({ communityId: localStorage.getItem("activeCommunityId") }));
-    const routeDiscored = `https://discord.com/oauth2/authorize?client_id=1377545849126518784&permissions=66560&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Fdiscord%2Flink&integration_type=0&scope=bot+identify+guilds+email&state=${state}`;
+    const routeDiscored = `
+        https://discord.com/oauth2/authorize
+        ?client_id=1377545849126518784
+        &permissions=66560
+        &response_type=code
+        &redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Fdiscord%2Flink
+        &integration_type=0
+        &scope=bot+identify+guilds+email
+        &state=${state}`;
     const discordAuth = () => {
         router.push(routeDiscored);
     }

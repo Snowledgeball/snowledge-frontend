@@ -8,7 +8,7 @@ import "../globals.css";
 import { Metadata } from "next";
 import { AuthProvider } from "@/contexts/auth-context";
 import { ReactQueryClientProvider } from "@/utils/react-query-provider";
-import { CommunityProvider } from "@/components/sidebar/community-context";
+import { CommunityProvider } from "@/contexts/community-context";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {

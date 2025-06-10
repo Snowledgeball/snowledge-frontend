@@ -78,7 +78,11 @@ export class CommunityService {
 		});
 	}
 
-	async updateDiscordGuildId(id: number, guildId: string) {
-		return this.communityRepository.update(id, { guildId });
+	async updateDiscordGuildId(id: number, guildId: string): Promise<Community> {
+		await this.communityRepository.update(id, { guildId });
+
+		return this.communityRepository.findOne({
+			where: { id },
+		});
 	}
 }

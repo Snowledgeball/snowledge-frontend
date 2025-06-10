@@ -42,7 +42,7 @@ export default function NavUser({
   const { isMobile } = useSidebar();
   const signOut = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/session`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/session`, {
         method: "DELETE",
         credentials: "include",
       });
