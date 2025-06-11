@@ -340,7 +340,9 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
             }
             onClick={() => handleCreateMissingChannels(names)}
           >
-            Créer les salons manquants
+            {Object.values(missing).filter(Boolean).length > 1
+              ? "Créer les salons manquants"
+              : "Créer le salon manquant"}
           </Button>
         )
       )}
