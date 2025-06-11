@@ -379,17 +379,22 @@ export class DiscordBotService implements OnModuleInit {
 	 */
 	async createChannelsIfNotExist(
 		guildId: string,
-		proposeName: string,
-		voteName: string,
-		resultName: string,
+		proposeName?: string,
+		voteName?: string,
+		resultName?: string,
 	) {
 		try {
 			const guild = await this.client.guilds.fetch(guildId);
 			await guild.fetch(); // S'assure que les channels sont bien chargés
 			const created: string[] = [];
 			const existing: string[] = [];
-			const names = [proposeName, voteName, resultName];
+
+			const names = [proposeName, voteName, resultName].filter(Boolean);
 			let salonIdees = null;
+			// Si aucun nom n'est fourni, on ne crée pas de channels
+			if (names.length === 0) {
+				return { created, existing };
+			}
 			for (const name of names) {
 				const found = guild.channels.cache.find(
 					(ch) =>
@@ -397,7 +402,6 @@ export class DiscordBotService implements OnModuleInit {
 				);
 				if (found) {
 					existing.push(name);
-					if (name === proposeName) salonIdees = found;
 				} else {
 					const createdChannel = await guild.channels.create({
 						name,

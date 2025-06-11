@@ -7,7 +7,7 @@ interface ChannelSectionProps {
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
-  onValidate: () => void;
+  onValidate?: () => void;
   isLoading: boolean;
   isMissing: boolean;
 }
@@ -38,7 +38,6 @@ export const ChannelSection: React.FC<ChannelSectionProps> = ({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          onValidate={onValidate}
           disabled={isLoading}
           canRename={false}
         />

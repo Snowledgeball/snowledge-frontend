@@ -6,7 +6,7 @@ interface ChannelInputProps {
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
-  onValidate: () => void;
+  onValidate?: () => void;
   disabled?: boolean;
   canRename?: boolean;
 }

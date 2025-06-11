@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useListChannels } from "./hooks/useListChannels";
 import { useCreateChannels } from "./hooks/useCreateChannels";
 import { useRenameChannels } from "./hooks/useRenameChannels";
@@ -26,20 +26,26 @@ interface Props {
   communityId: number;
 }
 
+/**
+ * Composant principal de gestion des intégrations Discord pour une communauté.
+ * Permet la création, l'affectation et le renommage des salons Discord nécessaires.
+ */
 export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
-  // États pour la création initiale et le renommage
+  // --- États locaux ---
+  // Noms des salons à créer ou à afficher
   const [names, setNames] = useState<ChannelNames>({
     propose: "propositions",
     vote: "votes",
     result: "résultats",
   });
+  // Valeurs temporaires pour le renommage
   const [rename, setRename] = useState<ChannelNames>({
     propose: "",
     vote: "",
     result: "",
   });
 
-  // Queries et mutations
+  // --- Récupération des données et mutations ---
   const {
     data: discordServerData,
     isLoading: isLoadingDiscordServer,
@@ -54,27 +60,40 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
 
   const { mutate: createChannels, isPending: isLoadingCreate } =
     useCreateChannels();
-
   const { mutate: renameChannels, isPending: isLoadingRename } =
     useRenameChannels();
-
   const { mutate: updateDiscordServer } = useUpdateDiscordServer();
 
-  // Utilitaires
-  const channelIds = {
-    propose: discordServerData?.proposeChannelId,
-    vote: discordServerData?.voteChannelId,
-    result: discordServerData?.resultChannelId,
-  };
+  // --- Utilitaires dérivés ---
+  // IDs des salons actuellement assignés
+  const channelIds = useMemo(
+    () => ({
+      propose: discordServerData?.proposeChannelId,
+      vote: discordServerData?.voteChannelId,
+      result: discordServerData?.resultChannelId,
+    }),
+    [discordServerData]
+  );
 
-  const missing = getMissingChannels(listData, channelIds);
-  const allIdsNull =
-    discordServerData &&
-    !discordServerData.proposeChannelId &&
-    !discordServerData.voteChannelId &&
-    !discordServerData.resultChannelId;
+  // Détection des salons manquants
+  const missing = useMemo(
+    () => getMissingChannels(listData, channelIds),
+    [listData, channelIds]
+  );
+  // Vérifie si aucun salon n'est encore assigné
+  const allIdsNull = useMemo(
+    () =>
+      discordServerData &&
+      !discordServerData.proposeChannelId &&
+      !discordServerData.voteChannelId &&
+      !discordServerData.resultChannelId,
+    [discordServerData]
+  );
 
-  // Synchronise les noms des salons avec la réalité Discord dès que c'est chargé
+  console.log("allIdsNull", allIdsNull);
+  console.log("discordServerData", discordServerData);
+
+  // --- Effet : synchronisation des noms avec la réalité Discord ---
   useEffect(() => {
     if (
       listData &&
@@ -97,141 +116,244 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     discordServerData?.resultChannelId,
   ]);
 
-  // Création des salons manquants
-  const handleCreateMissingChannels = () => {
-    if (!discordServerData?.discordGuildId) return;
-    const missingFields = Object.entries(missing).filter(
-      ([key, isMissing]) => isMissing && !rename[key as keyof typeof rename]
-    );
-    if (missingFields.length > 0) {
-      toast.error("Merci de renseigner un nom pour chaque salon manquant.");
-      return;
-    }
-    console.log("missing", missing);
-    console.log("rename", rename);
-    console.log("names", names);
-    createChannels(
-      {
-        guildId: discordServerData.discordGuildId,
-        proposeName: missing.propose ? rename.propose : names.propose,
-        voteName: missing.vote ? rename.vote : names.vote,
-        resultName: missing.result ? rename.result : names.result,
-      },
-      {
-        onSuccess: async () => {
-          const listResult = await refetchList();
-          const discordServerResult = await refetchDiscordServer();
-          if (!discordServerResult.data) {
-            toast.error(
-              "Erreur lors de la récupération des données du serveur Discord."
-            );
-            return;
-          }
-          updateDiscordServer({
-            id: discordServerResult.data.id,
-            proposeChannelId: missing.propose
-              ? getChannelIdByName(listResult.data, rename.propose)
-              : discordServerData.proposeChannelId,
-            voteChannelId: missing.vote
-              ? getChannelIdByName(listResult.data, rename.vote)
-              : discordServerData.voteChannelId,
-            resultChannelId: missing.result
-              ? getChannelIdByName(listResult.data, rename.result)
-              : discordServerData.resultChannelId,
-          });
-          toast.success("Salon(s) créé(s) avec succès !");
-        },
-        onError: (error) => {
-          toast.error(
-            error?.message || "Erreur lors de la création des salons Discord."
-          );
-        },
-      }
-    );
-  };
-
-  // Renommage d'un salon
-  const handleRename = (type: "propose" | "vote" | "result") => {
-    if (!discordServerData?.discordGuildId) return;
-    const oldNames = {
-      propose: getChannelName(listData, discordServerData?.proposeChannelId),
-      vote: getChannelName(listData, discordServerData?.voteChannelId),
-      result: getChannelName(listData, discordServerData?.resultChannelId),
-    };
-    const newNames = { ...oldNames, [type]: rename[type] };
-    let timeoutId: NodeJS.Timeout | null = setTimeout(() => {
-      toast.warning(
-        "Le renommage prend plus de 5 secondes. Vous avez probablement atteint la limite Discord (2 renommages toutes les 10 minutes). Veuillez patienter 10 minutes ou renommer le salon directement sur Discord.",
-        { duration: 20000 }
+  // --- Gestion de la création des salons manquants ---
+  const handleCreateMissingChannels = useCallback(
+    (channelNames: ChannelNames) => {
+      if (!discordServerData?.discordGuildId) return;
+      // Vérifie que tous les noms sont renseignés pour les salons manquants
+      const missingFields = Object.entries(missing).filter(
+        ([key, isMissing]) =>
+          isMissing && !channelNames[key as keyof typeof channelNames]
       );
-    }, 5000);
-    renameChannels(
-      {
-        guildId: discordServerData.discordGuildId,
-        oldNames,
-        newNames,
-      },
-      {
-        onSuccess: async () => {
-          if (timeoutId) clearTimeout(timeoutId);
-          const listResult = await refetchList();
-          const discordServerResult = await refetchDiscordServer();
-          if (!discordServerResult.data) {
-            toast.error(
-              "Erreur lors de la récupération des données du serveur Discord."
-            );
-            return;
-          }
-          updateDiscordServer({
-            id: discordServerResult.data.id,
-            proposeChannelId: getChannelIdByName(
-              listResult.data,
-              newNames.propose
-            ),
-            voteChannelId: getChannelIdByName(listResult.data, newNames.vote),
-            resultChannelId: getChannelIdByName(
-              listResult.data,
-              newNames.result
-            ),
-          });
-          toast.success("Salon renommé avec succès !");
-          setRename((prev) => ({ ...prev, [type]: "" }));
-        },
-        onError: (error) => {
-          if (timeoutId) clearTimeout(timeoutId);
-          toast.error(
-            error?.message || "Erreur lors du renommage du salon Discord."
-          );
-        },
+      if (missingFields.length > 0) {
+        toast.error("Merci de renseigner un nom pour chaque salon manquant.");
+        return;
       }
-    );
-  };
+      console.log("missing", missing);
+      console.log("channelNames", channelNames);
+      console.log("names", names);
 
+      createChannels(
+        {
+          guildId: discordServerData.discordGuildId,
+          proposeName: missing.propose ? channelNames.propose : "",
+          voteName: missing.vote ? channelNames.vote : "",
+          resultName: missing.result ? channelNames.result : "",
+        },
+        {
+          onSuccess: async () => {
+            // Rafraîchit la liste des salons et les infos du serveur
+            const listResult = await refetchList();
+            const discordServerResult = await refetchDiscordServer();
+
+            console.log("listResult", listResult);
+            console.log("discordServerResult", discordServerResult);
+
+            if (!discordServerResult.data) {
+              toast.error(
+                "Erreur lors de la récupération des données du serveur Discord."
+              );
+              return;
+            }
+
+            console.log("missing.result", missing.result);
+            console.log("listResult.data", listResult.data);
+            console.log("channelNames.result", channelNames.result);
+
+            // Met à jour les IDs des salons dans la BDD
+            updateDiscordServer({
+              id: discordServerResult.data.id,
+              proposeChannelId: missing.propose
+                ? getChannelIdByName(listResult.data, channelNames.propose)
+                : discordServerData.proposeChannelId,
+              voteChannelId: missing.vote
+                ? getChannelIdByName(listResult.data, channelNames.vote)
+                : discordServerData.voteChannelId,
+              resultChannelId: missing.result
+                ? getChannelIdByName(listResult.data, channelNames.result)
+                : discordServerData.resultChannelId,
+            });
+            toast.success("Salon(s) créé(s) avec succès !");
+          },
+          onError: (error) => {
+            toast.error(
+              error?.message || "Erreur lors de la création des salons Discord."
+            );
+          },
+        }
+      );
+    },
+    [
+      discordServerData,
+      missing,
+      names,
+      createChannels,
+      refetchList,
+      refetchDiscordServer,
+      updateDiscordServer,
+    ]
+  );
+
+  // --- Gestion du renommage d'un salon ---
+  const handleRename = useCallback(
+    (type: keyof ChannelNames) => {
+      if (!discordServerData?.discordGuildId) return;
+      // Récupère les anciens noms pour l'appel API
+      const oldNames = {
+        propose: getChannelName(listData, discordServerData?.proposeChannelId),
+        vote: getChannelName(listData, discordServerData?.voteChannelId),
+        result: getChannelName(listData, discordServerData?.resultChannelId),
+      };
+      // Prépare les nouveaux noms
+      const newNames = { ...oldNames, [type]: rename[type] };
+      // Timeout pour prévenir l'utilisateur en cas de lenteur (limite Discord)
+      let timeoutId: NodeJS.Timeout | null = setTimeout(() => {
+        toast.warning(
+          "Le renommage prend plus de 5 secondes. Vous avez probablement atteint la limite Discord (2 renommages toutes les 10 minutes). Veuillez patienter 10 minutes ou renommer le salon directement sur Discord.",
+          { duration: 20000 }
+        );
+      }, 5000);
+      renameChannels(
+        {
+          guildId: discordServerData.discordGuildId,
+          oldNames,
+          newNames,
+        },
+        {
+          onSuccess: async () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            const listResult = await refetchList();
+            const discordServerResult = await refetchDiscordServer();
+            if (!discordServerResult.data) {
+              toast.error(
+                "Erreur lors de la récupération des données du serveur Discord."
+              );
+              return;
+            }
+            // Met à jour les IDs des salons renommés
+            updateDiscordServer({
+              id: discordServerResult.data.id,
+              proposeChannelId: getChannelIdByName(
+                listResult.data,
+                newNames.propose
+              ),
+              voteChannelId: getChannelIdByName(listResult.data, newNames.vote),
+              resultChannelId: getChannelIdByName(
+                listResult.data,
+                newNames.result
+              ),
+            });
+            toast.success("Salon renommé avec succès !");
+            setRename((prev) => ({ ...prev, [type]: "" }));
+          },
+          onError: (error) => {
+            if (timeoutId) clearTimeout(timeoutId);
+            toast.error(
+              error?.message || "Erreur lors du renommage du salon Discord."
+            );
+          },
+        }
+      );
+    },
+    [
+      discordServerData,
+      listData,
+      rename,
+      renameChannels,
+      refetchList,
+      refetchDiscordServer,
+      updateDiscordServer,
+    ]
+  );
+
+  // --- Affichage du loader si les données sont en cours de chargement ---
   if (isLoadingDiscordServer || isLoadingList) {
     return <div>Chargement...</div>;
   }
 
+  // --- Génération dynamique des sections de salons ---
+  const renderChannelSections = (mode: "firstConfig" | "edition") => (
+    <div className="space-y-4">
+      {(["propose", "vote", "result"] as const).map((type) => (
+        <ChannelSection
+          key={type}
+          label={`Salon ${type === "propose" ? "propositions" : type === "vote" ? "votes" : "résultats"}`}
+          value={
+            mode === "firstConfig" || missing[type] ? names[type] : rename[type]
+          }
+          onChange={(v) =>
+            mode === "firstConfig" || missing[type]
+              ? setNames((prev) => ({ ...prev, [type]: v }))
+              : setRename((prev) => ({ ...prev, [type]: v }))
+          }
+          placeholder={
+            mode === "firstConfig"
+              ? type === "propose"
+                ? "propositions"
+                : type === "vote"
+                  ? "votes"
+                  : "résultats"
+              : getChannelName(listData, channelIds[type]) ||
+                (type === "propose"
+                  ? "propositions"
+                  : type === "vote"
+                    ? "votes"
+                    : "résultats")
+          }
+          onValidate={
+            mode === "edition" && !missing[type]
+              ? () => handleRename(type)
+              : undefined
+          }
+          isLoading={mode === "firstConfig" ? isLoadingCreate : isLoadingRename}
+          isMissing={mode === "firstConfig" ? true : missing[type]}
+        />
+      ))}
+      {mode === "firstConfig" ? (
+        <Button
+          className="w-full mt-2"
+          disabled={
+            isLoadingCreate || !names.propose || !names.vote || !names.result
+          }
+          onClick={() => {
+            if (!names.propose || !names.vote || !names.result) {
+              toast.error("Merci de renseigner un nom pour chaque salon.");
+              return;
+            }
+            handleCreateMissingChannels(names);
+          }}
+        >
+          Créer les salons
+        </Button>
+      ) : (
+        Object.values(missing).some(Boolean) && (
+          <Button
+            className="w-full mt-2"
+            disabled={
+              isLoadingCreate ||
+              (missing.propose && !names.propose) ||
+              (missing.vote && !names.vote) ||
+              (missing.result && !names.result)
+            }
+            onClick={() => handleCreateMissingChannels(names)}
+          >
+            Créer les salons manquants
+          </Button>
+        )
+      )}
+    </div>
+  );
+
+  // --- Rendu principal ---
   return (
     <Card className="max-w-xl mx-auto mt-8">
       <CardHeader>
         <CardTitle>Gestion des channels Discord</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <AlertInfo
-          title="Limitation Discord"
-          description={
-            <>
-              Sur cette plateforme, un nom de salon Discord n'est modifiable que{" "}
-              <b>deux fois toutes les 10 minutes.</b>
-              <br />
-              Si vous devez le modifier plus rapidement, vous pouvez le faire
-              directement depuis Discord.
-            </>
-          }
-          className="mb-4"
-        />
         {allIdsNull ? (
           <>
+            {/* Première configuration : aucun salon n'est encore assigné */}
             <AlertInfo
               variant="destructive"
               title="Première configuration des channels Discord"
@@ -246,92 +368,31 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
               }
               className="mb-4"
             />
-            <div className="space-y-4">
-              {(["propose", "vote", "result"] as const).map((type) => (
-                <ChannelSection
-                  key={type}
-                  label={`Nom du salon ${type === "propose" ? "propositions" : type === "vote" ? "votes" : "résultats"}`}
-                  value={names[type]}
-                  onChange={(v) => setNames((prev) => ({ ...prev, [type]: v }))}
-                  placeholder={
-                    type === "propose"
-                      ? "propositions"
-                      : type === "vote"
-                        ? "votes"
-                        : "résultats"
-                  }
-                  onValidate={handleCreateMissingChannels}
-                  isLoading={isLoadingCreate}
-                  isMissing={true}
-                />
-              ))}
-              <Button
-                className="w-full mt-2"
-                disabled={
-                  isLoadingCreate ||
-                  !names.propose ||
-                  !names.vote ||
-                  !names.result
-                }
-                onClick={() => {
-                  if (!names.propose || !names.vote || !names.result) {
-                    toast.error(
-                      "Merci de renseigner un nom pour chaque salon."
-                    );
-                    return;
-                  }
-                  setRename(names); // pour la logique de création
-                  handleCreateMissingChannels();
-                }}
-              >
-                Créer les salons
-              </Button>
-            </div>
+            {renderChannelSections("firstConfig")}
           </>
         ) : (
           <>
+            {/* Alerte sur la limitation Discord */}
+            <AlertInfo
+              title="Limitation Discord"
+              description={
+                <>
+                  Sur cette plateforme, un nom de salon Discord n'est modifiable
+                  que <b>deux fois toutes les 10 minutes.</b>
+                  <br />
+                  Si vous devez le modifier plus rapidement, vous pouvez le
+                  faire directement depuis Discord.
+                </>
+              }
+              className="mb-4"
+            />
+            {/* Edition/renommage des salons existants */}
             <AlertInfo
               title="Salons Discord assignés"
               description="Vous pouvez renommer chaque salon si besoin."
               className="mb-4"
             />
-            <div className="space-y-4">
-              {(["propose", "vote", "result"] as const).map((type) => (
-                <ChannelSection
-                  key={type}
-                  label={`Salon ${type === "propose" ? "propositions" : type === "vote" ? "votes" : "résultats"}`}
-                  value={rename[type]}
-                  onChange={(v) =>
-                    setRename((prev) => ({ ...prev, [type]: v }))
-                  }
-                  placeholder={
-                    getChannelName(listData, channelIds[type]) ||
-                    (type === "propose"
-                      ? "propositions"
-                      : type === "vote"
-                        ? "votes"
-                        : "résultats")
-                  }
-                  onValidate={() => handleRename(type)}
-                  isLoading={isLoadingRename}
-                  isMissing={missing[type]}
-                />
-              ))}
-              {Object.values(missing).some(Boolean) && (
-                <Button
-                  className="w-full mt-2"
-                  disabled={
-                    isLoadingCreate ||
-                    (missing.propose && !rename.propose) ||
-                    (missing.vote && !rename.vote) ||
-                    (missing.result && !rename.result)
-                  }
-                  onClick={handleCreateMissingChannels}
-                >
-                  Créer les salons manquants
-                </Button>
-              )}
-            </div>
+            {renderChannelSections("edition")}
           </>
         )}
       </CardContent>

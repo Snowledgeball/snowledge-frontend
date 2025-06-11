@@ -5,9 +5,9 @@ export function useCreateChannels() {
   return useMutation({
     mutationFn: async (params: {
       guildId: string;
-      proposeName: string;
-      voteName: string;
-      resultName: string;
+      proposeName?: string;
+      voteName?: string;
+      resultName?: string;
     }) => {
       return await fetcher(
         `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/discord-bot/create-channels`,

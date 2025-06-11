@@ -13,9 +13,9 @@ export class DiscordBotController {
 		@Body()
 		body: {
 			guildId: string;
-			proposeName: string;
-			voteName: string;
-			resultName: string;
+			proposeName?: string;
+			voteName?: string;
+			resultName?: string;
 		},
 	) {
 		return this.discordBotService.createChannelsIfNotExist(
