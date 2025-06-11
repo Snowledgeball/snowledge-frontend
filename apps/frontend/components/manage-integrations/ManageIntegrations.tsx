@@ -21,6 +21,13 @@ import {
   getExistingChannelNames,
 } from "./utils/channelUtils";
 import { ChannelNames } from "./types";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@repo/ui/components/tooltip";
+import { HelpCircle } from "lucide-react";
 
 interface Props {
   communityId: number;
@@ -369,16 +376,50 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
         ) : (
           <>
             {/* Alerte sur la limitation Discord */}
+            <div className="flex items-center gap-2 mb-4">
+              <span className="font-semibold text-base">
+                Limitation Discord
+              </span>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex items-center cursor-pointer">
+                      <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    align="center"
+                    className="max-w-xs text-sm"
+                  >
+                    <b>Attention :</b> Si vous essayez de renommer un même salon
+                    une 3ème fois dans ce délai,{" "}
+                    <b>
+                      toutes les modifications de salons seront bloquées pendant
+                      10 minutes.
+                    </b>
+                    <br />
+                    <br />
+                    Vous pouvez continuer à modifier les autres salons tant que
+                    la limite n'est pas atteinte pour chacun.
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <AlertInfo
               title="Limitation Discord"
               description={
-                <>
-                  Sur cette plateforme, un nom de salon Discord n'est modifiable
-                  que <b>deux fois toutes les 10 minutes.</b>
+                <span>
+                  Chaque salon Discord peut être renommé jusqu'à{" "}
+                  <strong>2 fois toutes les 10 minutes</strong>, indépendamment
+                  des autres salons.
                   <br />
-                  Si vous devez le modifier plus rapidement, vous pouvez le
-                  faire directement depuis Discord.
-                </>
+                  <br />
+                  <i>
+                    Si besoin, vous pouvez toujours renommer les salons
+                    directement depuis Discord.
+                  </i>
+                </span>
               }
               className="mb-4"
             />
