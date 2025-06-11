@@ -1,21 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useListChannels } from "./hooks/useListChannels";
 import { useCreateChannels } from "./hooks/useCreateChannels";
 import { useRenameChannels } from "./hooks/useRenameChannels";
 import { useDiscordServer } from "./hooks/useDiscordServer";
 import { useUpdateDiscordServer } from "./hooks/useUpdateDiscordServer";
-import { Channel, ChannelNames } from "./types";
-import { ChannelSelect } from "./components/ChannelSelect";
-import { Feedback } from "./components/Feedback";
+import { Channel } from "./types";
 import { Alert, AlertTitle, AlertDescription } from "@repo/ui/components/alert";
-import { SparklesIcon, PlusCircleIcon, ShieldAlertIcon } from "lucide-react";
+import { CheckIcon } from "lucide-react";
 // shadcn/ui
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
-  CardFooter,
 } from "@repo/ui/components/card";
 import { Button } from "@repo/ui/components/button";
 import { toast } from "sonner";
@@ -343,7 +340,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
                     </Button>
                   </>
                 ) : (
-                  <>
+                  <div className="flex items-center gap-2">
                     <input
                       className="border rounded px-2 py-1 w-full"
                       value={renamePropose}
@@ -352,14 +349,18 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
                         discordServerData?.proposeChannelId
                       )}
                     />
-                    <Button
-                      className="mt-1"
-                      onClick={() => handleRename("propose")}
-                      disabled={isLoadingRename || !renamePropose}
-                    >
-                      Renommer
-                    </Button>
-                  </>
+                    {!!renamePropose && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleRename("propose")}
+                        disabled={isLoadingRename || !renamePropose}
+                        aria-label="Valider le renommage"
+                      >
+                        <CheckIcon className="h-4 w-4 text-green-600" />
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
               <div>
@@ -390,7 +391,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
                     </Button>
                   </>
                 ) : (
-                  <>
+                  <div className="flex items-center gap-2">
                     <input
                       className="border rounded px-2 py-1 w-full"
                       value={renameVote}
@@ -399,14 +400,18 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
                         discordServerData?.voteChannelId
                       )}
                     />
-                    <Button
-                      className="mt-1"
-                      onClick={() => handleRename("vote")}
-                      disabled={isLoadingRename || !renameVote}
-                    >
-                      Renommer
-                    </Button>
-                  </>
+                    {!!renameVote && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleRename("vote")}
+                        disabled={isLoadingRename || !renameVote}
+                        aria-label="Valider le renommage"
+                      >
+                        <CheckIcon className="h-4 w-4 text-green-600" />
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
               <div>
@@ -437,7 +442,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
                     </Button>
                   </>
                 ) : (
-                  <>
+                  <div className="flex items-center gap-2">
                     <input
                       className="border rounded px-2 py-1 w-full"
                       value={renameResult}
@@ -446,14 +451,18 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
                         discordServerData?.resultChannelId
                       )}
                     />
-                    <Button
-                      className="mt-1"
-                      onClick={() => handleRename("result")}
-                      disabled={isLoadingRename || !renameResult}
-                    >
-                      Renommer
-                    </Button>
-                  </>
+                    {!!renameResult && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleRename("result")}
+                        disabled={isLoadingRename || !renameResult}
+                        aria-label="Valider le renommage"
+                      >
+                        <CheckIcon className="h-4 w-4 text-green-600" />
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
