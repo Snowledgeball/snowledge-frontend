@@ -18,6 +18,7 @@ import { VoteModule } from './vote/vote.module';
 import discordConfig from './config/discord.config';
 import mongoConfig, { formatURIMongo } from './config/mongo.config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { YoutubeModule } from './youtube/youtube.module';
 @Module({
 	imports: [
 		ConfigModule.forRoot({
@@ -61,6 +62,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 		LearnerModule,
 		ProposalModule,
 		VoteModule,
+		YoutubeModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
