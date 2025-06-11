@@ -266,13 +266,63 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     channels.vote !== oldChannels.vote ||
     channels.result !== oldChannels.result;
 
+  // Détection des problèmes d'affectation
+  const missingChannels: {
+    type: keyof ChannelNames;
+    id: string | undefined;
+  }[] = [];
+  if (discordServerData && listData?.channels) {
+    if (
+      discordServerData.proposeChannelId &&
+      !listData.channels.some(
+        (ch: Channel) => ch.id === discordServerData.proposeChannelId
+      )
+    ) {
+      missingChannels.push({
+        type: "propose",
+        id: discordServerData.proposeChannelId,
+      });
+    }
+    if (
+      discordServerData.voteChannelId &&
+      !listData.channels.some(
+        (ch: Channel) => ch.id === discordServerData.voteChannelId
+      )
+    ) {
+      missingChannels.push({
+        type: "vote",
+        id: discordServerData.voteChannelId,
+      });
+    }
+    if (
+      discordServerData.resultChannelId &&
+      !listData.channels.some(
+        (ch: Channel) => ch.id === discordServerData.resultChannelId
+      )
+    ) {
+      missingChannels.push({
+        type: "result",
+        id: discordServerData.resultChannelId,
+      });
+    }
+  }
+
+  const allIdsNull =
+    discordServerData &&
+    !discordServerData.proposeChannelId &&
+    !discordServerData.voteChannelId &&
+    !discordServerData.resultChannelId;
+
   return (
     <Card className="max-w-xl mx-auto mt-8">
       <CardHeader>
         <CardTitle>Gestion des channels Discord</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <Alert className="mb-4 border-blue-200 bg-blue-50">
+        <Alert
+          variant="destructive"
+          className="mb-4 border-blue-200 bg-blue-50"
+        >
           <div className="flex items-center gap-2 mb-1">
             <SparklesIcon className="h-5 w-5 text-blue-500" />
             <AlertTitle className="text-blue-900">
@@ -318,6 +368,37 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
             </ul>
           </AlertDescription>
         </Alert>
+        {/* Alertes de cohérence des channels */}
+        {missingChannels.length > 0 && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTitle>
+              Problème de synchronisation des channels Discord
+            </AlertTitle>
+            <AlertDescription>
+              {missingChannels.map((mc) => (
+                <div key={mc.type}>
+                  Le channel <b>{mc.type}</b> (id: <code>{mc.id}</code>)
+                  n'existe plus sur Discord.
+                  <br />
+                  Merci de sélectionner un channel valide ou d'en créer un
+                  nouveau.
+                </div>
+              ))}
+            </AlertDescription>
+          </Alert>
+        )}
+        {allIdsNull && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTitle>Première configuration des channels Discord</AlertTitle>
+            <AlertDescription>
+              Aucun channel n'est encore affecté pour les propositions, votes ou
+              résultats.
+              <br />
+              Veuillez créer ou sélectionner un channel pour chaque usage afin
+              d'activer l'intégration Discord.
+            </AlertDescription>
+          </Alert>
+        )}
         <ChannelSelect
           label="Channel propositions"
           mode={proposeMode}
