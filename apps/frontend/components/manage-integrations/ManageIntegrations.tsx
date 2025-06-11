@@ -86,7 +86,12 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
 
   // Met à jour les champs à partir des données récupérées
   useEffect(() => {
-    if (
+    if (listData && listData.channels && listData.channels.length === 0) {
+      // Aucun salon textuel, on passe tous les ChannelSelect en mode création
+      setProposeMode("new");
+      setVoteMode("new");
+      setResultMode("new");
+    } else if (
       listData &&
       listData.channels &&
       discordServerData &&
