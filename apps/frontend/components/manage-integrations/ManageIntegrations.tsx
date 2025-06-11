@@ -7,6 +7,8 @@ import { useUpdateDiscordServer } from "./hooks/useUpdateDiscordServer";
 import { Channel, ChannelNames } from "./types";
 import { ChannelSelect } from "./components/ChannelSelect";
 import { Feedback } from "./components/Feedback";
+import { Alert, AlertTitle, AlertDescription } from "@repo/ui/components/alert";
+import { SparklesIcon, PlusCircleIcon, ShieldAlertIcon } from "lucide-react";
 // shadcn/ui
 import {
   Card,
@@ -42,6 +44,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     isLoading: isLoadingDiscordServer,
     isError: isErrorDiscordServer,
     error: errorDiscordServer,
+    refetch: refetchDiscordServer,
   } = useDiscordServer(communityId);
 
   // Query pour lister les channels (on attend d'avoir le guildId du mapping DiscordServer)
@@ -141,29 +144,18 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
       },
       {
         onSuccess: async () => {
-          const newList = await refetchList();
-          const channelsList = newList.data?.channels || [];
-          const getId = (name: string) =>
-            channelsList.find((ch: Channel) => ch.name === name)?.id ||
-            undefined;
-          updateDiscordServer({
-            id: discordServerData.id,
-            proposeChannelId: getId(proposeName),
-            voteChannelId: getId(voteName),
-            resultChannelId: getId(resultName),
-          });
+          await refetchList();
+          await refetchDiscordServer();
+          // Repasse en mode select et reset les inputs
           if (proposeMode === "new") {
-            setChannels((c) => ({ ...c, propose: proposeName }));
             setProposeMode("select");
             setNewPropose("");
           }
           if (voteMode === "new") {
-            setChannels((c) => ({ ...c, vote: voteName }));
             setVoteMode("select");
             setNewVote("");
           }
           if (resultMode === "new") {
-            setChannels((c) => ({ ...c, result: resultName }));
             setResultMode("select");
             setNewResult("");
           }
@@ -203,6 +195,32 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     );
   };
 
+  // Fonction pour renommer un seul channel
+  const handleRenameSingleChannel =
+    (type: "propose" | "vote" | "result") =>
+    (oldName: string, newName: string) => {
+      if (!discordServerData?.discordGuildId) return;
+      const oldNames = { ...channels };
+      const newNames = { ...channels };
+      oldNames[type] = oldName;
+      newNames[type] = newName;
+      renameChannels(
+        {
+          guildId: discordServerData.discordGuildId,
+          oldNames,
+          newNames,
+        },
+        {
+          onSuccess: async () => {
+            await refetchList();
+          },
+        }
+      );
+      // Met à jour la sélection localement
+      setChannels((c) => ({ ...c, [type]: newName }));
+      setOldChannels((c) => ({ ...c, [type]: newName }));
+    };
+
   // Gestion des selects et inputs
   const handleSelect = (type: "propose" | "vote" | "result", value: string) => {
     if (value === "__new__") {
@@ -224,12 +242,67 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     isLoadingDiscordServer ||
     isLoadingUpdateDiscordServer;
 
+  // Vérifie si on est en mode création pour au moins un channel
+  const isCreating =
+    proposeMode === "new" || voteMode === "new" || resultMode === "new";
+  // Vérifie si une modification a été faite sur la sélection
+  const hasChanged =
+    channels.propose !== oldChannels.propose ||
+    channels.vote !== oldChannels.vote ||
+    channels.result !== oldChannels.result;
+
   return (
     <Card className="max-w-xl mx-auto mt-8">
       <CardHeader>
         <CardTitle>Gestion des channels Discord</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        <Alert className="mb-4 border-blue-200 bg-blue-50">
+          <div className="flex items-center gap-2 mb-1">
+            <SparklesIcon className="h-5 w-5 text-blue-500" />
+            <AlertTitle className="text-blue-900">
+              Bienvenue dans la gestion des channels Discord !
+            </AlertTitle>
+          </div>
+          <AlertDescription>
+            <ul className="list-disc pl-5 space-y-2 mt-2 text-blue-900">
+              <li>
+                <span className="font-semibold">
+                  🔄 Récupération automatique :
+                </span>{" "}
+                Les channels affichés sont ceux déjà existants sur votre serveur
+                Discord.
+              </li>
+              <li>
+                <span className="font-semibold">
+                  <PlusCircleIcon className="inline h-4 w-4 mb-1 text-green-600" />{" "}
+                  Création facilitée :
+                </span>{" "}
+                Créez de nouveaux channels directement depuis cette interface.
+              </li>
+              <li>
+                <span className="font-semibold">
+                  <ShieldAlertIcon className="inline h-4 w-4 mb-1 text-yellow-500" />{" "}
+                  Important :
+                </span>{" "}
+                <b>Ne renommez pas</b> ces channels sur Discord, faites-le
+                uniquement ici pour garantir la synchronisation.
+              </li>
+              <li>
+                <span className="font-semibold">📁 Un channel par usage :</span>{" "}
+                <b>Propositions</b>, <b>votes</b> et <b>résultats</b> doivent
+                chacun avoir leur propre channel pour éviter tout conflit.
+              </li>
+              <li>
+                <span className="font-semibold">
+                  ✨ Synchronisation instantanée :
+                </span>{" "}
+                Toute modification ici est automatiquement appliquée sur Discord{" "}
+                <b>et</b> dans la base de données.
+              </li>
+            </ul>
+          </AlertDescription>
+        </Alert>
         <ChannelSelect
           label="Channel propositions"
           mode={proposeMode}
@@ -240,6 +313,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
           newValue={newPropose}
           setNewValue={setNewPropose}
           loading={loading}
+          onRename={handleRenameSingleChannel("propose")}
         />
         <ChannelSelect
           label="Channel votes"
@@ -251,6 +325,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
           newValue={newVote}
           setNewValue={setNewVote}
           loading={loading}
+          onRename={handleRenameSingleChannel("vote")}
         />
         <ChannelSelect
           label="Channel résultats"
@@ -266,21 +341,23 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
       </CardContent>
       <CardFooter className="flex flex-col gap-4">
         <div className="flex gap-2 w-full">
-          <Button
-            className="flex-1"
-            onClick={handleCreateChannels}
-            disabled={loading}
-            variant="default"
-          >
-            Créer les channels
-          </Button>
+          {isCreating && (
+            <Button
+              className="flex-1"
+              onClick={handleCreateChannels}
+              disabled={loading}
+              variant="default"
+            >
+              Créer le salon
+            </Button>
+          )}
           <Button
             className="flex-1"
             onClick={handleRenameChannels}
-            disabled={loading}
+            disabled={loading || !hasChanged}
             variant="secondary"
           >
-            Renommer les channels
+            Appliquer les modifications
           </Button>
         </div>
         <Feedback

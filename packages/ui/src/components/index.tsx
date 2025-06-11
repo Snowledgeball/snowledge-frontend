@@ -124,3 +124,5 @@ export {
   CommandItem,
   CommandList,
 } from "./command";
+
+export { Alert, AlertTitle, AlertDescription } from "./alert";
