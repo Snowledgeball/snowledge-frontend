@@ -13,6 +13,7 @@ import json
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
@@ -23,7 +24,17 @@ from dateutil.relativedelta import relativedelta
 from llm.analyse import analyse
 from dateutil.parser import parse as parse_date
 
+origins = ["*"]
+
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class DiscordHarvestRequest(BaseModel):
     discordId: str = Field(..., description="Discord user ID of the server administrator (not the bot ID)")

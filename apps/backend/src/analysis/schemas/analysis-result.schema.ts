@@ -31,8 +31,5 @@ export class AnalysisResult {
 
 	@Prop({ required: true, type: Object })
 	result: Record<string, any>;
-
-	@Prop({ required: true })
-	created_at: Date;
 }
 export const AnalysisResultSchema = SchemaFactory.createForClass(AnalysisResult);

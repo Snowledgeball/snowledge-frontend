@@ -1,4 +1,4 @@
-import { ExecutionContext, Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { User } from 'src/user/entities/user.entity';
 import { DiscordService } from './discord.service';
 import { UserService } from 'src/user/user.service';
@@ -68,7 +68,6 @@ export class DiscordProvider {
 				if(communityId) {
 					try {
 						community = await this.communityService.updateDiscordGuildId(communityId, data.guild.id);
-						
 					} catch (error) {
 						this.logger.error(error)	
 					}

@@ -20,7 +20,7 @@ export default function Page() {
   const clientId = process.env.NEXT_PUBLIC_DSD_CLIEND_ID;
 
 // Mock data
-  const platforms = [
+  const initialPlatforms = [
     {
       key: 'discord',
       name: 'Discord',
@@ -28,10 +28,7 @@ export default function Page() {
       urlAuth: `https://discord.com/oauth2/authorize?client_id=${clientId}&permissions=378225683536&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Fdiscord%2Flink&integration_type=0&scope=bot+identify+guilds+email&state=${state}`,
       color: '#5865F2',
       options: [
-        { label: '#general', value: 'general' },
-        { label: '#announcements', value: 'announcements' },
-        { label: '#random', value: 'random' },
-        { label: '#support', value: 'support' },
+        { label: '', value: '' },
       ],
       estimatedVolume: 1240,
       lastFetched: '2024-06-01',
@@ -68,9 +65,10 @@ export default function Page() {
     //   type: 'posts',
     // },
   ]
+  const [platforms, setPlatforms] = useState(initialPlatforms);
   const [enabled, setEnabled] = useState({ discord: false})//, youtube: false, x: false 
   const [selected, setSelected] = useState({
-    discord: [] as string[],
+    discord: [] as Array<{ label: string, value: string }>,
     youtube: [] as string[],
     x: [] as string[],
   })
@@ -99,8 +97,20 @@ export default function Page() {
   // PARAMS: none
   // RETURNS: void
   // ============
-  function handleCollect() {
+  const handleCollect = async () => {
     setIsCollecting(true)
+    const body = {
+        "discordId": user.discordId,
+        "serverId": Number(activeCommunity?.guildId),
+        "channels": selected.discord.map(ch => Number(ch.value)),
+      }
+    await fetch(`http://localhost:8000/discord/harvest`,{
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    })
     setTimeout(() => setIsCollecting(false), 1200)
   }
 
@@ -118,7 +128,31 @@ export default function Page() {
       // discordAuth();
     }
   }
-
+  const fetchChannels = async (guildId: string) => {
+    const data = await fetch(`http://localhost:8000/discord/channels/${guildId}`,{
+      method: 'GET'
+    })
+    const info: {server_id: string, server_name: string, channels: [{id:string, name: string}]} = await data.json()
+    console.log(info)
+    const options: Array<{ label: string, value: string }> = [];
+    for( const channel of info.channels){
+      options.push({ label: `#${channel.name}`, value: channel.id })
+    }
+    setPlatforms(prev => 
+      prev.map((platform => 
+        platform.key === 'discord'
+          ? { ...platform, options: options }
+          : platform
+      ))
+    )
+  }
+  useEffect(() =>{
+    if(activeCommunity?.guildId){
+      fetchChannels(activeCommunity?.guildId);
+    }
+    console.log(activeCommunity)
+    console.log(user)
+  }, [])
   return (
     <section className="w-full flex flex-col gap-8">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
