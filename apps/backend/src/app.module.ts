@@ -19,6 +19,7 @@ import discordConfig from './config/discord.config';
 import mongoConfig, { formatURIMongo } from './config/mongo.config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { YoutubeModule } from './youtube/youtube.module';
+import { AnalysisModule } from './analysis/analysis.module';
 @Module({
 	imports: [
 		ConfigModule.forRoot({
@@ -63,6 +64,7 @@ import { YoutubeModule } from './youtube/youtube.module';
 		ProposalModule,
 		VoteModule,
 		YoutubeModule,
+		AnalysisModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

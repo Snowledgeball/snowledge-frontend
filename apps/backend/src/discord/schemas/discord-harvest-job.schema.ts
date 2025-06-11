@@ -10,11 +10,31 @@ export type DiscordHarvestJobDocument = DiscordHarvestJob & Document;
 export class DiscordHarvestJob {
 	@Transform(({ value }) => value.toString())
 	_id: ObjectId;
+	@Prop({ required: true })
+	discordId: string;
+
+	@Prop({ type: Number, required: true })
+	serverId: number;
+
+	@Prop({ type: [Number], required: true })
+	channels: number[];
+
+	@Prop()
+	after?: string;
+
+	@Prop()
+	before?: string;
 
 	@Prop({ enum: ['pending', 'running', 'completed', 'failed'], required: true })
 	status: string;
 
-	@Prop({ type: Object })
-	metadata?: Record<string, any>;
+	@Prop()
+	finished_at?: Date;
+
+	@Prop()
+	inserted?: number;
+
+	@Prop()
+	error?: string;
 }
 export const DiscordHarvestJobSchema = SchemaFactory.createForClass(DiscordHarvestJob);

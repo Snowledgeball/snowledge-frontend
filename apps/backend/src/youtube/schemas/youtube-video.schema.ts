@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Transform } from 'class-transformer';
-import { Document, ObjectId } from 'mongoose';
+import mongoose, { Document, ObjectId } from 'mongoose';
+import { YouTubeChannel } from './youtube-channel.schema';
 
 export type YouTubeVideoDocument = YouTubeVideo & Document;
 @Schema({
@@ -11,16 +12,13 @@ export class YouTubeVideo {
 	@Transform(({ value }) => value.toString())
 	_id: ObjectId;	
 	
-	@Prop()
+	@Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'YouTubeChannel' })
+	channel_id: YouTubeChannel;
+
+	@Prop({ required: true })
 	title: string;
 
-	@Prop()
-	url: string;
-
-	@Prop()
-	account_id?: string;
-
-	@Prop()
-	published_at?: Date;
+	@Prop({ required: true })
+	published_at: Date;
 }
 export const YouTubeVideoSchema = SchemaFactory.createForClass(YouTubeVideo);
