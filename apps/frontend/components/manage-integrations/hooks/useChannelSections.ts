@@ -33,18 +33,18 @@
  */
 
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { useListChannels } from "../hooks/useListChannels";
-import { useCreateChannels } from "../hooks/useCreateChannels";
-import { useRenameChannels } from "../hooks/useRenameChannels";
-import { useDiscordServer } from "../hooks/useDiscordServer";
-import { useUpdateDiscordServer } from "../hooks/useUpdateDiscordServer";
+import { useListChannels } from "./useListChannels";
+import { useCreateChannels } from "./useCreateChannels";
+import { useRenameChannels } from "./useRenameChannels";
+import { useDiscordServer } from "./useDiscordServer";
+import { useUpdateDiscordServer } from "./useUpdateDiscordServer";
 import {
   getChannelName,
   getMissingChannels,
   getChannelIdByName,
   getExistingChannelNames,
 } from "../utils/channelUtils";
-import { ChannelNames } from "../management-integration";
+import { ChannelNames } from "@/types/channelNames";
 import { waitForValue } from "@/utils/wait-for-value";
 import { toast } from "sonner";
 

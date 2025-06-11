@@ -24,7 +24,7 @@
 import React from "react";
 import { Button } from "@repo/ui/components/button";
 import { ChannelSection } from "./ChannelSection";
-import { ChannelNames } from "../management-integration";
+import { ChannelNames } from "@/types/channelNames";
 import { getChannelName } from "../utils/channelUtils";
 
 interface ChannelSectionsProps {

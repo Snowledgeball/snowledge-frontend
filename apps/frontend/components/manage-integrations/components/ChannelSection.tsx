@@ -24,7 +24,8 @@
 import React from "react";
 import { Alert, AlertTitle, AlertDescription } from "@repo/ui/components/alert";
 import { ChannelInput } from "./ChannelInput";
-import { ChannelNames, KindOfMissing } from "../management-integration";
+import { ChannelNames } from "@/types/channelNames";
+import { KindOfMissing } from "@/types/kindOfMissing";
 
 interface ChannelSectionProps {
   type: keyof ChannelNames;

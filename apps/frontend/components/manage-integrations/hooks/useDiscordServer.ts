@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
-import { DiscordServer } from "../management-integration";
+import { DiscordServer } from "@/types/discordServer";
 
 export function useDiscordServer(communityId: number) {
   return useQuery<DiscordServer>({
