@@ -90,9 +90,6 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     [discordServerData]
   );
 
-  console.log("allIdsNull", allIdsNull);
-  console.log("discordServerData", discordServerData);
-
   // --- Effet : synchronisation des noms avec la réalité Discord ---
   useEffect(() => {
     if (
@@ -129,9 +126,6 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
         toast.error("Merci de renseigner un nom pour chaque salon manquant.");
         return;
       }
-      console.log("missing", missing);
-      console.log("channelNames", channelNames);
-      console.log("names", names);
 
       createChannels(
         {
@@ -146,19 +140,12 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
             const listResult = await refetchList();
             const discordServerResult = await refetchDiscordServer();
 
-            console.log("listResult", listResult);
-            console.log("discordServerResult", discordServerResult);
-
             if (!discordServerResult.data) {
               toast.error(
                 "Erreur lors de la récupération des données du serveur Discord."
               );
               return;
             }
-
-            console.log("missing.result", missing.result);
-            console.log("listResult.data", listResult.data);
-            console.log("channelNames.result", channelNames.result);
 
             // Met à jour les IDs des salons dans la BDD
             updateDiscordServer({
