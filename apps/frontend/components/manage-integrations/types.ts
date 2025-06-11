@@ -17,3 +17,12 @@ export interface DiscordServer {
   resultChannelId?: string;
   communityId: number;
 }
+
+export interface KindOfMissing {
+  all?: boolean;
+  channelName?: {
+    propose?: boolean;
+    vote?: boolean;
+    result?: boolean;
+  };
+}

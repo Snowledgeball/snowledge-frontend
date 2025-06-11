@@ -277,6 +277,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
       {(["propose", "vote", "result"] as const).map((type) => (
         <ChannelSection
           key={type}
+          type={type}
           label={`Salon ${type === "propose" ? "propositions" : type === "vote" ? "votes" : "résultats"}`}
           value={
             mode === "firstConfig" || missing[type] ? names[type] : rename[type]
@@ -306,7 +307,15 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
               : undefined
           }
           isLoading={mode === "firstConfig" ? isLoadingCreate : isLoadingRename}
-          isMissing={mode === "firstConfig" ? true : missing[type]}
+          isMissing={
+            mode === "firstConfig"
+              ? { all: true }
+              : {
+                  channelName: {
+                    [type]: missing[type] as boolean,
+                  },
+                }
+          }
         />
       ))}
       {mode === "firstConfig" ? (
