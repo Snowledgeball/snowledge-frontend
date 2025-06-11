@@ -91,33 +91,26 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
   const voteExists = !!getChannelName(discordServerData?.voteChannelId);
   const resultExists = !!getChannelName(discordServerData?.resultChannelId);
 
-  // Création d'un seul salon manquant
-  const handleCreateSingleChannel = (type: "propose" | "vote" | "result") => {
+  // Création des channels en 1 clic (adapte pour ne créer que les salons manquants)
+  const handleCreateMissingChannels = () => {
     if (!discordServerData?.discordGuildId) return;
-    let name = "";
-    if (type === "propose") name = renamePropose || "propositions";
-    if (type === "vote") name = renameVote || "votes";
-    if (type === "result") name = renameResult || "résultats";
-    if (!name) {
-      toast.error("Merci de renseigner un nom pour le salon.");
+    // On ne crée que les salons manquants
+    const missing: { [key: string]: string } = {};
+    if (!proposeExists) missing.proposeName = renamePropose;
+    if (!voteExists) missing.voteName = renameVote;
+    if (!resultExists) missing.resultName = renameResult;
+    // Vérifie que tous les champs nécessaires sont remplis
+    const missingFields = Object.entries(missing).filter(([, v]) => !v);
+    if (missingFields.length > 0) {
+      toast.error("Merci de renseigner un nom pour chaque salon manquant.");
       return;
     }
     createChannels(
       {
         guildId: discordServerData.discordGuildId,
-        proposeName:
-          type === "propose"
-            ? name
-            : getChannelName(discordServerData?.proposeChannelId) ||
-              "propositions",
-        voteName:
-          type === "vote"
-            ? name
-            : getChannelName(discordServerData?.voteChannelId) || "votes",
-        resultName:
-          type === "result"
-            ? name
-            : getChannelName(discordServerData?.resultChannelId) || "résultats",
+        proposeName: proposeExists ? "" : renamePropose,
+        voteName: voteExists ? "" : renameVote,
+        resultName: resultExists ? "" : renameResult,
       },
       {
         onSuccess: async () => {
@@ -128,55 +121,17 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
               ?.id;
           updateDiscordServer({
             id: discordServerResult.data.id,
-            proposeChannelId: getId(name),
-            voteChannelId: getId(name),
-            resultChannelId: getId(name),
+            proposeChannelId: proposeExists
+              ? discordServerData.proposeChannelId
+              : getId(renamePropose),
+            voteChannelId: voteExists
+              ? discordServerData.voteChannelId
+              : getId(renameVote),
+            resultChannelId: resultExists
+              ? discordServerData.resultChannelId
+              : getId(renameResult),
           });
-          toast.success("Salon créé avec succès !");
-        },
-        onError: (error) => {
-          toast.error(
-            error?.message || "Erreur lors de la création du salon Discord."
-          );
-        },
-      }
-    );
-  };
-
-  // Création des channels en 1 clic
-  const handleCreateAllChannels = () => {
-    if (!discordServerData?.discordGuildId) return;
-    if (!proposeName || !voteName || !resultName) {
-      const missing = [];
-      if (!proposeName) missing.push("propositions");
-      if (!voteName) missing.push("votes");
-      if (!resultName) missing.push("résultats");
-      toast.error(
-        `Merci de renseigner le(s) nom(s) de channel pour : ${missing.join(", ")}.`
-      );
-      return;
-    }
-    createChannels(
-      {
-        guildId: discordServerData.discordGuildId,
-        proposeName,
-        voteName,
-        resultName,
-      },
-      {
-        onSuccess: async () => {
-          const listResult = await refetchList();
-          const discordServerResult = await refetchDiscordServer();
-          const getId = (name: string) =>
-            listResult.data?.channels.find((ch: Channel) => ch.name === name)
-              ?.id;
-          updateDiscordServer({
-            id: discordServerResult.data.id,
-            proposeChannelId: getId(proposeName),
-            voteChannelId: getId(voteName),
-            resultChannelId: getId(resultName),
-          });
-          toast.success("Salons créés avec succès !");
+          toast.success("Salon(s) créé(s) avec succès !");
         },
         onError: (error) => {
           toast.error(
@@ -208,6 +163,17 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     if (type === "propose") newNames.propose = renamePropose;
     if (type === "vote") newNames.vote = renameVote;
     if (type === "result") newNames.result = renameResult;
+
+    // Timer pour afficher un toast si ça prend plus de 5 secondes
+    let timeoutId: NodeJS.Timeout | null = setTimeout(() => {
+      toast.warning(
+        "Le renommage prend plus de 5 secondes. Vous avez probablement atteint la limite Discord (2 renommages toutes les 10 minutes). Veuillez patienter 10 minutes ou renommer le salon directement sur Discord.",
+        {
+          duration: 20000,
+        }
+      );
+    }, 5000);
+
     renameChannels(
       {
         guildId: discordServerData.discordGuildId,
@@ -216,6 +182,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
       },
       {
         onSuccess: async () => {
+          if (timeoutId) clearTimeout(timeoutId);
           const listResult = await refetchList();
           const discordServerResult = await refetchDiscordServer();
           const getId = (name: string) =>
@@ -234,6 +201,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
           if (type === "result") setRenameResult("");
         },
         onError: (error) => {
+          if (timeoutId) clearTimeout(timeoutId);
           toast.error(
             error?.message || "Erreur lors du renommage du salon Discord."
           );
@@ -252,6 +220,16 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
         <CardTitle>Gestion des channels Discord</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        <Alert variant="default" className="mb-4">
+          <AlertTitle>Limitation Discord</AlertTitle>
+          <AlertDescription>
+            Sur cette plateforme, un nom de salon Discord n'est modifiable que{" "}
+            <b>deux fois toutes les 10 minutes.</b>
+            <br />
+            Si vous devez le modifier plus rapidement, vous pouvez le faire
+            directement depuis Discord.
+          </AlertDescription>
+        </Alert>
         {allIdsNull ? (
           <>
             <Alert variant="destructive" className="mb-4">
@@ -296,8 +274,24 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
               </div>
               <Button
                 className="w-full mt-2"
-                onClick={handleCreateAllChannels}
-                disabled={isLoadingCreate}
+                style={{
+                  cursor:
+                    !proposeName || !voteName || !resultName
+                      ? "not-allowed"
+                      : "pointer",
+                }}
+                disabled={
+                  isLoadingCreate || !proposeName || !voteName || !resultName
+                }
+                onClick={() => {
+                  if (!proposeName || !voteName || !resultName) {
+                    toast.error(
+                      "Merci de renseigner un nom pour chaque salon."
+                    );
+                    return;
+                  }
+                  handleCreateMissingChannels();
+                }}
               >
                 Créer les salons
               </Button>
@@ -325,19 +319,14 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
                         Veuillez en créer un nouveau.
                       </AlertDescription>
                     </Alert>
-                    <input
-                      className="border rounded px-2 py-1 w-full"
-                      value={renamePropose}
-                      onChange={(e) => setRenamePropose(e.target.value)}
-                      placeholder="propositions"
-                    />
-                    <Button
-                      className="mt-1"
-                      onClick={() => handleCreateSingleChannel("propose")}
-                      disabled={isLoadingCreate || !renamePropose}
-                    >
-                      Créer ce salon
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <input
+                        className="border rounded px-2 py-1 w-full"
+                        value={renamePropose}
+                        onChange={(e) => setRenamePropose(e.target.value)}
+                        placeholder="propositions"
+                      />
+                    </div>
                   </>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -376,19 +365,14 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
                         Veuillez en créer un nouveau.
                       </AlertDescription>
                     </Alert>
-                    <input
-                      className="border rounded px-2 py-1 w-full"
-                      value={renameVote}
-                      onChange={(e) => setRenameVote(e.target.value)}
-                      placeholder="votes"
-                    />
-                    <Button
-                      className="mt-1"
-                      onClick={() => handleCreateSingleChannel("vote")}
-                      disabled={isLoadingCreate || !renameVote}
-                    >
-                      Créer ce salon
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <input
+                        className="border rounded px-2 py-1 w-full"
+                        value={renameVote}
+                        onChange={(e) => setRenameVote(e.target.value)}
+                        placeholder="votes"
+                      />
+                    </div>
                   </>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -427,19 +411,14 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
                         Veuillez en créer un nouveau.
                       </AlertDescription>
                     </Alert>
-                    <input
-                      className="border rounded px-2 py-1 w-full"
-                      value={renameResult}
-                      onChange={(e) => setRenameResult(e.target.value)}
-                      placeholder="résultats"
-                    />
-                    <Button
-                      className="mt-1"
-                      onClick={() => handleCreateSingleChannel("result")}
-                      disabled={isLoadingCreate || !renameResult}
-                    >
-                      Créer ce salon
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <input
+                        className="border rounded px-2 py-1 w-full"
+                        value={renameResult}
+                        onChange={(e) => setRenameResult(e.target.value)}
+                        placeholder="résultats"
+                      />
+                    </div>
                   </>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -466,6 +445,21 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
                 )}
               </div>
             </div>
+            {/* Affiche le bouton de création si au moins un salon est manquant */}
+            {(!proposeExists || !voteExists || !resultExists) && (
+              <Button
+                className="w-full mt-2"
+                disabled={
+                  isLoadingCreate ||
+                  (!proposeExists && !renamePropose) ||
+                  (!voteExists && !renameVote) ||
+                  (!resultExists && !renameResult)
+                }
+                onClick={handleCreateMissingChannels}
+              >
+                Créer les salons manquants
+              </Button>
+            )}
           </>
         )}
         {/* TODO: inutile pour le moment, à rajouter si demande
