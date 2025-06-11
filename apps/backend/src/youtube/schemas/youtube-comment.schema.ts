@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Transform } from 'class-transformer';
-import { Document, ObjectId } from 'mongoose';
+import mongoose, { Document, ObjectId } from 'mongoose';
+import { YouTubeVideo } from './youtube-video.schema';
 
 export type YouTubeCommentDocument = YouTubeComment & Document;
 @Schema({
@@ -11,11 +12,11 @@ export class YouTubeComment {
 	@Transform(({ value }) => value.toString())
 	_id: ObjectId;
 
-	@Prop()
-	video_id: any;
+	@Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'YoutubeVideo' })
+	video_id: YouTubeVideo;
 
 	@Prop()
-	parent_comment_id?: any;
+	parent_comment_id?: string;
 
 	@Prop()
 	author_user_id: string;

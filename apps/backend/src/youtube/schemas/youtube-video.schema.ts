@@ -18,7 +18,7 @@ export class YouTubeVideo {
 	url: string;
 
 	@Prop()
-	account_id?: any;
+	account_id?: string;
 
 	@Prop()
 	published_at?: Date;
