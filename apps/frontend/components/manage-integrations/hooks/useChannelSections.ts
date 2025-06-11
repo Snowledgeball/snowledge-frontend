@@ -1,0 +1,277 @@
+/**
+ * useChannelSections - Explications d'architecture
+ *
+ * Ce custom hook centralise toute la logique métier de gestion des channels Discord pour une communauté.
+ * Il regroupe :
+ *   - Les états locaux (noms des salons, valeurs de renommage)
+ *   - Les setters associés
+ *   - Les actions (création, renommage de salons)
+ *   - Les données calculées (salons manquants, IDs, loading, etc.)
+ *
+ * Il encapsule également tous les hooks de récupération/mutation de données (useListChannels, useDiscordServer, etc.)
+ *
+ * Le hook expose un objet structuré :
+ *   - isLoading : booléen global de chargement
+ *   - allIdsNull : booléen indiquant si aucun salon n'est encore assigné
+ *   - state : { names, setNames, rename, setRename } (états locaux)
+ *   - actions : { handleCreateMissingChannels, handleRename } (actions principales)
+ *   - meta : { missing, isLoadingCreate, isLoadingRename, listData, channelIds } (infos techniques)
+ *
+ * Utilisation dans le composant principal :
+ *   const { isLoading, allIdsNull, state, actions, meta } = useChannelSections(communityId);
+ *
+ * Puis on passe {...state} {...actions} {...meta} au composant ChannelSections, ce qui permet de garder le composant principal ultra-léger et découplé de la logique métier.
+ *
+ * Avantages :
+ *   - Toute la logique métier est centralisée
+ *   - Le composant principal ne fait que composer des sous-composants
+ *   - Facile à faire évoluer ou à réutiliser ailleurs
+ *
+ * Voir aussi :
+ *   - ChannelSections (affichage des sections de salons)
+ *   - ManageIntegrations (composant principal)
+ */
+
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useListChannels } from "../hooks/useListChannels";
+import { useCreateChannels } from "../hooks/useCreateChannels";
+import { useRenameChannels } from "../hooks/useRenameChannels";
+import { useDiscordServer } from "../hooks/useDiscordServer";
+import { useUpdateDiscordServer } from "../hooks/useUpdateDiscordServer";
+import {
+  getChannelName,
+  getMissingChannels,
+  getChannelIdByName,
+  getExistingChannelNames,
+} from "../utils/channelUtils";
+import { ChannelNames } from "../management-integration";
+import { waitForValue } from "@/utils/wait-for-value";
+import { toast } from "sonner";
+
+export function useChannelSections(communityId: number) {
+  // --- États locaux ---
+  const [names, setNames] = useState<ChannelNames>({
+    propose: "propositions",
+    vote: "votes",
+    result: "résultats",
+  });
+  const [rename, setRename] = useState<ChannelNames>({
+    propose: "",
+    vote: "",
+    result: "",
+  });
+
+  // --- Récupération des données et mutations ---
+  const {
+    data: discordServerData,
+    isLoading: isLoadingDiscordServer,
+    refetch: refetchDiscordServer,
+  } = useDiscordServer(communityId);
+
+  const {
+    data: listData,
+    isLoading: isLoadingList,
+    refetch: refetchList,
+  } = useListChannels(discordServerData?.discordGuildId || "");
+
+  const { mutate: createChannels, isPending: isLoadingCreate } =
+    useCreateChannels();
+  const { mutate: renameChannels, isPending: isLoadingRename } =
+    useRenameChannels();
+  const { mutate: updateDiscordServer } = useUpdateDiscordServer();
+
+  // --- Utilitaires dérivés ---
+  const channelIds = useMemo(
+    () => ({
+      propose: discordServerData?.proposeChannelId,
+      vote: discordServerData?.voteChannelId,
+      result: discordServerData?.resultChannelId,
+    }),
+    [discordServerData]
+  );
+
+  const missing = useMemo(
+    () => getMissingChannels(listData, channelIds),
+    [listData, channelIds]
+  );
+  const allIdsNull = useMemo(
+    () =>
+      discordServerData &&
+      !discordServerData.proposeChannelId &&
+      !discordServerData.voteChannelId &&
+      !discordServerData.resultChannelId,
+    [discordServerData]
+  );
+
+  // --- Effet : synchronisation des noms avec la réalité Discord ---
+  useEffect(() => {
+    if (listData && discordServerData) {
+      setNames(
+        getExistingChannelNames(listData, {
+          propose: discordServerData.proposeChannelId,
+          vote: discordServerData.voteChannelId,
+          result: discordServerData.resultChannelId,
+        })
+      );
+    }
+  }, [
+    listData,
+    discordServerData?.proposeChannelId,
+    discordServerData?.voteChannelId,
+    discordServerData?.resultChannelId,
+  ]);
+
+  // --- Gestion de la création des salons manquants ---
+  const handleCreateMissingChannels = useCallback(
+    (channelNames: ChannelNames) => {
+      if (!discordServerData?.discordGuildId) return;
+      const missingFields = Object.entries(missing).filter(
+        ([key, isMissing]) =>
+          isMissing && !channelNames[key as keyof typeof channelNames]
+      );
+      if (missingFields.length > 0) {
+        toast.error("Merci de renseigner un nom pour chaque salon manquant.");
+        return;
+      }
+
+      createChannels(
+        {
+          guildId: discordServerData.discordGuildId,
+          proposeName: missing.propose ? channelNames.propose : "",
+          voteName: missing.vote ? channelNames.vote : "",
+          resultName: missing.result ? channelNames.result : "",
+        },
+        {
+          onSuccess: async () => {
+            const listResult = await refetchList();
+            updateDiscordServer({
+              id: discordServerData.id,
+              proposeChannelId: missing.propose
+                ? getChannelIdByName(listResult.data, channelNames.propose)
+                : discordServerData.proposeChannelId,
+              voteChannelId: missing.vote
+                ? getChannelIdByName(listResult.data, channelNames.vote)
+                : discordServerData.voteChannelId,
+              resultChannelId: missing.result
+                ? getChannelIdByName(listResult.data, channelNames.result)
+                : discordServerData.resultChannelId,
+            });
+
+            const expectedResultId = getChannelIdByName(
+              listResult.data,
+              channelNames.result
+            );
+            const refreshed = await waitForValue(
+              refetchDiscordServer,
+              (result) => result.data?.resultChannelId === expectedResultId,
+              { intervalMs: 1000, maxTries: 5 }
+            );
+
+            if (!refreshed) {
+              toast.error("La synchronisation avec le serveur a échoué.");
+              return;
+            }
+
+            toast.success("Salon(s) créé(s) avec succès !");
+          },
+          onError: (error) => {
+            toast.error(
+              error?.message || "Erreur lors de la création des salons Discord."
+            );
+          },
+        }
+      );
+    },
+    [
+      discordServerData,
+      missing,
+      names,
+      createChannels,
+      refetchList,
+      refetchDiscordServer,
+      updateDiscordServer,
+    ]
+  );
+
+  // --- Gestion du renommage d'un salon ---
+  const handleRename = useCallback(
+    (type: keyof ChannelNames) => {
+      if (!discordServerData?.discordGuildId) return;
+      const oldNames = {
+        propose: getChannelName(listData, discordServerData?.proposeChannelId),
+        vote: getChannelName(listData, discordServerData?.voteChannelId),
+        result: getChannelName(listData, discordServerData?.resultChannelId),
+      };
+      const newNames = { ...oldNames, [type]: rename[type] };
+      let timeoutId: NodeJS.Timeout | null = setTimeout(() => {
+        toast.warning(
+          "Le renommage prend plus de 5 secondes. Vous avez probablement atteint la limite Discord (2 renommages toutes les 10 minutes). Veuillez patienter 10 minutes ou renommer le salon directement sur Discord.",
+          { duration: 20000 }
+        );
+      }, 5000);
+      renameChannels(
+        {
+          guildId: discordServerData.discordGuildId,
+          oldNames,
+          newNames,
+        },
+        {
+          onSuccess: async () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            const listResult = await refetchList();
+            const discordServerResult = await refetchDiscordServer();
+            if (!discordServerResult.data) {
+              toast.error(
+                "Erreur lors de la récupération des données du serveur Discord."
+              );
+              return;
+            }
+            updateDiscordServer({
+              id: discordServerResult.data.id,
+              proposeChannelId: getChannelIdByName(
+                listResult.data,
+                newNames.propose
+              ),
+              voteChannelId: getChannelIdByName(listResult.data, newNames.vote),
+              resultChannelId: getChannelIdByName(
+                listResult.data,
+                newNames.result
+              ),
+            });
+            toast.success("Salon renommé avec succès !");
+            setRename((prev) => ({ ...prev, [type]: "" }));
+          },
+          onError: (error) => {
+            if (timeoutId) clearTimeout(timeoutId);
+            toast.error(
+              error?.message || "Erreur lors du renommage du salon Discord."
+            );
+          },
+        }
+      );
+    },
+    [
+      discordServerData,
+      listData,
+      rename,
+      renameChannels,
+      refetchList,
+      refetchDiscordServer,
+      updateDiscordServer,
+    ]
+  );
+
+  return {
+    isLoading: isLoadingDiscordServer || isLoadingList,
+    allIdsNull,
+    state: { names, setNames, rename, setRename },
+    actions: { handleCreateMissingChannels, handleRename },
+    meta: {
+      missing,
+      isLoadingCreate,
+      isLoadingRename,
+      listData,
+      channelIds,
+    },
+  };
+}

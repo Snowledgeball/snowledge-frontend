@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
-import { DiscordServer } from "../../manage-integrations/types";
+import { DiscordServer } from "../../manage-integrations/management-integration";
 
 export function useCreateDiscordServer() {
   return useMutation({

@@ -1,5 +1,5 @@
 // Utilitaires pour la gestion des channels Discord
-import { Channel } from "../types";
+import { Channel } from "../management-integration";
 
 export function getChannelName(channels: Channel[] = [], id?: string): string {
   return channels.find((ch) => ch.id === id)?.name || "";

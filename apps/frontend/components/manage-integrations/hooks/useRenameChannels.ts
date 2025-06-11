@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
-import { ChannelNames } from "../types";
+import { ChannelNames } from "../management-integration";
 
 export function useRenameChannels() {
   return useMutation({

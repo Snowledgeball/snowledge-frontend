@@ -1,7 +1,30 @@
+/**
+ * ChannelSections - Explications d'architecture
+ *
+ * Ce composant gère l'affichage dynamique des sections de salons Discord (propositions, votes, résultats).
+ * Il reçoit toutes ses props (états, setters, actions, meta) du composant parent (ManageIntegrations),
+ * via le hook useChannelSections.
+ *
+ * Il se charge d'afficher pour chaque type de salon :
+ *   - Un ChannelSection (input + éventuelle alerte)
+ *   - Le bouton de création ou de création des salons manquants
+ *
+ * Il ne contient aucune logique métier : il ne fait qu'orchestrer l'affichage et relayer les callbacks/actions.
+ *
+ * Avantages :
+ *   - Séparation stricte entre logique métier (dans le hook) et affichage (dans ce composant)
+ *   - Facile à tester et à faire évoluer
+ *   - Réutilisable pour d'autres contextes si besoin
+ *
+ * Voir aussi :
+ *   - ChannelSection (affichage d'une section individuelle)
+ *   - useChannelSections (logique métier)
+ *   - ManageIntegrations (composant principal)
+ */
 import React from "react";
 import { Button } from "@repo/ui/components/button";
 import { ChannelSection } from "./ChannelSection";
-import { ChannelNames } from "../types";
+import { ChannelNames } from "../management-integration";
 import { getChannelName } from "../utils/channelUtils";
 
 interface ChannelSectionsProps {

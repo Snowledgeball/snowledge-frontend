@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
-import { Channel } from "../types";
+import { Channel } from "../management-integration";
 
 export function useListChannels(guildId: string) {
   return useQuery<Channel[]>({

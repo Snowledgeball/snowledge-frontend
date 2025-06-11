@@ -1,7 +1,30 @@
+/**
+ * ChannelSection - Explications d'architecture
+ *
+ * Ce composant gère l'affichage d'une section individuelle pour un salon Discord (propositions, votes ou résultats).
+ * Il reçoit toutes ses props du composant parent ChannelSections :
+ *   - type, label, value, onChange, placeholder, onValidate, isLoading, isMissing
+ *
+ * Il affiche :
+ *   - Un input pour le nom du salon (ChannelInput)
+ *   - Une alerte si le salon est manquant ou supprimé
+ *   - Un bouton de validation si besoin (renommage)
+ *
+ * Il ne contient aucune logique métier : il ne fait que gérer l'affichage et relayer les callbacks/actions.
+ *
+ * Avantages :
+ *   - Ultra-simple, facile à tester
+ *   - Réutilisable pour n'importe quel type de salon
+ *   - Séparation stricte entre logique et UI
+ *
+ * Voir aussi :
+ *   - ChannelSections (affichage dynamique de toutes les sections)
+ *   - useChannelSections (logique métier)
+ */
 import React from "react";
 import { Alert, AlertTitle, AlertDescription } from "@repo/ui/components/alert";
 import { ChannelInput } from "./ChannelInput";
-import { ChannelNames, KindOfMissing } from "../types";
+import { ChannelNames, KindOfMissing } from "../management-integration";
 
 interface ChannelSectionProps {
   type: keyof ChannelNames;
