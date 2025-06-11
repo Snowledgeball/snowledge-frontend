@@ -244,7 +244,7 @@ export class DiscordBotService implements OnModuleInit {
 		).toString();
 		const salonVotes = this.getTextChannelByName(
 			interaction.guild,
-			'votes-idees',
+			'votes-idees', // TODO: Récupérer le nom du channel depuis la base de données
 		);
 		if (!salonVotes) {
 			return interaction.reply({
@@ -340,7 +340,7 @@ export class DiscordBotService implements OnModuleInit {
 			// Si le nombre de ❌ atteint le seuil, la proposition est rejetée
 			const resultsChannel = this.getTextChannelByName(
 				reaction.message.guild,
-				'vote-resultats',
+				'vote-resultats', // TODO: Récupérer le nom du channel depuis la base de données
 			);
 			if (subjectNo.length >= this.VOTES_NECESSAIRES) {
 				if (resultsChannel) {

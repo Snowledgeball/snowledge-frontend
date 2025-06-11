@@ -132,9 +132,24 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
   const handleCreateChannels = () => {
     resetCreate();
     const proposeName = proposeMode === "new" ? newPropose : channels.propose;
+    console.log("proposeName", proposeName);
     const voteName = voteMode === "new" ? newVote : channels.vote;
+    console.log("voteName", voteName);
     const resultName = resultMode === "new" ? newResult : channels.result;
+    console.log("resultName", resultName);
     if (!discordServerData?.discordGuildId) return;
+    console.log("discordServerData", discordServerData);
+    if (!proposeName || !voteName || !resultName) {
+      alert(
+        "Tous les noms de channels doivent être renseignés." +
+          proposeName +
+          " " +
+          voteName +
+          " " +
+          resultName
+      );
+      return;
+    }
     createChannels(
       {
         guildId: discordServerData.discordGuildId,
@@ -144,8 +159,35 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
       },
       {
         onSuccess: async () => {
-          await refetchList();
-          await refetchDiscordServer();
+          const listResult = await refetchList();
+          const discordServerResult = await refetchDiscordServer();
+
+          if (listResult.data?.channels && discordServerResult.data) {
+            // Ici tu utilises la nouvelle data pour mettre à jour le mapping
+            const getId = (name: string) =>
+              listResult.data.channels.find((ch: Channel) => ch.name === name)
+                ?.id || undefined;
+
+            updateDiscordServer({
+              id: discordServerResult.data.id,
+              proposeChannelId: getId(proposeName),
+              voteChannelId: getId(voteName),
+              resultChannelId: getId(resultName),
+            });
+
+            // Et tu peux aussi mettre à jour tes useState locaux si besoin
+            setChannels({
+              propose: proposeName,
+              vote: voteName,
+              result: resultName,
+            });
+            setOldChannels({
+              propose: proposeName,
+              vote: voteName,
+              result: resultName,
+            });
+          }
+
           // Repasse en mode select et reset les inputs
           if (proposeMode === "new") {
             setProposeMode("select");
@@ -164,41 +206,28 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     );
   };
 
-  // Renommage des channels
-  const handleRenameChannels = () => {
-    resetRename();
+  // Mise à jour des affectations des channels (changement d'affectation sans renommage)
+  const handleUpdateChannelAssignments = () => {
     if (!discordServerData?.discordGuildId) return;
-    renameChannels(
-      {
-        guildId: discordServerData.discordGuildId,
-        oldNames: oldChannels,
-        newNames: channels,
-      },
-      {
-        onSuccess: async () => {
-          setOldChannels({ ...channels });
-          await refetchList();
-          // Synchronisation du mapping DiscordServer en base
-          if (listData?.channels) {
-            const getId = (name: string) =>
-              listData.channels.find((ch: Channel) => ch.name === name)?.id ||
-              undefined;
-            updateDiscordServer({
-              id: discordServerData.id,
-              proposeChannelId: getId(channels.propose),
-              voteChannelId: getId(channels.vote),
-              resultChannelId: getId(channels.result),
-            });
-          }
-        },
-      }
-    );
+    if (listData?.channels) {
+      const getId = (name: string) =>
+        listData.channels.find((ch: Channel) => ch.name === name)?.id ||
+        undefined;
+      updateDiscordServer({
+        id: discordServerData.id,
+        proposeChannelId: getId(channels.propose),
+        voteChannelId: getId(channels.vote),
+        resultChannelId: getId(channels.result),
+      });
+      setOldChannels({ ...channels });
+    }
   };
 
   // Fonction pour renommer un seul channel
   const handleRenameSingleChannel =
     (type: "propose" | "vote" | "result") =>
     (oldName: string, newName: string) => {
+      console.log("SINGLE CHANNEL RENAME");
       if (!discordServerData?.discordGuildId) return;
       const oldNames = { ...channels };
       const newNames = { ...channels };
@@ -220,20 +249,6 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
       setChannels((c) => ({ ...c, [type]: newName }));
       setOldChannels((c) => ({ ...c, [type]: newName }));
     };
-
-  // Gestion des selects et inputs
-  const handleSelect = (type: "propose" | "vote" | "result", value: string) => {
-    if (value === "__new__") {
-      if (type === "propose") setProposeMode("new");
-      if (type === "vote") setVoteMode("new");
-      if (type === "result") setResultMode("new");
-    } else {
-      setChannels((c) => ({ ...c, [type]: value }));
-      if (type === "propose") setProposeMode("select");
-      if (type === "vote") setVoteMode("select");
-      if (type === "result") setResultMode("select");
-    }
-  };
 
   const loading =
     isLoadingList ||
@@ -337,6 +352,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
           newValue={newResult}
           setNewValue={setNewResult}
           loading={loading}
+          onRename={handleRenameSingleChannel("result")}
         />
       </CardContent>
       <CardFooter className="flex flex-col gap-4">
@@ -353,7 +369,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
           )}
           <Button
             className="flex-1"
-            onClick={handleRenameChannels}
+            onClick={handleUpdateChannelAssignments}
             disabled={loading || !hasChanged}
             variant="secondary"
           >
