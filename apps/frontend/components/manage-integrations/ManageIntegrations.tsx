@@ -28,6 +28,7 @@ import {
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
 import { HelpCircle } from "lucide-react";
+import { waitForValue } from "@/utils/wait-for-value";
 
 interface Props {
   communityId: number;
@@ -83,10 +84,10 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
   );
 
   // Détection des salons manquants
-  const missing = useMemo(
-    () => getMissingChannels(listData, channelIds),
-    [listData, channelIds]
-  );
+  const missing = useMemo(() => {
+    const res = getMissingChannels(listData, channelIds);
+    return res;
+  }, [listData, channelIds]);
   // Vérifie si aucun salon n'est encore assigné
   const allIdsNull = useMemo(
     () =>
@@ -99,12 +100,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
 
   // --- Effet : synchronisation des noms avec la réalité Discord ---
   useEffect(() => {
-    if (
-      listData &&
-      discordServerData?.proposeChannelId &&
-      discordServerData?.voteChannelId &&
-      discordServerData?.resultChannelId
-    ) {
+    if (listData && discordServerData) {
       setNames(
         getExistingChannelNames(listData, {
           propose: discordServerData.proposeChannelId,
@@ -143,20 +139,11 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
         },
         {
           onSuccess: async () => {
-            // Rafraîchit la liste des salons et les infos du serveur
             const listResult = await refetchList();
-            const discordServerResult = await refetchDiscordServer();
 
-            if (!discordServerResult.data) {
-              toast.error(
-                "Erreur lors de la récupération des données du serveur Discord."
-              );
-              return;
-            }
-
-            // Met à jour les IDs des salons dans la BDD
+            // Met à jour la BDD avec les bons IDs
             updateDiscordServer({
-              id: discordServerResult.data.id,
+              id: discordServerData.id,
               proposeChannelId: missing.propose
                 ? getChannelIdByName(listResult.data, channelNames.propose)
                 : discordServerData.proposeChannelId,
@@ -167,6 +154,23 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
                 ? getChannelIdByName(listResult.data, channelNames.result)
                 : discordServerData.resultChannelId,
             });
+
+            // Attendre la propagation côté backend
+            const expectedResultId = getChannelIdByName(
+              listResult.data,
+              channelNames.result
+            );
+            const refreshed = await waitForValue(
+              refetchDiscordServer,
+              (result) => result.data?.resultChannelId === expectedResultId,
+              { intervalMs: 1000, maxTries: 5 }
+            );
+
+            if (!refreshed) {
+              toast.error("La synchronisation avec le serveur a échoué.");
+              return;
+            }
+
             toast.success("Salon(s) créé(s) avec succès !");
           },
           onError: (error) => {
