@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useListChannels } from "./hooks/useListChannels";
 import { useCreateChannels } from "./hooks/useCreateChannels";
 import { useRenameChannels } from "./hooks/useRenameChannels";
@@ -67,7 +67,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     result: discordServerData?.resultChannelId,
   };
 
-  const missing = getMissingChannels(listData?.channels, channelIds);
+  const missing = getMissingChannels(listData, channelIds);
   const allIdsNull =
     discordServerData &&
     !discordServerData.proposeChannelId &&
@@ -75,15 +75,15 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     !discordServerData.resultChannelId;
 
   // Synchronise les noms des salons avec la réalité Discord dès que c'est chargé
-  React.useEffect(() => {
+  useEffect(() => {
     if (
-      listData?.channels &&
+      listData &&
       discordServerData?.proposeChannelId &&
       discordServerData?.voteChannelId &&
       discordServerData?.resultChannelId
     ) {
       setNames(
-        getExistingChannelNames(listData.channels, {
+        getExistingChannelNames(listData, {
           propose: discordServerData.proposeChannelId,
           vote: discordServerData.voteChannelId,
           result: discordServerData.resultChannelId,
@@ -91,7 +91,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
       );
     }
   }, [
-    listData?.channels,
+    listData,
     discordServerData?.proposeChannelId,
     discordServerData?.voteChannelId,
     discordServerData?.resultChannelId,
@@ -121,16 +121,22 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
         onSuccess: async () => {
           const listResult = await refetchList();
           const discordServerResult = await refetchDiscordServer();
+          if (!discordServerResult.data) {
+            toast.error(
+              "Erreur lors de la récupération des données du serveur Discord."
+            );
+            return;
+          }
           updateDiscordServer({
             id: discordServerResult.data.id,
             proposeChannelId: missing.propose
-              ? getChannelIdByName(listResult.data?.channels, rename.propose)
+              ? getChannelIdByName(listResult.data, rename.propose)
               : discordServerData.proposeChannelId,
             voteChannelId: missing.vote
-              ? getChannelIdByName(listResult.data?.channels, rename.vote)
+              ? getChannelIdByName(listResult.data, rename.vote)
               : discordServerData.voteChannelId,
             resultChannelId: missing.result
-              ? getChannelIdByName(listResult.data?.channels, rename.result)
+              ? getChannelIdByName(listResult.data, rename.result)
               : discordServerData.resultChannelId,
           });
           toast.success("Salon(s) créé(s) avec succès !");
@@ -148,18 +154,9 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
   const handleRename = (type: "propose" | "vote" | "result") => {
     if (!discordServerData?.discordGuildId) return;
     const oldNames = {
-      propose: getChannelName(
-        listData?.channels,
-        discordServerData?.proposeChannelId
-      ),
-      vote: getChannelName(
-        listData?.channels,
-        discordServerData?.voteChannelId
-      ),
-      result: getChannelName(
-        listData?.channels,
-        discordServerData?.resultChannelId
-      ),
+      propose: getChannelName(listData, discordServerData?.proposeChannelId),
+      vote: getChannelName(listData, discordServerData?.voteChannelId),
+      result: getChannelName(listData, discordServerData?.resultChannelId),
     };
     const newNames = { ...oldNames, [type]: rename[type] };
     let timeoutId: NodeJS.Timeout | null = setTimeout(() => {
@@ -179,18 +176,21 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
           if (timeoutId) clearTimeout(timeoutId);
           const listResult = await refetchList();
           const discordServerResult = await refetchDiscordServer();
+          if (!discordServerResult.data) {
+            toast.error(
+              "Erreur lors de la récupération des données du serveur Discord."
+            );
+            return;
+          }
           updateDiscordServer({
             id: discordServerResult.data.id,
             proposeChannelId: getChannelIdByName(
-              listResult.data?.channels,
+              listResult.data,
               newNames.propose
             ),
-            voteChannelId: getChannelIdByName(
-              listResult.data?.channels,
-              newNames.vote
-            ),
+            voteChannelId: getChannelIdByName(listResult.data, newNames.vote),
             resultChannelId: getChannelIdByName(
-              listResult.data?.channels,
+              listResult.data,
               newNames.result
             ),
           });
@@ -305,7 +305,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
                     setRename((prev) => ({ ...prev, [type]: v }))
                   }
                   placeholder={
-                    getChannelName(listData?.channels, channelIds[type]) ||
+                    getChannelName(listData, channelIds[type]) ||
                     (type === "propose"
                       ? "propositions"
                       : type === "vote"

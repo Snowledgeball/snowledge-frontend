@@ -497,7 +497,7 @@ export class DiscordBotService implements OnModuleInit {
 			const channels = guild.channels.cache
 				.filter((ch) => ch.type === ChannelType.GuildText)
 				.map((ch) => ({ id: ch.id, name: ch.name }));
-			return { channels };
+			return channels;
 		} catch (e) {
 			const err = e as Error;
 			this.logger.error('Erreur listing channels Discord :', err);
