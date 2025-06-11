@@ -26,9 +26,9 @@ export const ChannelSection: React.FC<ChannelSectionProps> = ({
 }) => (
   <div>
     <label>{label}</label>
-    {isMissing ? (
+    {isMissing.all || isMissing.channelName?.[type] ? (
       <>
-        {isMissing.channelName && isMissing.channelName[type] && (
+        {isMissing.channelName?.[type] && (
           <Alert variant="destructive" className="mb-2">
             <AlertTitle>Salon manquant :</AlertTitle>
             <AlertDescription>
