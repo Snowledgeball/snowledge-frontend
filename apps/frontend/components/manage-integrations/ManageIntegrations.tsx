@@ -18,6 +18,7 @@ import {
   CardFooter,
 } from "@repo/ui/components/card";
 import { Button } from "@repo/ui/components/button";
+import { toast } from "sonner";
 
 interface Props {
   communityId: number;
@@ -137,21 +138,16 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
   const handleCreateChannels = () => {
     resetCreate();
     const proposeName = proposeMode === "new" ? newPropose : channels.propose;
-    console.log("proposeName", proposeName);
     const voteName = voteMode === "new" ? newVote : channels.vote;
-    console.log("voteName", voteName);
     const resultName = resultMode === "new" ? newResult : channels.result;
-    console.log("resultName", resultName);
     if (!discordServerData?.discordGuildId) return;
-    console.log("discordServerData", discordServerData);
     if (!proposeName || !voteName || !resultName) {
-      alert(
-        "Tous les noms de channels doivent être renseignés." +
-          proposeName +
-          " " +
-          voteName +
-          " " +
-          resultName
+      const missing = [];
+      if (!proposeName) missing.push("propositions");
+      if (!voteName) missing.push("votes");
+      if (!resultName) missing.push("résultats");
+      toast.error(
+        `Merci de renseigner le(s) nom(s) de channel pour : ${missing.join(", ")}.`
       );
       return;
     }
@@ -212,21 +208,22 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
   };
 
   // Mise à jour des affectations des channels (changement d'affectation sans renommage)
-  const handleUpdateChannelAssignments = () => {
-    if (!discordServerData?.discordGuildId) return;
-    if (listData?.channels) {
-      const getId = (name: string) =>
-        listData.channels.find((ch: Channel) => ch.name === name)?.id ||
-        undefined;
-      updateDiscordServer({
-        id: discordServerData.id,
-        proposeChannelId: getId(channels.propose),
-        voteChannelId: getId(channels.vote),
-        resultChannelId: getId(channels.result),
-      });
-      setOldChannels({ ...channels });
-    }
-  };
+  // TODO: Pour l'instant desactivé car pas très utile, peut embrouiller l'utilisateur, doit gérer d'autres cas, on verra si c'est demandé
+  // const handleUpdateChannelAssignments = () => {
+  //   if (!discordServerData?.discordGuildId) return;
+  //   if (listData?.channels) {
+  //     const getId = (name: string) =>
+  //       listData.channels.find((ch: Channel) => ch.name === name)?.id ||
+  //       undefined;
+  //     updateDiscordServer({
+  //       id: discordServerData.id,
+  //       proposeChannelId: getId(channels.propose),
+  //       voteChannelId: getId(channels.vote),
+  //       resultChannelId: getId(channels.result),
+  //     });
+  //     setOldChannels({ ...channels });
+  //   }
+  // };
 
   // Fonction pour renommer un seul channel
   const handleRenameSingleChannel =
@@ -351,14 +348,6 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
                 Créez de nouveaux channels directement depuis cette interface.
               </li>
               <li>
-                <span className="font-semibold">
-                  <ShieldAlertIcon className="inline h-4 w-4 mb-1 text-yellow-500" />{" "}
-                  Important :
-                </span>{" "}
-                <b>Ne renommez pas</b> ces channels sur Discord, faites-le
-                uniquement ici pour garantir la synchronisation.
-              </li>
-              <li>
                 <span className="font-semibold">📁 Un channel par usage :</span>{" "}
                 <b>Propositions</b>, <b>votes</b> et <b>résultats</b> doivent
                 chacun avoir leur propre channel pour éviter tout conflit.
@@ -453,14 +442,15 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
               Créer le salon
             </Button>
           )}
-          <Button
+          {/* TODO: Pour l'instant desactivé car pas très utile, peut embrouiller l'utilisateur, doit gérer d'autres cas, on verra si c'est demandé  */}
+          {/* <Button
             className="flex-1"
             onClick={handleUpdateChannelAssignments}
             disabled={loading || !hasChanged}
             variant="secondary"
           >
             Appliquer les modifications
-          </Button>
+          </Button> */}
         </div>
         <Feedback
           isErrorList={isErrorList}
