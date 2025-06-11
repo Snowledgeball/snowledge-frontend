@@ -12,8 +12,7 @@ import {
 } from "@repo/ui/components/card";
 import { Button } from "@repo/ui/components/button";
 import { toast } from "sonner";
-import { ChannelSection } from "./ChannelSection";
-import { AlertInfo } from "./AlertInfo";
+import { ChannelSection } from "./components/ChannelSection";
 import {
   getChannelName,
   getMissingChannels,
@@ -21,23 +20,17 @@ import {
   getExistingChannelNames,
 } from "./utils/channelUtils";
 import { ChannelNames } from "./types";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@repo/ui/components/tooltip";
-import { HelpCircle } from "lucide-react";
 import { waitForValue } from "@/utils/wait-for-value";
+import { DiscordLimitationTooltip } from "./components/DiscordLimitationTooltip";
+import { DiscordLimitationAlert } from "./components/DiscordLimitationAlert";
+import { FirstConfigAlert } from "./components/FirstConfigAlert";
+import { AssignedChannelsAlert } from "./components/AssignedChannelsAlert";
+import { ChannelSections } from "./components/ChannelSections";
 
 interface Props {
   communityId: number;
 }
 
-/**
- * Composant principal de gestion des intégrations Discord pour une communauté.
- * Permet la création, l'affectation et le renommage des salons Discord nécessaires.
- */
 export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
   // --- États locaux ---
   // Noms des salons à créer ou à afficher
@@ -68,8 +61,10 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
 
   const { mutate: createChannels, isPending: isLoadingCreate } =
     useCreateChannels();
+
   const { mutate: renameChannels, isPending: isLoadingRename } =
     useRenameChannels();
+
   const { mutate: updateDiscordServer } = useUpdateDiscordServer();
 
   // --- Utilitaires dérivés ---
@@ -88,6 +83,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     const res = getMissingChannels(listData, channelIds);
     return res;
   }, [listData, channelIds]);
+
   // Vérifie si aucun salon n'est encore assigné
   const allIdsNull = useMemo(
     () =>
@@ -269,90 +265,6 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
     return <div>Chargement...</div>;
   }
 
-  // --- Génération dynamique des sections de salons ---
-  const renderChannelSections = (mode: "firstConfig" | "edition") => (
-    <div className="space-y-4">
-      {(["propose", "vote", "result"] as const).map((type) => (
-        <ChannelSection
-          key={type}
-          type={type}
-          label={`Salon ${type === "propose" ? "propositions" : type === "vote" ? "votes" : "résultats"}`}
-          value={
-            mode === "firstConfig" || missing[type] ? names[type] : rename[type]
-          }
-          onChange={(v) =>
-            mode === "firstConfig" || missing[type]
-              ? setNames((prev) => ({ ...prev, [type]: v }))
-              : setRename((prev) => ({ ...prev, [type]: v }))
-          }
-          placeholder={
-            mode === "firstConfig"
-              ? type === "propose"
-                ? "propositions"
-                : type === "vote"
-                  ? "votes"
-                  : "résultats"
-              : getChannelName(listData, channelIds[type]) ||
-                (type === "propose"
-                  ? "propositions"
-                  : type === "vote"
-                    ? "votes"
-                    : "résultats")
-          }
-          onValidate={
-            mode === "edition" && !missing[type]
-              ? () => handleRename(type)
-              : undefined
-          }
-          isLoading={mode === "firstConfig" ? isLoadingCreate : isLoadingRename}
-          isMissing={
-            mode === "firstConfig"
-              ? { all: true }
-              : {
-                  channelName: {
-                    [type]: missing[type] as boolean,
-                  },
-                }
-          }
-        />
-      ))}
-      {mode === "firstConfig" ? (
-        <Button
-          className="w-full mt-2"
-          disabled={
-            isLoadingCreate || !names.propose || !names.vote || !names.result
-          }
-          onClick={() => {
-            if (!names.propose || !names.vote || !names.result) {
-              toast.error("Merci de renseigner un nom pour chaque salon.");
-              return;
-            }
-            handleCreateMissingChannels(names);
-          }}
-        >
-          Créer les salons
-        </Button>
-      ) : (
-        Object.values(missing).some(Boolean) && (
-          <Button
-            className="w-full mt-2"
-            disabled={
-              isLoadingCreate ||
-              (missing.propose && !names.propose) ||
-              (missing.vote && !names.vote) ||
-              (missing.result && !names.result)
-            }
-            onClick={() => handleCreateMissingChannels(names)}
-          >
-            {Object.values(missing).filter(Boolean).length > 1
-              ? "Créer les salons manquants"
-              : "Créer le salon manquant"}
-          </Button>
-        )
-      )}
-    </div>
-  );
-
   // --- Rendu principal ---
   return (
     <Card className="max-w-xl mx-auto mt-8">
@@ -363,21 +275,21 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
         {allIdsNull ? (
           <>
             {/* Première configuration : aucun salon n'est encore assigné */}
-            <AlertInfo
-              variant="destructive"
-              title="Première configuration des channels Discord"
-              description={
-                <>
-                  Aucun channel n'est encore affecté pour les propositions,
-                  votes ou résultats.
-                  <br />
-                  Veuillez choisir un nom pour chaque salon, puis cliquez sur
-                  "Créer les salons".
-                </>
-              }
-              className="mb-4"
+            <FirstConfigAlert />
+            <ChannelSections
+              mode="firstConfig"
+              names={names}
+              setNames={setNames}
+              rename={rename}
+              setRename={setRename}
+              missing={missing}
+              isLoadingCreate={isLoadingCreate}
+              isLoadingRename={isLoadingRename}
+              handleCreateMissingChannels={handleCreateMissingChannels}
+              handleRename={handleRename}
+              listData={listData}
+              channelIds={channelIds}
             />
-            {renderChannelSections("firstConfig")}
           </>
         ) : (
           <>
@@ -386,56 +298,25 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
               <span className="font-semibold text-base">
                 Limitation Discord
               </span>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="inline-flex items-center cursor-pointer">
-                      <HelpCircle className="w-4 h-4 text-muted-foreground" />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    align="center"
-                    className="max-w-xs text-sm"
-                  >
-                    <b>Attention :</b> Si vous essayez de renommer un même salon
-                    une 3ème fois dans ce délai,{" "}
-                    <b>
-                      toutes les modifications de salons seront bloquées pendant
-                      10 minutes.
-                    </b>
-                    <br />
-                    <br />
-                    Vous pouvez continuer à modifier les autres salons tant que
-                    la limite n'est pas atteinte pour chacun.
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <DiscordLimitationTooltip />
             </div>
-            <AlertInfo
-              title="Limitation Discord"
-              description={
-                <span>
-                  Chaque salon Discord peut être renommé jusqu'à{" "}
-                  <strong>2 fois toutes les 10 minutes</strong>, indépendamment
-                  des autres salons.
-                  <br />
-                  <br />
-                  <i>
-                    Si besoin, vous pouvez toujours renommer les salons
-                    directement depuis Discord.
-                  </i>
-                </span>
-              }
-              className="mb-4"
-            />
+            <DiscordLimitationAlert />
             {/* Edition/renommage des salons existants */}
-            <AlertInfo
-              title="Salons Discord assignés"
-              description="Vous pouvez renommer chaque salon si besoin."
-              className="mb-4"
+            <AssignedChannelsAlert />
+            <ChannelSections
+              mode="edition"
+              names={names}
+              setNames={setNames}
+              rename={rename}
+              setRename={setRename}
+              missing={missing}
+              isLoadingCreate={isLoadingCreate}
+              isLoadingRename={isLoadingRename}
+              handleCreateMissingChannels={handleCreateMissingChannels}
+              handleRename={handleRename}
+              listData={listData}
+              channelIds={channelIds}
             />
-            {renderChannelSections("edition")}
           </>
         )}
       </CardContent>
