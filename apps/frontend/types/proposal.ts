@@ -5,7 +5,7 @@ export type Proposal = {
   title: string;
   description: string;
   createdAt: Date;
-  endDate: Date;
+  endedAt: Date;
   progress: number;
   participationLevel: ParticipationLevel;
   submitter: User;
@@ -13,6 +13,7 @@ export type Proposal = {
   format?: string;
   status: "in_progress" | "accepted" | "rejected";
   reason?: "by_vote" | "by_expiration" | null;
+  deadline: Date;
 };
 
 type ParticipationLevel = "low" | "medium" | "high";

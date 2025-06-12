@@ -192,6 +192,8 @@ export class DiscordProposalVoteService {
 						proposal.status !== 'accepted'
 					) {
 						proposal.status = 'rejected';
+						proposal.endedAt = new Date();
+
 						await transactionalEntityManager.save(proposal);
 						await resultsChannel.send(
 							`❌ The following proposal has been rejected:\n**Subject** : ${subject}\n**Format** : ${format}`,
@@ -207,6 +209,7 @@ export class DiscordProposalVoteService {
 						proposal.status !== 'rejected'
 					) {
 						proposal.status = 'accepted';
+						proposal.endedAt = new Date();
 
 						// Vérifier les votes du format
 						let finalFormat = format;

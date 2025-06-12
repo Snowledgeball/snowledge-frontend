@@ -15,15 +15,6 @@ export class ProposalController {
 		return this.proposalService.findAllForACommunityBySlug(communitySlug);
 	}
 
-	// GET /proposals/:id
-	@Get(':id')
-	findOne(
-		@Param('communitySlug') communitySlug: string,
-		@Param('id') id: number,
-	): Promise<Proposal> {
-		return this.proposalService.findOne(id, communitySlug);
-	}
-
 	// POST /proposals
 	@Post()
 	create(

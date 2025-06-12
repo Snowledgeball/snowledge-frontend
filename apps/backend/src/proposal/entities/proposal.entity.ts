@@ -35,8 +35,8 @@ export class Proposal {
 	@Column({ default: 'in_progress' })
 	status: 'in_progress' | 'accepted' | 'rejected';
 
-	@Column({ nullable: false })
-	endDate: Date;
+	@Column({ type: 'timestamptz', nullable: true })
+	endedAt: Date;
 
 	@ManyToOne(() => Community, (community) => community.proposals, {
 		cascade: false,
@@ -53,11 +53,16 @@ export class Proposal {
 	@OneToMany(() => Vote, (vote) => vote.proposal)
 	votes: Vote[];
 
-	@CreateDateColumn()
+	@CreateDateColumn({ type: 'timestamptz' })
 	createdAt: Date;
 
-	@UpdateDateColumn()
+	@UpdateDateColumn({ type: 'timestamptz' })
 	updatedAt: Date;
+
+	@Expose()
+	get deadline() {
+		return new Date(this.createdAt.getTime() + 5 * 24 * 60 * 60 * 1000); // TODO: make it dynamic, 5 days by default
+	}
 
 	@Expose()
 	get quorum() {
@@ -76,10 +81,6 @@ export class Proposal {
 
 	@Expose()
 	get reason() {
-		return this.status === 'accepted'
-			? 'by_vote'
-			: this.status === 'rejected' && this.endDate < new Date()
-				? 'by_expiration'
-				: null;
+		return this.endedAt > this.deadline ? 'by_expiration' : 'by_vote';
 	}
 }

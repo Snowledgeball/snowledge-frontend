@@ -4,7 +4,6 @@ import { useDateFnsLocale } from "./useDateFnsLocale";
 
 export function useProposalDates(proposal: Proposal) {
   const dateFnsLocale = useDateFnsLocale();
-  const endDate = proposal.endDate ? new Date(proposal.endDate) : null;
   const now = new Date();
 
   const startedAgo = proposal.createdAt
@@ -15,12 +14,19 @@ export function useProposalDates(proposal: Proposal) {
     : "";
 
   let endsIn = "";
-  if (endDate && !isNaN(endDate.getTime())) {
-    endsIn = formatDistance(endDate, now, {
+  if (proposal.deadline && !isNaN(new Date(proposal.deadline).getTime())) {
+    endsIn = formatDistance(new Date(proposal.deadline), now, {
       addSuffix: true,
       locale: dateFnsLocale,
     });
   }
 
-  return { startedAgo, endsIn, dateFnsLocale };
+  const endedAgo = proposal.endedAt
+    ? formatDistanceToNow(new Date(proposal.endedAt), {
+        addSuffix: true,
+        locale: dateFnsLocale,
+      })
+    : "";
+
+  return { startedAgo, endsIn, dateFnsLocale, endedAgo };
 }

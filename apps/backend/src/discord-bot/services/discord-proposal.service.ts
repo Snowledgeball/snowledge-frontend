@@ -137,7 +137,6 @@ export class DiscordProposalService {
 						status: 'in_progress',
 						submitter: submitter,
 						community: discordServerForDb.community,
-						endDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
 					});
 					await this.proposalRepository.save(proposalEntity);
 				}

@@ -6,7 +6,7 @@ import React from "react";
 import { STATUS_LABELS } from "./labels/status-labels";
 import { REASON_LABELS } from "./labels/reason-labels";
 import { PARTICIPATION_LABELS } from "./labels/participation-labels";
-import { useProposalDates } from "@/components/voting/shared/hooks/useProposalDates";
+import { useProposalDates } from "../shared/hooks/useProposalDates";
 
 function getParticipationLabel(progress: number) {
   if (progress < 50) return "low";
@@ -29,8 +29,7 @@ const VotingDoneCard: React.FC<VotingDoneCardProps> = ({ proposal }) => {
     REASON_LABELS[proposal.reason as keyof typeof REASON_LABELS] ||
     REASON_LABELS.by_vote;
   const reasonLabel = t(reason.label);
-  const { endsIn: endedAgo } = useProposalDates(proposal);
-
+  const { endedAgo } = useProposalDates(proposal);
   return (
     <Card
       key={proposal.id}

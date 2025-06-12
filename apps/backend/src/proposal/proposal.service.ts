@@ -31,13 +31,16 @@ export class ProposalService {
 				'votes',
 			],
 			order: {
-				endDate: 'DESC',
+				endedAt: 'DESC',
 			},
 		});
 		const now = new Date();
 		const toUpdate: Proposal[] = [];
+
+		// Quand on récupère la liste des propositions, on vérifie si elles ont expiré
 		proposals.forEach((proposal) => {
-			if (proposal.status === 'in_progress' && proposal.endDate < now) {
+			if (proposal.status === 'in_progress' && proposal.deadline < now) {
+				proposal.endedAt = new Date();
 				proposal.status = 'rejected';
 				toUpdate.push(proposal);
 			}
@@ -46,25 +49,6 @@ export class ProposalService {
 			await this.proposalRepository.save(toUpdate);
 		}
 		return proposals;
-	}
-
-	async findOne(id: number, communitySlug: string): Promise<Proposal> {
-		const proposal = await this.proposalRepository.findOne({
-			where: { id, community: { slug: communitySlug } },
-			relations: ['community', 'submitter'],
-		});
-		if (!proposal) throw new NotFoundException('Proposal not found');
-
-		// Expiration automatique à la lecture
-		if (
-			proposal.status === 'in_progress' &&
-			proposal.endDate < new Date()
-		) {
-			proposal.status = 'rejected';
-			await this.proposalRepository.save(proposal);
-		}
-
-		return proposal;
 	}
 
 	async create(
@@ -91,17 +75,10 @@ export class ProposalService {
 			throw new NotFoundException('Community or user not found');
 		}
 
-		// Si endDate n'est pas fourni, on met J+5 à partir de maintenant
-		//TODO: Pouvoir modifier ça
-		const endDate = createProposalDto.endDate
-			? new Date(createProposalDto.endDate)
-			: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
-
 		const proposal = this.proposalRepository.create({
 			...rest,
 			community,
 			submitter,
-			endDate,
 		});
 		const savedProposal = await this.proposalRepository.save(proposal);
 
@@ -125,7 +102,7 @@ export class ProposalService {
 		const totalLearners = community.learners.length;
 		const votes = proposal.votes.length;
 		const quorumReached = votes > totalLearners / 2;
-		const timeOver = now > new Date(proposal.endDate);
+		const timeOver = now > proposal.deadline;
 
 		if (proposal.status !== 'in_progress') return proposal; // déjà terminé
 
@@ -135,11 +112,10 @@ export class ProposalService {
 			).length;
 			const noVotes = proposal.votes.filter(
 				(v) => v.choice === 'against',
-				console.log('noVotes'),
 			).length;
 			proposal.status = yesVotes > noVotes ? 'accepted' : 'rejected';
+			proposal.endedAt = now;
 			await this.proposalRepository.save(proposal);
-			console.log('proposal.status');
 		}
 		return proposal;
 	}
