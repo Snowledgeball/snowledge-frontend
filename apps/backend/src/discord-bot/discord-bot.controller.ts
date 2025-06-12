@@ -1,11 +1,13 @@
 import { Controller, Post, Body, Get, Query } from '@nestjs/common';
-import { DiscordBotService } from './discord-bot.service';
 import { ApiTags } from '@nestjs/swagger';
+import { DiscordProposalService } from './services/discord-proposal.service';
 
 @ApiTags('Discord Bot')
 @Controller('discord-bot')
 export class DiscordBotController {
-	constructor(private readonly discordBotService: DiscordBotService) {}
+	constructor(
+		private readonly discordProposalService: DiscordProposalService,
+	) {}
 
 	// Endpoint pour créer les channels si besoin
 	@Post('create-channels')
@@ -18,7 +20,7 @@ export class DiscordBotController {
 			resultName?: string;
 		},
 	) {
-		return this.discordBotService.createChannelsIfNotExist(
+		return this.discordProposalService.createChannelsIfNotExist(
 			body.guildId,
 			body.proposeName,
 			body.voteName,
@@ -36,7 +38,7 @@ export class DiscordBotController {
 			newNames: { propose: string; vote: string; result: string };
 		},
 	) {
-		return this.discordBotService.renameChannels(
+		return this.discordProposalService.renameChannels(
 			body.guildId,
 			body.oldNames,
 			body.newNames,
@@ -46,6 +48,6 @@ export class DiscordBotController {
 	// Endpoint pour lister les channels textuels (GET avec query param)
 	@Get('list-channels')
 	async listChannels(@Query('guildId') guildId: string) {
-		return this.discordBotService.listTextChannels(guildId);
+		return this.discordProposalService.listTextChannels(guildId);
 	}
 }

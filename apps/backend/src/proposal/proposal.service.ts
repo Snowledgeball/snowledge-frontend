@@ -5,7 +5,7 @@ import { Proposal } from './entities/proposal.entity';
 import { CreateProposalDto } from './dto/create-proposal.dto/create-proposal.dto';
 import { Community } from '../community/entities/community.entity';
 import { User } from '../user/entities/user.entity';
-import { DiscordBotService } from 'src/discord-bot/discord-bot.service';
+import { DiscordProposalService } from 'src/discord-bot/services/discord-proposal.service';
 
 @Injectable()
 export class ProposalService {
@@ -16,8 +16,7 @@ export class ProposalService {
 		private communityRepository: Repository<Community>,
 		@InjectRepository(User)
 		private userRepository: Repository<User>,
-		@Inject(DiscordBotService)
-		private readonly discordBotService: DiscordBotService,
+		private readonly discordProposalService: DiscordProposalService,
 	) {}
 
 	async findAllForACommunityBySlug(
@@ -109,7 +108,7 @@ export class ProposalService {
 		// Envoi sur Discord si la communauté a un serveur Discord
 		const discordServer = community.discordServers?.[0];
 		if (discordServer && submitter.discordId) {
-			await this.discordBotService.sendProposalToDiscordChannel({
+			await this.discordProposalService.sendProposalToDiscordChannel({
 				guildId: discordServer.discordGuildId,
 				sujet: proposal.title,
 				description: proposal.description,
@@ -136,9 +135,11 @@ export class ProposalService {
 			).length;
 			const noVotes = proposal.votes.filter(
 				(v) => v.choice === 'against',
+				console.log('noVotes'),
 			).length;
 			proposal.status = yesVotes > noVotes ? 'accepted' : 'rejected';
 			await this.proposalRepository.save(proposal);
+			console.log('proposal.status');
 		}
 		return proposal;
 	}

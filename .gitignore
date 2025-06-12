@@ -53,3 +53,5 @@ dist/
 .vscode
 apps/backend/tsconfig.build.tsbuildinfo
 .env.dev
+
+.cursor
