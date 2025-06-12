@@ -21,7 +21,10 @@ export class Learner {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-	@ManyToOne(() => User, (user) => user.learners, { eager: true })
+	@ManyToOne(() => User, (user) => user.learners, {
+		eager: true,
+		onDelete: 'CASCADE',
+	})
 	user: User;
 
 	@ManyToOne(() => Community, (community) => community.learners, {
