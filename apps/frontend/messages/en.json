@@ -422,6 +422,7 @@
     "low": "Low",
     "medium": "Medium",
     "high": "High",
+    "to_be_defined": "To be defined",
     "errors": {
       "title_required": "Title is required.",
       "title_too_short": "Title must be at least 5 characters.",

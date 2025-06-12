@@ -369,6 +369,7 @@
     "low": "Faible",
     "medium": "Moyenne",
     "high": "Élevée",
+    "to_be_defined": "À définir",
     "vote_submitted_error": "Erreur lors de l'envoi du vote. Veuillez réessayer.",
     "errors": {
       "title_required": "Le titre est requis.",
