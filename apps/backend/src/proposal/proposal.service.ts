@@ -31,6 +31,9 @@ export class ProposalService {
 				'community.learners',
 				'votes',
 			],
+			order: {
+				endDate: 'DESC',
+			},
 		});
 		const now = new Date();
 		const toUpdate: Proposal[] = [];
