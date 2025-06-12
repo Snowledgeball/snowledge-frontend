@@ -21,7 +21,8 @@ export function getChannelIdByName(
   channels: Channel[] = [],
   name: string
 ): string | undefined {
-  return channels.find((ch) => ch.name === name)?.id;
+  return channels.find((ch) => ch.name.toLowerCase() === name.toLowerCase())
+    ?.id;
 }
 
 export function getExistingChannelNames(
