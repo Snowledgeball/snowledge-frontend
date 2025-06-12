@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { Proposal } from 'src/proposal/entities/proposal.entity';
 import { User as UserEntity } from 'src/user/entities/user.entity';
 import { Community } from 'src/community/entities/community.entity';
@@ -17,14 +17,9 @@ export class DiscordProposalVoteService {
 	private readonly VOTES_NECESSAIRES = 1;
 
 	constructor(
-		@InjectRepository(Proposal)
-		private proposalRepository: Repository<Proposal>,
-		@InjectRepository(UserEntity)
-		private userRepository: Repository<UserEntity>,
 		@InjectRepository(Community)
 		private communityRepository: Repository<Community>,
-		@InjectRepository(Vote)
-		private voteRepository: Repository<Vote>,
+		private readonly dataSource: DataSource,
 	) {}
 
 	async handleMessageReactionAdd(
@@ -58,121 +53,151 @@ export class DiscordProposalVoteService {
 				);
 				return;
 			}
-			let proposal = await this.proposalRepository.findOne({
-				where: {
-					title: subject,
-					format: format,
-					community: { id: community.id },
-				},
-				relations: ['community'],
-			});
-			if (!proposal) {
-				this.logger.error(
-					`Critical inconsistency: Discord proposal (title: ${subject}, format: ${format}) does not exist in database during voting or status update.`,
-				);
-				return;
-			}
-			let voteType: 'subject' | 'format' | null = null;
-			let voteValue: 'for' | 'against' | null = null;
-			if (reaction.emoji.name === '✅') {
-				voteType = 'subject';
-				voteValue = 'for';
-			} else if (reaction.emoji.name === '❌') {
-				voteType = 'subject';
-				voteValue = 'against';
-			} else if (reaction.emoji.name === '👍') {
-				voteType = 'format';
-				voteValue = 'for';
-			} else if (reaction.emoji.name === '👎') {
-				voteType = 'format';
-				voteValue = 'against';
-			}
-			if (voteType && voteValue) {
-				const voter = await this.userRepository.findOne({
-					where: { discordId: user.id },
-				});
-				if (!voter) {
-					this.logger.warn(
-						`Discord user ${user.id} not found in database`,
-					);
-					return;
-				}
-				let vote = await this.voteRepository.findOne({
-					where: {
-						proposal: { id: proposal.id },
-						user: { id: voter.id },
-					},
-				});
-				if (!vote) {
-					if (voteType === 'format') {
-						this.logger.warn(
-							'[DiscordProposalVoteService] User tried to vote on format before voting on subject. Vote ignored.',
+			await this.dataSource.transaction(
+				async (transactionalEntityManager) => {
+					const proposal = await transactionalEntityManager
+						.getRepository(Proposal)
+						.findOne({
+							where: {
+								title: subject,
+								format: format,
+								community: { id: community.id },
+							},
+							relations: ['community'],
+							lock: { mode: 'pessimistic_write' },
+						});
+
+					if (!proposal) {
+						this.logger.error(
+							`Critical inconsistency: Discord proposal (title: ${subject}, format: ${format}) does not exist in database during voting or status update.`,
 						);
 						return;
 					}
-					vote = this.voteRepository.create({
-						proposal,
-						user: voter,
-					});
-				}
-				if (voteType === 'subject') vote.choice = voteValue;
-				else if (voteType === 'format') vote.formatChoice = voteValue;
-				await this.voteRepository.save(vote);
-			}
-			let subjectYes = [],
-				subjectNo = [],
-				formatYes = [],
-				formatNo = [];
-			try {
-				subjectYes = await getVotersFromReaction(reaction, '✅');
-				subjectNo = await getVotersFromReaction(reaction, '❌');
-				formatYes = await getVotersFromReaction(reaction, '👍');
-				formatNo = await getVotersFromReaction(reaction, '👎');
-			} catch (err: any) {
-				if (err?.code === 10008) {
-					this.logger.warn(
-						'[DiscordBotService] Tried to fetch reactions for a message that no longer exists (probably deleted right after vote validation). This is normal if a user tried to react just after the message was deleted.',
-					);
-					return;
-				}
-				throw err;
-			}
-			const resultsChannelId = discordServer?.resultChannelId;
-			if (!resultsChannelId)
-				throw new Error('No results channel assigned in database.');
-			const resultsChannel =
-				reaction.message.guild.channels.cache.get(resultsChannelId);
-			if (
-				!resultsChannel ||
-				resultsChannel.type !== ChannelType.GuildText
-			) {
-				throw new Error(
-					'The results channel does not exist or is not a text channel.',
-				);
-			}
-			let newStatus: 'accepted' | 'rejected' | null = null;
-			if (subjectNo.length >= this.VOTES_NECESSAIRES) {
-				await resultsChannel.send(
-					`❌ The following proposal has been rejected:\n**Subject** : ${subject}\n**Format** : ${format}`,
-				);
-				newStatus = 'rejected';
-				try {
-					await reaction.message.delete();
-				} catch (e) {}
-			}
-			if (subjectYes.length >= this.VOTES_NECESSAIRES) {
-				await resultsChannel.send(
-					`✅ The following proposal has been **approved**:\n**Subject** : ${subject}\n**Format** : ${format}`,
-				);
-				newStatus = 'accepted';
-				try {
-					await reaction.message.delete();
-				} catch (e) {}
-			}
-			if (newStatus) {
-				proposal.status = newStatus;
-				await this.proposalRepository.save(proposal);
-			}
+
+					let voteType: 'subject' | 'format' | null = null;
+					let voteValue: 'for' | 'against' | null = null;
+					if (reaction.emoji.name === '✅') {
+						voteType = 'subject';
+						voteValue = 'for';
+					} else if (reaction.emoji.name === '❌') {
+						voteType = 'subject';
+						voteValue = 'against';
+					} else if (reaction.emoji.name === '👍') {
+						voteType = 'format';
+						voteValue = 'for';
+					} else if (reaction.emoji.name === '👎') {
+						voteType = 'format';
+						voteValue = 'against';
+					}
+					if (voteType && voteValue) {
+						const voter = await transactionalEntityManager
+							.getRepository(UserEntity)
+							.findOne({ where: { discordId: user.id } });
+						if (!voter) {
+							this.logger.warn(
+								`Discord user ${user.id} not found in database`,
+							);
+							return;
+						}
+						let vote = await transactionalEntityManager
+							.getRepository(Vote)
+							.findOne({
+								where: {
+									proposal: { id: proposal.id },
+									user: { id: voter.id },
+								},
+							});
+						if (!vote) {
+							if (voteType === 'format') {
+								this.logger.warn(
+									'[DiscordProposalVoteService] User tried to vote on format before voting on subject. Vote ignored.',
+								);
+								return;
+							}
+							vote = transactionalEntityManager
+								.getRepository(Vote)
+								.create({ proposal, user: voter });
+						}
+						if (voteType === 'subject') vote.choice = voteValue;
+						else if (voteType === 'format')
+							vote.formatChoice = voteValue;
+						await transactionalEntityManager
+							.getRepository(Vote)
+							.save(vote);
+					}
+					let subjectYes = [],
+						subjectNo = [],
+						formatYes = [],
+						formatNo = [];
+					try {
+						subjectYes = await getVotersFromReaction(
+							reaction,
+							'✅',
+						);
+						subjectNo = await getVotersFromReaction(reaction, '❌');
+						formatYes = await getVotersFromReaction(reaction, '👍');
+						formatNo = await getVotersFromReaction(reaction, '👎');
+					} catch (err: any) {
+						if (err?.code === 10008) {
+							this.logger.warn(
+								'[DiscordBotService] Tried to fetch reactions for a message that no longer exists (probably deleted right after vote validation). This is normal if a user tried to react just after the message was deleted.',
+							);
+							return;
+						}
+						throw err;
+					}
+					const resultsChannelId = discordServer?.resultChannelId;
+					if (!resultsChannelId)
+						throw new Error(
+							'No results channel assigned in database.',
+						);
+					const resultsChannel =
+						reaction.message.guild.channels.cache.get(
+							resultsChannelId,
+						);
+					if (
+						!resultsChannel ||
+						resultsChannel.type !== ChannelType.GuildText
+					) {
+						throw new Error(
+							'The results channel does not exist or is not a text channel.',
+						);
+					}
+					console.log('subjectNo', subjectNo);
+					console.log('proposal.status', proposal.status);
+					console.log('subjectYes', subjectYes);
+					if (
+						subjectNo.length >= this.VOTES_NECESSAIRES &&
+						proposal.status !== 'rejected' &&
+						proposal.status !== 'accepted'
+					) {
+						proposal.status = 'rejected';
+						await transactionalEntityManager.save(proposal);
+						await resultsChannel.send(
+							`❌ The following proposal has been rejected:\n**Subject** : ${subject}\n**Format** : ${format}`,
+						);
+						try {
+							await reaction.message.delete();
+						} catch (e) {}
+						return;
+					}
+					if (
+						subjectYes.length >= this.VOTES_NECESSAIRES &&
+						proposal.status !== 'accepted' &&
+						proposal.status !== 'rejected'
+					) {
+						proposal.status = 'accepted';
+						await transactionalEntityManager.save(proposal);
+						await resultsChannel.send(
+							`✅ The following proposal has been **approved**:\n**Subject** : ${subject}\n**Format** : ${format}`,
+						);
+						try {
+							await reaction.message.delete();
+						} catch (e) {}
+						return;
+					}
+				},
+			);
 		} catch (e) {
 			this.logger.error('Error in MessageReactionAdd:', e);
 		}
