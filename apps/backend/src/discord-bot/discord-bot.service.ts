@@ -522,8 +522,9 @@ export class DiscordBotService implements OnModuleInit {
 					'🎉 **Proposez vos idées !**\n\n' +
 					'Pour proposer une idée :\n' +
 					'1. Cliquez sur le bouton **📝 Proposer une idée** ci-dessous.\n' +
-					'2. Saisissez le sujet de votre idée.\n' +
-					'3. Sélectionnez le format souhaité (**Whitepaper** ou **Masterclass**).\n\n' +
+					'2. Saisissez le sujet de votre idée et sa description.\n' +
+					'3. Sélectionnez le format souhaité (**Whitepaper** ou **Masterclass**).\n' +
+					'4. Indiquez si vous souhaitez être contributeur pour cette idée.\n\n' +
 					'Votre proposition sera ensuite envoyée dans le salon <#' +
 					voteName +
 					'> pour que tout le monde puisse voter !';
