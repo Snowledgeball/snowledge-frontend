@@ -18,10 +18,17 @@ import {
 } from 'discord.js';
 import * as fs from 'fs';
 import * as path from 'path';
+import { DiscordServer } from 'src/discord-server/entities/discord-server-entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class DiscordBotService implements OnModuleInit {
-	// Logger NestJS pour afficher les logs dans la console
+	constructor(
+		@InjectRepository(DiscordServer)
+		private discordServerRepository: Repository<DiscordServer>,
+	) {}
+
 	private readonly logger = new Logger(DiscordBotService.name);
 	private client: Client;
 	// Nombre de votes nécessaires pour valider ou rejeter une proposition
@@ -237,21 +244,32 @@ export class DiscordBotService implements OnModuleInit {
 
 	// Gère la sélection du format : publie la proposition dans #votes-idees et ajoute les réactions de vote
 	private async handleSelectFormat(interaction: any) {
+		// 1. Déférer la réponse dès le début
+		await interaction.deferUpdate();
+
 		const format = interaction.values[0];
 		const subject = Buffer.from(
 			interaction.customId.split('|')[1],
 			'base64',
 		).toString();
-		const salonVotes = this.getTextChannelByName(
-			interaction.guild,
-			'votes-idees', // TODO: Récupérer le nom du channel depuis la base de données
-		);
-		if (!salonVotes) {
-			return interaction.reply({
-				content: '❌ The #votes-idees channel does not exist.',
-				ephemeral: true,
-			});
+
+		const discordServer = await this.discordServerRepository.findOne({
+			where: { discordGuildId: interaction.guild.id },
+		});
+		const voteChannelId = discordServer?.voteChannelId;
+		if (!voteChannelId) {
+			throw new Error('Aucun salon vote assigné en base.');
 		}
+
+		const salonVotes = interaction.guild.channels.cache.get(voteChannelId);
+		if (!salonVotes || salonVotes.type !== ChannelType.GuildText) {
+			throw new Error(
+				"Le salon vote n'existe pas ou n'est pas un salon textuel.",
+			);
+		}
+		const voteChannelName = salonVotes.name;
+		console.log(voteChannelName);
+
 		// Envoie le message de proposition et ajoute les réactions pour voter
 		const messageVote = await salonVotes.send(
 			`📢 New idea proposed by <@${interaction.user.id}> :\n\n**Subject** : ${subject}\n**Format** : ${format}\n\n**Vote Subject** : ✅ = Yes | ❌ = No\n**Vote Format** : 👍 = Yes | 👎 = No`,
@@ -276,14 +294,15 @@ export class DiscordBotService implements OnModuleInit {
 		this.writeVotes(votesData);
 
 		try {
-			await interaction.update({
+			// 2. Modifie la réponse initiale (après deferUpdate)
+			await interaction.editReply({
 				content: '✅ Your proposal has been sent for voting!',
 				components: [],
 				ephemeral: true,
 			});
 		} catch (e) {
 			this.logger.error(
-				'Error updating interaction (probably expired):',
+				'Error editing interaction (probably expired):',
 				e,
 			);
 		}
@@ -294,11 +313,18 @@ export class DiscordBotService implements OnModuleInit {
 		reaction: MessageReaction,
 		user: User,
 	) {
+		const discordServer = await this.discordServerRepository.findOne({
+			where: { discordGuildId: reaction.message.guild.id },
+		});
+		const voteChannelId = discordServer?.voteChannelId;
+		if (!voteChannelId) {
+			throw new Error('Aucun salon vote assigné en base.');
+		}
 		try {
 			if (user.bot) return;
 			// Vérifie que le channel est bien un salon textuel nommé "votes-idees"
 			const channel = reaction.message.channel;
-			if (!('name' in channel) || channel.name !== 'votes-idees') return;
+			if (!('id' in channel) || channel.id !== voteChannelId) return;
 			// Vérifie que le message est bien une proposition
 			if (
 				!reaction.message.content ||
@@ -314,6 +340,7 @@ export class DiscordBotService implements OnModuleInit {
 			const subjectNo = await this.getVotersFromReaction(reaction, '❌');
 			const formatYes = await this.getVotersFromReaction(reaction, '👍');
 			const formatNo = await this.getVotersFromReaction(reaction, '👎');
+
 			const result = {
 				subject,
 				format,
@@ -336,12 +363,26 @@ export class DiscordBotService implements OnModuleInit {
 			}
 			this.writeVotes(votesData);
 
+			const discordServer = await this.discordServerRepository.findOne({
+				where: { discordGuildId: reaction.message.guild.id },
+			});
+			const resultsChannelId = discordServer?.resultChannelId;
+			if (!resultsChannelId) {
+				throw new Error('Aucun salon résultats assigné en base.');
+			}
+
 			// === LOGIQUE DE VALIDATION/REJET ===
 			// Si le nombre de ❌ atteint le seuil, la proposition est rejetée
-			const resultsChannel = this.getTextChannelByName(
-				reaction.message.guild,
-				'vote-resultats', // TODO: Récupérer le nom du channel depuis la base de données
-			);
+			const resultsChannel =
+				reaction.message.guild.channels.cache.get(resultsChannelId);
+			if (
+				!resultsChannel ||
+				resultsChannel.type !== ChannelType.GuildText
+			) {
+				throw new Error(
+					"Le salon résultats n'existe pas ou n'est pas un salon textuel.",
+				);
+			}
 			if (subjectNo.length >= this.VOTES_NECESSAIRES) {
 				if (resultsChannel) {
 					await resultsChannel.send(
