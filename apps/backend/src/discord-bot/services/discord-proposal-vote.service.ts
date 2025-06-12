@@ -186,9 +186,6 @@ export class DiscordProposalVoteService {
 							'The results channel does not exist or is not a text channel.',
 						);
 					}
-					console.log('subjectNo', subjectNo);
-					console.log('proposal.status', proposal.status);
-					console.log('subjectYes', subjectYes);
 					if (
 						subjectNo.length >= this.VOTES_NECESSAIRES &&
 						proposal.status !== 'rejected' &&
