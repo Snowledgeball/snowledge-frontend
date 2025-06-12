@@ -21,6 +21,7 @@ import * as path from 'path';
 import { DiscordServer } from 'src/discord-server/entities/discord-server-entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class DiscordBotService implements OnModuleInit {
@@ -33,6 +34,10 @@ export class DiscordBotService implements OnModuleInit {
 	private client: Client;
 	// Nombre de votes nécessaires pour valider ou rejeter une proposition
 	private readonly VOTES_NECESSAIRES = 1;
+	private pendingProposals = new Map<
+		string,
+		{ sujet: string; description: string }
+	>();
 
 	// Méthode appelée automatiquement par NestJS au démarrage du module
 	onModuleInit() {
@@ -204,7 +209,7 @@ export class DiscordBotService implements OnModuleInit {
 	}
 
 	// === HANDLERS ===
-	// Gère le clic sur le bouton "Proposer une idée" : ouvre un modal pour saisir le sujet
+	// Gère le clic sur le bouton "Proposer une idée" : ouvre un modal pour saisir le sujet et la description
 	private async handleProposerIdee(interaction: any) {
 		const modal = new ModalBuilder()
 			.setCustomId('formulaire_idee_sujet')
@@ -214,21 +219,30 @@ export class DiscordBotService implements OnModuleInit {
 			.setLabel('Quel est le sujet ?')
 			.setStyle(TextInputStyle.Paragraph)
 			.setRequired(true);
-		// On précise le type pour éviter les erreurs de typage
+		// AJOUT : champ description
+		const descriptionInput = new TextInputBuilder()
+			.setCustomId('description')
+			.setLabel('Décris ton idée')
+			.setStyle(TextInputStyle.Paragraph)
+			.setRequired(true);
 		const row1 = new ActionRowBuilder<TextInputBuilder>().addComponents(
 			sujetInput,
 		);
-		modal.addComponents(row1);
+		const row2 = new ActionRowBuilder<TextInputBuilder>().addComponents(
+			descriptionInput,
+		);
+		modal.addComponents(row1, row2);
 		await interaction.showModal(modal);
 	}
 
 	// Gère la soumission du modal : propose un select menu pour choisir le format
 	private async handleModalSujet(interaction: any) {
 		const sujet = interaction.fields.getTextInputValue('sujet');
+		const description = interaction.fields.getTextInputValue('description');
+		const id = randomUUID();
+		this.pendingProposals.set(id, { sujet, description });
 		const select = new StringSelectMenuBuilder()
-			.setCustomId(
-				`choix_format|${Buffer.from(sujet).toString('base64')}`,
-			)
+			.setCustomId(`choix_format|${id}`)
 			.setPlaceholder('Choisis le format')
 			.addOptions([
 				{ label: 'Whitepaper', value: 'Whitepaper' },
@@ -246,13 +260,9 @@ export class DiscordBotService implements OnModuleInit {
 	private async handleSelectFormat(interaction: any) {
 		// 1. Déférer la réponse dès le début
 		await interaction.deferUpdate();
-
 		const format = interaction.values[0];
-		const subject = Buffer.from(
-			interaction.customId.split('|')[1],
-			'base64',
-		).toString();
-
+		const id = interaction.customId.split('|')[1];
+		const { sujet, description } = this.pendingProposals.get(id) || {};
 		const discordServer = await this.discordServerRepository.findOne({
 			where: { discordGuildId: interaction.guild.id },
 		});
@@ -260,7 +270,6 @@ export class DiscordBotService implements OnModuleInit {
 		if (!voteChannelId) {
 			throw new Error('Aucun salon vote assigné en base.');
 		}
-
 		const salonVotes = interaction.guild.channels.cache.get(voteChannelId);
 		if (!salonVotes || salonVotes.type !== ChannelType.GuildText) {
 			throw new Error(
@@ -269,20 +278,19 @@ export class DiscordBotService implements OnModuleInit {
 		}
 		const voteChannelName = salonVotes.name;
 		console.log(voteChannelName);
-
-		// Envoie le message de proposition et ajoute les réactions pour voter
+		// Affichage dans le salon de vote
 		const messageVote = await salonVotes.send(
-			`📢 New idea proposed by <@${interaction.user.id}> :\n\n**Subject** : ${subject}\n**Format** : ${format}\n\n**Vote Subject** : ✅ = Yes | ❌ = No\n**Vote Format** : 👍 = Yes | 👎 = No`,
+			`📢 New idea proposed by <@${interaction.user.id}> :\n\n**Subject** : ${sujet}\n**Description** : ${description}\n**Format** : ${format}\n\n**Vote Subject** : ✅ = Yes | ❌ = No\n**Vote Format** : 👍 = Yes | 👎 = No`,
 		);
 		await messageVote.react('✅');
 		await messageVote.react('❌');
 		await messageVote.react('👍');
 		await messageVote.react('👎');
-
 		// Ajoute la proposition dans votes.json avec le statut 'pending'
 		let votesData = this.readVotes();
 		votesData.push({
-			subject,
+			subject: sujet,
+			description,
 			format,
 			proposedBy: interaction.user.id,
 			status: 'pending',
@@ -292,7 +300,6 @@ export class DiscordBotService implements OnModuleInit {
 			},
 		});
 		this.writeVotes(votesData);
-
 		try {
 			// 2. Modifie la réponse initiale (après deferUpdate)
 			await interaction.editReply({
