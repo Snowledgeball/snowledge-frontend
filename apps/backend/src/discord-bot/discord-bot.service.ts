@@ -518,6 +518,21 @@ export class DiscordBotService implements OnModuleInit {
 					if (fetched.size > 0)
 						await salonIdees.bulkDelete(fetched, true);
 				} catch (e) {}
+				let voteChannelId = null;
+				if (!voteName) {
+					const discordServer =
+						await this.discordServerRepository.findOne({
+							where: { discordGuildId: guildId },
+						});
+					voteChannelId = discordServer?.voteChannelId;
+				} else {
+					const voteChannel = guild.channels.cache.find(
+						(ch) =>
+							ch.type === ChannelType.GuildText &&
+							ch.name === voteName,
+					);
+					voteChannelId = voteChannel ? voteChannel.id : voteName;
+				}
 				const explication =
 					'🎉 **Proposez vos idées !**\n\n' +
 					'Pour proposer une idée :\n' +
@@ -526,7 +541,7 @@ export class DiscordBotService implements OnModuleInit {
 					'3. Sélectionnez le format souhaité (**Whitepaper** ou **Masterclass**).\n' +
 					'4. Indiquez si vous souhaitez être contributeur pour cette idée.\n\n' +
 					'Votre proposition sera ensuite envoyée dans le salon <#' +
-					voteName +
+					voteChannelId +
 					'> pour que tout le monde puisse voter !';
 				const button = new ButtonBuilder()
 					.setCustomId('proposer_idee')
