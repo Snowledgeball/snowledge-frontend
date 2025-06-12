@@ -118,9 +118,32 @@ export class DiscordProposalVoteService {
 								.getRepository(Vote)
 								.create({ proposal, user: voter });
 						}
-						if (voteType === 'subject') vote.choice = voteValue;
-						else if (voteType === 'format')
+						if (voteType === 'subject') {
+							vote.choice = voteValue;
+							const userId = user.id;
+							let formatChoice: 'for' | 'against' | undefined;
+							const formatReactions =
+								reaction.message.reactions.cache.filter(
+									(r) =>
+										r.emoji.name === '👍' ||
+										r.emoji.name === '👎',
+								);
+							for (const r of formatReactions.values()) {
+								const users = await r.users.fetch();
+								if (users.has(userId)) {
+									formatChoice =
+										r.emoji.name === '👍'
+											? 'for'
+											: 'against';
+									break;
+								}
+							}
+							if (formatChoice) {
+								vote.formatChoice = formatChoice;
+							}
+						} else if (voteType === 'format') {
 							vote.formatChoice = voteValue;
+						}
 						await transactionalEntityManager
 							.getRepository(Vote)
 							.save(vote);

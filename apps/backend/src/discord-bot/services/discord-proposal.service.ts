@@ -161,6 +161,7 @@ export class DiscordProposalService {
 	}
 
 	async handleMessageReactionAdd(reaction: MessageReaction, user: User) {
+		if (user.bot) return;
 		const discordServer = await this.discordServerRepository.findOne({
 			where: { discordGuildId: reaction.message.guild.id },
 			relations: ['community'],
