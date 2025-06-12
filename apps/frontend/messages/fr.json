@@ -422,6 +422,7 @@
     "warningRename": "Le renommage prend plus de 5 secondes. Vous avez probablement atteint la limite Discord (2 renommages toutes les 10 minutes). Veuillez patienter 10 minutes ou renommer le salon directement sur Discord.",
     "errorFetchServer": "Erreur lors de la récupération des données du serveur Discord.",
     "successRename": "Salon renommé avec succès !",
-    "errorRename": "Erreur lors du renommage du salon Discord."
+    "errorRename": "Erreur lors du renommage du salon Discord.",
+    "validate": "Valider"
   }
 }

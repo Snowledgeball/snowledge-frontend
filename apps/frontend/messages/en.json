@@ -474,6 +474,7 @@
     "warningRename": "Renaming is taking more than 5 seconds. You have probably reached the Discord limit (2 renames every 10 minutes). Please wait 10 minutes or rename the channel directly on Discord.",
     "errorFetchServer": "Error while fetching Discord server data.",
     "successRename": "Channel renamed successfully!",
-    "errorRename": "Error while renaming the Discord channel."
+    "errorRename": "Error while renaming the Discord channel.",
+    "validate": "Validate"
   }
 }

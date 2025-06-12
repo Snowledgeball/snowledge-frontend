@@ -456,10 +456,24 @@ export class DiscordBotService implements OnModuleInit {
 				await this.voteRepository.save(vote);
 			}
 			// --- LOGIQUE DE VALIDATION/REJET ---
-			const subjectYes = await this.getVotersFromReaction(reaction, '✅');
-			const subjectNo = await this.getVotersFromReaction(reaction, '❌');
-			const formatYes = await this.getVotersFromReaction(reaction, '👍');
-			const formatNo = await this.getVotersFromReaction(reaction, '👎');
+			let subjectYes = [],
+				subjectNo = [],
+				formatYes = [],
+				formatNo = [];
+			try {
+				subjectYes = await this.getVotersFromReaction(reaction, '✅');
+				subjectNo = await this.getVotersFromReaction(reaction, '❌');
+				formatYes = await this.getVotersFromReaction(reaction, '👍');
+				formatNo = await this.getVotersFromReaction(reaction, '👎');
+			} catch (err: any) {
+				if (err?.code === 10008) {
+					this.logger.warn(
+						'[DiscordBotService] Tried to fetch reactions for a message that no longer exists (probably deleted right after vote validation). This is normal if a user tried to react just after the message was deleted.',
+					);
+					return;
+				}
+				throw err;
+			}
 			// --- ENREGISTREMENT EN BDD : update statut uniquement ---
 			const resultsChannelId = discordServer?.resultChannelId;
 			if (!resultsChannelId) {
@@ -560,9 +574,9 @@ export class DiscordBotService implements OnModuleInit {
 					const voteChannel = guild.channels.cache.find(
 						(ch) =>
 							ch.type === ChannelType.GuildText &&
-							ch.name === voteName,
+							ch.name === voteName.toLowerCase(),
 					);
-					voteChannelId = voteChannel ? voteChannel.id : voteName;
+					voteChannelId = voteChannel?.id;
 				}
 				const explication =
 					'🎉 **Submit your ideas!**\n\n' +
