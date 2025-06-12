@@ -68,7 +68,7 @@ export class DiscordBotService implements OnModuleInit {
 
 		// Log quand le bot est prêt
 		this.client.once(Events.ClientReady, () => {
-			this.logger.log(`✅ Connecté en tant que ${this.client.user?.tag}`);
+			this.logger.log(`✅ Connected as ${this.client.user?.tag}`);
 		});
 
 		// Gestion des interactions (slash commands, boutons, modals, select menus)
@@ -142,7 +142,7 @@ export class DiscordBotService implements OnModuleInit {
 		const token = process.env.DISCORD_TOKEN;
 		if (!token) {
 			this.logger.error(
-				"DISCORD_TOKEN n'est pas défini dans les variables d'environnement !",
+				'DISCORD_TOKEN is not defined in environment variables!',
 			);
 			return;
 		}
@@ -184,16 +184,16 @@ export class DiscordBotService implements OnModuleInit {
 	private async handleProposerIdee(interaction: any) {
 		const modal = new ModalBuilder()
 			.setCustomId('formulaire_idee_sujet')
-			.setTitle('Proposer une idée');
+			.setTitle('Propose an idea');
 		const sujetInput = new TextInputBuilder()
 			.setCustomId('sujet')
-			.setLabel('Quel est le sujet ?')
+			.setLabel('What is the subject?')
 			.setStyle(TextInputStyle.Paragraph)
 			.setRequired(true);
 		// AJOUT : champ description
 		const descriptionInput = new TextInputBuilder()
 			.setCustomId('description')
-			.setLabel('Décris ton idée')
+			.setLabel('Describe your idea')
 			.setStyle(TextInputStyle.Paragraph)
 			.setRequired(true);
 		const row1 = new ActionRowBuilder<TextInputBuilder>().addComponents(
@@ -214,14 +214,14 @@ export class DiscordBotService implements OnModuleInit {
 		this.pendingProposals.set(id, { sujet, description });
 		const select = new StringSelectMenuBuilder()
 			.setCustomId(`choix_format|${id}`)
-			.setPlaceholder('Choisis le format')
+			.setPlaceholder('Choose the format')
 			.addOptions([
 				{ label: 'Whitepaper', value: 'Whitepaper' },
 				{ label: 'Masterclass', value: 'Masterclass' },
 			]);
 		const row = new ActionRowBuilder().addComponents(select);
 		await interaction.reply({
-			content: 'Sélectionne le format pour ta proposition :',
+			content: 'Select the format for your proposal:',
 			components: [row],
 			ephemeral: true,
 		});
@@ -236,7 +236,7 @@ export class DiscordBotService implements OnModuleInit {
 		const proposal = this.pendingProposals.get(id);
 		if (!proposal) {
 			await interaction.followUp({
-				content: 'Erreur : proposition introuvable.',
+				content: 'Error: proposal not found.',
 				ephemeral: true,
 			});
 			return;
@@ -246,7 +246,7 @@ export class DiscordBotService implements OnModuleInit {
 
 		// 1. Met à jour le message du select menu format pour indiquer que le format est validé
 		await interaction.editReply({
-			content: `✅ Format sélectionné : **${format}**`,
+			content: `✅ Format selected: **${format}**`,
 			components: [],
 			ephemeral: true,
 		});
@@ -254,14 +254,14 @@ export class DiscordBotService implements OnModuleInit {
 		// 2. Affiche le select menu contributeur
 		const select = new StringSelectMenuBuilder()
 			.setCustomId(`choix_contributeur|${id}`)
-			.setPlaceholder('Souhaitez-vous être contributeur ?')
+			.setPlaceholder('Do you want to be a contributor?')
 			.addOptions([
-				{ label: 'Oui', value: 'yes' },
-				{ label: 'Non', value: 'no' },
+				{ label: 'Yes', value: 'yes' },
+				{ label: 'No', value: 'no' },
 			]);
 		const row = new ActionRowBuilder().addComponents(select);
 		await interaction.followUp({
-			content: 'Souhaitez-vous être contributeur pour cette idée ?',
+			content: 'Do you want to be a contributor for this idea?',
 			components: [row],
 			ephemeral: true,
 		});
@@ -276,7 +276,7 @@ export class DiscordBotService implements OnModuleInit {
 		const proposal = this.pendingProposals.get(id);
 		if (!proposal) {
 			await interaction.followUp({
-				content: 'Erreur : proposition introuvable.',
+				content: 'Error: proposal not found.',
 				ephemeral: true,
 			});
 			return;
@@ -304,11 +304,11 @@ export class DiscordBotService implements OnModuleInit {
 				});
 			if (!submitter) {
 				this.logger.warn(
-					`Utilisateur Discord ${interaction.user.id} introuvable en BDD lors de la création de la proposition.`,
+					`Discord user ${interaction.user.id} not found in database when creating proposal.`,
 				);
 			} else if (!discordServerForDb?.community) {
 				this.logger.warn(
-					`Aucune communauté liée au serveur Discord lors de la création de la proposition.`,
+					`No community linked to Discord server when creating proposal.`,
 				);
 			} else {
 				// Vérifie si la proposition existe déjà (évite doublon si double clic)
@@ -336,10 +336,7 @@ export class DiscordBotService implements OnModuleInit {
 				}
 			}
 		} catch (e) {
-			this.logger.error(
-				'Erreur lors de la création de la proposition en BDD :',
-				e,
-			);
+			this.logger.error('Error while creating proposal in database:', e);
 		}
 		this.pendingProposals.delete(id);
 		try {
@@ -367,7 +364,7 @@ export class DiscordBotService implements OnModuleInit {
 		});
 		const voteChannelId = discordServer?.voteChannelId;
 		if (!voteChannelId) {
-			throw new Error('Aucun salon vote assigné en base.');
+			throw new Error('No vote channel assigned in database.');
 		}
 		try {
 			if (user.bot) return;
@@ -392,7 +389,7 @@ export class DiscordBotService implements OnModuleInit {
 				: null;
 			if (!community) {
 				this.logger.warn(
-					`Communauté introuvable pour le serveur Discord ${reaction.message.guild.id}`,
+					`Community not found for Discord server ${reaction.message.guild.id}`,
 				);
 				return;
 			}
@@ -407,7 +404,7 @@ export class DiscordBotService implements OnModuleInit {
 			});
 			if (!proposal) {
 				this.logger.error(
-					`Incohérence critique : la proposition Discord (title: ${subject}, format: ${format}) n'existe pas en BDD lors d'un vote ou d'une mise à jour de statut.`,
+					`Critical inconsistency: Discord proposal (title: ${subject}, format: ${format}) does not exist in database during voting or status update.`,
 				);
 				return;
 			}
@@ -434,7 +431,7 @@ export class DiscordBotService implements OnModuleInit {
 				});
 				if (!voter) {
 					this.logger.warn(
-						`Utilisateur Discord ${user.id} introuvable en BDD`,
+						`Discord user ${user.id} not found in database`,
 					);
 					return;
 				}
@@ -466,7 +463,7 @@ export class DiscordBotService implements OnModuleInit {
 			// --- ENREGISTREMENT EN BDD : update statut uniquement ---
 			const resultsChannelId = discordServer?.resultChannelId;
 			if (!resultsChannelId) {
-				throw new Error('Aucun salon résultats assigné en base.');
+				throw new Error('No results channel assigned in database.');
 			}
 			const resultsChannel =
 				reaction.message.guild.channels.cache.get(resultsChannelId);
@@ -475,7 +472,7 @@ export class DiscordBotService implements OnModuleInit {
 				resultsChannel.type !== ChannelType.GuildText
 			) {
 				throw new Error(
-					"Le salon résultats n'existe pas ou n'est pas un salon textuel.",
+					'The results channel does not exist or is not a text channel.',
 				);
 			}
 			let newStatus: 'accepted' | 'rejected' | null = null;
@@ -568,18 +565,18 @@ export class DiscordBotService implements OnModuleInit {
 					voteChannelId = voteChannel ? voteChannel.id : voteName;
 				}
 				const explication =
-					'🎉 **Proposez vos idées !**\n\n' +
-					'Pour proposer une idée :\n' +
-					'1. Cliquez sur le bouton **📝 Proposer une idée** ci-dessous.\n' +
-					'2. Saisissez le sujet de votre idée et sa description.\n' +
-					'3. Sélectionnez le format souhaité (**Whitepaper** ou **Masterclass**).\n' +
-					'4. Indiquez si vous souhaitez être contributeur pour cette idée.\n\n' +
-					'Votre proposition sera ensuite envoyée dans le salon <#' +
+					'🎉 **Submit your ideas!**\n\n' +
+					'To submit an idea:\n' +
+					'1. Click the **📝 Submit an idea** button below.\n' +
+					'2. Enter the subject of your idea and its description.\n' +
+					'3. Select the desired format (**Whitepaper** or **Masterclass**).\n' +
+					'4. Indicate if you want to be a contributor for this idea.\n\n' +
+					'Your proposal will then be sent to the <#' +
 					voteChannelId +
-					'> pour que tout le monde puisse voter !';
+					'> channel for everyone to vote!';
 				const button = new ButtonBuilder()
 					.setCustomId('proposer_idee')
-					.setLabel('📝 Proposer une idée')
+					.setLabel('📝 Submit an idea')
 					.setStyle(ButtonStyle.Primary);
 				const row = new ActionRowBuilder().addComponents(button);
 				const sent = await salonIdees.send({
@@ -593,9 +590,9 @@ export class DiscordBotService implements OnModuleInit {
 			return { created, existing };
 		} catch (e) {
 			const err = e as Error;
-			this.logger.error('Erreur création channels Discord :', err);
+			this.logger.error('Error creating Discord channels:', err);
 			return {
-				error: 'Erreur lors de la création des channels',
+				error: 'Error while creating channels',
 				details: err.message,
 			};
 		}
@@ -633,9 +630,9 @@ export class DiscordBotService implements OnModuleInit {
 			return { results };
 		} catch (e) {
 			const err = e as Error;
-			this.logger.error('Erreur renommage channels Discord :', err);
+			this.logger.error('Error renaming Discord channels:', err);
 			return {
-				error: 'Erreur lors du renommage des channels',
+				error: 'Error while renaming channels',
 				details: err.message,
 			};
 		}
@@ -654,9 +651,9 @@ export class DiscordBotService implements OnModuleInit {
 			return channels;
 		} catch (e) {
 			const err = e as Error;
-			this.logger.error('Erreur listing channels Discord :', err);
+			this.logger.error('Error listing Discord channels:', err);
 			return {
-				error: 'Erreur lors du listing des channels',
+				error: 'Error while listing channels',
 				details: err.message,
 			};
 		}
@@ -683,17 +680,17 @@ export class DiscordBotService implements OnModuleInit {
 		});
 		const voteChannelId = discordServer?.voteChannelId;
 		if (!voteChannelId) {
-			throw new Error('Aucun salon vote assigné en base.');
+			throw new Error('No vote channel assigned in database.');
 		}
 		const guild = await this.client.guilds.fetch(guildId);
 		const salonVotes = guild.channels.cache.get(voteChannelId);
 		if (!salonVotes || salonVotes.type !== ChannelType.GuildText) {
 			throw new Error(
-				"Le salon vote n'existe pas ou n'est pas un salon textuel.",
+				'The vote channel does not exist or is not a text channel.',
 			);
 		}
 		const messageVote = await salonVotes.send(
-			`📢 New idea proposed by <@${discordUserId}> :\n\n**Subject** : ${sujet}\n**Description** : ${description}\n**Format** : ${format}\n**Contributeur** : ${contributeur ? 'Oui' : 'Non'}\n\n**Vote Subject** : ✅ = Yes | ❌ = No\n**Vote Format** : 👍 = Yes | 👎 = No`,
+			`📢 New idea proposed by <@${discordUserId}> :\n\n**Subject** : ${sujet}\n**Description** : ${description}\n**Format** : ${format}\n**Contributor** : ${contributeur ? 'Yes' : 'No'}\n\n**Vote Subject** : ✅ = Yes | ❌ = No\n**Vote Format** : 👍 = Yes | 👎 = No`,
 		);
 		await messageVote.react('✅');
 		await messageVote.react('❌');
