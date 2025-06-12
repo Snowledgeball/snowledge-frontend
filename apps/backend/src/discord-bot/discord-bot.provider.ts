@@ -72,27 +72,28 @@ export class DiscordBotProvider {
 			}
 
 			await this.learnerService.create(user.id, community.id);
-		}
 
-		await this.userService.update(user.id, {
-			discordAccess: discordAccess,
-		});
+			await this.userService.update(user.id, {
+				discordAccess: discordAccess,
+				discordId: discordUser.id,
+			});
 
-		// Attribution du rôle Discord
-		const client = this.discordClientService?.getClient?.();
-		if (!client) throw new Error('Client Discord non initialisé');
-		const guild = await client.guilds.fetch(guildId);
-		const member = await guild.members.fetch(discordUser.id);
-		const role = guild.roles.cache.find(
-			(r) => r.name === 'Snowledge Authenticated',
-		);
-		if (!role) {
-			throw new Error(
-				"Le rôle 'Snowledge Authenticated' n'existe pas sur ce serveur !",
+			// Attribution du rôle Discord
+			const client = this.discordClientService?.getClient?.();
+			if (!client) throw new Error('Client Discord non initialisé');
+			const guild = await client.guilds.fetch(guildId);
+			const member = await guild.members.fetch(discordUser.id);
+			const role = guild.roles.cache.find(
+				(r) => r.name === 'Snowledge Authenticated',
 			);
-		}
+			if (!role) {
+				throw new Error(
+					"Le rôle 'Snowledge Authenticated' n'existe pas sur ce serveur !",
+				);
+			}
 
-		await member.roles.add(role.id);
+			await member.roles.add(role.id);
+		}
 
 		return user;
 	}

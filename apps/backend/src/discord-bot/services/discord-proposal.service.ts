@@ -201,9 +201,32 @@ export class DiscordProposalService {
 					if (name === (resultName ? resultName : undefined))
 						resultChannel = found;
 				} else {
+					const role = guild.roles.cache.find(
+						(r) => r.name === 'Snowledge Authenticated',
+					);
+					if (!role) {
+						throw new Error(
+							"Le rôle 'Snowledge Authenticated' n'existe pas sur ce serveur !",
+						);
+					}
 					const createdChannel = await guild.channels.create({
 						name,
 						type: ChannelType.GuildText,
+						permissionOverwrites: [
+							{
+								id: guild.roles.everyone.id,
+								deny: ['ViewChannel'],
+							},
+							{
+								id: role.id,
+								allow: ['ViewChannel'],
+								deny: ['SendMessages'],
+							},
+							{
+								id: client.user.id,
+								allow: ['ViewChannel', 'SendMessages'],
+							},
+						],
 					});
 					created.push(name);
 					if (name === (proposeName ? proposeName : undefined))
