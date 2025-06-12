@@ -20,5 +20,6 @@ import { Vote } from 'src/vote/entities/vote.entity';
 	],
 	controllers: [DiscordBotController],
 	providers: [DiscordBotService],
+	exports: [DiscordBotService],
 })
 export class DiscordBotModule {}

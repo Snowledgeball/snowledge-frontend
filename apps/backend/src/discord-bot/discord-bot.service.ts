@@ -16,8 +16,6 @@ import {
 	User,
 	Interaction,
 } from 'discord.js';
-import * as fs from 'fs';
-import * as path from 'path';
 import { DiscordServer } from 'src/discord-server/entities/discord-server-entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -152,14 +150,6 @@ export class DiscordBotService implements OnModuleInit {
 		this.client.login(token);
 	}
 
-	// === UTILS ===
-	// Récupère un salon textuel par son nom dans un serveur Discord
-	private getTextChannelByName(guild: any, name: string) {
-		return guild.channels.cache.find(
-			(ch: any) => ch.name === name && ch.type === ChannelType.GuildText,
-		);
-	}
-
 	// Extrait les infos d'une proposition à partir du contenu du message Discord
 	private extractPropositionInfo(messageContent: string) {
 		const lines = messageContent.split('\n');
@@ -292,38 +282,31 @@ export class DiscordBotService implements OnModuleInit {
 			return;
 		}
 		const { sujet, description, format } = proposal;
-		const discordServer = await this.discordServerRepository.findOne({
-			where: { discordGuildId: interaction.guild.id },
-			relations: ['community'],
+		await this.sendProposalToDiscordChannel({
+			guildId: interaction.guild.id,
+			sujet,
+			description,
+			format,
+			contributeur,
+			discordUserId: interaction.user.id,
 		});
-		const voteChannelId = discordServer?.voteChannelId;
-		if (!voteChannelId) {
-			throw new Error('Aucun salon vote assigné en base.');
-		}
-		const salonVotes = interaction.guild.channels.cache.get(voteChannelId);
-		if (!salonVotes || salonVotes.type !== ChannelType.GuildText) {
-			throw new Error(
-				"Le salon vote n'existe pas ou n'est pas un salon textuel.",
-			);
-		}
-		const messageVote = await salonVotes.send(
-			`📢 New idea proposed by <@${interaction.user.id}> :\n\n**Subject** : ${sujet}\n**Description** : ${description}\n**Format** : ${format}\n**Contributeur** : ${contributeur ? 'Oui' : 'Non'}\n\n**Vote Subject** : ✅ = Yes | ❌ = No\n**Vote Format** : 👍 = Yes | 👎 = No`,
-		);
-		await messageVote.react('✅');
-		await messageVote.react('❌');
-		await messageVote.react('👍');
-		await messageVote.react('👎');
 		// === Création de la proposition en BDD ===
 		try {
 			// Cherche l'utilisateur en BDD par son Discord ID
 			const submitter = await this.userRepository.findOne({
 				where: { discordId: interaction.user.id },
 			});
+			// Récupère le serveur Discord pour la communauté (pour la création BDD)
+			const discordServerForDb =
+				await this.discordServerRepository.findOne({
+					where: { discordGuildId: interaction.guild.id },
+					relations: ['community'],
+				});
 			if (!submitter) {
 				this.logger.warn(
 					`Utilisateur Discord ${interaction.user.id} introuvable en BDD lors de la création de la proposition.`,
 				);
-			} else if (!discordServer?.community) {
+			} else if (!discordServerForDb?.community) {
 				this.logger.warn(
 					`Aucune communauté liée au serveur Discord lors de la création de la proposition.`,
 				);
@@ -334,7 +317,7 @@ export class DiscordBotService implements OnModuleInit {
 						title: sujet,
 						format: format,
 						submitter: { id: submitter.id },
-						community: { id: discordServer.community.id },
+						community: { id: discordServerForDb.community.id },
 					},
 					relations: ['submitter', 'community'],
 				});
@@ -346,7 +329,7 @@ export class DiscordBotService implements OnModuleInit {
 						isContributor: contributeur,
 						status: 'in_progress',
 						submitter: submitter,
-						community: discordServer.community,
+						community: discordServerForDb.community,
 						endDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
 					});
 					await this.proposalRepository.save(proposalEntity);
@@ -373,7 +356,7 @@ export class DiscordBotService implements OnModuleInit {
 		}
 	}
 
-	// Gère l'ajout d'une réaction sur un message de vote : met à jour le JSON et annonce le résultat si besoin
+	// Gère l'ajout d'une réaction sur un message de vote
 	private async handleMessageReactionAdd(
 		reaction: MessageReaction,
 		user: User,
@@ -677,5 +660,45 @@ export class DiscordBotService implements OnModuleInit {
 				details: err.message,
 			};
 		}
+	}
+
+	// Ajoute la méthode utilitaire
+	async sendProposalToDiscordChannel({
+		guildId,
+		sujet,
+		description,
+		format,
+		contributeur,
+		discordUserId,
+	}: {
+		guildId: string;
+		sujet: string;
+		description: string;
+		format: string;
+		contributeur: boolean;
+		discordUserId: string;
+	}) {
+		const discordServer = await this.discordServerRepository.findOne({
+			where: { discordGuildId: guildId },
+		});
+		const voteChannelId = discordServer?.voteChannelId;
+		if (!voteChannelId) {
+			throw new Error('Aucun salon vote assigné en base.');
+		}
+		const guild = await this.client.guilds.fetch(guildId);
+		const salonVotes = guild.channels.cache.get(voteChannelId);
+		if (!salonVotes || salonVotes.type !== ChannelType.GuildText) {
+			throw new Error(
+				"Le salon vote n'existe pas ou n'est pas un salon textuel.",
+			);
+		}
+		const messageVote = await salonVotes.send(
+			`📢 New idea proposed by <@${discordUserId}> :\n\n**Subject** : ${sujet}\n**Description** : ${description}\n**Format** : ${format}\n**Contributeur** : ${contributeur ? 'Oui' : 'Non'}\n\n**Vote Subject** : ✅ = Yes | ❌ = No\n**Vote Format** : 👍 = Yes | 👎 = No`,
+		);
+		await messageVote.react('✅');
+		await messageVote.react('❌');
+		await messageVote.react('👍');
+		await messageVote.react('👎');
+		return messageVote;
 	}
 }

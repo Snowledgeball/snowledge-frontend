@@ -80,12 +80,12 @@ const CreateProposalScreen = ({ communitySlug }: { communitySlug: string }) => {
           onChange={(v: boolean) => setValue("isContributor", v)}
           t={t}
         />
-        <CommentsField register={register} error={errors.comments} t={t} />
+        {/* <CommentsField register={register} error={errors.comments} t={t} />
         {createProposal.isError && (
           <div className="text-red-500 text-sm" role="alert">
             {t("vote_submitted_error")}
           </div>
-        )}
+        )} */}
         <Button
           type="submit"
           disabled={isSubmitting || createProposal.isPending}

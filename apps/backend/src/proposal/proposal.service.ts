@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Proposal } from './entities/proposal.entity';
 import { CreateProposalDto } from './dto/create-proposal.dto/create-proposal.dto';
 import { Community } from '../community/entities/community.entity';
 import { User } from '../user/entities/user.entity';
+import { DiscordBotService } from 'src/discord-bot/discord-bot.service';
 
 @Injectable()
 export class ProposalService {
@@ -15,6 +16,8 @@ export class ProposalService {
 		private communityRepository: Repository<Community>,
 		@InjectRepository(User)
 		private userRepository: Repository<User>,
+		@Inject(DiscordBotService)
+		private readonly discordBotService: DiscordBotService,
 	) {}
 
 	async findAllForACommunityBySlug(
@@ -69,7 +72,7 @@ export class ProposalService {
 		const { communityId, submitterId, ...rest } = createProposalDto;
 		const community = await this.communityRepository.findOne({
 			where: { slug: communitySlug },
-			relations: ['user'],
+			relations: ['user', 'discordServers'],
 		});
 		const submitter = await this.userRepository.findOne({
 			where: { id: submitterId },
@@ -98,7 +101,21 @@ export class ProposalService {
 			submitter,
 			endDate,
 		});
-		return this.proposalRepository.save(proposal);
+		const savedProposal = await this.proposalRepository.save(proposal);
+
+		// Envoi sur Discord si la communauté a un serveur Discord
+		const discordServer = community.discordServers?.[0];
+		if (discordServer && submitter.discordId) {
+			await this.discordBotService.sendProposalToDiscordChannel({
+				guildId: discordServer.discordGuildId,
+				sujet: proposal.title,
+				description: proposal.description,
+				format: proposal.format,
+				contributeur: proposal.isContributor,
+				discordUserId: submitter.discordId,
+			});
+		}
+		return savedProposal;
 	}
 
 	async updateProposalStatus(proposal: Proposal, community: Community) {
