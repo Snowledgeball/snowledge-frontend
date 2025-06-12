@@ -207,9 +207,25 @@ export class DiscordProposalVoteService {
 						proposal.status !== 'rejected'
 					) {
 						proposal.status = 'accepted';
+
+						// Vérifier les votes du format
+						let finalFormat = format;
+						if (formatNo.length >= formatYes.length) {
+							// Si les votes non sont supérieurs ou égaux aux votes oui, on met "toBeDefined"
+							finalFormat = 'toBeDefined';
+							proposal.format = 'toBeDefined';
+						}
+
 						await transactionalEntityManager.save(proposal);
+
+						// Adapter le message selon le résultat du format
+						const formatMessage =
+							finalFormat === 'toBeDefined'
+								? 'To be defined (format refused)'
+								: format;
+
 						await resultsChannel.send(
-							`✅ The following proposal has been **approved**:\n**Subject** : ${subject}\n**Format** : ${format}`,
+							`✅ The following proposal has been **approved**:\n**Subject** : ${subject}\n**Format** : ${formatMessage}`,
 						);
 						try {
 							await reaction.message.delete();
