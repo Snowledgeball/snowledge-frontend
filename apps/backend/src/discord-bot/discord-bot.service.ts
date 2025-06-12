@@ -22,12 +22,24 @@ import { DiscordServer } from 'src/discord-server/entities/discord-server-entity
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
+import { Proposal } from 'src/proposal/entities/proposal.entity';
+import { User as UserEntity } from 'src/user/entities/user.entity';
+import { Community } from 'src/community/entities/community.entity';
+import { Vote } from 'src/vote/entities/vote.entity';
 
 @Injectable()
 export class DiscordBotService implements OnModuleInit {
 	constructor(
 		@InjectRepository(DiscordServer)
 		private discordServerRepository: Repository<DiscordServer>,
+		@InjectRepository(Proposal)
+		private proposalRepository: Repository<Proposal>,
+		@InjectRepository(UserEntity)
+		private userRepository: Repository<UserEntity>,
+		@InjectRepository(Community)
+		private communityRepository: Repository<Community>,
+		@InjectRepository(Vote)
+		private voteRepository: Repository<Vote>,
 	) {}
 
 	private readonly logger = new Logger(DiscordBotService.name);
@@ -318,6 +330,7 @@ export class DiscordBotService implements OnModuleInit {
 		const { sujet, description, format } = proposal;
 		const discordServer = await this.discordServerRepository.findOne({
 			where: { discordGuildId: interaction.guild.id },
+			relations: ['community'],
 		});
 		const voteChannelId = discordServer?.voteChannelId;
 		if (!voteChannelId) {
@@ -350,6 +363,51 @@ export class DiscordBotService implements OnModuleInit {
 			},
 		});
 		this.writeVotes(votesData);
+		// === Création de la proposition en BDD ===
+		try {
+			// Cherche l'utilisateur en BDD par son Discord ID
+			const submitter = await this.userRepository.findOne({
+				where: { discordId: interaction.user.id },
+			});
+			if (!submitter) {
+				this.logger.warn(
+					`Utilisateur Discord ${interaction.user.id} introuvable en BDD lors de la création de la proposition.`,
+				);
+			} else if (!discordServer?.community) {
+				this.logger.warn(
+					`Aucune communauté liée au serveur Discord lors de la création de la proposition.`,
+				);
+			} else {
+				// Vérifie si la proposition existe déjà (évite doublon si double clic)
+				let existing = await this.proposalRepository.findOne({
+					where: {
+						title: sujet,
+						format: format,
+						submitter: { id: submitter.id },
+						community: { id: discordServer.community.id },
+					},
+					relations: ['submitter', 'community'],
+				});
+				if (!existing) {
+					const proposalEntity = this.proposalRepository.create({
+						title: sujet,
+						description: description,
+						format: format,
+						isContributor: contributeur,
+						status: 'in_progress',
+						submitter: submitter,
+						community: discordServer.community,
+						endDate: new Date(), // à adapter si tu veux une vraie date de fin
+					});
+					await this.proposalRepository.save(proposalEntity);
+				}
+			}
+		} catch (e) {
+			this.logger.error(
+				'Erreur lors de la création de la proposition en BDD :',
+				e,
+			);
+		}
 		this.pendingProposals.delete(id);
 		try {
 			await interaction.editReply({
@@ -372,6 +430,7 @@ export class DiscordBotService implements OnModuleInit {
 	) {
 		const discordServer = await this.discordServerRepository.findOne({
 			where: { discordGuildId: reaction.message.guild.id },
+			relations: ['community'],
 		});
 		const voteChannelId = discordServer?.voteChannelId;
 		if (!voteChannelId) {
@@ -379,7 +438,7 @@ export class DiscordBotService implements OnModuleInit {
 		}
 		try {
 			if (user.bot) return;
-			// Vérifie que le channel est bien un salon textuel nommé "votes-idees"
+			// Vérifie que le channel est bien le bon
 			const channel = reaction.message.channel;
 			if (!('id' in channel) || channel.id !== voteChannelId) return;
 			// Vérifie que le message est bien une proposition
@@ -392,12 +451,86 @@ export class DiscordBotService implements OnModuleInit {
 			const { subject, format, proposedBy } = this.extractPropositionInfo(
 				reaction.message.content ?? '',
 			);
-			// Récupère les votes actuels
+			// Cherche la communauté liée au serveur Discord
+			const community = discordServer?.community
+				? await this.communityRepository.findOne({
+						where: { id: discordServer.community.id },
+					})
+				: null;
+			if (!community) {
+				this.logger.warn(
+					`Communauté introuvable pour le serveur Discord ${reaction.message.guild.id}`,
+				);
+				return;
+			}
+			// Cherche la proposition existante (toujours nécessaire)
+			let proposal = await this.proposalRepository.findOne({
+				where: {
+					title: subject,
+					format: format,
+					community: { id: community.id },
+				},
+				relations: ['community'],
+			});
+			if (!proposal) {
+				this.logger.error(
+					`Incohérence critique : la proposition Discord (title: ${subject}, format: ${format}) n'existe pas en BDD lors d'un vote ou d'une mise à jour de statut.`,
+				);
+				return;
+			}
+			// --- ENREGISTREMENT DU VOTE INDIVIDUEL ---
+			let voteType: 'subject' | 'format' | null = null;
+			let voteValue: 'for' | 'against' | null = null;
+			if (reaction.emoji.name === '✅') {
+				voteType = 'subject';
+				voteValue = 'for';
+			} else if (reaction.emoji.name === '❌') {
+				voteType = 'subject';
+				voteValue = 'against';
+			} else if (reaction.emoji.name === '👍') {
+				voteType = 'format';
+				voteValue = 'for';
+			} else if (reaction.emoji.name === '👎') {
+				voteType = 'format';
+				voteValue = 'against';
+			}
+			if (voteType && voteValue) {
+				// Cherche l'utilisateur en BDD par son Discord ID
+				const voter = await this.userRepository.findOne({
+					where: { discordId: user.id },
+				});
+				if (!voter) {
+					this.logger.warn(
+						`Utilisateur Discord ${user.id} introuvable en BDD`,
+					);
+					return;
+				}
+				// Vérifie si le vote existe déjà
+				let vote = await this.voteRepository.findOne({
+					where: {
+						proposal: { id: proposal.id },
+						user: { id: voter.id },
+					},
+				});
+				if (!vote) {
+					vote = this.voteRepository.create({
+						proposal,
+						user: voter,
+					});
+				}
+				if (voteType === 'subject') {
+					vote.choice = voteValue;
+				} else if (voteType === 'format') {
+					vote.formatChoice = voteValue;
+				}
+				await this.voteRepository.save(vote);
+			}
+			// --- LOGIQUE DE VALIDATION/REJET ---
 			const subjectYes = await this.getVotersFromReaction(reaction, '✅');
 			const subjectNo = await this.getVotersFromReaction(reaction, '❌');
 			const formatYes = await this.getVotersFromReaction(reaction, '👍');
 			const formatNo = await this.getVotersFromReaction(reaction, '👎');
-
+			// Met à jour le JSON local
 			const result = {
 				subject,
 				format,
@@ -419,17 +552,11 @@ export class DiscordBotService implements OnModuleInit {
 				votesData.push(result);
 			}
 			this.writeVotes(votesData);
-
-			const discordServer = await this.discordServerRepository.findOne({
-				where: { discordGuildId: reaction.message.guild.id },
-			});
+			// Gestion du salon résultats
 			const resultsChannelId = discordServer?.resultChannelId;
 			if (!resultsChannelId) {
 				throw new Error('Aucun salon résultats assigné en base.');
 			}
-
-			// === LOGIQUE DE VALIDATION/REJET ===
-			// Si le nombre de ❌ atteint le seuil, la proposition est rejetée
 			const resultsChannel =
 				reaction.message.guild.channels.cache.get(resultsChannelId);
 			if (
@@ -440,32 +567,34 @@ export class DiscordBotService implements OnModuleInit {
 					"Le salon résultats n'existe pas ou n'est pas un salon textuel.",
 				);
 			}
+			// Statut à mettre à jour ?
+			let newStatus: 'accepted' | 'rejected' | null = null;
 			if (subjectNo.length >= this.VOTES_NECESSAIRES) {
-				if (resultsChannel) {
-					await resultsChannel.send(
-						`❌ The following proposal has been rejected:\n**Subject** : ${subject}\n**Format** : ${format}`,
-					);
-				}
+				await resultsChannel.send(
+					`❌ The following proposal has been rejected:\n**Subject** : ${subject}\n**Format** : ${format}`,
+				);
 				if (index !== -1) votesData[index].status = 'rejected';
 				this.writeVotes(votesData);
+				newStatus = 'rejected';
 				try {
 					await reaction.message.delete();
 				} catch (e) {}
-				return;
 			}
-			// Si le nombre de ✅ atteint le seuil, la proposition est validée
 			if (subjectYes.length >= this.VOTES_NECESSAIRES) {
-				if (resultsChannel) {
-					await resultsChannel.send(
-						`✅ The following proposal has been **approved**:\n**Subject** : ${subject}\n**Format** : ${format}`,
-					);
-				}
+				await resultsChannel.send(
+					`✅ The following proposal has been **approved**:\n**Subject** : ${subject}\n**Format** : ${format}`,
+				);
 				if (index !== -1) votesData[index].status = 'approved';
 				this.writeVotes(votesData);
+				newStatus = 'accepted';
 				try {
 					await reaction.message.delete();
 				} catch (e) {}
-				return;
+			}
+			// --- ENREGISTREMENT EN BDD : update statut uniquement ---
+			if (newStatus) {
+				proposal.status = newStatus;
+				await this.proposalRepository.save(proposal);
 			}
 		} catch (e) {
 			this.logger.error('Error in MessageReactionAdd:', e);
