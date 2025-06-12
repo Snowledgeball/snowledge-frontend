@@ -160,42 +160,6 @@ export class DiscordBotService implements OnModuleInit {
 		);
 	}
 
-	// Donne le chemin absolu du fichier votes.json (stockage local des votes)
-	private getVotesFilePath() {
-		return path.join(__dirname, 'votes.json');
-	}
-
-	// Lit le fichier votes.json et retourne son contenu (ou un tableau vide si absent)
-	private readVotes() {
-		const votesPath = this.getVotesFilePath();
-		if (fs.existsSync(votesPath)) {
-			try {
-				return JSON.parse(fs.readFileSync(votesPath, 'utf8'));
-			} catch (e) {
-				this.logger.error(
-					'Erreur lors de la lecture de votes.json :',
-					e,
-				);
-			}
-		}
-		return [];
-	}
-
-	// Écrit les données de votes dans votes.json
-	private writeVotes(votesData: any) {
-		const votesPath = this.getVotesFilePath();
-		try {
-			fs.writeFileSync(
-				votesPath,
-				JSON.stringify(votesData, null, 2),
-				'utf8',
-			);
-			this.logger.log('Votes sauvegardés dans votes.json');
-		} catch (err) {
-			this.logger.error("Erreur lors de l'écriture de votes.json :", err);
-		}
-	}
-
 	// Extrait les infos d'une proposition à partir du contenu du message Discord
 	private extractPropositionInfo(messageContent: string) {
 		const lines = messageContent.split('\n');
@@ -349,20 +313,6 @@ export class DiscordBotService implements OnModuleInit {
 		await messageVote.react('❌');
 		await messageVote.react('👍');
 		await messageVote.react('👎');
-		let votesData = this.readVotes();
-		votesData.push({
-			subject: sujet,
-			description,
-			format,
-			contributeur,
-			proposedBy: interaction.user.id,
-			status: 'pending',
-			votes: {
-				subject: { yes: [], no: [] },
-				format: { yes: [], no: [] },
-			},
-		});
-		this.writeVotes(votesData);
 		// === Création de la proposition en BDD ===
 		try {
 			// Cherche l'utilisateur en BDD par son Discord ID
@@ -530,29 +480,7 @@ export class DiscordBotService implements OnModuleInit {
 			const subjectNo = await this.getVotersFromReaction(reaction, '❌');
 			const formatYes = await this.getVotersFromReaction(reaction, '👍');
 			const formatNo = await this.getVotersFromReaction(reaction, '👎');
-			// Met à jour le JSON local
-			const result = {
-				subject,
-				format,
-				proposedBy,
-				status: 'pending',
-				votes: {
-					subject: { yes: subjectYes, no: subjectNo },
-					format: { yes: formatYes, no: formatNo },
-				},
-			};
-			let votesData = this.readVotes();
-			const index = votesData.findIndex(
-				(v: any) => v.subject === subject && v.format === format,
-			);
-			if (index !== -1) {
-				result.status = votesData[index].status || 'pending';
-				votesData[index] = result;
-			} else {
-				votesData.push(result);
-			}
-			this.writeVotes(votesData);
-			// Gestion du salon résultats
+			// --- ENREGISTREMENT EN BDD : update statut uniquement ---
 			const resultsChannelId = discordServer?.resultChannelId;
 			if (!resultsChannelId) {
 				throw new Error('Aucun salon résultats assigné en base.');
@@ -567,14 +495,11 @@ export class DiscordBotService implements OnModuleInit {
 					"Le salon résultats n'existe pas ou n'est pas un salon textuel.",
 				);
 			}
-			// Statut à mettre à jour ?
 			let newStatus: 'accepted' | 'rejected' | null = null;
 			if (subjectNo.length >= this.VOTES_NECESSAIRES) {
 				await resultsChannel.send(
 					`❌ The following proposal has been rejected:\n**Subject** : ${subject}\n**Format** : ${format}`,
 				);
-				if (index !== -1) votesData[index].status = 'rejected';
-				this.writeVotes(votesData);
 				newStatus = 'rejected';
 				try {
 					await reaction.message.delete();
@@ -584,14 +509,11 @@ export class DiscordBotService implements OnModuleInit {
 				await resultsChannel.send(
 					`✅ The following proposal has been **approved**:\n**Subject** : ${subject}\n**Format** : ${format}`,
 				);
-				if (index !== -1) votesData[index].status = 'approved';
-				this.writeVotes(votesData);
 				newStatus = 'accepted';
 				try {
 					await reaction.message.delete();
 				} catch (e) {}
 			}
-			// --- ENREGISTREMENT EN BDD : update statut uniquement ---
 			if (newStatus) {
 				proposal.status = newStatus;
 				await this.proposalRepository.save(proposal);
