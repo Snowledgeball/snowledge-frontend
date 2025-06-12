@@ -125,28 +125,20 @@ export class ProposalService {
 		const now = new Date();
 		const totalLearners = community.learners.length;
 		const votes = proposal.votes.length;
-		console.log('votes', votes);
-		console.log('totalLearners', totalLearners);
 		const quorumReached = votes > totalLearners / 2;
 		const timeOver = now > new Date(proposal.endDate);
-		console.log('quorumReached', quorumReached);
-		// console.log('timeOver', timeOver);
-		// console.log('AZAZAZAZ');
 
 		if (proposal.status !== 'in_progress') return proposal; // déjà terminé
 
 		if (quorumReached || timeOver) {
 			const yesVotes = proposal.votes.filter(
 				(v) => v.choice === 'for',
-				console.log('yesVotes'),
 			).length;
 			const noVotes = proposal.votes.filter(
 				(v) => v.choice === 'against',
-				console.log('noVotes'),
 			).length;
 			proposal.status = yesVotes > noVotes ? 'accepted' : 'rejected';
 			await this.proposalRepository.save(proposal);
-			console.log('proposal.status');
 		}
 		return proposal;
 	}
