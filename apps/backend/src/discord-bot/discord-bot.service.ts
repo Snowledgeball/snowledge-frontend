@@ -589,6 +589,12 @@ export class DiscordBotService implements OnModuleInit {
 					);
 					voteChannelId = voteChannel?.id;
 				}
+				// TODO: Faire un truc comme ça pour tout traduire
+				// Ne pas oublier que ça "marche" que pour les serv qui ont activé la fonctionnalité communauté sur discord (là ils peuvent choisir la langue), sinon, c'est us par défaut
+				// Donc pourquoi gérer avec un paramètre en bd, décidé depuis le front ?
+				// const language = interaction.guild.preferredLocale;
+				// const t = await getTranslations(locale);
+
 				const explication =
 					'🎉 **Submit your ideas!**\n\n' +
 					'To submit an idea:\n' +
