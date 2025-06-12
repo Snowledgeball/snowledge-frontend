@@ -140,6 +140,12 @@ export function useChannelSections(communityId: number) {
         return;
       }
 
+      channelNames = {
+        propose: channelNames.propose.toLowerCase(),
+        vote: channelNames.vote.toLowerCase(),
+        result: channelNames.result.toLowerCase(),
+      };
+
       createChannels(
         {
           guildId: discordServerData.discordGuildId,

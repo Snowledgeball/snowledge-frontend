@@ -534,6 +534,8 @@ export class DiscordBotService implements OnModuleInit {
 
 			const names = [proposeName, voteName, resultName].filter(Boolean);
 			let salonIdees = null;
+			let voteChannel = null;
+			let resultChannel = null;
 			// Si aucun nom n'est fourni, on ne crée pas de channels
 			if (names.length === 0) {
 				return { created, existing };
@@ -545,13 +547,22 @@ export class DiscordBotService implements OnModuleInit {
 				);
 				if (found) {
 					existing.push(name);
+					if (name === (voteName ? voteName : undefined))
+						voteChannel = found;
+					if (name === (resultName ? resultName : undefined))
+						resultChannel = found;
 				} else {
 					const createdChannel = await guild.channels.create({
 						name,
 						type: ChannelType.GuildText,
 					});
 					created.push(name);
-					if (name === proposeName) salonIdees = createdChannel;
+					if (name === (proposeName ? proposeName : undefined))
+						salonIdees = createdChannel;
+					if (name === (voteName ? voteName : undefined))
+						voteChannel = createdChannel;
+					if (name === (resultName ? resultName : undefined))
+						resultChannel = createdChannel;
 				}
 			}
 			// Effectue le setup dans le salon de propositions
@@ -574,7 +585,7 @@ export class DiscordBotService implements OnModuleInit {
 					const voteChannel = guild.channels.cache.find(
 						(ch) =>
 							ch.type === ChannelType.GuildText &&
-							ch.name === voteName.toLowerCase(),
+							ch.name === voteName,
 					);
 					voteChannelId = voteChannel?.id;
 				}
@@ -599,7 +610,43 @@ export class DiscordBotService implements OnModuleInit {
 				});
 				try {
 					await sent.pin();
-				} catch (e) {}
+				} catch (e) {
+					this.logger.error('Could not pin message:', e);
+				}
+			}
+			// Message épinglé dans le salon de vote
+			if (voteChannel) {
+				const voteExplanation =
+					'📢 **How to vote on proposals**\n\n' +
+					'- Each new idea will appear here.\n' +
+					'- To vote on the subject: ✅ = Yes, ❌ = No\n' +
+					'- To vote on the format: 👍 = Yes, 👎 = No\n\n' +
+					'Once enough votes are collected, the proposal will be either approved or rejected and moved to the results channel.';
+				const voteMsg = await voteChannel.send({
+					content: voteExplanation,
+				});
+				try {
+					await voteMsg.pin();
+				} catch (e) {
+					this.logger.error('Could not pin message:', e);
+				}
+			}
+			// Message épinglé dans le salon de résultats
+			if (resultChannel) {
+				const resultExplanation =
+					'🏁 **Results of votes**\n\n' +
+					'- All approved or rejected proposals will appear here.\n' +
+					'- ✅ = Approved\n' +
+					'- ❌ = Rejected\n\n' +
+					'You can follow the outcome of each idea in this channel.';
+				const resultMsg = await resultChannel.send({
+					content: resultExplanation,
+				});
+				try {
+					await resultMsg.pin();
+				} catch (e) {
+					this.logger.error('Could not pin message:', e);
+				}
 			}
 			return { created, existing };
 		} catch (e) {
