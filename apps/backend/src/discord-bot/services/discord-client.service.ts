@@ -22,10 +22,10 @@ export class DiscordClientService implements OnModuleInit {
 		this.client.once(Events.ClientReady, () => {
 			this.logger.log(`✅ Connected as ${this.client.user?.tag}`);
 		});
-		const token = process.env.DISCORD_TOKEN;
+		const token = process.env.DISCORD_BOT_TOKEN;
 		if (!token) {
 			this.logger.error(
-				'DISCORD_TOKEN is not defined in environment variables!',
+				'DISCORD_BOT_TOKEN is not defined in environment variables!',
 			);
 			return;
 		}

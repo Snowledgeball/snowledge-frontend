@@ -107,5 +107,84 @@ export class DiscordInteractionService implements OnModuleInit {
 				}
 			},
 		);
+
+		client.on(Events.GuildCreate, async (guild) => {
+			try {
+				console.log('CREAAAT');
+				// Vérifier si le rôle existe déjà
+				let role = guild.roles.cache.find(
+					(r) => r.name === 'Snowledge Authenticated',
+				);
+				if (!role) {
+					role = await guild.roles.create({
+						name: 'Snowledge Authenticated',
+						color: 'Blue',
+						mentionable: true,
+						permissions: [], // Permissions minimales
+					});
+					this.logger.log(
+						`Rôle 'Snowledge Authenticated' créé sur le serveur ${guild.name}`,
+					);
+				} else {
+					this.logger.log(
+						`Rôle 'Snowledge Authenticated' déjà existant sur le serveur ${guild.name}`,
+					);
+				}
+
+				// Vérifier si le salon existe déjà
+				let channel = guild.channels.cache.find(
+					(c) =>
+						c.name === 'validation-cgu-snowledge' && c.type === 0, // 0 = GUILD_TEXT
+				);
+				if (!channel) {
+					channel = await guild.channels.create({
+						name: 'validation-cgu-snowledge',
+						type: 0, // GUILD_TEXT
+						topic: 'Salon pour valider les CGU et autoriser Snowledge',
+					});
+					this.logger.log(
+						`Salon 'validation-cgu-snowledge' créé sur le serveur ${guild.name}`,
+					);
+
+					// Génération dynamique de l'URL OAuth2
+					const params = new URLSearchParams({
+						client_id: process.env.DISCORD_CLIENT_ID,
+						redirect_uri: process.env.DISCORD_REDIRECT_URI,
+						response_type: 'code',
+						scope: 'identify email',
+						prompt: 'consent',
+					});
+					const oauthUrl = `https://discord.com/oauth2/authorize?${params.toString()}`;
+					const {
+						ActionRowBuilder,
+						ButtonBuilder,
+						ButtonStyle,
+					} = require('discord.js');
+					const row = new ActionRowBuilder().addComponents(
+						new ButtonBuilder()
+							.setLabel('Autoriser Snowledge')
+							.setStyle(ButtonStyle.Link)
+							.setURL(oauthUrl),
+					);
+					const message = await channel.send({
+						content: `Afin de pouvoir accéder aux fonctionnalités de Snowledge, vous devez accepter les conditions suivantes et autoriser la connexion à votre compte Discord.`,
+						components: [row],
+					});
+					await message.pin();
+					this.logger.log(
+						`Message d'autorisation envoyé et épinglé dans 'validation-cgu-snowledge' sur ${guild.name}`,
+					);
+				} else {
+					this.logger.log(
+						`Salon 'validation-cgu-snowledge' déjà existant sur le serveur ${guild.name}`,
+					);
+				}
+			} catch (e) {
+				this.logger.error(
+					`Erreur lors de la création du rôle, du salon ou de l'envoi du message sur le serveur ${guild.name}`,
+					e,
+				);
+			}
+		});
 	}
 }

@@ -11,6 +11,11 @@ import { DiscordInteractionService } from './services/discord-interaction.servic
 import { DiscordProposalService } from './services/discord-proposal.service';
 import { DiscordProposalFormService } from './services/discord-proposal-form.service';
 import { DiscordProposalVoteService } from './services/discord-proposal-vote.service';
+import { DiscordBotProvider } from './discord-bot.provider';
+import { DiscordService } from 'src/discord/discord.service';
+import { UserService } from 'src/user/user.service';
+import { DiscordAccess } from 'src/discord/entities/discord-access.entity';
+import { Learner } from 'src/learner/entities/learner/learner';
 
 @Module({
 	imports: [
@@ -20,6 +25,8 @@ import { DiscordProposalVoteService } from './services/discord-proposal-vote.ser
 			UserEntity,
 			Community,
 			Vote,
+			DiscordAccess,
+			Learner,
 		]),
 	],
 	controllers: [DiscordBotController],
@@ -29,6 +36,9 @@ import { DiscordProposalVoteService } from './services/discord-proposal-vote.ser
 		DiscordProposalService,
 		DiscordProposalFormService,
 		DiscordProposalVoteService,
+		DiscordBotProvider,
+		DiscordService,
+		UserService,
 	],
 	exports: [
 		DiscordClientService,

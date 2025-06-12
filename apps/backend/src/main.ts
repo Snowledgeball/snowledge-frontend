@@ -4,9 +4,11 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { ClassSerializerInterceptor } from '@nestjs/common';
+import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule);
+	const app = await NestFactory.create<NestExpressApplication>(AppModule);
 	app.useGlobalInterceptors(
 		new ClassSerializerInterceptor(app.get(Reflector)),
 	);
@@ -36,6 +38,10 @@ async function bootstrap() {
 		const document = SwaggerModule.createDocument(app, config);
 		SwaggerModule.setup('swagger', app, document);
 	}
+
+	// Sert le dossier public à la racine de l'API
+	app.useStaticAssets(join(__dirname, '..', 'public'));
+
 	await app.listen(configService.get('serverConfig.port'));
 
 	console.log(`Application is running on: ${await app.getUrl()}`);
