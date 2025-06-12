@@ -36,7 +36,7 @@ export class DiscordBotService implements OnModuleInit {
 	private readonly VOTES_NECESSAIRES = 1;
 	private pendingProposals = new Map<
 		string,
-		{ sujet: string; description: string }
+		{ sujet: string; description: string; format?: string }
 	>();
 
 	// Méthode appelée automatiquement par NestJS au démarrage du module
@@ -80,6 +80,11 @@ export class DiscordBotService implements OnModuleInit {
 					interaction.customId.startsWith('choix_format|')
 				) {
 					await this.handleSelectFormat(interaction);
+				} else if (
+					interaction.isStringSelectMenu() &&
+					interaction.customId.startsWith('choix_contributeur|')
+				) {
+					await this.handleSelectContributeur(interaction);
 				}
 			},
 		);
@@ -262,7 +267,55 @@ export class DiscordBotService implements OnModuleInit {
 		await interaction.deferUpdate();
 		const format = interaction.values[0];
 		const id = interaction.customId.split('|')[1];
-		const { sujet, description } = this.pendingProposals.get(id) || {};
+		const proposal = this.pendingProposals.get(id);
+		if (!proposal) {
+			await interaction.followUp({
+				content: 'Erreur : proposition introuvable.',
+				ephemeral: true,
+			});
+			return;
+		}
+		proposal.format = format;
+		this.pendingProposals.set(id, proposal);
+
+		// 1. Met à jour le message du select menu format pour indiquer que le format est validé
+		await interaction.editReply({
+			content: `✅ Format sélectionné : **${format}**`,
+			components: [],
+			ephemeral: true,
+		});
+
+		// 2. Affiche le select menu contributeur
+		const select = new StringSelectMenuBuilder()
+			.setCustomId(`choix_contributeur|${id}`)
+			.setPlaceholder('Souhaitez-vous être contributeur ?')
+			.addOptions([
+				{ label: 'Oui', value: 'yes' },
+				{ label: 'Non', value: 'no' },
+			]);
+		const row = new ActionRowBuilder().addComponents(select);
+		await interaction.followUp({
+			content: 'Souhaitez-vous être contributeur pour cette idée ?',
+			components: [row],
+			ephemeral: true,
+		});
+	}
+
+	// Nouveau handler pour le choix contributeur
+	private async handleSelectContributeur(interaction: any) {
+		// 1. Déférer la réponse dès le début
+		await interaction.deferUpdate();
+		const contributeur = interaction.values[0] === 'yes';
+		const id = interaction.customId.split('|')[1];
+		const proposal = this.pendingProposals.get(id);
+		if (!proposal) {
+			await interaction.followUp({
+				content: 'Erreur : proposition introuvable.',
+				ephemeral: true,
+			});
+			return;
+		}
+		const { sujet, description, format } = proposal;
 		const discordServer = await this.discordServerRepository.findOne({
 			where: { discordGuildId: interaction.guild.id },
 		});
@@ -276,22 +329,19 @@ export class DiscordBotService implements OnModuleInit {
 				"Le salon vote n'existe pas ou n'est pas un salon textuel.",
 			);
 		}
-		const voteChannelName = salonVotes.name;
-		console.log(voteChannelName);
-		// Affichage dans le salon de vote
 		const messageVote = await salonVotes.send(
-			`📢 New idea proposed by <@${interaction.user.id}> :\n\n**Subject** : ${sujet}\n**Description** : ${description}\n**Format** : ${format}\n\n**Vote Subject** : ✅ = Yes | ❌ = No\n**Vote Format** : 👍 = Yes | 👎 = No`,
+			`📢 New idea proposed by <@${interaction.user.id}> :\n\n**Subject** : ${sujet}\n**Description** : ${description}\n**Format** : ${format}\n**Contributeur** : ${contributeur ? 'Oui' : 'Non'}\n\n**Vote Subject** : ✅ = Yes | ❌ = No\n**Vote Format** : 👍 = Yes | 👎 = No`,
 		);
 		await messageVote.react('✅');
 		await messageVote.react('❌');
 		await messageVote.react('👍');
 		await messageVote.react('👎');
-		// Ajoute la proposition dans votes.json avec le statut 'pending'
 		let votesData = this.readVotes();
 		votesData.push({
 			subject: sujet,
 			description,
 			format,
+			contributeur,
 			proposedBy: interaction.user.id,
 			status: 'pending',
 			votes: {
@@ -300,8 +350,8 @@ export class DiscordBotService implements OnModuleInit {
 			},
 		});
 		this.writeVotes(votesData);
+		this.pendingProposals.delete(id);
 		try {
-			// 2. Modifie la réponse initiale (après deferUpdate)
 			await interaction.editReply({
 				content: '✅ Your proposal has been sent for voting!',
 				components: [],
@@ -474,7 +524,9 @@ export class DiscordBotService implements OnModuleInit {
 					'1. Cliquez sur le bouton **📝 Proposer une idée** ci-dessous.\n' +
 					'2. Saisissez le sujet de votre idée.\n' +
 					'3. Sélectionnez le format souhaité (**Whitepaper** ou **Masterclass**).\n\n' +
-					'Votre proposition sera ensuite envoyée dans le salon <#votes-idees> pour que tout le monde puisse voter !';
+					'Votre proposition sera ensuite envoyée dans le salon <#' +
+					voteName +
+					'> pour que tout le monde puisse voter !';
 				const button = new ButtonBuilder()
 					.setCustomId('proposer_idee')
 					.setLabel('📝 Proposer une idée')
