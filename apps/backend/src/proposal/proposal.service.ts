@@ -87,6 +87,7 @@ export class ProposalService {
 		}
 
 		// Si endDate n'est pas fourni, on met J+5 à partir de maintenant
+		//TODO: Pouvoir modifier ça
 		const endDate = createProposalDto.endDate
 			? new Date(createProposalDto.endDate)
 			: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);

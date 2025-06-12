@@ -397,7 +397,7 @@ export class DiscordBotService implements OnModuleInit {
 						status: 'in_progress',
 						submitter: submitter,
 						community: discordServer.community,
-						endDate: new Date(), // à adapter si tu veux une vraie date de fin
+						endDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
 					});
 					await this.proposalRepository.save(proposalEntity);
 				}
