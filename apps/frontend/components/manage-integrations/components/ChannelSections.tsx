@@ -26,6 +26,7 @@ import { Button } from "@repo/ui/components/button";
 import { ChannelSection } from "./ChannelSection";
 import { ChannelNames } from "@/types/channelNames";
 import { getChannelName } from "../utils/channelUtils";
+import { useTranslations } from "next-intl";
 
 interface ChannelSectionsProps {
   mode: "firstConfig" | "edition";
@@ -55,87 +56,86 @@ export const ChannelSections: React.FC<ChannelSectionsProps> = ({
   handleRename,
   listData,
   channelIds,
-}) => (
-  <div className="space-y-4">
-    {(["propose", "vote", "result"] as const).map((type) => (
-      <ChannelSection
-        key={type}
-        type={type}
-        label={`Salon ${type === "propose" ? "propositions" : type === "vote" ? "votes" : "résultats"}`}
-        value={
-          mode === "firstConfig" || missing[type] ? names[type] : rename[type]
-        }
-        onChange={(v) =>
-          mode === "firstConfig" || missing[type]
-            ? setNames((prev) => ({ ...prev, [type]: v }))
-            : setRename((prev) => ({ ...prev, [type]: v }))
-        }
-        placeholder={
-          mode === "firstConfig"
-            ? type === "propose"
-              ? "propositions"
-              : type === "vote"
-                ? "votes"
-                : "résultats"
-            : getChannelName(listData, channelIds[type]) ||
-              (type === "propose"
-                ? "propositions"
-                : type === "vote"
-                  ? "votes"
-                  : "résultats")
-        }
-        onValidate={
-          mode === "edition" && !missing[type]
-            ? () => handleRename(type)
-            : undefined
-        }
-        isLoading={mode === "firstConfig" ? isLoadingCreate : isLoadingRename}
-        isMissing={
-          mode === "firstConfig"
-            ? { all: true }
-            : {
-                channelName: {
-                  [type]: missing[type] as boolean,
-                },
-              }
-        }
-      />
-    ))}
-    {mode === "firstConfig" ? (
-      <Button
-        className="w-full mt-2"
-        disabled={
-          isLoadingCreate || !names.propose || !names.vote || !names.result
-        }
-        onClick={() => {
-          if (!names.propose || !names.vote || !names.result) {
-            // toast.error("Merci de renseigner un nom pour chaque salon."); // à gérer dans le parent si besoin
-            return;
+}) => {
+  const t = useTranslations("manageIntegrations");
+  const typeLabel = (type: keyof ChannelNames) =>
+    type === "propose"
+      ? t("propose")
+      : type === "vote"
+        ? t("vote")
+        : t("result");
+  return (
+    <div className="space-y-4">
+      {(["propose", "vote", "result"] as const).map((type) => (
+        <ChannelSection
+          key={type}
+          type={type}
+          label={typeLabel(type)}
+          value={
+            mode === "firstConfig" || missing[type] ? names[type] : rename[type]
           }
-          handleCreateMissingChannels(names);
-        }}
-      >
-        Créer les salons
-      </Button>
-    ) : (
-      Object.values(missing).some(Boolean) && (
+          onChange={(v) =>
+            mode === "firstConfig" || missing[type]
+              ? setNames((prev) => ({ ...prev, [type]: v }))
+              : setRename((prev) => ({ ...prev, [type]: v }))
+          }
+          placeholder={
+            mode === "firstConfig"
+              ? typeLabel(type)
+              : getChannelName(listData, channelIds[type]) || typeLabel(type)
+          }
+          onValidate={
+            mode === "edition" && !missing[type]
+              ? () => handleRename(type)
+              : undefined
+          }
+          isLoading={mode === "firstConfig" ? isLoadingCreate : isLoadingRename}
+          isMissing={
+            mode === "firstConfig"
+              ? { all: true }
+              : {
+                  channelName: {
+                    [type]: missing[type] as boolean,
+                  },
+                }
+          }
+        />
+      ))}
+      {mode === "firstConfig" ? (
         <Button
           className="w-full mt-2"
           disabled={
-            isLoadingCreate ||
-            (missing.propose && !names.propose) ||
-            (missing.vote && !names.vote) ||
-            (missing.result && !names.result)
+            isLoadingCreate || !names.propose || !names.vote || !names.result
           }
-          onClick={() => handleCreateMissingChannels(names)}
+          onClick={() => {
+            if (!names.propose || !names.vote || !names.result) {
+              return;
+            }
+            handleCreateMissingChannels(names);
+          }}
         >
-          {Object.values(missing).filter(Boolean).length > 1
-            ? "Créer les salons manquants"
-            : "Créer le salon manquant"}
+          {t("createChannels")}
         </Button>
-      )
-    )}
-  </div>
-);
+      ) : (
+        Object.values(missing).some(Boolean) && (
+          <Button
+            className="w-full mt-2"
+            disabled={
+              isLoadingCreate ||
+              (missing.propose && !names.propose) ||
+              (missing.vote && !names.vote) ||
+              (missing.result && !names.result)
+            }
+            onClick={() => handleCreateMissingChannels(names)}
+          >
+            {Object.values(missing).filter(Boolean).length > 1
+              ? t("createMissingChannels")
+              : t("createMissingChannel")}
+          </Button>
+        )
+      )}
+    </div>
+  );
+};
 
 export default ChannelSections;

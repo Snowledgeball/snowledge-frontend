@@ -1,12 +1,16 @@
 import React from "react";
 import { AlertInfo } from "./AlertInfo";
+import { useTranslations } from "next-intl";
 
-export const AssignedChannelsAlert: React.FC = () => (
-  <AlertInfo
-    title="Salons Discord assignés"
-    description="Vous pouvez renommer chaque salon si besoin."
-    className="mb-4"
-  />
-);
+export const AssignedChannelsAlert: React.FC = () => {
+  const t = useTranslations("manageIntegrations");
+  return (
+    <AlertInfo
+      title={t("assignedChannelsTitle")}
+      description={t("assignedChannelsDescription")}
+      className="mb-4"
+    />
+  );
+};
 
 export default AssignedChannelsAlert;

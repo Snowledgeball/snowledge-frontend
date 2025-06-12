@@ -142,7 +142,8 @@
     "voting": "Voting",
     "create-topic": "Create topic",
     "in-progress": "In progress",
-    "done": "Done"
+    "done": "Done",
+    "validate": "Validate"
   },
   "inviteModal": {
     "title": "Invite users",
@@ -442,5 +443,37 @@
     "no_proposals_done": "No proposals have been completed yet.",
     "accepted": "Accepted",
     "rejected": "Rejected"
+  },
+  "manageIntegrations": {
+    "loading": "Loading...",
+    "title": "Discord channel management",
+    "discordLimitation": "Discord limitation",
+    "propose": "Proposals",
+    "vote": "Votes",
+    "result": "Results",
+    "createChannels": "Create channels",
+    "createMissingChannels": "Create missing channels",
+    "createMissingChannel": "Create missing channel",
+    "missingTitle": "Missing channel:",
+    "missingDescription": "The assigned channel for {label} no longer exists on Discord.",
+    "missingDescription2": "Please create a new one.",
+    "assignedChannelsTitle": "Assigned Discord channels",
+    "assignedChannelsDescription": "You can rename each channel if needed.",
+    "firstConfigTitle": "First configuration of Discord channels",
+    "firstConfigDescription": "No channel is yet assigned for proposals, votes or results.",
+    "firstConfigDescription2": "Please choose a name for each channel, then click \"Create channels\".",
+    "discordLimitationDescription": "Each Discord channel can be renamed up to <strong>2 times every 10 minutes</strong>, independently of the others.",
+    "discordLimitationDescription2": "If needed, you can always rename channels directly from Discord.",
+    "discordLimitationTooltipAttention": "Warning:",
+    "discordLimitationTooltipBlocked": "If you try to rename the same channel a 3rd time in this period, <b>all channel modifications will be blocked for 10 minutes.</b>",
+    "discordLimitationTooltipOtherChannels": "You can continue to modify other channels as long as the limit is not reached for each.",
+    "errorMissingName": "Please provide a name for each missing channel.",
+    "errorSync": "Synchronization with the server failed.",
+    "successCreate": "Channel(s) created successfully!",
+    "errorCreate": "Error while creating Discord channels.",
+    "warningRename": "Renaming is taking more than 5 seconds. You have probably reached the Discord limit (2 renames every 10 minutes). Please wait 10 minutes or rename the channel directly on Discord.",
+    "errorFetchServer": "Error while fetching Discord server data.",
+    "successRename": "Channel renamed successfully!",
+    "errorRename": "Error while renaming the Discord channel."
   }
 }

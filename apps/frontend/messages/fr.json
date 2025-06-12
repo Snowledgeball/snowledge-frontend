@@ -143,7 +143,8 @@
     "voting": "Voting",
     "create-topic": "Créer un sujet",
     "in-progress": "En cours",
-    "done": "Terminé"
+    "done": "Terminé",
+    "validate": "Valider"
   },
   "inviteModal": {
     "title": "Invitez des utilisateurs",
@@ -390,5 +391,37 @@
     "no_proposals_done": "Aucun sujet de vote terminé.",
     "accepted": "Accepté",
     "rejected": "Rejeté"
+  },
+  "manageIntegrations": {
+    "loading": "Chargement...",
+    "title": "Gestion des channels Discord",
+    "discordLimitation": "Limitation Discord",
+    "propose": "Propositions",
+    "vote": "Votes",
+    "result": "Résultats",
+    "createChannels": "Créer les salons",
+    "createMissingChannels": "Créer les salons manquants",
+    "createMissingChannel": "Créer le salon manquant",
+    "missingTitle": "Salon manquant :",
+    "missingDescription": "Le salon assigné pour {label} n'existe plus sur Discord.",
+    "missingDescription2": "Veuillez en créer un nouveau.",
+    "assignedChannelsTitle": "Salons Discord assignés",
+    "assignedChannelsDescription": "Vous pouvez renommer chaque salon si besoin.",
+    "firstConfigTitle": "Première configuration des channels Discord",
+    "firstConfigDescription": "Aucun channel n'est encore affecté pour les propositions, votes ou résultats.",
+    "firstConfigDescription2": "Veuillez choisir un nom pour chaque salon, puis cliquez sur \"Créer les salons\".",
+    "discordLimitationDescription": "Chaque salon Discord peut être renommé jusqu'à <strong>2 fois toutes les 10 minutes</strong>, indépendamment des autres salons.",
+    "discordLimitationDescription2": "Si besoin, vous pouvez toujours renommer les salons directement depuis Discord.",
+    "discordLimitationTooltipAttention": "Attention :",
+    "discordLimitationTooltipBlocked": "Si vous essayez de renommer un même salon une 3ème fois dans ce délai, <b>toutes les modifications de salons seront bloquées pendant 10 minutes.</b>",
+    "discordLimitationTooltipOtherChannels": "Vous pouvez continuer à modifier les autres salons tant que la limite n'est pas atteinte pour chacun.",
+    "errorMissingName": "Merci de renseigner un nom pour chaque salon manquant.",
+    "errorSync": "La synchronisation avec le serveur a échoué.",
+    "successCreate": "Salon(s) créé(s) avec succès !",
+    "errorCreate": "Erreur lors de la création des salons Discord.",
+    "warningRename": "Le renommage prend plus de 5 secondes. Vous avez probablement atteint la limite Discord (2 renommages toutes les 10 minutes). Veuillez patienter 10 minutes ou renommer le salon directement sur Discord.",
+    "errorFetchServer": "Erreur lors de la récupération des données du serveur Discord.",
+    "successRename": "Salon renommé avec succès !",
+    "errorRename": "Erreur lors du renommage du salon Discord."
   }
 }

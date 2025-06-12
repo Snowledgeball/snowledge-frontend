@@ -47,8 +47,10 @@ import {
 import { ChannelNames } from "@/types/channelNames";
 import { waitForValue } from "@/utils/wait-for-value";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 export function useChannelSections(communityId: number) {
+  const t = useTranslations("manageIntegrations");
   // --- États locaux ---
   const [names, setNames] = useState<ChannelNames>({
     propose: "propositions",
@@ -107,11 +109,15 @@ export function useChannelSections(communityId: number) {
   useEffect(() => {
     if (listData && discordServerData) {
       setNames(
-        getExistingChannelNames(listData, {
-          propose: discordServerData.proposeChannelId,
-          vote: discordServerData.voteChannelId,
-          result: discordServerData.resultChannelId,
-        })
+        getExistingChannelNames(
+          listData,
+          {
+            propose: discordServerData.proposeChannelId,
+            vote: discordServerData.voteChannelId,
+            result: discordServerData.resultChannelId,
+          },
+          t
+        )
       );
     }
   }, [
@@ -130,7 +136,7 @@ export function useChannelSections(communityId: number) {
           isMissing && !channelNames[key as keyof typeof channelNames]
       );
       if (missingFields.length > 0) {
-        toast.error("Merci de renseigner un nom pour chaque salon manquant.");
+        toast.error(t("errorMissingName"));
         return;
       }
 
@@ -168,16 +174,14 @@ export function useChannelSections(communityId: number) {
             );
 
             if (!refreshed) {
-              toast.error("La synchronisation avec le serveur a échoué.");
+              toast.error(t("errorSync"));
               return;
             }
 
-            toast.success("Salon(s) créé(s) avec succès !");
+            toast.success(t("successCreate"));
           },
           onError: (error) => {
-            toast.error(
-              error?.message || "Erreur lors de la création des salons Discord."
-            );
+            toast.error(error?.message || t("errorCreate"));
           },
         }
       );
@@ -190,6 +194,7 @@ export function useChannelSections(communityId: number) {
       refetchList,
       refetchDiscordServer,
       updateDiscordServer,
+      t,
     ]
   );
 
@@ -204,10 +209,7 @@ export function useChannelSections(communityId: number) {
       };
       const newNames = { ...oldNames, [type]: rename[type] };
       let timeoutId: NodeJS.Timeout | null = setTimeout(() => {
-        toast.warning(
-          "Le renommage prend plus de 5 secondes. Vous avez probablement atteint la limite Discord (2 renommages toutes les 10 minutes). Veuillez patienter 10 minutes ou renommer le salon directement sur Discord.",
-          { duration: 20000 }
-        );
+        toast.warning(t("warningRename"), { duration: 20000 });
       }, 5000);
       renameChannels(
         {
@@ -221,9 +223,7 @@ export function useChannelSections(communityId: number) {
             const listResult = await refetchList();
             const discordServerResult = await refetchDiscordServer();
             if (!discordServerResult.data) {
-              toast.error(
-                "Erreur lors de la récupération des données du serveur Discord."
-              );
+              toast.error(t("errorFetchServer"));
               return;
             }
             updateDiscordServer({
@@ -238,14 +238,12 @@ export function useChannelSections(communityId: number) {
                 newNames.result
               ),
             });
-            toast.success("Salon renommé avec succès !");
+            toast.success(t("successRename"));
             setRename((prev) => ({ ...prev, [type]: "" }));
           },
           onError: (error) => {
             if (timeoutId) clearTimeout(timeoutId);
-            toast.error(
-              error?.message || "Erreur lors du renommage du salon Discord."
-            );
+            toast.error(error?.message || t("errorRename"));
           },
         }
       );
@@ -258,6 +256,7 @@ export function useChannelSections(communityId: number) {
       refetchList,
       refetchDiscordServer,
       updateDiscordServer,
+      t,
     ]
   );
 

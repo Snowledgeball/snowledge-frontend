@@ -26,6 +26,7 @@ import { Alert, AlertTitle, AlertDescription } from "@repo/ui/components/alert";
 import { ChannelInput } from "./ChannelInput";
 import { ChannelNames } from "@/types/channelNames";
 import { KindOfMissing } from "@/types/kindOfMissing";
+import { useTranslations } from "next-intl";
 
 interface ChannelSectionProps {
   type: keyof ChannelNames;
@@ -47,39 +48,41 @@ export const ChannelSection: React.FC<ChannelSectionProps> = ({
   onValidate,
   isLoading,
   isMissing,
-}) => (
-  <div>
-    <label>{label}</label>
-    {isMissing.all || isMissing.channelName?.[type] ? (
-      <>
-        {isMissing.channelName?.[type] && (
-          <Alert variant="destructive" className="mb-2">
-            <AlertTitle>Salon manquant :</AlertTitle>
-            <AlertDescription>
-              Le salon assigné pour {label.toLowerCase()} n'existe plus sur
-              Discord.
-              <br />
-              Veuillez en créer un nouveau.
-            </AlertDescription>
-          </Alert>
-        )}
+}) => {
+  const t = useTranslations("manageIntegrations");
+  return (
+    <div>
+      <label>{label}</label>
+      {isMissing.all || isMissing.channelName?.[type] ? (
+        <>
+          {isMissing.channelName?.[type] && (
+            <Alert variant="destructive" className="mb-2">
+              <AlertTitle>{t("missingTitle")}</AlertTitle>
+              <AlertDescription>
+                {t("missingDescription", { label: label.toLowerCase() })}
+                <br />
+                {t("missingDescription2")}
+              </AlertDescription>
+            </Alert>
+          )}
+          <ChannelInput
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            disabled={isLoading}
+            canRename={false}
+          />
+        </>
+      ) : (
         <ChannelInput
           value={value}
           onChange={onChange}
           placeholder={placeholder}
+          onValidate={onValidate}
           disabled={isLoading}
-          canRename={false}
+          canRename={true}
         />
-      </>
-    ) : (
-      <ChannelInput
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        onValidate={onValidate}
-        disabled={isLoading}
-        canRename={true}
-      />
-    )}
-  </div>
-);
+      )}
+    </div>
+  );
+};

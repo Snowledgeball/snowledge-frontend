@@ -1,5 +1,6 @@
 // Utilitaires pour la gestion des channels Discord
 import { Channel } from "@/types/channel";
+import { useTranslations } from "next-intl";
 
 export function getChannelName(channels: Channel[] = [], id?: string): string {
   return channels.find((ch) => ch.id === id)?.name || "";
@@ -25,11 +26,15 @@ export function getChannelIdByName(
 
 export function getExistingChannelNames(
   channels: Channel[] = [],
-  ids: { propose?: string; vote?: string; result?: string }
+  ids: { propose?: string; vote?: string; result?: string },
+  t?: (key: string) => string
 ): { propose: string; vote: string; result: string } {
   return {
-    propose: getChannelName(channels, ids.propose) || "propositions",
-    vote: getChannelName(channels, ids.vote) || "votes",
-    result: getChannelName(channels, ids.result) || "résultats",
+    propose:
+      getChannelName(channels, ids.propose) ||
+      (t ? t("propose") : "propositions"),
+    vote: getChannelName(channels, ids.vote) || (t ? t("vote") : "votes"),
+    result:
+      getChannelName(channels, ids.result) || (t ? t("result") : "résultats"),
   };
 }

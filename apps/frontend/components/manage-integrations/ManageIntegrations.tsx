@@ -11,6 +11,7 @@ import { FirstConfigAlert } from "./components/FirstConfigAlert";
 import { AssignedChannelsAlert } from "./components/AssignedChannelsAlert";
 import { ChannelSections } from "./components/ChannelSections";
 import { useChannelSections } from "./hooks/useChannelSections";
+import { useTranslations } from "next-intl";
 
 /**
  * ManageIntegrations - Explications d'architecture
@@ -39,17 +40,18 @@ interface Props {
 }
 
 export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
+  const t = useTranslations("manageIntegrations");
   const { isLoading, allIdsNull, state, actions, meta } =
     useChannelSections(communityId);
 
   if (isLoading) {
-    return <div>Chargement...</div>;
+    return <div>{t("loading")}</div>;
   }
 
   return (
     <Card className="max-w-xl mx-auto mt-8">
       <CardHeader>
-        <CardTitle>Gestion des channels Discord</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {allIdsNull ? (
@@ -66,7 +68,7 @@ export const ManageIntegrations: React.FC<Props> = ({ communityId }) => {
           <>
             <div className="flex items-center gap-2 mb-4">
               <span className="font-semibold text-base">
-                Limitation Discord
+                {t("discordLimitation")}
               </span>
               <DiscordLimitationTooltip />
             </div>
