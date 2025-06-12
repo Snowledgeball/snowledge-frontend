@@ -16,6 +16,8 @@ import { DiscordService } from 'src/discord/discord.service';
 import { UserService } from 'src/user/user.service';
 import { DiscordAccess } from 'src/discord/entities/discord-access.entity';
 import { Learner } from 'src/learner/entities/learner/learner';
+import { CommunityService } from 'src/community/community.service';
+import { LearnerService } from 'src/learner/learner.service';
 
 @Module({
 	imports: [
@@ -39,6 +41,8 @@ import { Learner } from 'src/learner/entities/learner/learner';
 		DiscordBotProvider,
 		DiscordService,
 		UserService,
+		CommunityService,
+		LearnerService,
 	],
 	exports: [
 		DiscordClientService,

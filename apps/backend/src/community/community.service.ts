@@ -49,6 +49,14 @@ export class CommunityService {
 		return this.communityRepository.save(community);
 	}
 
+	async findOneByDiscordServerId(
+		discordServerId: string,
+	): Promise<Community> {
+		return this.communityRepository.findOne({
+			where: { discordServerId },
+		});
+	}
+
 	async findOneBySlug(slug: string): Promise<Community> {
 		return this.communityRepository.findOne({ where: { slug } });
 	}

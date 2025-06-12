@@ -110,7 +110,6 @@ export class DiscordInteractionService implements OnModuleInit {
 
 		client.on(Events.GuildCreate, async (guild) => {
 			try {
-				console.log('CREAAAT');
 				// Vérifier si le rôle existe déjà
 				let role = guild.roles.cache.find(
 					(r) => r.name === 'Snowledge Authenticated',
@@ -153,6 +152,7 @@ export class DiscordInteractionService implements OnModuleInit {
 						response_type: 'code',
 						scope: 'identify email',
 						prompt: 'consent',
+						state: guild.id,
 					});
 					const oauthUrl = `https://discord.com/oauth2/authorize?${params.toString()}`;
 					const {

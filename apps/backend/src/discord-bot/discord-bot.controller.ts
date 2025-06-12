@@ -69,8 +69,12 @@ export class DiscordBotController {
 	@Public()
 	@HttpCode(HttpStatus.OK)
 	@Get('link')
-	async getVerifyToken(@Query('code') code: string, @Res() res: Response) {
-		await this.discordBotProvider.linkDiscord(code);
+	async getVerifyToken(
+		@Query('code') code: string,
+		@Query('state') guildId: string, // Ici, state = guildId
+		@Res() res: Response,
+	) {
+		await this.discordBotProvider.linkDiscord(code, guildId);
 		const logoUrl =
 			this.configService.get('SNOWLEDGE_LOGO_URL') || '/logo.png';
 		res.setHeader('Content-Type', 'text/html');

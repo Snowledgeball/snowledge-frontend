@@ -44,6 +44,9 @@ export class Community {
 	@Column()
 	codeOfConduct: string;
 
+	@Column({ nullable: true })
+	discordServerId?: string;
+
 	@ManyToOne(() => User, (user) => user.communities, {
 		cascade: false,
 		nullable: false,

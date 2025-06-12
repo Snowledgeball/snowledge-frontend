@@ -53,6 +53,17 @@ export class LearnerService {
 		return this.learnerRepository.save(learner);
 	}
 
+	// Methode simple pour créer un learner
+	async create(userId: number, communityId: number) {
+		const learner = this.learnerRepository.create({
+			community: { id: communityId },
+			user: { id: userId },
+			status: LearnerStatus.MEMBER,
+			isContributor: false,
+		});
+		return this.learnerRepository.save(learner);
+	}
+
 	async getLearnersByCommunitySlug(slug: string) {
 		const community = await this.communityRepository.findOne({
 			where: { slug },

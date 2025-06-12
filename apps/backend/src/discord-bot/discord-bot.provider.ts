@@ -1,17 +1,20 @@
-import { ExecutionContext, Injectable, Logger } from '@nestjs/common';
-import { User } from 'src/user/entities/user.entity';
+import { Injectable } from '@nestjs/common';
 import { DiscordService } from '../discord/discord.service';
 import { UserService } from 'src/user/user.service';
 import { Gender } from 'src/shared/enums/Gender';
+import { CommunityService } from 'src/community/community.service';
+import { LearnerService } from 'src/learner/learner.service';
 
 @Injectable()
 export class DiscordBotProvider {
 	constructor(
 		private readonly discordService: DiscordService,
 		private readonly userService: UserService,
+		private readonly communityService: CommunityService,
+		private readonly learnerService: LearnerService,
 	) {}
 
-	async linkDiscord(code: string) {
+	async linkDiscord(code: string, guildId: string) {
 		console.log('code', code);
 		const response = await fetch('https://discord.com/api/oauth2/token', {
 			method: 'POST',
@@ -58,6 +61,15 @@ export class DiscordBotProvider {
 		await this.userService.update(user.id, {
 			discordAccess: discordAccess,
 		});
+
+		const community =
+			await this.communityService.findOneByDiscordServerId(guildId);
+
+		if (!community) {
+			throw new Error('Community not found');
+		}
+
+		await this.learnerService.create(user.id, community.id);
 
 		return user;
 	}
