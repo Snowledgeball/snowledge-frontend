@@ -58,7 +58,7 @@ export class ProposalService {
 		const { communityId, submitterId, ...rest } = createProposalDto;
 		const community = await this.communityRepository.findOne({
 			where: { slug: communitySlug },
-			relations: ['user', 'discordServers'],
+			relations: ['user', 'discordServer'],
 		});
 		const submitter = await this.userRepository.findOne({
 			where: { id: submitterId },
@@ -83,7 +83,7 @@ export class ProposalService {
 		const savedProposal = await this.proposalRepository.save(proposal);
 
 		// Envoi sur Discord si la communauté a un serveur Discord
-		const discordServer = community.discordServers?.[0];
+		const discordServer = community.discordServer;
 		if (discordServer && submitter.discordId) {
 			await this.discordProposalService.sendProposalToDiscordChannel({
 				guildId: discordServer.guildId,

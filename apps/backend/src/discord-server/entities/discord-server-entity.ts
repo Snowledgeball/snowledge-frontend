@@ -1,10 +1,10 @@
-import { Entity, Column, PrimaryColumn, OneToOne } from 'typeorm';
+import { Entity, Column, PrimaryColumn, OneToOne, JoinColumn } from 'typeorm';
 import { Community } from '../../community/entities/community.entity';
 
 @Entity()
 export class DiscordServer {
 	@PrimaryColumn({ type: 'varchar', length: 32 })
-	guildId: string; // Identifiant du serveur Discord (guild)
+	guildId: string; // Identifiant du serveur Discord (guild) -- PRIMARY KEY
 
 	@Column({ type: 'varchar', length: 32, nullable: true })
 	guildName?: string; // Nom du serveur Discord (guild)
@@ -18,8 +18,9 @@ export class DiscordServer {
 	@Column({ type: 'varchar', length: 32, nullable: true })
 	resultChannelId?: string; // Channel résultats
 
-	@OneToOne(() => Community, (community) => community.discordServers, {
+	@OneToOne(() => Community, (community) => community.discordServer, {
 		onDelete: 'CASCADE',
 	})
-	community: Community; // Lien vers la communauté associée
+	@JoinColumn() // DiscordServer porte la clé étrangère communityId
+	community: Community;
 }

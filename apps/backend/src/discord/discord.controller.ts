@@ -1,4 +1,15 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Param, Post, Query, Res } from '@nestjs/common';
+import {
+	Body,
+	Controller,
+	Get,
+	HttpCode,
+	HttpStatus,
+	Logger,
+	Param,
+	Post,
+	Query,
+	Res,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { VerifyTokenDto } from 'src/auth/dto/verify-token.dto';
 import { EmailProvider } from 'src/email/email.provider';
@@ -10,9 +21,7 @@ import { Response } from 'express';
 @Controller('discord')
 export class DiscordController {
 	private readonly logger = new Logger(DiscordController.name);
-	constructor(
-		private discordProvider: DiscordProvider,
-	) {}
+	constructor(private discordProvider: DiscordProvider) {}
 
 	@HttpCode(HttpStatus.OK)
 	@Post('link')
@@ -22,12 +31,23 @@ export class DiscordController {
 
 	@HttpCode(HttpStatus.OK)
 	@Get('link')
-	async getVerifyToken(@Res() res: Response, @User() user: UserEntity, @Query('code') code: string, @Query('state') state?: string) {
+	async getVerifyToken(
+		@Res() res: Response,
+		@User() user: UserEntity,
+		@Query('code') code: string,
+		@Query('state') state?: string,
+	) {
 		const { communityId } = JSON.parse(state);
-		if(code){
-			const response = await this.discordProvider.linkDiscord(code, user, communityId);
-			if(response){
-				res.redirect(`http://localhost:3000/${response.slug}?verify=discord`);
+		if (code) {
+			const response = await this.discordProvider.linkDiscord(
+				code,
+				user,
+				communityId,
+			);
+			if (response) {
+				res.redirect(
+					`http://localhost:3000/${response.slug}?verify=discord`,
+				);
 			} else {
 				res.redirect(`http://localhost:3000/profile?verify=discord`);
 			}

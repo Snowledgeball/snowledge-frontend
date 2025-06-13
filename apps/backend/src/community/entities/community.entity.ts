@@ -45,9 +45,6 @@ export class Community {
 	@Column()
 	codeOfConduct: string;
 
-	@Column({ nullable: true })
-	discordServerId?: string;
-
 	@ManyToOne(() => User, (user) => user.communities, {
 		cascade: false,
 		nullable: false,
@@ -61,7 +58,7 @@ export class Community {
 	proposals: Proposal[];
 
 	@OneToOne(() => DiscordServer, (discordServer) => discordServer.community)
-	discordServers: DiscordServer[];
+	discordServer: DiscordServer;
 
 	@CreateDateColumn({
 		type: 'timestamp',

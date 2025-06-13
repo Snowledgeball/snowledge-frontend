@@ -52,7 +52,9 @@ export class CommunityService {
 	async findOneByDiscordServerId(
 		discordServerId: string,
 	): Promise<Community> {
-		return this.communityRepository.findOne({ where: { discordServerId } });
+		return this.communityRepository.findOne({
+			where: { discordServer: { guildId: discordServerId } },
+		});
 	}
 
 	async findOneBySlug(slug: string): Promise<Community> {

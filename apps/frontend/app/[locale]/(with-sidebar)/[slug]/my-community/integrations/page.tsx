@@ -36,6 +36,7 @@ export default function Page() {
   const state = encodeURIComponent(
     JSON.stringify({ communityId: localStorage.getItem("activeCommunityId") })
   );
+  // TODO: change to the correct client id
   const clientId = process.env.NEXT_PUBLIC_DSD_CLIEND_ID;
 
   // Mock data
@@ -103,7 +104,7 @@ export default function Page() {
   const [tab, setTab] = useState("all");
 
   useEffect(() => {
-    if (user?.discordId || activeCommunity?.guildId) {
+    if (user?.discordId || activeCommunity?.discordServerId) {
       setEnabled((prev) => ({ ...prev, discord: true }));
     }
   }, []);
@@ -118,7 +119,7 @@ export default function Page() {
     setIsCollecting(true);
     const body = {
       discordId: user.discordId,
-      serverId: Number(activeCommunity?.guildId),
+      serverId: Number(activeCommunity?.discordServerId),
       channels: selected.discord.map((ch) => Number(ch.value)),
     };
     await fetch(`http://localhost:8000/discord/harvest`, {
@@ -171,8 +172,8 @@ export default function Page() {
     );
   };
   useEffect(() => {
-    if (activeCommunity?.guildId) {
-      fetchChannels(activeCommunity?.guildId);
+    if (activeCommunity?.discordServerId) {
+      fetchChannels(activeCommunity?.discordServerId);
     }
     console.log(activeCommunity);
     console.log(user);

@@ -25,7 +25,7 @@ export class DiscordBotProvider {
 				client_secret: process.env.DISCORD_CLIENT_SECRET,
 				code,
 				grant_type: 'authorization_code',
-				redirect_uri: process.env.DISCORD_REDIRECT_URI,
+				redirect_uri: `${process.env.BACK_URL}/discord-bot/link`,
 				scope: 'identify email',
 			}).toString(),
 			headers: {

@@ -74,11 +74,12 @@ export class DiscordBotController {
 		@Query('state') guildId: string, // Ici, state = guildId
 		@Res() res: Response,
 	) {
-		await this.discordBotProvider.linkDiscord(code, guildId);
-		const logoUrl =
-			this.configService.get('SNOWLEDGE_LOGO_URL') || '/logo.png';
-		res.setHeader('Content-Type', 'text/html');
-		res.send(`
+		if (code) {
+			await this.discordBotProvider.linkDiscord(code, guildId);
+			const logoUrl =
+				this.configService.get('SNOWLEDGE_LOGO_URL') || '/logo.png';
+			res.setHeader('Content-Type', 'text/html');
+			res.send(`
 			<html>
 			  <head>
 				<title>Connexion Snowledge réussie</title>
@@ -146,6 +147,9 @@ export class DiscordBotController {
 				</script>
 			  </body>
 			</html>
-		`);
+			`);
+		} else {
+			res.redirect(`${process.env.FRONT_URL}/profile`);
+		}
 	}
 }

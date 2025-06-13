@@ -21,9 +21,8 @@ export class DiscordProvider {
 	) {}
 
 	async linkDiscord(code: string, user: User, communityId?: number) {
-		let data;
+		let data: any;
 		let community: Community;
-		console.log(communityId);
 		try {
 			const response = await fetch(
 				'https://discord.com/api/oauth2/token',
@@ -43,11 +42,16 @@ export class DiscordProvider {
 				},
 			);
 			data = await response.json();
+			console.log('data', data);
 		} catch (error) {
+			console.log('error', error);
 			this.logger.error(error);
 		}
 
+		console.log('ICI');
+
 		if (data && !data.error) {
+			console.log('DATTT', data);
 			const discordAccess = await this.discordService.createDiscordAccess(
 				{
 					accessToken: data.access_token,
@@ -73,7 +77,9 @@ export class DiscordProvider {
 				this.logger.error(error);
 			}
 
+			console.log('userInfo', userInfo);
 			if (userInfo) {
+				console.log('communityId', communityId);
 				if (communityId) {
 					try {
 						community =
@@ -81,6 +87,8 @@ export class DiscordProvider {
 								communityId,
 							);
 
+						console.log('data', data);
+						console.log('communityId', communityId);
 						await this.discordServerService.create({
 							communityId,
 							guildId: data.guild.id,
@@ -88,6 +96,7 @@ export class DiscordProvider {
 						});
 					} catch (error) {
 						this.logger.error(error);
+						throw new Error('Error creating discord server', error);
 					}
 				}
 				await this.userService.update(user.id, {
