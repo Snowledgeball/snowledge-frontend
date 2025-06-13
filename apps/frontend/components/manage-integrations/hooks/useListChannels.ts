@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetcher } from "@/lib/fetcher";
+import { useAuth } from "@/contexts/auth-context";
 import { Channel } from "@/types/channel";
 
 export function useListChannels(guildId: string) {
+  const { fetcher } = useAuth();
   return useQuery<Channel[]>({
     queryKey: ["discord-channels", guildId],
     queryFn: async () => {

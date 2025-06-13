@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetcher } from "@/lib/fetcher";
+import { useAuth } from "@/contexts/auth-context";
 import { DiscordServer } from "@/types/discordServer";
 
 export function useDiscordServer(communityId: number) {
+  const { fetcher } = useAuth();
   return useQuery<DiscordServer>({
     queryKey: ["discord-server", communityId],
     queryFn: async () => {

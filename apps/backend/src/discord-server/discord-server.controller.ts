@@ -30,23 +30,25 @@ export class DiscordServerController {
 		return servers.map((s) => new DiscordServerDto(s));
 	}
 
-	@Get(':id')
-	async findOne(@Param('id') id: string): Promise<DiscordServerDto> {
-		const server = await this.discordServerService.findOne(Number(id));
+	@Get(':guildId')
+	async findOne(
+		@Param('guildId') guildId: string,
+	): Promise<DiscordServerDto> {
+		const server = await this.discordServerService.findOne(guildId);
 		return new DiscordServerDto(server);
 	}
 
-	@Put(':id')
+	@Put(':guildId')
 	async update(
-		@Param('id') id: string,
+		@Param('guildId') guildId: string,
 		@Body() data: UpdateDiscordServerDto,
 	): Promise<any> {
-		return this.discordServerService.update(Number(id), data);
+		return this.discordServerService.update(guildId, data);
 	}
 
-	@Delete(':id')
-	async remove(@Param('id') id: string): Promise<any> {
-		return this.discordServerService.remove(Number(id));
+	@Delete(':guildId')
+	async remove(@Param('guildId') guildId: string): Promise<any> {
+		return this.discordServerService.remove(guildId);
 	}
 
 	// Endpoint pour récupérer la config Discord d'une communauté

@@ -1,6 +1,6 @@
 export type DiscordServer = {
   id: number;
-  discordGuildId: string;
+  guildId: string;
   proposeChannelId?: string;
   voteChannelId?: string;
   resultChannelId?: string;

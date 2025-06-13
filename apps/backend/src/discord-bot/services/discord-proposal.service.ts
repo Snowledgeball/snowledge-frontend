@@ -107,7 +107,7 @@ export class DiscordProposalService {
 			});
 			const discordServerForDb =
 				await this.discordServerRepository.findOne({
-					where: { discordGuildId: interaction.guild.id },
+					where: { guildId: interaction.guild.id },
 					relations: ['community'],
 				});
 			if (!submitter) {
@@ -162,7 +162,7 @@ export class DiscordProposalService {
 	async handleMessageReactionAdd(reaction: MessageReaction, user: User) {
 		if (user.bot) return;
 		const discordServer = await this.discordServerRepository.findOne({
-			where: { discordGuildId: reaction.message.guild.id },
+			where: { guildId: reaction.message.guild.id },
 			relations: ['community'],
 		});
 		await this.voteService.handleMessageReactionAdd(
@@ -250,7 +250,7 @@ export class DiscordProposalService {
 				if (!voteName) {
 					const discordServer =
 						await this.discordServerRepository.findOne({
-							where: { discordGuildId: guildId },
+							where: { guildId: guildId },
 						});
 					voteChannelId = discordServer?.voteChannelId;
 				} else {
@@ -380,7 +380,7 @@ export class DiscordProposalService {
 	}) {
 		const client = this.discordClientService.getClient();
 		const discordServer = await this.discordServerRepository.findOne({
-			where: { discordGuildId: guildId },
+			where: { guildId: guildId },
 		});
 		const voteChannelId = discordServer?.voteChannelId;
 		if (!voteChannelId)

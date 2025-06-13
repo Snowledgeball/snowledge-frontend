@@ -74,7 +74,7 @@ export function useChannelSections(communityId: number) {
     data: listData,
     isLoading: isLoadingList,
     refetch: refetchList,
-  } = useListChannels(discordServerData?.discordGuildId || "");
+  } = useListChannels(discordServerData?.guildId || "");
 
   const { mutate: createChannels, isPending: isLoadingCreate } =
     useCreateChannels();
@@ -130,7 +130,7 @@ export function useChannelSections(communityId: number) {
   // --- Gestion de la création des salons manquants ---
   const handleCreateMissingChannels = useCallback(
     (channelNames: ChannelNames) => {
-      if (!discordServerData?.discordGuildId) return;
+      if (!discordServerData?.guildId) return;
       const missingFields = Object.entries(missing).filter(
         ([key, isMissing]) =>
           isMissing && !channelNames[key as keyof typeof channelNames]
@@ -148,7 +148,7 @@ export function useChannelSections(communityId: number) {
 
       createChannels(
         {
-          guildId: discordServerData.discordGuildId,
+          guildId: discordServerData.guildId,
           proposeName: missing.propose ? channelNames.propose : "",
           voteName: missing.vote ? channelNames.vote : "",
           resultName: missing.result ? channelNames.result : "",
@@ -157,7 +157,7 @@ export function useChannelSections(communityId: number) {
           onSuccess: async () => {
             const listResult = await refetchList();
             updateDiscordServer({
-              id: discordServerData.id,
+              guildId: discordServerData.guildId,
               proposeChannelId: missing.propose
                 ? getChannelIdByName(listResult.data, channelNames.propose)
                 : discordServerData.proposeChannelId,
@@ -207,7 +207,7 @@ export function useChannelSections(communityId: number) {
   // --- Gestion du renommage d'un salon ---
   const handleRename = useCallback(
     (type: keyof ChannelNames) => {
-      if (!discordServerData?.discordGuildId) return;
+      if (!discordServerData?.guildId) return;
       const oldNames = {
         propose: getChannelName(listData, discordServerData?.proposeChannelId),
         vote: getChannelName(listData, discordServerData?.voteChannelId),
@@ -219,7 +219,7 @@ export function useChannelSections(communityId: number) {
       }, 5000);
       renameChannels(
         {
-          guildId: discordServerData.discordGuildId,
+          guildId: discordServerData.guildId,
           oldNames,
           newNames,
         },
@@ -233,7 +233,7 @@ export function useChannelSections(communityId: number) {
               return;
             }
             updateDiscordServer({
-              id: discordServerResult.data.id,
+              guildId: discordServerResult.data.guildId,
               proposeChannelId: getChannelIdByName(
                 listResult.data,
                 newNames.propose

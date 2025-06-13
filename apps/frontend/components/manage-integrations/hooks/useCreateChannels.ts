@@ -1,7 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
-import { fetcher } from "@/lib/fetcher";
+import { useAuth } from "@/contexts/auth-context";
 
 export function useCreateChannels() {
+  const { fetcher } = useAuth();
   return useMutation({
     mutationFn: async (params: {
       guildId: string;

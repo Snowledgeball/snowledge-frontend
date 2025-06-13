@@ -3,7 +3,10 @@ import { IsString, IsOptional, IsNumber } from 'class-validator';
 export class UpdateDiscordServerDto {
 	@IsString()
 	@IsOptional()
-	discordGuildId?: string;
+	guildId?: string;
+
+	@IsString()
+	guildName?: string;
 
 	@IsString()
 	@IsOptional()

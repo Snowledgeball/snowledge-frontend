@@ -1,8 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
-import { fetcher } from "@/lib/fetcher";
-import { DiscordServer } from "../../manage-integrations/management-integration";
+import { DiscordServer } from "@/types/discordServer";
+import { useAuth } from "@/contexts/auth-context";
 
 export function useCreateDiscordServer() {
+  const { fetcher } = useAuth();
   return useMutation({
     mutationFn: async (params: Omit<DiscordServer, "id">) => {
       return await fetcher(

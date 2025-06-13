@@ -6,6 +6,7 @@ import {
 	OneToMany,
 	UpdateDateColumn,
 	CreateDateColumn,
+	OneToOne,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Learner } from '../../learner/entities/learner/learner';
@@ -59,7 +60,7 @@ export class Community {
 	@OneToMany(() => Proposal, (proposal) => proposal.community)
 	proposals: Proposal[];
 
-	@OneToMany(() => DiscordServer, (discordServer) => discordServer.community)
+	@OneToOne(() => DiscordServer, (discordServer) => discordServer.community)
 	discordServers: DiscordServer[];
 
 	@CreateDateColumn({

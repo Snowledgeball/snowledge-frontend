@@ -86,7 +86,7 @@ export class ProposalService {
 		const discordServer = community.discordServers?.[0];
 		if (discordServer && submitter.discordId) {
 			await this.discordProposalService.sendProposalToDiscordChannel({
-				guildId: discordServer.discordGuildId,
+				guildId: discordServer.guildId,
 				sujet: proposal.title,
 				description: proposal.description,
 				format: proposal.format,

@@ -1,16 +1,16 @@
 import { DiscordServer } from '../entities/discord-server-entity';
 
 export class DiscordServerDto {
-	id: number;
-	discordGuildId: string;
+	guildId: string;
+	guildName: string;
 	proposeChannelId?: string;
 	voteChannelId?: string;
 	resultChannelId?: string;
 	communityId: number;
 
 	constructor(entity: DiscordServer) {
-		this.id = entity.id;
-		this.discordGuildId = entity.discordGuildId;
+		this.guildId = entity.guildId;
+		this.guildName = entity.guildName;
 		this.proposeChannelId = entity.proposeChannelId;
 		this.voteChannelId = entity.voteChannelId;
 		this.resultChannelId = entity.resultChannelId;

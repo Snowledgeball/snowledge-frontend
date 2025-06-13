@@ -30,29 +30,29 @@ export class DiscordServerService {
 		return this.discordServerRepository.find({ relations: ['community'] });
 	}
 
-	findOne(id: number) {
+	findOne(guildId: string) {
 		return this.discordServerRepository.findOne({
-			where: { id },
+			where: { guildId },
 			relations: ['community'],
 		});
 	}
 
-	async update(id: number, data: UpdateDiscordServerDto) {
+	async update(guildId: string, data: UpdateDiscordServerDto) {
 		if (data.communityId) {
 			const community = await this.communityRepository.findOne({
 				where: { id: data.communityId },
 			});
-			await this.discordServerRepository.update(id, {
+			await this.discordServerRepository.update(guildId, {
 				...data,
 				community,
 			});
 		} else {
-			await this.discordServerRepository.update(id, data);
+			await this.discordServerRepository.update(guildId, data);
 		}
-		return this.findOne(id);
+		return this.findOne(guildId);
 	}
 
-	remove(id: number) {
-		return this.discordServerRepository.delete(id);
+	remove(guildId: string) {
+		return this.discordServerRepository.delete(guildId);
 	}
 }

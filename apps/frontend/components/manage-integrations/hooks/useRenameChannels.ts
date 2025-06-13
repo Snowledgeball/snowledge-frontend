@@ -1,8 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
-import { fetcher } from "@/lib/fetcher";
+import { useAuth } from "@/contexts/auth-context";
 import { ChannelNames } from "@/types/channelNames";
 
 export function useRenameChannels() {
+  const { fetcher } = useAuth();
   return useMutation({
     mutationFn: async (params: {
       guildId: string;
