@@ -3,6 +3,7 @@ import { DiscordServer } from "@/types/discordServer";
 import { useAuth } from "@/contexts/auth-context";
 
 export function useCreateDiscordServer() {
+  // Pas utilisé pour l'instant
   const { fetcher } = useAuth();
   return useMutation({
     mutationFn: async (params: Omit<DiscordServer, "id">) => {

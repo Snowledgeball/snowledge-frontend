@@ -7,14 +7,27 @@ import { DiscordAccess } from './entities/discord-access.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommunityModule } from 'src/community/community.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { DiscordChannel, DiscordChannelSchema } from './schemas/discord-channel.schema';
-import { DiscordHarvestJob, DiscordHarvestJobSchema } from './schemas/discord-harvest-job.schema';
-import { DiscordMessage, DiscordMessageSchema } from './schemas/discord-message.schema';
-import { DiscordServer, DiscordServerSchema } from './schemas/discord-server.schema';
+import {
+	DiscordChannel,
+	DiscordChannelSchema,
+} from './schemas/discord-channel.schema';
+import {
+	DiscordHarvestJob,
+	DiscordHarvestJobSchema,
+} from './schemas/discord-harvest-job.schema';
+import {
+	DiscordMessage,
+	DiscordMessageSchema,
+} from './schemas/discord-message.schema';
+import {
+	DiscordServer,
+	DiscordServerSchema,
+} from './schemas/discord-server.schema';
+import { DiscordServerModule } from 'src/discord-server/discord-server.module';
 
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([DiscordAccess]), 
+		TypeOrmModule.forFeature([DiscordAccess]),
 		MongooseModule.forFeature([
 			{ name: DiscordChannel.name, schema: DiscordChannelSchema },
 			{ name: DiscordHarvestJob.name, schema: DiscordHarvestJobSchema },
@@ -23,8 +36,10 @@ import { DiscordServer, DiscordServerSchema } from './schemas/discord-server.sch
 		]),
 		CommunityModule,
 		UserModule,
+		DiscordServerModule,
 	],
 	controllers: [DiscordController],
 	providers: [DiscordProvider, DiscordService],
+	exports: [DiscordProvider, DiscordService],
 })
 export class DiscordModule {}
