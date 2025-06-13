@@ -6,7 +6,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@repo/ui/components/collapsible";
+} from "@repo/ui";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -17,7 +17,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   useSidebarAccordion,
-} from "@repo/ui/components/sidebar";
+} from "@repo/ui";
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";

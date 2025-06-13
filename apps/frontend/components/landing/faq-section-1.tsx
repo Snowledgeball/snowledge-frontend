@@ -5,7 +5,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@repo/ui/components/accordion";
+} from "@repo/ui";
 import { Button } from "@repo/ui/components/button";
 import Link from "next/link";
 import { useTranslations } from "next-intl";

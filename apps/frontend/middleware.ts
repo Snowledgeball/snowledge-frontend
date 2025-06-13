@@ -36,12 +36,9 @@ export async function middleware(request: NextRequest) {
   }
   const protectedRoutes =
     /^\/(fr|en)\/(community|create-community|dev-trooper|profile)(\/|$)/;
-  console.log("All cooies", request.cookies.getAll());
   if (protectedRoutes.test(pathname)) {
     const accessToken = request.cookies.get("access-token")?.value;
     const refreshToken = request.cookies.get("refresh-token")?.value;
-    console.log("accessToken", accessToken);
-    console.log("refreshToken", refreshToken);
     const currentLocale =
       locales.find((locale) => pathname.startsWith(`/${locale}`)) ||
       defaultLocale;
