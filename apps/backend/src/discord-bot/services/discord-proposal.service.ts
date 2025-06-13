@@ -201,6 +201,7 @@ export class DiscordProposalService {
 					if (name === (resultName ? resultName : undefined))
 						resultChannel = found;
 				} else {
+					// TODO: dangereux d'avoir le nom en dur
 					const role = guild.roles.cache.find(
 						(r) => r.name === 'Snowledge Authenticated',
 					);

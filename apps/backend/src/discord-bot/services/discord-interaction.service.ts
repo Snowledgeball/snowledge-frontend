@@ -136,10 +136,35 @@ export class DiscordInteractionService implements OnModuleInit {
 						c.name === 'validation-cgu-snowledge' && c.type === 0, // 0 = GUILD_TEXT
 				);
 				if (!channel) {
+					// TODO: dangereux d'avoir le nom en dur
+					const role = guild.roles.cache.find(
+						(r) => r.name === 'Snowledge Authenticated',
+					);
+					if (!role) {
+						throw new Error(
+							"Le rôle 'Snowledge Authenticated' n'existe pas sur ce serveur !",
+						);
+					}
+
 					channel = await guild.channels.create({
 						name: 'validation-cgu-snowledge',
 						type: 0, // GUILD_TEXT
 						topic: 'Salon pour valider les CGU et autoriser Snowledge',
+						permissionOverwrites: [
+							{
+								id: guild.roles.everyone.id,
+								allow: ['ViewChannel'],
+								deny: ['SendMessages'],
+							},
+							{
+								id: role.id,
+								deny: ['ViewChannel'],
+							},
+							{
+								id: client.user.id,
+								allow: ['ViewChannel', 'SendMessages'],
+							},
+						],
 					});
 					this.logger.log(
 						`Salon 'validation-cgu-snowledge' créé sur le serveur ${guild.name}`,
