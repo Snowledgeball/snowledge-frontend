@@ -15,11 +15,12 @@ services:
       - NEXT_TELEMETRY_DISABLED=1
       - NODE_ENV=development
       - NEXT_PUBLIC_BACKEND_URL=http://localhost:4000
+      - NEXT_PUBLIC_ANALYSER_URL=http://localhost:8000
+      - NEXT_PUBLIC_DSD_CLIEND_ID=1377545849126518784
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/snowledge
     networks:
       - snowledge_network
   # Service pour le backend
-
   backend:
     build:
       context: .
@@ -40,6 +41,28 @@ services:
       - PGSQL_DB=snowledge
       - PGSQL_NAME=postgres
       - PGSQL_PWD=postgres
+      - MG_NAME=social_data
+      - MG_HOST=mongo
+      - MG_PORT=27017
+      - MG_USER=admin
+      - MG_PASSWORD=adminpass
+  analyzer:
+    build:
+      context: .
+      dockerfile: ./apps/analyzer/Dockerfile.dev
+    env_file:
+      - .env.dev
+    environment:
+      - DISCORD_BOT_TOKEN=
+      - DISCORD_CLIENT_ID=
+      - DISCORD_PUBLIC_KEY=
+      - OVH_AI_ENDPOINTS_ACCESS_TOKEN=
+      - OVH_API_BASE_URL=https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions
+      - MG_NAME=social_data
+      - MG_HOST=localhost
+      - MG_PORT=27017
+      - MG_USER=admin
+      - MG_PASSWORD=adminpass
   pgadmin:
     image: dpage/pgadmin4 
     restart: always 
@@ -52,6 +75,7 @@ services:
       - postgres
     networks:
       - snowledge_network
+
 networks:
   snowledge_network:
     external: true

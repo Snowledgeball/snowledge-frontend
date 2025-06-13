@@ -1,0 +1,30 @@
+# === Base: Python + outils système
+FROM python:3.11-slim AS base
+
+RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
+
+
+# === Installer: install Python deps pour analyzer
+FROM base AS installer
+WORKDIR /app
+
+COPY apps/analyzer/requirements.txt ./requirements.txt
+COPY apps/analyzer/ .
+COPY .env.dev .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+# === Runner: exécute le daemon + API
+FROM installer AS runner
+WORKDIR /app
+
+# Copier les dépendances et le code
+# COPY --from=installer /app .
+ENV PYTHONPATH=/app
+EXPOSE 8000
+
+# Commande de démarrage (daemon + API)
+# CMD ["bash", "-c", "python3 collectors/discord_harvester_daemon.py & python3 api/full_api.py"]
+RUN pip install supervisor
+COPY apps/analyzer/supervisord.conf /etc/supervisord.conf
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]

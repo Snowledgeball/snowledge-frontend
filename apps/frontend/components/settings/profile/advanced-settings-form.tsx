@@ -11,7 +11,16 @@ export default function AdvancedSettingsForm() {
     const router = useRouter();
     const verify = useSearchParams().get("verify");
     const { user, fetchDataUser } = useAuth();
-    const routeDiscored = "https://discord.com/oauth2/authorize?client_id=1377001604179558491&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Fdiscord%2Flink&scope=identify+guilds+email+messages.read+connections";
+    const state = encodeURIComponent(JSON.stringify({ communityId: localStorage.getItem("activeCommunityId") }));
+    const routeDiscored = `
+        https://discord.com/oauth2/authorize
+        ?client_id=1377545849126518784
+        &permissions=66560
+        &response_type=code
+        &redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Fdiscord%2Flink
+        &integration_type=0
+        &scope=bot+identify+guilds+email
+        &state=${state}`;
     const discordAuth = () => {
         router.push(routeDiscored);
     }
@@ -32,9 +41,10 @@ export default function AdvancedSettingsForm() {
                 >
                     Discord Access
                 </label>
-                <button onClick={discordAuth} disabled={user?.discordAccess} className="text-sm text-muted-foreground">
+                {/* disabled={user?.discordAccess} */}
+                <Button onClick={discordAuth}  className="text-sm text-muted-foreground">
                     Connect discord
-                </button>
+                </Button>
             </div>
             </div>
             <div className="flex items-top space-x-2">

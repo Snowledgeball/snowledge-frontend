@@ -1,5 +1,5 @@
 import React from "react";
-import { CommunityContext } from "@/components/sidebar/community-context";
+import { CommunityContext } from "@/contexts/community-context";
 
 export function useCurrentCommunity() {
   const ctx = React.useContext(CommunityContext);

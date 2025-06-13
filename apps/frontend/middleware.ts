@@ -35,13 +35,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`${newUrl}`, request.url));
   }
   const protectedRoutes =
-    /^\/(fr|en)\/(community|create-community|profile)(\/|$)/;
-  // console.log("All cooies", request.cookies.getAll());
+    /^\/(fr|en)\/(community|create-community|dev-trooper|profile)(\/|$)/;
   if (protectedRoutes.test(pathname)) {
     const accessToken = request.cookies.get("access-token")?.value;
     const refreshToken = request.cookies.get("refresh-token")?.value;
-    console.log("accessToken", accessToken);
-    console.log("refreshToken", refreshToken);
     const currentLocale =
       locales.find((locale) => pathname.startsWith(`/${locale}`)) ||
       defaultLocale;
@@ -52,15 +49,18 @@ export async function middleware(request: NextRequest) {
 
     if (!accessToken && refreshToken) {
       try {
-        const response = await fetch("http://backend:4000/auth/refresh-token", {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            "x-internal-call": "true",
-          },
-          body: JSON.stringify({ refreshToken }),
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/refresh-token`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              "x-internal-call": "true",
+            },
+            body: JSON.stringify({ refreshToken }),
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();

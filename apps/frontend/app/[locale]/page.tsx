@@ -13,14 +13,16 @@ import { useAuth } from "@/contexts/auth-context";
 import { useEffect } from "react";
 
 export default function Home() {
-  const { user, fetchDataUser } = useAuth();
+  const { accessToken, user, fetchDataUser } = useAuth();
   const noRedirect = useSearchParams().get("no-redirect");
   const router = useRouter();
   // Appelle le hook directement dans le composant
   const { data: communities, isLoading } = useUserCommunities(user?.id || 0);
 
   useEffect(() => {
-    fetchDataUser();
+    if (accessToken){
+      fetchDataUser();
+    }
     if (!isLoading && communities && !noRedirect && user) {
       if (communities.length > 0) {
         router.push(`/${communities[0].slug}`);

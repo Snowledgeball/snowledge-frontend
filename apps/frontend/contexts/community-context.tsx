@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useUserCommunities } from "../../hooks/useUserCommunities";
+import { useUserCommunities } from "../hooks/useUserCommunities";
 import { Community } from "@/types/community";
 import { useAuth } from "@/contexts/auth-context";
 import { useEffect } from "react";
@@ -18,7 +18,9 @@ export function CommunityProvider({ children }: { children: React.ReactNode }) {
     React.useState<Community | null>(null);
 
   useEffect(() => {
-    fetchDataUser();
+    //TODO verifier le comportement
+      fetchDataUser();
+    
   }, []);
 
   // Restaure la communauté active depuis le localStorage au montage

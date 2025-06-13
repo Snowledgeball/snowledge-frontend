@@ -52,7 +52,7 @@ const NavMenuItems = ({ className }: NavMenuItemsProps) => {
 };
 
 export function LpNavbar2() {
-  const { user, fetchDataUser } = useAuth();
+  const { accessToken, user, fetchDataUser } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const tCTA = useTranslations("cta");
   const tForm = useTranslations("form");
@@ -76,7 +76,9 @@ export function LpNavbar2() {
   };
 
   useEffect(() => {
-    fetchDataUser();
+    if(!user && accessToken){
+      fetchDataUser();
+    }
   }, []);
 
   return (

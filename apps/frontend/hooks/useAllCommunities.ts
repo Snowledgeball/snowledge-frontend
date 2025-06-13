@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Community } from "@/types/community";
-import { fetcher } from "@/lib/fetcher";
+import { useAuth } from "@/contexts/auth-context";
 
 export function useAllCommunities() {
+  const { fetcher } = useAuth();
+
   const {
     data: communities,
     isLoading,

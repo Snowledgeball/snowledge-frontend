@@ -30,10 +30,12 @@ export function CommunitySwitcher() {
   const { activeCommunity, setActiveCommunity } = useCurrentCommunity();
   const router = useRouter();
   const { isMobile } = useSidebar();
-  const { user, fetchDataUser } = useAuth();
+  const { accessToken, user, fetchDataUser } = useAuth();
   const { data: communities } = useUserCommunities(user?.id || 0);
   useEffect(() => {
-    fetchDataUser();
+    if(accessToken){
+      fetchDataUser();
+    }
   }, []);
   if (!communities || !activeCommunity) return null;
   return (

@@ -1,0 +1,60 @@
+youtube_prompts:
+  trends:
+    description: >
+      Analyse les tendances, sujets récurrents et le ton général des commentaires YouTube d'une vidéo.
+    template: |-
+      Tu es un analyste expert des communautés en ligne. Voici une liste de messages YouTube :
+      {{messages}}
+
+      Analyse :
+      1. Les sujets les plus discutés, en regroupant les sous-thèmes similaires.
+      2. Le ton général (positif, neutre, négatif) exprimé par la majorité des utilisateurs.
+      3. Les questions ou préoccupations récurrentes.
+
+      Réponds uniquement dans ce format JSON strict :
+      {
+        "topics": [
+          {"title": "<topic_1>", "summary": "<brève explication>"},
+          {"title": "<topic_2>", "summary": "<brève explication>"},
+          {"title": "<topic_3>", "summary": "<brève explication>"}
+        ],
+        "sentiment": "<Positive|Neutral|Negative>",
+        "confidence": "<High|Medium|Low>"
+      }
+
+  sentiment:
+    description: >
+      Classifie le sentiment général d'un lot de commentaires YouTube.
+    template: |-
+      Tu es un analyste de sentiment. D'après le ton, le choix des mots et les indices émotionnels dans les messages suivants, détermine le sentiment général exprimé par la communauté.
+
+      Messages à analyser :
+      {{messages}}
+
+      Réponds en JSON :
+      {
+        "sentiment": "<Positive|Neutral|Negative>",
+        "confidence": "<High|Medium|Low>",
+        "reasoning": "<brève explication de ton analyse>"
+      }
+
+      Prends en compte le contexte et les interactions. Ignore les cas isolés sauf s'ils dominent l'ensemble.
+
+  best_contributor:
+    description: >
+      Identifie l'utilisateur ayant posté le commentaire le plus pertinent par rapport à la thématique abordée dans la vidéo.
+    template: |-
+      Tu es un analyste de communauté. Voici une liste de messages YouTube :
+      {{messages}}
+
+      Ta tâche :
+      1. Lis tous les commentaires et replies.
+      2. Identifie le commentaire le plus pertinent, c'est-à-dire celui qui apporte la meilleure valeur ajoutée ou la réflexion la plus poussée sur le sujet de la vidéo.
+      3. Indique l'utilisateur (displayname) ayant posté ce commentaire, et explique brièvement pourquoi ce commentaire est le plus pertinent.
+
+      Réponds uniquement dans ce format JSON strict :
+      {
+        "user": "<displayname de l'utilisateur>",
+        "comment": "<contenu du commentaire le plus pertinent>",
+        "reasoning": "<explication de la pertinence de ce commentaire>"
+      }

@@ -70,6 +70,7 @@ export class CommunityService {
 		return community.user;
 	}
 
+	// TODO rename / refacto ???
 	async update(id: number, data: UpdateCommunityDto): Promise<Community> {
 		const community = await this.communityRepository.findOne({
 			where: { id },
@@ -82,6 +83,14 @@ export class CommunityService {
 			...community,
 			...data,
 			slug,
+		});
+	}
+
+	async updateDiscordGuildId(id: number, guildId: string): Promise<Community> {
+		await this.communityRepository.update(id, { guildId });
+
+		return this.communityRepository.findOne({
+			where: { id },
 		});
 	}
 }

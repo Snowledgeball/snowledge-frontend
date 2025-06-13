@@ -1,0 +1,47 @@
+# Fichiers d'environnement
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Environnement virtuel
+.venv/
+venv/
+
+# Caches Python
+__pycache__/
+*/__pycache__/
+
+# Fichiers compilés Python
+*.py[cod]
+*$py.class
+
+# Cursors temporaires (ex. : VS Code)
+.cursor
+
+# Fichiers de log
+*.log
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Pytest
+.cache/
+
+# mypy
+.mypy_cache/
+
+# Coverage
+htmlcov/
+.coverage
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Profiling
+*.prof

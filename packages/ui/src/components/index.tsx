@@ -1,3 +1,9 @@
+export {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "./accordion";
 export { AspectRatio } from "./aspect-ratio";
 export { Avatar, AvatarImage, AvatarFallback } from "./avatar";
 export { Badge } from "./badge";
@@ -95,6 +101,13 @@ export {
   SidebarInset,
   SidebarFooter,
   SidebarProvider,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  useSidebarAccordion,
 } from "./sidebar";
 export { Switch } from "./switch";
 export {

@@ -17,12 +17,30 @@ import { ProposalModule } from './proposal/proposal.module';
 import { VoteModule } from './vote/vote.module';
 import { DiscordBotModule } from './discord-bot/discord-bot.module';
 import { DiscordServerModule } from './discord-server/discord-server.module';
+import discordConfig from './config/discord.config';
+import mongoConfig, { formatURIMongo } from './config/mongo.config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { YoutubeModule } from './youtube/youtube.module';
+import { AnalysisModule } from './analysis/analysis.module';
 @Module({
 	imports: [
 		ConfigModule.forRoot({
 			envFilePath: ['.env.dev', '.env.prod'],
 			isGlobal: true,
-			load: [mailingConfig, postgresConfig, serverConfig],
+			load: [
+				discordConfig,
+				mailingConfig,
+				mongoConfig,
+				postgresConfig,
+				serverConfig,
+			],
+		}),
+		MongooseModule.forRootAsync({
+			imports: [ConfigModule],
+			inject: [mongoConfig.KEY],
+			useFactory: (mongoConfig) => ({
+				uri: formatURIMongo(mongoConfig),
+			}),
 		}),
 		TypeOrmModule.forRootAsync({
 			imports: [ConfigModule],
@@ -49,6 +67,8 @@ import { DiscordServerModule } from './discord-server/discord-server.module';
 		VoteModule,
 		DiscordBotModule,
 		DiscordServerModule,
+		YoutubeModule,
+		AnalysisModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

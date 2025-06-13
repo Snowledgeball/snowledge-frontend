@@ -1,10 +1,12 @@
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
-import { fetcher } from "@/lib/fetcher";
 import type { Proposal } from "@/types/proposal";
 import VotingDoneCard from "./VotingDoneCard";
+import { useAuth } from "@/contexts/auth-context";
 
 const VotingDoneList = ({ communitySlug }: { communitySlug: string }) => {
+    const { fetcher } = useAuth();
+
   const t = useTranslations("voting");
   const {
     data: proposals,

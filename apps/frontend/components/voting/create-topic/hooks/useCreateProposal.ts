@@ -1,14 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { VoteFormValues } from "../vote-schema";
-import { fetcher } from "@/lib/fetcher";
 import { useTranslations } from "next-intl";
 import { Proposal } from "@/types/proposal";
 import { useAuth } from "@/contexts/auth-context";
 
 export function useCreateProposal(communitySlug: string) {
   const t = useTranslations("voting");
-  const { user } = useAuth();
+  const { user, fetcher } = useAuth();
   return useMutation({
     mutationFn: async (data: VoteFormValues): Promise<Proposal> => {
       const res = await fetcher(
